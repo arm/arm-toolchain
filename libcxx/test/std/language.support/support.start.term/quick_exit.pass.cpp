@@ -17,6 +17,9 @@
 
 // test quick_exit and at_quick_exit
 
+// TODO: Find out why the at_quick_exit symbol is not found.
+// XFAIL: LIBCXX-PICOLIBC-FIXME
+
 #include <cstdlib>
 
 void f() {}
