@@ -207,6 +207,21 @@ DEFAULT_FEATURES = [
           """,
         ),
     ),
+    Feature(
+        name="has-no-atomics",
+        when=lambda cfg: not sourceBuilds(
+            cfg,
+            """
+            #include <atomic>
+            std::atomic_uint x;
+            int main(int, char**) { (void)x.load(); return 0; }
+          """,
+        ),
+        actions=[
+            AddFeature("availability-pmr-missing"),
+            AddFeature("libcpp-has-no-incomplete-pstl"),
+        ],
+    ),
     # Tests that require 64-bit architecture
     Feature(
         name="32-bit-pointer",

@@ -7,6 +7,8 @@
 //===----------------------------------------------------------------------===//
 //
 
+// XFAIL: has-no-atomics
+
 // UNSUPPORTED: c++03, c++11, c++14, c++17
 // ADDITIONAL_COMPILE_FLAGS: -Wno-private-header
 
