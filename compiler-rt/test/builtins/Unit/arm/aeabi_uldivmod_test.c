@@ -1,3 +1,5 @@
+// This fails when libcxx is built with exceptions
+// UNSUPPORTED: armv6m-target-arch
 // REQUIRES: arm-target-arch || armv6m-target-arch
 // RUN: %clang_builtins %s %librt -o %t && %run %t
 
