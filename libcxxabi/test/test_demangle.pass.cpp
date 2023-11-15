@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 // This test is too big for most embedded devices.
-// XFAIL: LIBCXX-PICOLIBC-FIXME
+// REQUIRES: large_tests
 
 // This test exercises support for char array initializer lists added in
 // dd8b266ef.

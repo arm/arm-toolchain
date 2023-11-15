@@ -18,6 +18,9 @@ set(LIBCXXABI_ENABLE_SHARED OFF CACHE BOOL "")
 set(LIBCXXABI_ENABLE_STATIC ON CACHE BOOL "")
 set(LIBCXXABI_ENABLE_STATIC_UNWINDER ON CACHE BOOL "")
 set(LIBCXXABI_ENABLE_THREADS OFF CACHE BOOL "")
+# Long tests are prohibitively slow when run via emulation.
+# The emulated target has limited memory.
+set(LIBCXXABI_TEST_PARAMS "long_tests=False;large_tests=False" CACHE STRING "")
 set(LIBCXXABI_USE_COMPILER_RT ON CACHE BOOL "")
 set(LIBCXX_ENABLE_EXCEPTIONS ON CACHE BOOL "")
 set(LIBCXX_ENABLE_FILESYSTEM OFF CACHE STRING "")
@@ -30,13 +33,17 @@ set(LIBCXX_ENABLE_THREADS OFF CACHE BOOL "")
 set(LIBCXX_ENABLE_WIDE_CHARACTERS OFF CACHE BOOL "")
 set(LIBCXX_INCLUDE_BENCHMARKS OFF CACHE BOOL "")
 # Long tests are prohibitively slow when run via emulation.
-set(LIBCXX_TEST_PARAMS "long_tests=False" CACHE STRING "")
+# The emulated target has limited memory.
+set(LIBCXX_TEST_PARAMS "long_tests=False;large_tests=False" CACHE STRING "")
 set(LIBCXX_USE_COMPILER_RT ON CACHE BOOL "")
 set(LIBUNWIND_ENABLE_SHARED OFF CACHE BOOL "")
 set(LIBUNWIND_ENABLE_STATIC ON CACHE BOOL "")
 set(LIBUNWIND_ENABLE_THREADS OFF CACHE BOOL "")
 set(LIBUNWIND_IS_BAREMETAL ON CACHE BOOL "")
 set(LIBUNWIND_REMEMBER_HEAP_ALLOC ON CACHE BOOL "")
+# Long tests are prohibitively slow when run via emulation.
+# The emulated target has limited memory.
+set(LIBUNWIND_TEST_PARAMS "long_tests=False;large_tests=False" CACHE STRING "")
 set(LIBUNWIND_USE_COMPILER_RT ON CACHE BOOL "")
 find_program(QEMU_SYSTEM_ARM qemu-system-arm REQUIRED)
 
