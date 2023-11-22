@@ -10,6 +10,9 @@
 // UNSUPPORTED: no-exceptions
 // UNSUPPORTED: c++03
 
+// fails with bad_alloc exception
+// REQUIRES: large_tests
+
 // template <class BidirectionalIterator, class Allocator, class charT, class traits>
 //     bool
 //     regex_search(BidirectionalIterator first, BidirectionalIterator last,
