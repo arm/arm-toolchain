@@ -1032,21 +1032,8 @@ typedef __char32_t char32_t;
 // functions is gradually being added to existing C libraries. The conditions
 // below check for known C library versions and conditions under which these
 // functions are declared by the C library.
-//
-// GNU libc 2.36 and newer declare c8rtomb() and mbrtoc8() in C++ modes if
-// __cpp_char8_t is defined or if C2X extensions are enabled. Determining
-// the latter depends on internal GNU libc details that are not appropriate
-// to depend on here, so any declarations present when __cpp_char8_t is not
-// defined are ignored.
-#  if defined(_LIBCPP_GLIBC_PREREQ)
-#    if _LIBCPP_GLIBC_PREREQ(2, 36) && defined(__cpp_char8_t)
-#      define _LIBCPP_HAS_C8RTOMB_MBRTOC8 1
-#    else
-#      define _LIBCPP_HAS_C8RTOMB_MBRTOC8 0
-#    endif
-#  else
-#    define _LIBCPP_HAS_C8RTOMB_MBRTOC8 0
-#  endif
+// For picolibc:
+#define _LIBCPP_HAS_C8RTOMB_MBRTOC8 1
 
 // There are a handful of public standard library types that are intended to
 // support CTAD but don't need any explicit deduction guides to do so. This
