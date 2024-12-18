@@ -1,0 +1,27 @@
+name: Sync from Upstream LLVM
+on:
+  schedule:
+    - cron: '0,30 * * * *'
+jobs:
+  Fetch-Upstream:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch: [main, release/19.x]
+    env:
+      UPSTREAM_REMOTE: git@github.com:llvm/llvm-project.git
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+      - name: Configure Upstream Remote
+        run: git remote add upstream $UPSTREAM_REMOTE
+      - name: Fetch Upstream Changes
+        run: git pull --ff-only upstream ${{ matrix.branch }}
+      - name: Configure Git Identity
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Push Changes
+        run: git push origin
