@@ -1,3 +1,6 @@
+# This workflow fetches changes from relevant branches from the
+# llvm/llvm-project repository (upstream) into the corresponding branches
+# in the arm/arm-toolchain repository (downstream), keeping them in sync.
 name: Sync from Upstream LLVM
 on:
   schedule:
@@ -16,7 +19,7 @@ jobs:
         with:
           ref: ${{ matrix.branch }}
       - name: Configure Upstream Remote
-        run: git remote add upstream $UPSTREAM_REMOTE
+        run: git remote add upstream ${{ env.UPSTREAM_REMOTE }}
       - name: Fetch Upstream Changes
         run: git pull --ff-only upstream ${{ matrix.branch }}
       - name: Configure Git Identity
