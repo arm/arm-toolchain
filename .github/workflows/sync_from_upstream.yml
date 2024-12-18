@@ -27,4 +27,4 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Push Changes
-        run: git push origin
+        run: git push origin ${{ matrix.branch }}
