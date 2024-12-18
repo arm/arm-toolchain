@@ -12,7 +12,7 @@ jobs:
       matrix:
         branch: [main, release/19.x]
     env:
-      UPSTREAM_REMOTE: git@github.com:llvm/llvm-project.git
+      UPSTREAM_REMOTE: https://github.com/llvm/llvm-project.git
     steps:
       - name: Checkout
         uses: actions/checkout@v4
