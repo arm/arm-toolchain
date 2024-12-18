@@ -1,0 +1,26 @@
+# This workflow executes the automerge python script to automatically merge
+# changes from the `main` branch of upstream LLVM into the `arm-software`
+# branch of the arm/arm-toolchain repository.
+name: Automerge
+on:
+  workflow_run:
+    workflows: [Sync from Upstream LLVM]
+    types:
+      - completed
+jobs:
+  Run-Automerge:
+    runs-on: ubuntu-latest
+    env:
+      FROM_BRANCH: main
+      TO_BRANCH: arm-software
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure Git Identity
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Run automerge
+        run: python3 arm-software/ci/automerge.py --project-name ${{ env.GITHUB_REPOSITORY }} --from-branch ${{ env.FROM_BRANCH }} --to-branch ${{ env.TO_BRANCH }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
