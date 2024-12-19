@@ -498,9 +498,8 @@ void baremetal::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   }
 
   if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nodefaultlibs)) {
-    AddRunTimeLibs(TC, D, CmdArgs, Args);
-
     CmdArgs.push_back("-lc");
+    AddRunTimeLibs(TC, D, CmdArgs, Args);
   }
 
   if (D.isUsingLTO()) {
