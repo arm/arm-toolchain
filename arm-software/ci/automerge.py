@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 MERGE_CONFLICT_LABEL = "automerge_conflict"
 AUTOMERGE_BRANCH = "automerge"
 REMOTE_NAME = "origin"
+MERGE_IGNORE_PATHSPEC_FILE = Path(__file__).parent / ".automerge_ignore"
 
 
 class MergeConflictError(Exception):
@@ -37,10 +38,16 @@ class Git():
     def __init__(self, repo_path: Path) -> None:
         self.repo_path = repo_path
 
-    def run_cmd(self, args: list[str]) -> str:
+    def run_cmd(self, args: list[str], check: bool = True) -> str:
         git_cmd = ["git", "-C", str(self.repo_path)] + args
-        git_process = subprocess.run(git_cmd, check=True, capture_output=True, text=True)
+        git_process = subprocess.run(git_cmd, check=check, capture_output=True, text=True)
         return git_process.stdout
+
+
+def has_unresolved_conflicts(git_repo: Git) -> bool:
+    diff_output = git_repo.run_cmd(["diff", "--name-only", "--diff-filter=U"])
+    diff_output = diff_output.strip()
+    return bool(diff_output)
 
 
 def prefix_current_commit_message(git_repo: Git) -> None:
@@ -52,13 +59,14 @@ def prefix_current_commit_message(git_repo: Git) -> None:
 def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, dry_run: bool) -> None:
     logger.info(f"Merging commit {commit_hash} into {to_branch}")
     git_repo.run_cmd(["switch", to_branch])
-    try:
-        git_repo.run_cmd(["merge", commit_hash, "--no-edit"])
-    except subprocess.CalledProcessError:
+    git_repo.run_cmd(["merge", commit_hash, "--no-commit", "--no-ff"], check=False)
+    # Ensure all paths that should be ignored stay unchanged
+    git_repo.run_cmd(["restore", "--ours", "--staged", "--worktree", f"--pathspec-from-file={MERGE_IGNORE_PATHSPEC_FILE}"])
+    if has_unresolved_conflicts(git_repo):
         logger.info("Merge failed")
         git_repo.run_cmf(["merge", "--abort"])
         raise MergeConflictError(commit_hash)
-    git_repo.run_cmd(["commit", "--amend", "--reuse-message", commit_hash])
+    git_repo.run_cmd(["commit", "--reuse-message", commit_hash])
     prefix_current_commit_message(git_repo)
     if dry_run:
         logger.info("Dry run. Skipping push into remote repository.")
