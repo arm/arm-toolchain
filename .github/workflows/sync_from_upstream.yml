@@ -14,10 +14,17 @@ jobs:
     env:
       UPSTREAM_REMOTE: https://github.com/llvm/llvm-project.git
     steps:
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch }}
+          token: ${{ steps.generate-token.outputs.token }}
       - name: Configure Upstream Remote
         run: git remote add upstream ${{ env.UPSTREAM_REMOTE }}
       - name: Fetch Upstream Changes
