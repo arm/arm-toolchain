@@ -69,7 +69,7 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, dry_run: bool)
     )
     if has_unresolved_conflicts(git_repo):
         logger.info("Merge failed")
-        git_repo.run_cmf(["merge", "--abort"])
+        git_repo.run_cmd(["merge", "--abort"])
         raise MergeConflictError(commit_hash)
     git_repo.run_cmd(["commit", "--reuse-message", commit_hash])
     prefix_current_commit_message(git_repo)
