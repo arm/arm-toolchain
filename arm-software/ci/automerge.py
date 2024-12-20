@@ -60,7 +60,7 @@ def prefix_current_commit_message(git_repo: Git) -> None:
 
 
 def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, dry_run: bool) -> None:
-    logger.info(f"Merging commit {commit_hash} into {to_branch}")
+    logger.info("Merging commit %s into %s", commit_hash, to_branch)
     git_repo.run_cmd(["switch", to_branch])
     git_repo.run_cmd(["merge", commit_hash, "--no-commit", "--no-ff"], check=False)
     # Ensure all paths that should be ignored stay unchanged
@@ -91,7 +91,7 @@ def create_pull_request(git_repo: Git, to_branch: str) -> None:
 
 
 def process_conflict(git_repo: Git, commit_hash: str, to_branch: str, dry_run: bool) -> None:
-    logger.info(f"Processing conflict for {commit_hash}")
+    logger.info("Processing conflict for %s", commit_hash)
     git_repo.run_cmd(["switch", "--force-create", AUTOMERGE_BRANCH, commit_hash])
     if dry_run:
         logger.info("Dry run, skipping push and creation of PR.")
@@ -102,7 +102,7 @@ def process_conflict(git_repo: Git, commit_hash: str, to_branch: str, dry_run: b
 
 
 def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> list[str]:
-    logger.info(f"Calculating list of commits to be merged from {from_branch} to {to_branch}")
+    logger.info("Calculating list of commits to be merged from %s to %s", from_branch, to_branch)
     merge_base_output = git_repo.run_cmd(["merge-base", from_branch, to_branch])
     merge_base_commit = merge_base_output.strip()
     log_output = git_repo.run_cmd(["log", f"{merge_base_commit}..{from_branch}", "--pretty=format:%H"])
@@ -112,7 +112,7 @@ def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> li
         return []
     commit_list = commit_list.split("\n")
     commit_list.reverse()
-    logger.info(f"Found {len(commit_list)} commits to be merged")
+    logger.info("Found %d commits to be merged", len(commit_list))
     return commit_list
 
 
@@ -124,20 +124,20 @@ def ensure_branch_exists(git_repo: Git, branch_name: str) -> None:
 
 
 def fetch_branch(git_repo: Git, branch_name: str) -> None:
-    logger.info(f"Fetching '{branch_name}' branch from remote.")
+    logger.info("Fetching '%s' branch from remote.", branch_name)
     ensure_branch_exists(git_repo, branch_name)
     git_repo.run_cmd(["fetch", REMOTE_NAME, f"{branch_name}:{branch_name}"])
 
 
-def get_prs_for_label(project_name: str, label: str) -> dict:
-    logger.info(f"Fetching list of open PRs for label '{label}'.")
+def pr_exist_for_label(project_name: str, label: str) -> bool:
+    logger.info("Fetching list of open PRs for label '%s'.", label)
     gh_process = subprocess.run(
         ["gh", "pr", "list", "--label", label, "--repo", project_name, "--json", "id"],
         check=True,
         capture_output=True,
         text=True,
     )
-    return json.loads(gh_process.stdout)
+    return len(json.loads(gh_process.stdout)) > 0
 
 
 def main():
@@ -178,7 +178,7 @@ def main():
     args = arg_parser.parse_args()
 
     try:
-        if get_prs_for_label(args.project_name, MERGE_CONFLICT_LABEL):
+        if pr_exist_for_label(args.project_name, MERGE_CONFLICT_LABEL):
             logger.error("There are pending automerge PRs. Cannot continue.")
             sys.exit(1)
         logger.info("No pending merge conflicts. Proceeding with automerge.")
@@ -200,7 +200,10 @@ def main():
         )
     except subprocess.CalledProcessError as error:
         logger.error(
-            f'Failed to run command: "{' '.join(str(error.cmd))}"\nstdout:\n{error.stdout}\nstderr:\n{error.stderr}'
+            'Failed to run command: "%s"\nstdout:\n%s\nstderr:\n%s',
+            " ".join(str(error.cmd)),
+            error.stdout,
+            error.stderr,
         )
         sys.exit(1)
 
