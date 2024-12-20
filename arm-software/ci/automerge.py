@@ -178,8 +178,7 @@ def main():
     args = arg_parser.parse_args()
 
     try:
-        pending_automerge_prs = get_prs_for_label(args.project_name, MERGE_CONFLICT_LABEL)
-        if pending_automerge_prs:
+        if get_prs_for_label(args.project_name, MERGE_CONFLICT_LABEL):
             logger.error("There are pending automerge PRs. Cannot continue.")
             sys.exit(1)
         logger.info("No pending merge conflicts. Proceeding with automerge.")
