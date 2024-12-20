@@ -101,7 +101,7 @@ def process_conflict(git_repo: Git, commit_hash: str, to_branch: str, dry_run: b
     create_pull_request(git_repo, to_branch)
 
 
-def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> None:
+def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> list[str]:
     logger.info(f"Calculating list of commits to be merged from {from_branch} to {to_branch}")
     merge_base_output = git_repo.run_cmd(["merge-base", from_branch, to_branch])
     merge_base_commit = merge_base_output.strip()
