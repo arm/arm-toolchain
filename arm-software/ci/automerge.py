@@ -26,16 +26,18 @@ class MergeConflictError(Exception):
     """
     An exception representing a failed merge from upstream due to a conflict.
     """
+
     def __init__(self, commit_hash: str) -> None:
         super().__init__()
         self.commit_hash = commit_hash
 
 
-class Git():
+class Git:
     """
     A helper class for running Git commands on a repository that lives in a
     specific path.
     """
+
     def __init__(self, repo_path: Path) -> None:
         self.repo_path = repo_path
 
@@ -62,7 +64,9 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, dry_run: bool)
     git_repo.run_cmd(["switch", to_branch])
     git_repo.run_cmd(["merge", commit_hash, "--no-commit", "--no-ff"], check=False)
     # Ensure all paths that should be ignored stay unchanged
-    git_repo.run_cmd(["restore", "--ours", "--staged", "--worktree", f"--pathspec-from-file={MERGE_IGNORE_PATHSPEC_FILE}"])
+    git_repo.run_cmd(
+        ["restore", "--ours", "--staged", "--worktree", f"--pathspec-from-file={MERGE_IGNORE_PATHSPEC_FILE}"]
+    )
     if has_unresolved_conflicts(git_repo):
         logger.info("Merge failed")
         git_repo.run_cmf(["merge", "--abort"])
@@ -80,7 +84,10 @@ def create_pull_request(git_repo: Git, to_branch: str) -> None:
     logger.info("Creating Pull Request")
     log_output = git_repo.run_cmd(["log", "HEAD", "--max-count=1", "--pretty=format:%s"])
     pr_title = f"Automerge conflict: {log_output}"
-    subprocess.run(["gh", "pr", "create", "--head", AUTOMERGE_BRANCH, "--base", to_branch, "--fill", "--title", pr_title], check=True)
+    subprocess.run(
+        ["gh", "pr", "create", "--head", AUTOMERGE_BRANCH, "--base", to_branch, "--fill", "--title", pr_title],
+        check=True,
+    )
 
 
 def process_conflict(git_repo: Git, commit_hash: str, to_branch: str, dry_run: bool) -> None:
@@ -95,9 +102,7 @@ def process_conflict(git_repo: Git, commit_hash: str, to_branch: str, dry_run: b
 
 
 def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> None:
-    logger.info(
-        f"Calculating list of commits to be merged from {from_branch} to {to_branch}"
-    )
+    logger.info(f"Calculating list of commits to be merged from {from_branch} to {to_branch}")
     merge_base_output = git_repo.run_cmd(["merge-base", from_branch, to_branch])
     merge_base_commit = merge_base_output.strip()
     log_output = git_repo.run_cmd(["log", f"{merge_base_commit}..{from_branch}", "--pretty=format:%H"])
@@ -126,7 +131,12 @@ def fetch_branch(git_repo: Git, branch_name: str) -> None:
 
 def get_prs_for_label(project_name: str, label: str) -> dict:
     logger.info(f"Fetching list of open PRs for label '{label}'.")
-    gh_process = subprocess.run(["gh", "pr", "list", "--label", label, "--repo", project_name, "--json", "id"], check=True, capture_output=True, text=True)
+    gh_process = subprocess.run(
+        ["gh", "pr", "list", "--label", label, "--repo", project_name, "--json", "id"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
     return json.loads(gh_process.stdout)
 
 
@@ -168,9 +178,7 @@ def main():
     args = arg_parser.parse_args()
 
     try:
-        pending_automerge_prs = get_prs_for_label(
-            args.project_name, MERGE_CONFLICT_LABEL
-        )
+        pending_automerge_prs = get_prs_for_label(args.project_name, MERGE_CONFLICT_LABEL)
         if pending_automerge_prs:
             logger.error("There are pending automerge PRs. Cannot continue.")
             sys.exit(1)
@@ -181,9 +189,7 @@ def main():
         fetch_branch(git_repo, args.from_branch)
         fetch_branch(git_repo, args.to_branch)
 
-        merge_commits = get_merge_commit_list(
-            git_repo, args.from_branch, args.to_branch
-        )
+        merge_commits = get_merge_commit_list(git_repo, args.from_branch, args.to_branch)
         for commit_hash in merge_commits:
             merge_commit(git_repo, args.to_branch, commit_hash, args.dry_run)
     except MergeConflictError as conflict:
