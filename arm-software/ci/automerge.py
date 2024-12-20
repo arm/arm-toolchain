@@ -9,6 +9,7 @@ import argparse
 import json
 import logging
 import subprocess
+import sys
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -75,14 +76,14 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, dry_run: bool)
     logger.info("Merge successful")
 
 
-def create_pull_request(git_repo: Git) -> None:
+def create_pull_request(git_repo: Git, to_branch: str) -> None:
     logger.info("Creating Pull Request")
     log_output = git_repo.run_cmd(["log", "HEAD", "--max-count=1", "--pretty=format:%s"])
     pr_title = f"Automerge conflict: {log_output}"
-    subprocess.run(["gh", "pr", "create", "--fill", "--title", pr_title], check=True)
+    subprocess.run(["gh", "pr", "create", "--head", AUTOMERGE_BRANCH, "--base", to_branch, "--fill", "--title", pr_title], check=True)
 
 
-def process_conflict(git_repo: Git, commit_hash: str, project_name: str, to_branch: str, dry_run: bool) -> None:
+def process_conflict(git_repo: Git, commit_hash: str, to_branch: str, dry_run: bool) -> None:
     logger.info(f"Processing conflict for {commit_hash}")
     git_repo.run_cmd(["switch", "--force-create", AUTOMERGE_BRANCH, commit_hash])
     if dry_run:
@@ -90,7 +91,7 @@ def process_conflict(git_repo: Git, commit_hash: str, project_name: str, to_bran
         return
     git_repo.run_cmd(["push", REMOTE_NAME, AUTOMERGE_BRANCH])
     logger.info("Publishing Pull Request for conflict")
-    create_pull_request(git_repo, project_name, to_branch)
+    create_pull_request(git_repo, to_branch)
 
 
 def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> None:
@@ -102,7 +103,7 @@ def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> No
     log_output = git_repo.run_cmd(["log", f"{merge_base_commit}..{from_branch}", "--pretty=format:%H"])
     commit_list = log_output.strip()
     if not commit_list:
-        logger.info(f"No commits to be merged")
+        logger.info("No commits to be merged")
         return []
     commit_list = commit_list.split("\n")
     commit_list.reverse()
@@ -172,7 +173,7 @@ def main():
         )
         if pending_automerge_prs:
             logger.error("There are pending automerge PRs. Cannot continue.")
-            exit(1)
+            sys.exit(1)
         logger.info("No pending merge conflicts. Proceeding with automerge.")
 
         git_repo = Git(args.repo_path)
@@ -189,7 +190,6 @@ def main():
         process_conflict(
             git_repo,
             conflict.commit_hash,
-            args.project_name,
             args.to_branch,
             args.dry_run,
         )
@@ -197,7 +197,7 @@ def main():
         logger.error(
             f'Failed to run command: "{' '.join(str(error.cmd))}"\nstdout:\n{error.stdout}\nstderr:\n{error.stderr}'
         )
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
