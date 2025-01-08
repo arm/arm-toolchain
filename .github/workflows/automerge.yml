@@ -18,12 +18,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Fetch entire repository history
-          fetch-depth: 0
+            ref: ${{ env.TO_BRANCH }}
       - name: Configure Git Identity
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Fetch Branches
+        run: |
+          git remote set-branches --add origin ${{ env.FROM_BRANCH }}
+          git fetch origin ${{ env.FROM_BRANCH }}:${{ env.FROM_BRANCH }}
+          git fetch origin --update-head-ok --unshallow ${{ env.TO_BRANCH }}:${{ env.TO_BRANCH }}
       - name: Run automerge
         run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ env.FROM_BRANCH }} --to-branch ${{ env.TO_BRANCH }}
         env:
