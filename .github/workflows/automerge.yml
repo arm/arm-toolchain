@@ -17,6 +17,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Fetch entire repository history
+          fetch-depth: 0
       - name: Configure Git Identity
         run: |
           git config --local user.name "github-actions[bot]"

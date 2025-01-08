@@ -116,19 +116,6 @@ def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> li
     return commit_list
 
 
-def ensure_branch_exists(git_repo: Git, branch_name: str) -> None:
-    try:
-        git_repo.run_cmd(["rev-parse", "--verify", branch_name])
-    except subprocess.CalledProcessError:
-        git_repo.run_cmd(["remote", "set-branches", "--add", REMOTE_NAME, branch_name])
-
-
-def fetch_branch(git_repo: Git, branch_name: str) -> None:
-    logger.info("Fetching '%s' branch from remote.", branch_name)
-    ensure_branch_exists(git_repo, branch_name)
-    git_repo.run_cmd(["fetch", REMOTE_NAME, f"{branch_name}:{branch_name}"])
-
-
 def pr_exist_for_label(project_name: str, label: str) -> bool:
     logger.info("Fetching list of open PRs for label '%s'.", label)
     gh_process = subprocess.run(
@@ -184,9 +171,6 @@ def main():
         logger.info("No pending merge conflicts. Proceeding with automerge.")
 
         git_repo = Git(args.repo_path)
-
-        fetch_branch(git_repo, args.from_branch)
-        fetch_branch(git_repo, args.to_branch)
 
         merge_commits = get_merge_commit_list(git_repo, args.from_branch, args.to_branch)
         for commit_hash in merge_commits:
