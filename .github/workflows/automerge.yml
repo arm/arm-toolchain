@@ -22,6 +22,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Run automerge
-        run: python3 arm-software/ci/automerge.py --project-name ${{ env.GITHUB_REPOSITORY }} --from-branch ${{ env.FROM_BRANCH }} --to-branch ${{ env.TO_BRANCH }}
+        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ env.FROM_BRANCH }} --to-branch ${{ env.TO_BRANCH }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
