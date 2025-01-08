@@ -5,6 +5,7 @@ name: Sync from Upstream LLVM
 on:
   schedule:
     - cron: '0,30 * * * *'
+  workflow_dispatch:
 jobs:
   Fetch-Upstream:
     runs-on: ubuntu-latest
