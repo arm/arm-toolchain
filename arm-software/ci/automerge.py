@@ -185,7 +185,7 @@ def main():
         git_repo = Git(args.repo_path)
 
         with open(MERGE_IGNORE_PATHSPEC_FILE) as ignored_paths_file:
-            ignored_paths = ignored_paths_file.readlines()
+            ignored_paths = ignored_paths_file.read().splitlines()
 
         merge_commits = get_merge_commit_list(git_repo, args.from_branch, args.to_branch)
         for commit_hash in merge_commits:
