@@ -64,9 +64,8 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, dry_run: bool)
     git_repo.run_cmd(["switch", to_branch])
     git_repo.run_cmd(["merge", commit_hash, "--no-commit", "--no-ff"], check=False)
     # Ensure all paths that should be ignored stay unchanged
-    git_repo.run_cmd(
-        ["restore", "--ours", "--staged", "--worktree", f"--pathspec-from-file={MERGE_IGNORE_PATHSPEC_FILE}"]
-    )
+    git_repo.run_cmd(["restore", "--staged", f"--pathspec-from-file={MERGE_IGNORE_PATHSPEC_FILE}"])
+    git_repo.run_cmd(["restore", "--ours", "--worktree", f"--pathspec-from-file={MERGE_IGNORE_PATHSPEC_FILE}"])
     if has_unresolved_conflicts(git_repo):
         logger.info("Merge failed")
         git_repo.run_cmd(["merge", "--abort"])
