@@ -50,16 +50,17 @@ class Git:
 def restore_changes_to_ignored_files(git_repo: Git, ignore_list: list[str]) -> None:
     if not ignore_list:
         return
-    # Make sure any files deleted by us stay deleted.
-    # Note that any deleted files in the working tree at this point are conflicts
-    ls_files_output = git_repo.run_cmd(["ls-files", "--deleted", "--deduplicate"] + ignore_list)
+    # First, deal with any conflicting changes to files in the ignore list,
+    # keeping the version from the destination branch
+    git_repo.run_cmd(["restore", "--ours", "--worktree"] + ignore_list)
+    # Next, any files still unmerged are the ones deleted on the destination branch.
+    # Make sure they stay deleted.
+    ls_files_output = git_repo.run_cmd(["diff", "--name-only", "--diff-filter=U", "--"] + ignore_list)
     deleted_by_us = ls_files_output.splitlines()
     if deleted_by_us:
         git_repo.run_cmd(["rm"] + deleted_by_us)
-    # Next, restore ignored files in the index
-    git_repo.run_cmd(["restore", "--staged"] + ignore_list)
-    # And finally, restore ignored files in the working tree
-    git_repo.run_cmd(["restore", "--ours", "--worktree"] + ignore_list)
+    # Finally, restore all other ignored files
+    git_repo.run_cmd(["restore", "--staged", "--worktree"] + ignore_list)
 
 
 def has_unresolved_conflicts(git_repo: Git) -> bool:
