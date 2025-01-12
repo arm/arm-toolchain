@@ -94,7 +94,7 @@ COMPILER_CMAKE_FLAGS=(
     -DCOMPILER_RT_LIBRARY_atomic_aarch64-unknown-linux-gnu="-rtlib=compiler-rt"
     -DLIBOMP_COPY_EXPORTS=False
     -DLIBOMP_USE_HWLOC=False
-    -DLIBOMP_OMPT_SUPPORT=OFF
+    -DLIBOMP_OMPT_SUPPORT=ON
     -DLIBOMP_OMPD_GDB_SUPPORT=OFF
     -DCLANG_VENDOR="Arm Toolchain for Linux ${ATFL_VERSION}"
     -DFLANG_VENDOR="Arm Toolchain for Linux ${ATFL_VERSION}"
