@@ -11,6 +11,7 @@ fi
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 README_MD_PATH=${README_MD_PATH:-"${BASE_DIR}/README.md"}
+MKMODULEDIRS_PATH=${MKMODULEDIRS_PATH:-"${BASE_DIR}/mkmoduledirs.sh.var"}
 SOURCES_DIR=${SOURCES_DIR:-"${BASE_DIR}/src"}
 LIBRARIES_DIR=${LIBRARIES_DIR:-"${BASE_DIR}/lib"}
 PATCHES_DIR=${PATCHES_DIR:-"${BASE_DIR}/patches"}
@@ -166,6 +167,8 @@ Environment Variables:
 
     README_MD_PATH      Specifies the location of the README.md file to bundle
                         (default: ${README_MD_PATH})
+    MKMODULEDIRS_PATH   Specifies the location of mkmoduledirs.sh.var to tweak
+                        (default: ${MKMODULEDIRS_PATH})
     SOURCES_DIR         The directory where all source code will be stored
                         (default: $SOURCES_DIR)
     LIBRARIES_DIR       The directory where the ArmPL veclibs will be stored
@@ -354,6 +357,12 @@ shared_lib_build() {
 
 package() {
     cp "${README_MD_PATH}" "${ATFL_DIR}/README.md"
+    mkdir -p "${ATFL_DIR}/arm"
+    cp "${MKMODULEDIRS_PATH}" "${ATFL_DIR}/arm/mkmoduledirs.sh"
+    sed -i "s/%ATFL_VERSION%/${ATFL_VERSION}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
+    sed -i "s/%ATFL_BUILD%/unknown/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
+    sed -i "s/%ATFL_INSTALL_PREFIX%/\$\(dirname \$\(dirname \`realpath \$BASH_SOURCE\`\)\)/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
+    chmod 0755 ${ATFL_DIR}/arm/mkmoduledirs.sh
     cp "${LIBRARIES_DIR}/libamath.a" \
         "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
     cp "${LIBRARIES_DIR}/libamath.so" \
@@ -422,6 +431,12 @@ fi
 if ! [[ -f "${README_MD_PATH}" ]]
 then
   echo "The path to README.md file is configured incorrectly or does not exist."
+  exit 1
+fi
+
+if ! [[ -f "${MKMODULEDIRS_PATH}" ]]
+then
+  echo "The path to mkmoduledirs.sh.var file is configured incorrectly or does not exist."
   exit 1
 fi
 
