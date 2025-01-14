@@ -41,6 +41,9 @@ class Git:
     def __init__(self, repo_path: Path) -> None:
         self.repo_path = repo_path
 
+    def get_repo_path(self) -> Path:
+        return self.repo_path
+
     def run_cmd(self, args: list[str], check: bool = True) -> str:
         git_cmd = ["git", "-C", str(self.repo_path)] + args
         git_process = subprocess.run(git_cmd, check=check, capture_output=True, text=True)
@@ -98,7 +101,9 @@ def create_pull_request(git_repo: Git, to_branch: str) -> None:
     log_output = git_repo.run_cmd(["log", "HEAD", "--max-count=1", "--pretty=format:%s"])
     pr_title = f"Automerge conflict: {log_output}"
     subprocess.run(
-        ["gh", "pr", "create", "--head", AUTOMERGE_BRANCH, "--base", to_branch, "--fill", "--title", pr_title],
+        ["gh", "pr", "create", "--head", AUTOMERGE_BRANCH, "--base", to_branch, "--fill", "--title", pr_title,
+         "--label", MERGE_CONFLICT_LABEL],
+        cwd=git_repo.get_repo_path(),
         check=True,
     )
 
