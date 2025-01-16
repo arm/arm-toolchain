@@ -2,6 +2,9 @@
 
 # A bash script to build the Arm Toolchain for Embedded
 
+# The script creates a build of the toolchain in the 'build' directory, inside
+# the repository tree.
+
 set -ex
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -12,8 +15,8 @@ clang --version
 export CC=clang
 export CXX=clang++
 
-mkdir build
-cd build
+mkdir -p ${REPO_ROOT}/build
+cd ${REPO_ROOT}/build
 
-cmake ${REPO_ROOT}/arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF
+cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF
 ninja package-llvm-toolchain
