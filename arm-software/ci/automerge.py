@@ -8,6 +8,7 @@ in upstream LLVM into a downstream branch.
 import argparse
 import json
 import logging
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -206,7 +207,7 @@ def main():
     except subprocess.CalledProcessError as error:
         logger.error(
             'Failed to run command: "%s"\nstdout:\n%s\nstderr:\n%s',
-            " ".join(str(error.cmd)),
+            shlex.join(error.cmd),
             error.stdout,
             error.stderr,
         )
