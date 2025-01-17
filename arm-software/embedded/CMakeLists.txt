@@ -303,6 +303,12 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL newlib)
         DESTINATION bin
         COMPONENT llvm-toolchain-newlib-configs
     )
+    install(
+        DIRECTORY
+        ${CMAKE_CURRENT_SOURCE_DIR}/newlib-samples/
+        DESTINATION samples
+        COMPONENT llvm-toolchain-newlib-configs
+    )
 endif()
 
 install(
