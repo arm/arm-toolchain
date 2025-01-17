@@ -2,7 +2,7 @@
     "args": {
         "common": {
             "TARGET_ARCH": "armv7m",
-            "VARIANT": "armv7m_hard_fpv4_sp_d16",
+            "VARIANT": "armv7m_hard_fpv4_sp_d16_unaligned",
             "COMPILE_FLAGS": "-mfloat-abi=hard -march=armv7m -mfpu=fpv4-sp-d16",
             "ENABLE_EXCEPTIONS": "OFF",
             "ENABLE_RTTI": "OFF",

@@ -2,7 +2,7 @@
     "args": {
         "common": {
             "TARGET_ARCH": "armv7a",
-            "VARIANT": "armv7a_soft_nofp",
+            "VARIANT": "armv7a_soft_nofp_unaligned",
             "COMPILE_FLAGS": "-mfloat-abi=soft -march=armv7a -mfpu=none",
             "ENABLE_EXCEPTIONS": "OFF",
             "ENABLE_RTTI": "OFF",

@@ -2,7 +2,7 @@
     "args": {
         "common": {
             "TARGET_ARCH": "armv7r",
-            "VARIANT": "armv7r_hard_vfpv3xd_exn_rtti",
+            "VARIANT": "armv7r_hard_vfpv3xd_exn_rtti_unaligned",
             "COMPILE_FLAGS": "-mfloat-abi=hard -march=armv7r -mfpu=vfpv3xd",
             "ENABLE_EXCEPTIONS": "ON",
             "ENABLE_RTTI": "ON",
