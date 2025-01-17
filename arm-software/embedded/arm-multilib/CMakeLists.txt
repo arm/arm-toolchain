@@ -68,7 +68,7 @@ set(PARALLEL_LIB_BUILD_LEVELS
 )
 if(NOT CMAKE_GENERATOR MATCHES "Ninja")
     if (ENABLE_PARALLEL_LIB_CONFIG OR ENABLE_PARALLEL_LIB_BUILD)
-        message(WARNING "Library build parallization should only be enabled with the Ninja generator.")
+        message(WARNING "Library build parallelization should only be enabled with the Ninja generator.")
     endif()
 endif()
 
