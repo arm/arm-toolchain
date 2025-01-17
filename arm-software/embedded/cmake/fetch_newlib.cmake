@@ -14,7 +14,7 @@ read_repo_version(newlib newlib)
 get_patch_command(${CMAKE_CURRENT_LIST_DIR}/.. newlib newlib_patch_command)
 
 FetchContent_Declare(newlib
-    GIT_REPOSITORY https://sourceware.org/git/newlib-cygwin.git
+    GIT_REPOSITORY "${newlib_URL}"
     GIT_TAG "${newlib_TAG}"
     GIT_SHALLOW "${newlib_SHALLOW}"
     GIT_PROGRESS TRUE
