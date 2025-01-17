@@ -1,4 +1,4 @@
-From 928f527624c6cbc1d897c5f36309981971f47873 Mon Sep 17 00:00:00 2001
+From 24fb12a2a1a46d759221b3d59b41502021cc877b Mon Sep 17 00:00:00 2001
 From: Volodymyr Turanskyy <volodymyr.turanskyy@arm.com>
 Date: Thu, 2 Jan 2025 16:23:27 +0000
 Subject: [PATCH] Update patch for newlib-4.5.0 tag
@@ -12,11 +12,12 @@ Change-Id: Iec24f4305ad35a3a6df1672bb14555bf81249130
  libgloss/arm/linux-crt0.c          |   2 +-
  libgloss/arm/syscalls.c            |   6 +-
  libgloss/arm/trap.S                |   2 +-
- newlib/libc/include/sys/features.h |   2 +
+ newlib/libc/include/sys/features.h |   3 +
  newlib/libc/machine/arm/setjmp.S   |   4 +-
+ newlib/libc/string/wcwidth.c       |   2 +-
  newlib/libc/sys/arm/crt0.S         |   2 +-
  newlib/libc/sys/arm/trap.S         |   2 +-
- 11 files changed, 73 insertions(+), 64 deletions(-)
+ 12 files changed, 75 insertions(+), 65 deletions(-)
 
 diff --git a/libgloss/Makefile.in b/libgloss/Makefile.in
 index 54a00614d..be1450749 100644
@@ -398,14 +399,15 @@ index 845ad0173..2056c2adf 100644
          .global __rt_stkovf_split_small
  
 diff --git a/newlib/libc/include/sys/features.h b/newlib/libc/include/sys/features.h
-index 325acdf5f..12cb6465b 100644
+index 325acdf5f..dfaba8fe7 100644
 --- a/newlib/libc/include/sys/features.h
 +++ b/newlib/libc/include/sys/features.h
-@@ -27,6 +27,8 @@ extern "C" {
+@@ -27,6 +27,9 @@ extern "C" {
  
  #include <_newlib_version.h>
  
 +#define _DEFAULT_SOURCE
++#define _GNU_SOURCE
 +
  /* Macro to test version of GCC.  Returns 0 for non-GCC or too old GCC. */
  #ifndef __GNUC_PREREQ
@@ -427,6 +429,19 @@ index 0070f17cd..a53f7918e 100644
  	.arch_extension mve
  # endif
  #endif
+diff --git a/newlib/libc/string/wcwidth.c b/newlib/libc/string/wcwidth.c
+index 8348eefe8..65604c061 100644
+--- a/newlib/libc/string/wcwidth.c
++++ b/newlib/libc/string/wcwidth.c
+@@ -230,7 +230,7 @@ __wcwidth (const wint_t ucs)
+ }
+ 
+ int
+-wcwidth (const wint_t wc)
++wcwidth (const wchar_t wc)
+ {
+   wint_t wi = wc;
+ 
 diff --git a/newlib/libc/sys/arm/crt0.S b/newlib/libc/sys/arm/crt0.S
 index dae0f0465..51e86d549 100644
 --- a/newlib/libc/sys/arm/crt0.S
