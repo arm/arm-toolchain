@@ -107,6 +107,9 @@ Mappings:
 - Match: --target=thumbv7em-unknown-none-eabihf
   Flags:
   - --target=thumbv7m-unknown-none-eabihf
+- Match: --target=thumbebv7em-unknown-none-eabihf
+  Flags:
+  - --target=thumbebv7m-unknown-none-eabihf
 
 # v7-A and v7-R include the ISA in the triple, but that doesn't matter for
 # library selection, so canonicalise Thumb triples to ARM ones.
