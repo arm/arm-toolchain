@@ -12,7 +12,7 @@ fi
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 README_MD_PATH=${README_MD_PATH:-"${BASE_DIR}/README.md"}
 MKMODULEDIRS_PATH=${MKMODULEDIRS_PATH:-"${BASE_DIR}/mkmoduledirs.sh.var"}
-SOURCES_DIR=${SOURCES_DIR:-"${BASE_DIR}/src"}
+SOURCES_DIR=${SOURCES_DIR:-"$(git -C "${BASE_DIR}" rev-parse --show-toplevel)"}
 LIBRARIES_DIR=${LIBRARIES_DIR:-"${BASE_DIR}/lib"}
 PATCHES_DIR=${PATCHES_DIR:-"${BASE_DIR}/patches"}
 BUILD_DIR=${BUILD_DIR:-"${BASE_DIR}/build"}
@@ -171,7 +171,7 @@ Environment Variables:
                         (default: ${MKMODULEDIRS_PATH})
     SOURCES_DIR         The directory where all source code will be stored
                         (default: $SOURCES_DIR)
-    LIBRARIES_DIR       The directory where the ArmPL veclibs will be stored
+    LIBRARIES_DIR       The optional directory where the ArmPL veclibs will be stored
                         (default: $LIBRARIES_DIR)
     PATCHES_DIR         The optional directory where all patches will be stored
                         (default: $PATCHES_DIR)
@@ -192,6 +192,14 @@ Environment Variables:
     ZLIB_STATIC_PATH    Specifies the location of the static zlib library (libz.a)
                         (default: ${ZLIB_STATIC_PATH})
 EOF
+}
+
+libraries_present() {
+    if [ "$(ls -A "${LIBRARIES_DIR}")" ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 patches_present() {
@@ -363,14 +371,18 @@ package() {
     sed -i "s/%ATFL_BUILD%/unknown/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_INSTALL_PREFIX%/\$\(dirname \$\(dirname \`realpath \$BASH_SOURCE\`\)\)/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     chmod 0755 ${ATFL_DIR}/arm/mkmoduledirs.sh
-    cp "${LIBRARIES_DIR}/libamath.a" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
-    cp "${LIBRARIES_DIR}/libamath.so" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+    if ! libraries_present; then
+      echo "The Amath libraries will not be packaged."
+    else
+      cp "${LIBRARIES_DIR}/libamath.a" \
+          "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+      cp "${LIBRARIES_DIR}/libamath.so" \
+          "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+    fi
     cp "${ATFL_DIR}/lib/libFortranDecimal.a" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+      "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
     cp "${ATFL_DIR}/lib/libFortranRuntime.a" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+      "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
     cp ${ATFL_DIR}/include/flang/omp* "${ATFL_DIR}/include"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
     echo "export PS1=\"(ATfL ${ATFL_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
@@ -379,7 +391,11 @@ package() {
     ln -sf clang++ armclang++
     ln -sf flang armflang
     ln -sf llvm-objdump armllvm-objdump
-    echo "-fveclib=ArmPL -mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0" > atfl-performance.cfg
+    if ! libraries_present; then
+      echo "-mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0" > atfl-performance.cfg
+    else
+      echo "-fveclib=ArmPL -mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0" > atfl-performance.cfg
+    fi
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang.cfg
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang++.cfg
     echo "-frtlib-add-rpath @atfl-performance.cfg" > flang.cfg
@@ -443,12 +459,6 @@ fi
 if ! [[ -e "${SOURCES_DIR}" ]]
 then
   echo "The sources directory is configured incorrectly or does not exist."
-  exit 1
-fi
-
-if ! [[ -e "${LIBRARIES_DIR}" ]]
-then
-  echo "The ArmPL vector libraries directory is configured incorrectly or does not exist."
   exit 1
 fi
 
