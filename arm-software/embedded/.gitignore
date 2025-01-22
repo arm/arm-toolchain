@@ -1,0 +1,16 @@
+.*.swp
+.idea
+/repos*/
+/build*/
+/install*/
+/venv/
+__pycache__
+*.egg-info
+
+# IDEs
+.vscode
+compile_commands.json
+
+# Downloaded FVPs
+/fvp/download/
+/fvp/install/
