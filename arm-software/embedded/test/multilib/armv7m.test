@@ -89,6 +89,20 @@
 # CHECK-BE-FPV4-EXN-RTTI: arm-none-eabi/armebv7m_hard_fpv4_sp_d16_exn_rtti{{$}}
 # CHECK-BE-FPV4-EXN-RTTI-EMPTY:
 
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabi -mbig-endian -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=CHECK-BE-SOFT-FPV4
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabi -mbig-endian -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-BE-SOFT-FPV4
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabi -mbig-endian -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=CHECK-BE-SOFT-FPV4
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabi -mbig-endian -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-BE-SOFT-FPV4
+# CHECK-BE-SOFT-FPV4: arm-none-eabi/armebv7m_soft_fpv4_sp_d16{{$}}
+# CHECK-BE-SOFT-FPV4-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabi -mbig-endian -mfpu=fpv4-sp-d16 | FileCheck %s --check-prefix=CHECK-BE-SOFT-FPV4-EXN-RTTI
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabi -mbig-endian -mfpu=fpv4-sp-d16 -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-BE-SOFT-FPV4-EXN-RTTI
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabi -mbig-endian -mfpu=fpv4-sp-d16 | FileCheck %s --check-prefix=CHECK-BE-SOFT-FPV4-EXN-RTTI
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabi -mbig-endian -mfpu=fpv4-sp-d16 -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-BE-SOFT-FPV4-EXN-RTTI
+# CHECK-BE-SOFT-FPV4-EXN-RTTI: arm-none-eabi/armebv7m_soft_fpv4_sp_d16_exn_rtti{{$}}
+# CHECK-BE-SOFT-FPV4-EXN-RTTI-EMPTY:
+
 # %clang -print-multi-directory --target=arm-none-eabi   -mcpu=cortex-m3 | FileCheck %s --check-prefix=NONE
 # %clang -print-multi-directory --target=arm-none-eabi   -mcpu=cortex-m4 | FileCheck %s --check-prefix=SOFT-FPV4
 # %clang -print-multi-directory --target=arm-none-eabihf -mcpu=cortex-m4 | FileCheck %s --check-prefix=FPV4
