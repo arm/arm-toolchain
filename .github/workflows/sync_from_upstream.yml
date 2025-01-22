@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 jobs:
   Fetch-Upstream:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
         branch: [main, release/19.x]
