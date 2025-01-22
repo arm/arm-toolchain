@@ -17,8 +17,8 @@ but not limited to:
 The Arm Toolchain repository is synchronized with the upstream
 *llvm-project* including the main and release branches. Arm Toolchain
 for Embedded aims to stay close to the head of the *picolibc* main
-branch. The newlib overlay package aims to track the most recent
-newlib release.
+branch. The *newlib* overlay package aims to track the most recent
+*newlib* release.
 
 All changes that can be made in the upstream project, must be made in
 the upstream project. Please see the [Downstream Patch Policy](#downstream-patch-policy)
@@ -26,8 +26,8 @@ below for what Arm considers a downstream patch along with the
 additional requirements for such a patch.
 
 For guidance on how to contribute to the upstream projects see:
-* `llvm-project` [Contributing to LLVM](https://llvm.org/docs/Contributing.html).
-* `picolibc` GitHub.
+* *llvm-project* [Contributing to LLVM](https://llvm.org/docs/Contributing.html).
+* *picolibc* GitHub.
 [Pull requests documentation](https://docs.github.com/en/pull-requests)
 
 ## Ways to contribute
@@ -38,9 +38,9 @@ Please make sure that the issue is specific to the *arm-toolchain*
 before reporting. If the issue exists in *llvm-project* or *picolibc*
 then please report the issue in the upstream project.
 
-Please create a Github issue in the *arm-toolchain* project
+Please create a GitHub issue in the *arm-toolchain* project
 [Issues](https://github.com/arm/arm-toolchain/issues)
-list and label is as a `bug`.
+list.
 
 ### Submit a fix
 
@@ -52,8 +52,8 @@ _How to submit a change_ section below.
 For a bigger change, please create an issue in the
 *arm-toolchain* project
 [Issues](https://github.com/arm/arm-toolchain/issues)
-list and label is as an `rfc` (Request for Comments) to initiate the discussion
-first, before submitting the change itself.
+list and put [RFC] in the subject line (Request for Comments) to initiate the discussion
+first, before submitting a PR for the change.
 
 There is no formal template for an `rfc`, however it would be good to
 explain the purpose of the change and the key design options, proposed
@@ -110,7 +110,7 @@ made in the upstream project.
 #### Toolchain integration
 
 Patches that are specific to integrating components of the Arm
-toolchain or the the projects that it depends on, may be implemented
+Toolchain or the projects that it depends on, may be implemented
 downstream if there's insufficient benefit to the upstream
 project. For example upstream may not be willing to accept a patch
 that only affects Arm Toolchain, but they may be willing to accept a
@@ -144,7 +144,7 @@ implementation once that has landed.
 
 When a feature or bug fix in the main branch of upstream
 *llvm-project* has missed the cut off for the upstream numbered
-release, Arm may choose to backport the change to the Arm toolchain
+release, Arm may choose to backport the change to the Arm Toolchain
 numbered release. An attempt must have been made to use the upstream
 backport process first.
 
@@ -176,8 +176,8 @@ requirements below:
 * New files added to an external project like *picolibc* or *newlib*
   must follow the licensing and copyright of the external project.
 
-* Any patch that causes the arm toolchain to deviate from upstream
+* Any patch that causes the Arm Toolchain to deviate from upstream
   behavior, such as a new command-line option, must be documented in
-  the arm-software/doc/features.md file. The documentation for a
+  the `arm-software/doc/features.md file`. The documentation for a
   feature must state if it is experimental. Experimental features may
   change or be removed at any point in the future.
