@@ -5,3 +5,6 @@ This sample shows how to use semihosting with
 targeting the
 [micro:bit board model](https://www.qemu.org/2019/05/22/microbit/)
 using `newlib`.
+
+A recent version of QEMU is required to run the sample, because of the
+dependency on details of semihosting implementation in QEMU.
