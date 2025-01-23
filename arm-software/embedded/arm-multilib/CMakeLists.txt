@@ -33,6 +33,12 @@ set(MULTILIB_JSON "" CACHE STRING "JSON file to load library definitions from.")
 set(ENABLE_VARIANTS "all" CACHE STRING "Semicolon separated list of variants to build, or \"all\". Must match entries in the json.")
 set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
 set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib llvmlibc)
+set(PROJECT_PREFIX "${CMAKE_BINARY_DIR}/lib-builds" CACHE STRING "Directory to build subprojects in.")
+option(
+    NUMERICAL_BUILD_NAMES
+    "Instead of using the full variant name to label build directories, use an index number. This may help shorten paths."
+    OFF
+)
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain build or install root.")
 set(LIBC_HDRGEN "" CACHE PATH "Path to prebuilt lbc-hdrgen if not included in LLVM binaries set by LLVM_BINARY_DIR")
 option(
@@ -249,9 +255,19 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 endforeach()
             endif()
 
+            if(NUMERICAL_BUILD_NAMES)
+                set(runtimes_id ${lib_idx})
+                list(APPEND additional_cmake_args "-DVARIANT_BUILD_ID=${lib_idx}")
+            else()
+                set(runtimes_id ${variant})
+            endif()
+
             ExternalProject_Add(
                 runtimes-${variant}
-                PREFIX ${CMAKE_BINARY_DIR}/lib-builds
+                STAMP_DIR ${PROJECT_PREFIX}/runtimes/${runtimes_id}/stamp
+                BINARY_DIR ${PROJECT_PREFIX}/runtimes/${runtimes_id}/build
+                DOWNLOAD_DIR ${PROJECT_PREFIX}/runtimes/${runtimes_id}/dl
+                TMP_DIR ${PROJECT_PREFIX}/runtimes/${runtimes_id}/tmp
                 SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/arm-runtimes
                 INSTALL_DIR ${destination_directory}
                 DEPENDS runtimes-depends
@@ -262,6 +278,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 -DVARIANT_JSON=${variant_json_file}
                 -DC_LIBRARY=${C_LIBRARY}
                 -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+                -DPROJECT_PREFIX=${PROJECT_PREFIX}
                 STEP_TARGETS build install
                 USES_TERMINAL_CONFIGURE FALSE
                 USES_TERMINAL_BUILD TRUE

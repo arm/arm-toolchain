@@ -100,6 +100,9 @@ set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tes
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
 set(LIBC_HDRGEN "" CACHE PATH "Path to prebuilt lbc-hdrgen if not included in LLVM binaries set by LLVM_BINARY_DIR")
 
+set(PROJECT_PREFIX "subproj" CACHE STRING "Directory to build subprojects in.")
+set(VARIANT_BUILD_ID "${VARIANT}" CACHE STRING "Name to use to identify build directories." )
+
 # Temporary location to collect the libraries as they are built.
 set(TEMP_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/tmp_install")
 
@@ -264,6 +267,10 @@ endif()
 ExternalProject_Add(
     compiler_rt
     SOURCE_DIR ${llvmproject_src_dir}/compiler-rt
+    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
+    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
+    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
+    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
     INSTALL_DIR compiler-rt/install
     CMAKE_ARGS
     ${compiler_launcher_cmake_args}
@@ -382,6 +389,10 @@ if(C_LIBRARY STREQUAL picolibc)
 
     ExternalProject_Add(
         picolibc
+        STAMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${picolibc_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS compiler_rt-install
@@ -486,6 +497,10 @@ if(C_LIBRARY STREQUAL newlib)
 
     ExternalProject_Add(
         newlib
+        STAMP_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${newlib_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
         CONFIGURE_COMMAND
@@ -611,6 +626,10 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
     ExternalProject_Add(
         llvmlibc
+        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR llvmlibc/install
         DEPENDS libc_hdrgen
@@ -650,6 +669,10 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
     ExternalProject_Add(
         llvmlibc-support
+        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support-stamp
+        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support-build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS ${lib_tool_dependencies} llvmlibc-install
@@ -719,6 +742,10 @@ if(ENABLE_CXX_LIBS)
 
     ExternalProject_Add(
         cxxlibs
+        STAMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS compiler_rt-install clib-install

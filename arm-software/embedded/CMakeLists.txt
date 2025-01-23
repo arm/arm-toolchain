@@ -181,6 +181,14 @@ set(LLVM_TOOLCHAIN_C_LIBRARY
 set_property(CACHE LLVM_TOOLCHAIN_C_LIBRARY
     PROPERTY STRINGS picolibc newlib llvmlibc)
 
+option(
+    SHORT_BUILD_PATHS
+    "Shorten the lengths of internal build paths, which may help with OS path
+    length limits. This replaces the variant suffixes in build directories with
+    index numbers, which is shorter but less descriptive."
+    OFF
+)
+
 # Previously, the LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL option was
 # called LLVM_TOOLCHAIN_NEWLIB_OVERLAY_INSTALL. Detect a setting of
 # that name, in case it's in an existing CMakeCache.txt or command
@@ -600,10 +608,15 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
     # LIST_SEPARATOR option will handle switching it back.
     string(REPLACE ";" "," ENABLE_VARIANTS_PASSTHROUGH "${LLVM_TOOLCHAIN_LIBRARY_VARIANTS}")
 
+    set(multilib_prefix ${CMAKE_BINARY_DIR}/multilib-builds)
+
     ExternalProject_Add(
         multilib-${LLVM_TOOLCHAIN_C_LIBRARY}
-        PREFIX ${CMAKE_BINARY_DIR}/multilib-builds
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arm-multilib
+        STAMP_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-stamp
+        BINARY_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-build
+        DOWNLOAD_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-dl
+        TMP_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-tmp
         INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR}${library_subdir}
         DEPENDS ${lib_tool_dependencies}
         CMAKE_ARGS
@@ -623,6 +636,8 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=${FETCHCONTENT_SOURCE_DIR_PICOLIBC}
         -DFETCHCONTENT_SOURCE_DIR_NEWLIB=${FETCHCONTENT_SOURCE_DIR_NEWLIB}
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DPROJECT_PREFIX=${multilib_prefix}
+        -DNUMERICAL_BUILD_NAMES=${SHORT_BUILD_PATHS}
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
         LIST_SEPARATOR ,
