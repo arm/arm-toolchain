@@ -45,6 +45,7 @@ The following packages need to be installed (using `apt`):
 - `zlib-devel`
 - `zlib-static`
 - `zstd`
+- `libzstd-static` (since RHEL9)
 - `wget`
 - `mpfr`
 - `mpfr-devel`
