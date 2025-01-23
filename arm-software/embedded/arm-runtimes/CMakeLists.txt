@@ -21,7 +21,7 @@ set(llvmproject_src_dir ${TOOLCHAIN_SOURCE_DIR}/../..)
 # CMake arguments are loaded from the JSON file depending on which C
 # library is used, so this must be set before the JSON is processed.
 set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
-set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib llvmlibc)
+set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
 set(VARIANT_JSON "" CACHE STRING "JSON file to load args from.")
 if(VARIANT_JSON)
@@ -37,7 +37,12 @@ if(VARIANT_JSON)
         set(${json_param}_def ${json_val})
     endforeach()
     # Load arguments specific to the chosen library, overwriting any existing values.
-    string(JSON json_args GET ${variant_json_read} "args" ${C_LIBRARY})
+    if(C_LIBRARY MATCHES "^newlib")
+        # Treat newlib variants as newlib for library compatibility
+        string(JSON json_args GET ${variant_json_read} "args" "newlib")
+    else()
+        string(JSON json_args GET ${variant_json_read} "args" ${C_LIBRARY})
+    endif()
     string(JSON json_args_len LENGTH ${json_args})
     math(EXPR json_args_len_dec "${json_args_len} - 1")
     foreach(json_idx RANGE ${json_args_len_dec})
@@ -85,7 +90,7 @@ set(PICOLIBC_BUILD_TYPE ${PICOLIBC_BUILD_TYPE_def} CACHE STRING "Picolibc config
 set_property(CACHE PICOLIBC_BUILD_TYPE PROPERTY STRINGS minsize release)
 
 set(ENABLE_CXX_LIBS ${ENABLE_CXX_LIBS_def} CACHE BOOL "Build CXX libs")
-set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib or llvm-libc).")
+set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
@@ -459,9 +464,42 @@ endif()
 # newlib
 ###############################################################################
 
-if(C_LIBRARY STREQUAL newlib)
+if(C_LIBRARY MATCHES "^newlib")
     if(ENABLE_LIBC_TESTS)
         message(FATAL_ERROR "Tests cannot yet be enabled using newlib libc.")
+    endif()
+
+    if(C_LIBRARY STREQUAL newlib-nano)
+        # Taken from https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/blob/main/build-baremetal-toolchain.sh#L582
+        set(newlib_flags
+            --disable-newlib-supplied-syscalls
+            --disable-nls
+            --enable-lite-exit
+            --disable-multilib
+            --enable-newlib-retargetable-locking
+            --enable-newlib-nano-malloc
+            --disable-newlib-unbuf-stream-opt
+            --enable-newlib-reent-small
+            --disable-newlib-fseek-optimization
+            --enable-newlib-nano-formatted-io
+            --disable-newlib-fvwrite-in-streamio
+            --disable-newlib-wide-orient
+            --enable-lite-exit
+            --enable-newlib-global-atexit)
+        set(newlib_optim_flags
+            "-g -Oz")
+    else()
+        set(newlib_flags
+            --enable-newlib-io-long-long
+            --enable-newlib-register-fini
+            --disable-newlib-supplied-syscalls
+            --enable-newlib-io-c99-formats
+            --disable-nls
+            --enable-lite-exit
+            --disable-multilib
+            --enable-newlib-retargetable-locking)
+        set(newlib_optim_flags
+            "-g -O2")
     endif()
 
     include(${TOOLCHAIN_SOURCE_DIR}/cmake/fetch_newlib.cmake)
@@ -474,8 +512,8 @@ if(C_LIBRARY STREQUAL newlib)
         "RANLIB_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-ranlib"
         "READELF_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-readelf"
         "STRIP_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-strip"
-        "CFLAGS_FOR_TARGET=${flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI --sysroot ${TEMP_LIB_DIR}"
-        "CCASFLAGS=${flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI --sysroot ${TEMP_LIB_DIR}"
+        "CFLAGS_FOR_TARGET=${flags} ${newlib_optim_flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI --sysroot ${TEMP_LIB_DIR}"
+        "CCASFLAGS=${flags} ${newlib_optim_flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI --sysroot ${TEMP_LIB_DIR}"
     )
 
     include(ProcessorCount)
@@ -486,7 +524,7 @@ if(C_LIBRARY STREQUAL newlib)
     endif()
 
     ExternalProject_Add(
-        newlib
+        ${C_LIBRARY}
         STAMP_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/stamp
         BINARY_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/build
         DOWNLOAD_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/dl
@@ -499,14 +537,7 @@ if(C_LIBRARY STREQUAL newlib)
             --target=${target_triple}
             --prefix "${TEMP_LIB_DIR}"
             --exec_prefix <BINARY_DIR>/tmpinstall
-            --enable-newlib-io-long-long
-            --enable-newlib-register-fini
-            --disable-newlib-supplied-syscalls
-            --enable-newlib-io-c99-formats
-            --disable-nls
-            --enable-lite-exit
-            --disable-multilib
-            --enable-newlib-retargetable-locking
+            ${newlib_flags}
         BUILD_COMMAND
             ${CMAKE_COMMAND} -E env ${build_env}
             make ${make_flags}
@@ -690,7 +721,7 @@ if(ENABLE_CXX_LIBS)
                 -DLLVM_LIT_ARGS=${cxxlibs_lit_args}
             )
         endif()
-    elseif(C_LIBRARY STREQUAL newlib)
+    elseif(C_LIBRARY MATCHES "^newlib")
         set(cxxlibs_extra_cmake_options
             -DLIBCXXABI_ENABLE_THREADS=OFF
             -DLIBCXX_ENABLE_MONOTONIC_CLOCK=OFF
@@ -703,6 +734,9 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
         )
+        if(C_LIBRARY STREQUAL newlib-nano)
+            set(lib_compile_flags "${lib_compile_flags} -g -Oz")
+        endif()
     endif()
 
     ExternalProject_Add(
