@@ -1,11 +1,13 @@
 # Contributing to the Arm Toolchain
 
-The Arm Toolchain repository is a fork of the *llvm-project*, with
-build scripts to produce Arm Toolchain for Embedded and Arm Toolchain
-for Linux.
+The Arm Toolchain repository is a fork of the *llvm-project*, with an
+additional arm-software directory containing build scripts to produce
+Arm Toolchain for Embedded and Arm Toolchain for Linux, as well as
+documentation and samples.
 
-Arm Toolchain for Embedded integrates *llvm-project* with the
-*picolibc* C-library or the *newlib* C-library via an overlay package.
+Additionally, Arm Toolchain for Embedded can integrate external
+projects such as the *picolibc* C-library or the *newlib* C-library
+via an overlay package.
 
 Contributions are welcome that improve the project in areas including
 but not limited to:
@@ -55,7 +57,7 @@ For a bigger change, please create an issue in the
 list and put [RFC] in the subject line (Request for Comments) to initiate the discussion
 first, before submitting a PR for the change.
 
-There is no formal template for an `rfc`, however it would be good to
+There is no formal template for an `RFC`, however it would be good to
 explain the purpose of the change and the key design options, proposed
 decisions.
 
@@ -96,8 +98,8 @@ $ ./run-precommit-checks.sh
 
 A patch is considered a downstream patch if:
 
-* It touches any part of the *llvm-project* repository outside the
-  *arm-software* directory.
+* It adds, modifies or removes, any file in the *arm-toolchain*
+  repository outside of the *arm-software* directory.
 
 * It is a patch file to be applied to an external project used by a
   toolchain built from the fork. For example *picolibc* or *newlib*.
@@ -170,14 +172,31 @@ requirements below:
   as when the upstream equivalent lands, must include Removes
   downstream issue:#<issue number>.
 
-* New files in *llvm-project* must include the LLVM license, with the
-  standard header comment and SPDX identifier.
+* New files in the *arm-toolchain* repository must include the LLVM
+  license, with the standard header comment and SPDX identifier.
 
 * New files added to an external project like *picolibc* or *newlib*
   must follow the licensing and copyright of the external project.
 
 * Any patch that causes the Arm Toolchain to deviate from upstream
-  behavior, such as a new command-line option, must be documented in
-  the `arm-software/doc/features.md file`. The documentation for a
-  feature must state if it is experimental. Experimental features may
-  change or be removed at any point in the future.
+  behavior, such as a new command-line option, must have user
+  documentation. See [Downstream Feature
+  Documentation](downstream-feature-documentation) for the location
+  and required contents.
+
+### Downstream Feature Documentation
+
+There are three files that contain the user facing documentation for downstream features.
+
+* `arm-software/docs/arm-toolchain-features.md` for features common to
+  both Arm Toolchain for Embedded and Arm Toolchain for Linux.
+
+* `arm-software/docs/arm-toolchain-for-embedded-features.md` for
+  features specific to Arm Toolchain for Embedded.
+
+* `arm-software/docs/arm-toolchain-for-linux-features.md` for
+  features specific to Arm Toolchain for Linux.
+
+The documentation for a feature must state if it is
+experimental. Experimental features may change or be removed at any
+point in the future.
