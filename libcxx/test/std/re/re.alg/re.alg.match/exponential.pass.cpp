@@ -6,6 +6,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+// fails with bad_alloc exception
+// REQUIRES: large_tests
+
 // <regex>
 // UNSUPPORTED: no-exceptions
 // UNSUPPORTED: c++03

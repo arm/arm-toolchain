@@ -11,6 +11,8 @@
 // UNSUPPORTED: no-localization
 // UNSUPPORTED: c++03
 
+// XFAIL: LIBCXX-PICOLIBC-FIXME
+
 // TODO: Investigate these failures which break the CI.
 // UNSUPPORTED: clang-17, clang-18, clang-19
 

@@ -21,7 +21,7 @@
             "PICOLIBC_BUILD_TYPE": "release",
             "ENABLE_CXX_LIBS": "ON",
             "ENABLE_LIBC_TESTS": "ON",
-            "ENABLE_COMPILER_RT_TESTS": "OFF",
+            "ENABLE_COMPILER_RT_TESTS": "ON",
             "ENABLE_LIBCXX_TESTS": "ON"
         },
         "newlib": {

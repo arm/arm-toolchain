@@ -8,7 +8,7 @@
 
 // REQUIRES: objective-c++
 
-// XFAIL: *
+// XFAIL: LIBCXX-PICOLIBC-FIXME
 
 // Make sure the test DOES NOT pass if it fails at runtime.
 

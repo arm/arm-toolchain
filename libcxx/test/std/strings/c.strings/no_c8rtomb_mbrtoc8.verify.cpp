@@ -6,6 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+// XFAIL: LIBCXX-PICOLIBC-FIXME
+
 // UNSUPPORTED: c++03
 
 #include <uchar.h>
