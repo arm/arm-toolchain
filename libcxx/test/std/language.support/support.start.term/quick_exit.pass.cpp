@@ -6,8 +6,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-// XFAIL: LIBCXX-PICOLIBC-FIXME
-
 // UNSUPPORTED: c++03
 
 // ::quick_exit and ::at_quick_exit were not implemented in older versions of macOS
