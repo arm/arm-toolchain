@@ -660,8 +660,8 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
     ExternalProject_Add(
         llvmlibc-support
-        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support-stamp
-        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support-build
+        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
         DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
         TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
