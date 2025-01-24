@@ -200,10 +200,10 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
     list(JOIN lit_test_executor " " lit_test_executor)
 endif()
 
-set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS}")
+set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS} --sysroot ${TEMP_LIB_DIR}")
 # Compiling the libraries benefits from some extra optimization
 # flags, and requires a sysroot.
-set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident --sysroot ${TEMP_LIB_DIR}")
+set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident")
 
 # Generic target names for the C library.
 # Declare these now, since compiler-rt requires the 'install' dependency.
