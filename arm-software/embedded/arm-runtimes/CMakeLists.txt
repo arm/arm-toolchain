@@ -512,8 +512,8 @@ if(C_LIBRARY MATCHES "^newlib")
         "RANLIB_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-ranlib"
         "READELF_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-readelf"
         "STRIP_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-strip"
-        "CFLAGS_FOR_TARGET=${flags} ${newlib_optim_flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI --sysroot ${TEMP_LIB_DIR}"
-        "CCASFLAGS=${flags} ${newlib_optim_flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI --sysroot ${TEMP_LIB_DIR}"
+        "CFLAGS_FOR_TARGET=${flags} ${newlib_optim_flags} ${lib_compile_flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI"
+        "CCASFLAGS=${flags} ${newlib_optim_flags} ${lib_compile_flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI"
     )
 
     include(ProcessorCount)
