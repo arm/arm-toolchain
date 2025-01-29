@@ -7,14 +7,12 @@
 
 set -ex
 
+export CC=clang
+export CXX=clang++
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C ${SCRIPT_DIR} rev-parse --show-toplevel )
 BUILD_DIR=${REPO_ROOT}/build_llvmlibc_overlay
-
-clang --version
-
-export CC=clang
-export CXX=clang++
 
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
