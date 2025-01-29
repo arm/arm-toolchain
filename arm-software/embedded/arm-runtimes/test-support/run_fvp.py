@@ -92,6 +92,19 @@ def run_fvp(
         cwd=working_directory,
         check=False,
     )
-    sys.stdout.buffer.write(result.stdout)
+
+    # Corstone-310 prints out boilerplate text on stdout alongside the actual
+    # output of the image. Some tests, for instance in libcxx, check the
+    # contents of stdout, and may treat the unexpected text as a condition for
+    # failure. To work around this, we cut out the model's boilerplate output.
+    if fvp_model == "corstone-310":
+        decoded_stdout = result.stdout.decode()
+        relevant_lines = decoded_stdout.splitlines()[5:-2]
+        reencoded_stdout = '\n'.join(relevant_lines).encode()
+        result_stdout = reencoded_stdout
+    else:
+        result_stdout = result.stdout
+
+    sys.stdout.buffer.write(result_stdout)
     return result.returncode
 
