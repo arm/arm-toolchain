@@ -58,7 +58,7 @@ def run_fvp(
     command.extend(["--quiet"])
     for config in fvp_configs:
         command.extend(["--config-file", path.join(fvp_config_dir, config + ".cfg")])
-    command.extend(["--application", image])
+    command.extend(["--application", f"*={image}"])
     command.extend(["--parameter", f"{model.cmdline_param}={shlex.join(arguments)}"])
     command.extend(["--plugin", path.join(fvp_install_dir, model.crypto_plugin)])
     if tarmac_file is not None:
