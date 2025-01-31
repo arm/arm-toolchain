@@ -20,6 +20,18 @@
 # AARCH64-UNALIGNED: aarch64-none-elf/aarch64a_unaligned{{$}}
 # AARCH64-UNALIGNED-EMPTY:
 
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -march=armv8-r | FileCheck %s --check-prefix=AARCH64R-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -mcpu=cortex-r82 | FileCheck %s --check-prefix=AARCH64R-EXNRTTI-UNALIGNED
+
+# AARCH64R-EXNRTTI-UNALIGNED: aarch64-none-elf/aarch64r_exn_rtti_unaligned{{$}}
+# AARCH64R-EXNRTTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -march=armv8-r -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=AARCH64R-UNALIGNED
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -mcpu=cortex-r82 -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=AARCH64R-UNALIGNED
+
+# AARCH64R-UNALIGNED: aarch64-none-elf/aarch64r_unaligned{{$}}
+# AARCH64R-UNALIGNED-EMPTY:
+
 
 # Strictalign
 
@@ -44,6 +56,18 @@
 
 # AARCH64: aarch64-none-elf/aarch64a{{$}}
 # AARCH64-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -march=armv8-r -mno-unaligned-access | FileCheck %s --check-prefix=AARCH64R-EXNRTTI
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -mcpu=cortex-r82 -mno-unaligned-access | FileCheck %s --check-prefix=AARCH64R-EXNRTTI
+
+# AARCH64R-EXNRTTI: aarch64-none-elf/aarch64r_exn_rtti{{$}}
+# AARCH64R-EXNRTTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -march=armv8-r -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck %s --check-prefix=AARCH64R
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -mcpu=cortex-r82 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck %s --check-prefix=AARCH64R
+
+# AARCH64R: aarch64-none-elf/aarch64r{{$}}
+# AARCH64R-EMPTY:
 
 
 # Big endian
