@@ -170,7 +170,7 @@ set(LLVM_TOOLCHAIN_C_LIBRARY
     "Which C library to use."
 )
 set_property(CACHE LLVM_TOOLCHAIN_C_LIBRARY
-    PROPERTY STRINGS picolibc newlib llvmlibc)
+    PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
 option(
     SHORT_BUILD_PATHS
@@ -286,7 +286,7 @@ include(ProcessorCount)
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_picolibc.cmake)
 endif()
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL newlib)
+if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_newlib.cmake)
 endif()
 
@@ -309,18 +309,18 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 ##################################################################################################
 
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL newlib)
+if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
     install(
         FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/newlib.cfg
+        ${CMAKE_CURRENT_SOURCE_DIR}/${LLVM_TOOLCHAIN_C_LIBRARY}.cfg
         DESTINATION bin
-        COMPONENT llvm-toolchain-newlib-configs
+        COMPONENT llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
     )
     install(
         DIRECTORY
         ${CMAKE_CURRENT_SOURCE_DIR}/newlib-samples/
         DESTINATION samples
-        COMPONENT llvm-toolchain-newlib-configs
+        COMPONENT llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
     )
 endif()
 
@@ -731,7 +731,7 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc)
         ${picolibc_SOURCE_DIR}/COPYING.picolibc         COPYING.picolibc
     )
 endif()
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL newlib)
+if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
     list(APPEND third_party_license_files
         ${newlib_SOURCE_DIR}/COPYING.NEWLIB             COPYING.NEWLIB
         ${newlib_SOURCE_DIR}/COPYING.LIBGLOSS           COPYING.LIBGLOSS

@@ -47,3 +47,9 @@ overlay package.
 Note that the `-DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on` option
 only generates the `newlib` package, but does not install it as part
 of the `install` CMake target.
+
+## About `newlib-nano`
+`newlib-nano` is provided as a separate package, and is meant to be equal
+to using GCC with `--specs=nano.specs`. In order to use the nano version
+of newlib, where the documentation in this file refers to `newlib`, replace
+it with `newlib-nano`.

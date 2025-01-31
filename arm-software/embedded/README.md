@@ -7,7 +7,7 @@ bare-metal LLVM based toolchain targeting Arm based on:
 * libc++abi
 * libc++
 * compiler-rt
-* picolibc, or optionally newlib or LLVM's libc
+* picolibc, or optionally newlib(-nano) or LLVM's libc
 
 ## Goal
 
@@ -191,7 +191,7 @@ relying on the Arm GNU Toolchain.
 > *Note:* `picolibc` provides excellent
 > [support for Arm GNU Toolchain](https://github.com/picolibc/picolibc/blob/main/doc/using.md),
 > so projects that require using both Arm GNU Toolchain and Arm Toolchain for Embedded
-> can choose either `picolibc` or `newlib`.
+> can choose either `picolibc` or `newlib`/`newlib-nano`.
 
 ## Building from source
 
