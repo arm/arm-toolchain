@@ -101,8 +101,8 @@ def run_fvp(
     if fvp_model == "corstone-310":
         decoded_stdout = result.stdout.decode()
         expected_stdout_format = r"""
-    Ethos-U rev 136b7d75 --- Apr 12 2023 13:44:01
-    \(C\) COPYRIGHT 2019-2023 Arm Limited
+    Ethos-U rev [0-9a-z]+ --- \w{3} \d{2} \d{4} \d{2}:\d{2}:\d{2}
+    \(C\) COPYRIGHT (?:\d{4}|\d{4}-\d{4})(?:,\s?(?:\d{4}|\d{4}-\d{4}))* Arm Limited
     ALL RIGHTS RESERVED
 
 (.*)
