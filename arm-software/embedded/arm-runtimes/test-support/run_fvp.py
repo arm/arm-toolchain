@@ -2,6 +2,7 @@
 
 # SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
+import re
 import subprocess
 import sys
 from os import path
@@ -99,12 +100,31 @@ def run_fvp(
     # failure. To work around this, we cut out the model's boilerplate output.
     if fvp_model == "corstone-310":
         decoded_stdout = result.stdout.decode()
-        relevant_lines = decoded_stdout.splitlines()[5:-2]
-        reencoded_stdout = '\n'.join(relevant_lines).encode()
-        result_stdout = reencoded_stdout
+        expected_stdout_format = r"""
+    Ethos-U rev 136b7d75 --- Apr 12 2023 13:44:01
+    \(C\) COPYRIGHT 2019-2023 Arm Limited
+    ALL RIGHTS RESERVED
+
+(.*)
+Info: /OSCI/SystemC: Simulation stopped by user.
+\[warning \]\[main@0\]\[\d+ ns\] Simulation stopped by user
+"""
+
+        regex_result = re.fullmatch(
+            expected_stdout_format, decoded_stdout, flags=re.DOTALL
+        )
+        if not regex_result:
+            error_msg = (
+                f"Corstone's output format is different than expected\n"
+                f"Expected (regex): {expected_stdout_format}\n"
+                f"Got: {decoded_stdout}"
+            )
+            raise RuntimeError(error_msg)
+
+        relevant_stdout = regex_result[1]
+        result_stdout = relevant_stdout.encode()
     else:
         result_stdout = result.stdout
 
     sys.stdout.buffer.write(result_stdout)
     return result.returncode
-
