@@ -285,6 +285,16 @@
             "flags": "--target=thumbv7m-unknown-none-eabi -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access"
         },
         {
+            "variant": "armebv7m_soft_fpv4_sp_d16_exn_rtti",
+            "json": "armebv7m_soft_fpv4_sp_d16_exn_rtti.json",
+            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=fpv4-sp-d16"
+        },
+        {
+            "variant": "armebv7m_soft_fpv4_sp_d16",
+            "json": "armebv7m_soft_fpv4_sp_d16.json",
+            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti"
+         },
+        {
             "variant": "armv7m_hard_fpv4_sp_d16_exn_rtti_unaligned",
             "json": "armv7m_hard_fpv4_sp_d16_exn_rtti_unaligned.json",
             "flags": "--target=thumbv7m-unknown-none-eabihf -mfpu=fpv4-sp-d16"

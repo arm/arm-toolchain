@@ -98,6 +98,9 @@ Mappings:
 - Match: --target=thumbv7em-unknown-none-eabihf
   Flags:
   - --target=thumbv7m-unknown-none-eabihf
+- Match: --target=thumbebv7em-unknown-none-eabi
+  Flags:
+  - --target=thumbebv7m-unknown-none-eabi
 - Match: --target=thumbebv7em-unknown-none-eabihf
   Flags:
   - --target=thumbebv7m-unknown-none-eabihf
