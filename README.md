@@ -8,7 +8,7 @@ Welcome to the Arm Toolchain project!
 This repository contains the source code for the Arm Toolchain
 project, a fork of the LLVM project containing build scripts and
 auxiliary material for building LLVM based toolchains targeting
-Arm for bare-metal or native AArch64 Linux environments. 
+Arm for bare-metal or native AArch64 Linux environments.
 
 ## Goal
 
