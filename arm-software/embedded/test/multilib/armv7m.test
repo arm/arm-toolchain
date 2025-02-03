@@ -103,6 +103,20 @@
 # CHECK-BE-SOFT-FPV4-EXN-RTTI: arm-none-eabi/armebv7m_soft_fpv4_sp_d16_exn_rtti{{$}}
 # CHECK-BE-SOFT-FPV4-EXN-RTTI-EMPTY:
 
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabi -mbig-endian -mfpu=none -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=CHECK-BE-SOFT-NOFP
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabi -mbig-endian -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-BE-SOFT-NOFP
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabi -mbig-endian -mfpu=none -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=CHECK-BE-SOFT-NOFP
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabi -mbig-endian -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-BE-SOFT-NOFP
+# CHECK-BE-SOFT-NOFP: arm-none-eabi/armebv7m_soft_nofp{{$}}
+# CHECK-BE-SOFT-NOFP-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabi -mbig-endian -mfpu=none | FileCheck %s --check-prefix=CHECK-BE-SOFT-NOFP-EXN-RTTI
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabi -mbig-endian -mfpu=none -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-BE-SOFT-NOFP-EXN-RTTI
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabi -mbig-endian -mfpu=none | FileCheck %s --check-prefix=CHECK-BE-SOFT-NOFP-EXN-RTTI
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabi -mbig-endian -mfpu=none -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-BE-SOFT-NOFP-EXN-RTTI
+# CHECK-BE-SOFT-NOFP-EXN-RTTI: arm-none-eabi/armebv7m_soft_nofp_exn_rtti{{$}}
+# CHECK-BE-SOFT-NOFP-EXN-RTTI-EMPTY:
+
 # %clang -print-multi-directory --target=arm-none-eabi   -mcpu=cortex-m3 | FileCheck %s --check-prefix=NONE
 # %clang -print-multi-directory --target=arm-none-eabi   -mcpu=cortex-m4 | FileCheck %s --check-prefix=SOFT-FPV4
 # %clang -print-multi-directory --target=arm-none-eabihf -mcpu=cortex-m4 | FileCheck %s --check-prefix=FPV4
