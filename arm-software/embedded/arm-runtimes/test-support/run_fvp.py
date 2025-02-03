@@ -59,7 +59,18 @@ def run_fvp(
     command.extend(["--quiet"])
     for config in fvp_configs:
         command.extend(["--config-file", path.join(fvp_config_dir, config + ".cfg")])
-    command.extend(["--application", image])
+
+    if fvp_model == "corstone-310":
+        command.extend(["--application", f"cpu0={image}"])
+    elif fvp_model == "aem-a" or fvp_model == "aem-r":
+        # In case we ever need to run multiprocessor images, the instance name below
+        # can be renamed to "cluster0.cpu*" (wildcard).
+        command.extend(["--application", f"cluster0.cpu0={image}"])
+    else:
+        raise RuntimeError(
+            f"FVP model {fvp_model} not covered in --application definition"
+        )
+
     command.extend(["--parameter", f"{model.cmdline_param}={shlex.join(arguments)}"])
     command.extend(["--plugin", path.join(fvp_install_dir, model.crypto_plugin)])
     if tarmac_file is not None:

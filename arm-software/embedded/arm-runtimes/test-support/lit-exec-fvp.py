@@ -77,7 +77,7 @@ def main():
         help="optional arguments for the image",
     )
     args = parser.parse_args()
-    return run_fvp(
+    ret_code = run_fvp(
         args.fvp_install_dir,
         args.fvp_config_dir,
         args.fvp_model,
