@@ -67,7 +67,7 @@ def run_fvp(
         command.extend(["--application", f"cluster0.cpu0={image}"])
     else:
         raise RuntimeError(
-            "FVP model {fvp_model} not covered in --application definition"
+            f"FVP model {fvp_model} not covered in --application definition"
         )
 
     command.extend(["--parameter", f"{model.cmdline_param}={shlex.join(arguments)}"])
@@ -105,4 +105,3 @@ def run_fvp(
     )
     sys.stdout.buffer.write(result.stdout)
     return result.returncode
-
