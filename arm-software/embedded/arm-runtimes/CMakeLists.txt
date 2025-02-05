@@ -470,24 +470,40 @@ if(C_LIBRARY MATCHES "^newlib")
     endif()
 
     if(C_LIBRARY STREQUAL newlib-nano)
-        # Taken from https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/blob/main/build-baremetal-toolchain.sh#L582
-        set(newlib_flags
-            --disable-newlib-supplied-syscalls
-            --disable-nls
-            --enable-lite-exit
-            --disable-multilib
-            --enable-newlib-retargetable-locking
-            --enable-newlib-nano-malloc
-            --disable-newlib-unbuf-stream-opt
-            --enable-newlib-reent-small
-            --disable-newlib-fseek-optimization
-            --enable-newlib-nano-formatted-io
-            --disable-newlib-fvwrite-in-streamio
-            --disable-newlib-wide-orient
-            --enable-lite-exit
-            --enable-newlib-global-atexit)
         set(newlib_optim_flags
             "-g -Oz")
+        if(TARGET_ARCH MATCHES "^aarch64")
+            # When trying to build newlib-nano on AArch64, fall back to regular newlib
+            # See https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/blob/9e3db8c042400c9c59686dec8eda2e8c44e5fb5d/build-baremetal-toolchain.sh#L625
+            # ARMGCC just skips building the nano libs for AArch64, but in order to not break integration and testing of multilib, we are building
+            # regular newlib for AArch64 with extreme size optimisation and calling it newlib-nano.
+            set(newlib_flags
+                --enable-newlib-io-long-long
+                --enable-newlib-register-fini
+                --disable-newlib-supplied-syscalls
+                --enable-newlib-io-c99-formats
+                --disable-nls
+                --enable-lite-exit
+                --disable-multilib
+                --enable-newlib-retargetable-locking)
+        else()
+            # Taken from https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/blob/9e3db8c042400c9c59686dec8eda2e8c44e5fb5d/build-baremetal-toolchain.sh#L582
+            set(newlib_flags
+                --disable-newlib-supplied-syscalls
+                --disable-nls
+                --enable-lite-exit
+                --disable-multilib
+                --enable-newlib-retargetable-locking
+                --enable-newlib-nano-malloc
+                --disable-newlib-unbuf-stream-opt
+                --enable-newlib-reent-small
+                --disable-newlib-fseek-optimization
+                --enable-newlib-nano-formatted-io
+                --disable-newlib-fvwrite-in-streamio
+                --disable-newlib-wide-orient
+                --enable-lite-exit
+                --enable-newlib-global-atexit)
+        endif()
     else()
         set(newlib_flags
             --enable-newlib-io-long-long
@@ -733,8 +749,12 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
         )
+
         if(C_LIBRARY STREQUAL newlib-nano)
             set(lib_compile_flags "${lib_compile_flags} -g -Oz")
+        endif()
+
+        if(C_LIBRARY STREQUAL newlib-nano AND NOT TARGET_ARCH MATCHES "^aarch64")
             set(cxxlibs_extra_cmake_options
                 ${cxxlibs_extra_cmake_options}
                 -DLIBCXX_ENABLE_WIDE_CHARACTERS=OFF
