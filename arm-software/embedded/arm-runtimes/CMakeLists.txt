@@ -727,7 +727,6 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_MONOTONIC_CLOCK=OFF
             -DLIBCXX_ENABLE_RANDOM_DEVICE=OFF
             -DLIBCXX_ENABLE_THREADS=OFF
-            -DLIBCXX_ENABLE_WIDE_CHARACTERS=ON
             -DLIBUNWIND_ENABLE_THREADS=OFF
             -DLIBCXXABI_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
@@ -736,6 +735,15 @@ if(ENABLE_CXX_LIBS)
         )
         if(C_LIBRARY STREQUAL newlib-nano)
             set(lib_compile_flags "${lib_compile_flags} -g -Oz")
+            set(cxxlibs_extra_cmake_options
+                ${cxxlibs_extra_cmake_options}
+                -DLIBCXX_ENABLE_WIDE_CHARACTERS=OFF
+            )
+        else()
+            set(cxxlibs_extra_cmake_options
+                ${cxxlibs_extra_cmake_options}
+                -DLIBCXX_ENABLE_WIDE_CHARACTERS=ON
+            )
         endif()
     endif()
 
