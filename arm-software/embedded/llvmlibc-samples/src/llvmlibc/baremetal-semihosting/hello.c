@@ -29,9 +29,7 @@ int main(void) {
   strncpy(out_s, hello_s, hello_s_len + 1);
   assert(out_s_len >= strlen(out_s) + world_s_len + 1);
   strncat(out_s, world_s, world_s_len + 1);
-  // 2024-10-17 Embedded printf implementation does not currently
-  // support printing floating point numbers.
-  printf("%s %li\n", out_s, lround(400000 * atanf(1.0f)));
+  printf("%s\npi = %f\n", out_s, 4.0f * atanf(1.0f));
   free(out_s);
   return 0;
 }
