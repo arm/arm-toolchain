@@ -107,3 +107,19 @@
 
 # AARCH64-BE: aarch64-none-elf/aarch64a_be{{$}}
 # AARCH64-BE-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -march=armv8-r -mbig-endian | FileCheck %s --check-prefix=AARCH64R-BE-EXNRTTI
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -mcpu=cortex-r82 -mbig-endian | FileCheck %s --check-prefix=AARCH64R-BE-EXNRTTI
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -march=armv8-r -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=AARCH64R-BE-EXNRTTI
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -mcpu=cortex-r82 -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=AARCH64R-BE-EXNRTTI
+
+# AARCH64R-BE-EXNRTTI: aarch64-none-elf/aarch64r_be_exn_rtti{{$}}
+# AARCH64R-BE-EXNRTTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -march=armv8-r -mbig-endian -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=AARCH64R-BE
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -mcpu=cortex-r82 -mbig-endian -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=AARCH64R-BE
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -march=armv8-r -mbig-endian -fno-exceptions -fno-rtti -mno-unaligned-access| FileCheck %s --check-prefix=AARCH64R-BE
+# RUN: %clang -print-multi-directory --target=aarch64-none-elf -mcpu=cortex-r82 -mbig-endian -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck %s --check-prefix=AARCH64R-BE
+
+# AARCH64R-BE: aarch64-none-elf/aarch64r_be{{$}}
+# AARCH64R-BE-EMPTY:

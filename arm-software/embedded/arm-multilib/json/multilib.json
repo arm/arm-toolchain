@@ -65,6 +65,16 @@
             "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -fno-exceptions -fno-rtti"
         },
         {
+            "variant": "aarch64r_be_exn_rtti",
+            "json": "aarch64r_be_exn_rtti.json",
+            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r"
+        },
+        {
+            "variant": "aarch64r_be",
+            "json": "aarch64r_be.json",
+            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r -fno-exceptions -fno-rtti"
+        },
+        {
             "variant": "aarch64r_exn_rtti",
             "json": "aarch64r_exn_rtti.json",
             "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -mno-unaligned-access"
