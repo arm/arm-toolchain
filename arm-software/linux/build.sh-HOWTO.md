@@ -142,7 +142,7 @@ The `build.sh` script reads the following environment variables:
   (default: `arm-software/linux/patches`)
 - `BUILD_DIR` - The directory where all build will be happening
   (default: `arm-software/linux/build`)
-- `LOG_DIR` - The directory where all build logs will be stored
+- `LOGS_DIR` - The directory where all build logs will be stored
   (default: `arm-software/linux/logs`)
 - `OUTPUT_DIR` - The directory where all build output will be stored
   (default: `arm-software/linux/output`)
