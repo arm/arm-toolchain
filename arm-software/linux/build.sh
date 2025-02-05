@@ -17,7 +17,7 @@ LIBRARIES_DIR=${LIBRARIES_DIR:-"${BASE_DIR}/lib"}
 PATCHES_DIR=${PATCHES_DIR:-"${BASE_DIR}/patches"}
 BUILD_DIR=${BUILD_DIR:-"${BASE_DIR}/build"}
 ATFL_DIR=${ATFL_DIR:-"${BUILD_DIR}/atfl"}
-LOG_DIR=${LOGS_DIR:-"${BASE_DIR}/logs"}
+LOGS_DIR=${LOGS_DIR:-"${BASE_DIR}/logs"}
 OUTPUT_DIR=${OUTPUT_DIR:-"${BASE_DIR}/output"}
 
 #########################
@@ -177,8 +177,8 @@ Environment Variables:
                         (default: $PATCHES_DIR)
     BUILD_DIR           The directory where all build output will be stored
                         (default: $BUILD_DIR)
-    LOG_DIR             The directory where all build logs will be stored
-                        (default: $LOG_DIR)
+    LOGS_DIR            The directory where all build logs will be stored
+                        (default: $LOGS_DIR)
     OUTPUT_DIR          The directory where all build output will be stored
                         (default: $OUTPUT_DIR)
     RELEASE_FLAGS       Enable release flags in the build true/false
@@ -259,13 +259,13 @@ bootstrap_compiler_build() {
         -DCOMPILER_RT_USE_LLVM_UNWINDER=ON \
         -DCOMPILER_RT_ENABLE_STATIC_UNWINDER=ON \
         "${COMMON_CMAKE_FLAGS[@]}" "${LIBUNWIND_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
-        tee "${LOG_DIR}/bootstrap_compiler.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOG_DIR}/bootstrap_compiler.txt"
-    run_command cmake --install . 2>&1 | tee -a "${LOG_DIR}/bootstrap_compiler.txt"
+        tee "${LOGS_DIR}/bootstrap_compiler.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BUILD_DIR}/bootstrap_compiler/bin:$PATH"
     echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
     echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
-    run_command ninja ${NINJA_ARGS} check-all 2>&1 | tee -a "${LOG_DIR}/bootstrap_compiler.txt"
+    run_command ninja ${NINJA_ARGS} check-all 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
 }
 
 libcpp_build() {
@@ -303,12 +303,12 @@ libcpp_build() {
         -DLIBCXX_ENABLE_UNICODE=ON \
         -DLIBCXX_ENABLE_WIDE_CHARACTERS=ON \
         "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${LIBUNWIND_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
-        tee "${LOG_DIR}/libcpp.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOG_DIR}/libcpp.txt"
-    run_command cmake --install . 2>&1 | tee -a "${LOG_DIR}/libcpp.txt"
+        tee "${LOGS_DIR}/libcpp.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     export LD_LIBRARY_PATH="${ATFL_DIR}/lib:$LD_LIBRARY_PATH"
-    run_command ninja ${NINJA_ARGS} check-cxx 2>&1 | tee -a "${LOG_DIR}/libcpp.txt"
-    run_command ninja ${NINJA_ARGS} check-cxxabi 2>&1 | tee -a "${LOG_DIR}/libcpp.txt"
+    run_command ninja ${NINJA_ARGS} check-cxx 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
+    run_command ninja ${NINJA_ARGS} check-cxxabi 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
 }
 
 product_build() {
@@ -325,10 +325,10 @@ product_build() {
         -DBUILD_SHARED_LIBS=False \
         -DLIBOMP_ENABLE_SHARED=True \
         "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
-        tee "${LOG_DIR}/product.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOG_DIR}/product.txt"
-    run_command cmake --install . 2>&1 | tee -a "${LOG_DIR}/product.txt"
-    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOG_DIR}/product.txt"
+        tee "${LOGS_DIR}/product.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
 }
 
 shared_lib_build() {
@@ -345,11 +345,11 @@ shared_lib_build() {
         -DBUILD_SHARED_LIBS=True \
         -DLIBOMP_ENABLE_SHARED=False \
         "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
-        tee "${LOG_DIR}/shared_lib.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOG_DIR}/shared_lib.txt"
+        tee "${LOGS_DIR}/shared_lib.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
     rm -rf "${ATFL_DIR}.keep" "${ATFL_DIR}.libs"
     mv "${ATFL_DIR}" "${ATFL_DIR}.keep"
-    run_command cmake --install . 2>&1 | tee -a "${LOG_DIR}/shared_lib.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
     mv "${ATFL_DIR}" "${ATFL_DIR}.libs"
     mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
     cp "${ATFL_DIR}.libs/lib/aarch64-unknown-linux-gnu/libomp.a" \
@@ -361,7 +361,7 @@ shared_lib_build() {
     rm -r "${ATFL_DIR}.libs"
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
-    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOG_DIR}/shared_lib.txt"
+    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
 }
 
 package() {
@@ -402,7 +402,7 @@ package() {
     echo "-frtlib-add-rpath @atfl-performance.cfg" > flang.cfg
     cd -
     run_command tar --owner=root --group=root -czf "$OUTPUT_DIR/$TAR_NAME" -C "$BUILD_DIR" atfl |
-        tee "${LOG_DIR}/package.txt"
+        tee "${LOGS_DIR}/package.txt"
 }
 
 ################
@@ -478,7 +478,7 @@ fi
 
 mkdir -p "${BUILD_DIR}"
 mkdir -p "${OUTPUT_DIR}"
-mkdir -p "${LOG_DIR}"
+mkdir -p "${LOGS_DIR}"
 
 main
 trap : 0
