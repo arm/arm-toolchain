@@ -8,7 +8,7 @@ strip = '@LLVM_BINARY_DIR@/bin/llvm-strip@CMAKE_EXECUTABLE_SUFFIX@'
 exe_wrapper = [
     'sh',
     '-c',
-    'test -z "$PICOLIBC_TEST" || @picolibc_test_executor_bin@ "$@" < /dev/null',
+    'test -z "$PICOLIBC_TEST" || @Python_EXECUTABLE@ @picolibc_test_executor_bin@ "$@" < /dev/null',
     '@picolibc_test_executor_bin@',
     @meson_test_executor_params@]
 
