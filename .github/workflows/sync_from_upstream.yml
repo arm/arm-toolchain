@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        branch: [main, release/19.x]
+        branch: [main, release/20.x]
     env:
       UPSTREAM_REMOTE: https://github.com/llvm/llvm-project.git
     steps:
