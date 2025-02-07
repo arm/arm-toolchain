@@ -11,24 +11,28 @@ on:
 jobs:
   Run-Automerge:
     runs-on: ubuntu-latest
-    env:
-      FROM_BRANCH: main
-      TO_BRANCH: arm-software
+    strategy:
+      matrix:
+        branches:
+          - from_branch: main
+            to_branch: arm-software
+          - from_branch: release/20.x
+            to_branch: release/arm-software/20.x
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-            ref: ${{ env.TO_BRANCH }}
+            ref: ${{ matrix.branches.to_branch }}
       - name: Configure Git Identity
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Fetch Branches
         run: |
-          git remote set-branches --add origin ${{ env.FROM_BRANCH }}
-          git fetch origin ${{ env.FROM_BRANCH }}:${{ env.FROM_BRANCH }}
-          git fetch origin --update-head-ok --unshallow ${{ env.TO_BRANCH }}:${{ env.TO_BRANCH }}
+          git remote set-branches --add origin ${{ matrix.branches.from_branch }}
+          git fetch origin ${{ matrix.branches.from_branch }}:${{ matrix.branches.from_branch }}
+          git fetch origin --update-head-ok --unshallow ${{ matrix.branches.to_branch }}:${{ matrix.branches.to_branch }}
       - name: Run automerge
-        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ env.FROM_BRANCH }} --to-branch ${{ env.TO_BRANCH }}
+        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ matrix.branches.from_branch }} --to-branch ${{ matrix.branches.to_branch }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
