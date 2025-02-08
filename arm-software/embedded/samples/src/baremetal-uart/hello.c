@@ -1,3 +1,9 @@
+/* Copyright (c) 2020-2025, Arm Limited and affiliates. 
+ *
+ * Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+ * See https://llvm.org/LICENSE.txt for license information.
+ * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception */
+
 #include <stdio.h>
 
 // https://infocenter.nordicsemi.com/pdf/nRF51_RM_v3.0.pdf sections 14.2 and 29.10

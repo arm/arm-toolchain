@@ -2,6 +2,7 @@
 
 # SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
+import re
 import subprocess
 import sys
 from os import path
@@ -58,7 +59,18 @@ def run_fvp(
     command.extend(["--quiet"])
     for config in fvp_configs:
         command.extend(["--config-file", path.join(fvp_config_dir, config + ".cfg")])
-    command.extend(["--application", image])
+
+    if fvp_model == "corstone-310":
+        command.extend(["--application", f"cpu0={image}"])
+    elif fvp_model == "aem-a" or fvp_model == "aem-r":
+        # In case we ever need to run multiprocessor images, the instance name below
+        # can be renamed to "cluster0.cpu*" (wildcard).
+        command.extend(["--application", f"cluster0.cpu0={image}"])
+    else:
+        raise RuntimeError(
+            f"FVP model {fvp_model} not covered in --application definition"
+        )
+
     command.extend(["--parameter", f"{model.cmdline_param}={shlex.join(arguments)}"])
     command.extend(["--plugin", path.join(fvp_install_dir, model.crypto_plugin)])
     if tarmac_file is not None:
@@ -92,6 +104,38 @@ def run_fvp(
         cwd=working_directory,
         check=False,
     )
-    sys.stdout.buffer.write(result.stdout)
-    return result.returncode
 
+    # Corstone-310 prints out boilerplate text on stdout alongside the actual
+    # output of the image. Some tests, for instance in libcxx, check the
+    # contents of stdout, and may treat the unexpected text as a condition for
+    # failure. To work around this, we cut out the model's boilerplate output.
+    if fvp_model == "corstone-310":
+        decoded_stdout = result.stdout.decode()
+        expected_stdout_format = r"""
+    Ethos-U rev [0-9a-z]+ --- \w{3} \d{2} \d{4} \d{2}:\d{2}:\d{2}
+    \(C\) COPYRIGHT (?:\d{4}|\d{4}-\d{4})(?:,\s?(?:\d{4}|\d{4}-\d{4}))* Arm Limited
+    ALL RIGHTS RESERVED
+
+(.*)
+Info: /OSCI/SystemC: Simulation stopped by user.
+\[warning \]\[main@0\]\[\d+ ns\] Simulation stopped by user
+"""
+
+        regex_result = re.fullmatch(
+            expected_stdout_format, decoded_stdout, flags=re.DOTALL
+        )
+        if not regex_result:
+            error_msg = (
+                f"Corstone's output format is different than expected\n"
+                f"Expected (regex): {expected_stdout_format}\n"
+                f"Got: {decoded_stdout}"
+            )
+            raise RuntimeError(error_msg)
+
+        relevant_stdout = regex_result[1]
+        result_stdout = relevant_stdout.encode()
+    else:
+        result_stdout = result.stdout
+
+    sys.stdout.buffer.write(result_stdout)
+    return result.returncode

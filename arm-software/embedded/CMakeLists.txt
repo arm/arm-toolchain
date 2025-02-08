@@ -1,18 +1,9 @@
 #
-# Copyright (c) 2022, Arm Limited and affiliates.
-# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2022-2025, Arm Limited and affiliates.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
 
@@ -180,6 +171,14 @@ set(LLVM_TOOLCHAIN_C_LIBRARY
 )
 set_property(CACHE LLVM_TOOLCHAIN_C_LIBRARY
     PROPERTY STRINGS picolibc newlib llvmlibc)
+
+option(
+    SHORT_BUILD_PATHS
+    "Shorten the lengths of internal build paths, which may help with OS path
+    length limits. This replaces the variant suffixes in build directories with
+    index numbers, which is shorter but less descriptive."
+    OFF
+)
 
 # Previously, the LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL option was
 # called LLVM_TOOLCHAIN_NEWLIB_OVERLAY_INSTALL. Detect a setting of
@@ -352,25 +351,6 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
       DESTINATION samples
       COMPONENT llvm-toolchain-llvmlibc-configs
     )
-
-    # We need to build libc-hdrgen
-    ExternalProject_Add(
-        libc_hdrgen
-        SOURCE_DIR ${llvmproject_src_dir}/llvm
-        DEPENDS ${lib_tool_dependencies}
-        CMAKE_ARGS
-            -DLLVM_ENABLE_RUNTIMES=libc
-            -DLLVM_LIBC_FULL_BUILD=ON
-            -DCMAKE_BUILD_TYPE=Debug
-        STEP_TARGETS build install
-        BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libc-hdrgen
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E true
-        # Always run the build command so that incremental builds are correct.
-        BUILD_ALWAYS TRUE
-        CONFIGURE_HANDLED_BY_BUILD TRUE
-    )
-    ExternalProject_Get_property(libc_hdrgen BINARY_DIR)
-    set(LIBC_HDRGEN ${BINARY_DIR}/bin/libc-hdrgen${CMAKE_EXECUTABLE_SUFFIX})
 
     # LLVM libc lacks a configuration for AArch64, but the AArch32 one works
     # fine. However, setting the configuration for both architectures to the
@@ -600,10 +580,15 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
     # LIST_SEPARATOR option will handle switching it back.
     string(REPLACE ";" "," ENABLE_VARIANTS_PASSTHROUGH "${LLVM_TOOLCHAIN_LIBRARY_VARIANTS}")
 
+    set(multilib_prefix ${CMAKE_BINARY_DIR}/multilib-builds)
+
     ExternalProject_Add(
         multilib-${LLVM_TOOLCHAIN_C_LIBRARY}
-        PREFIX ${CMAKE_BINARY_DIR}/multilib-builds
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arm-multilib
+        STAMP_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-stamp
+        BINARY_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-build
+        DOWNLOAD_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-dl
+        TMP_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-tmp
         INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR}${library_subdir}
         DEPENDS ${lib_tool_dependencies}
         CMAKE_ARGS
@@ -615,7 +600,6 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         -DENABLE_PARALLEL_LIB_CONFIG=${ENABLE_PARALLEL_LIB_CONFIG}
         -DENABLE_PARALLEL_LIB_BUILD=${ENABLE_PARALLEL_LIB_BUILD}
         -DPARALLEL_LIB_BUILD_LEVELS=${PARALLEL_LIB_BUILD_LEVELS}
-        -DLIBC_HDRGEN=${LIBC_HDRGEN}
         -DFVP_INSTALL_DIR=${FVP_INSTALL_DIR}
         -DENABLE_QEMU_TESTING=${ENABLE_QEMU_TESTING}
         -DENABLE_FVP_TESTING=${ENABLE_FVP_TESTING}
@@ -623,6 +607,8 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=${FETCHCONTENT_SOURCE_DIR_PICOLIBC}
         -DFETCHCONTENT_SOURCE_DIR_NEWLIB=${FETCHCONTENT_SOURCE_DIR_NEWLIB}
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DPROJECT_PREFIX=${multilib_prefix}
+        -DNUMERICAL_BUILD_NAMES=${SHORT_BUILD_PATHS}
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
         LIST_SEPARATOR ,
@@ -787,9 +773,8 @@ install(
 add_custom_target(
     install-llvm-toolchain
 )
-set(LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS_ALL ${LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS})
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
-    list(APPEND LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS_ALL llvm-toolchain-mingw)
+    list(APPEND LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS llvm-toolchain-mingw)
 endif()
 foreach(component ${LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS})
     add_custom_target(

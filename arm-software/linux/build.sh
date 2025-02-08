@@ -12,12 +12,12 @@ fi
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 README_MD_PATH=${README_MD_PATH:-"${BASE_DIR}/README.md"}
 MKMODULEDIRS_PATH=${MKMODULEDIRS_PATH:-"${BASE_DIR}/mkmoduledirs.sh.var"}
-SOURCES_DIR=${SOURCES_DIR:-"${BASE_DIR}/src"}
+SOURCES_DIR=${SOURCES_DIR:-"$(git -C "${BASE_DIR}" rev-parse --show-toplevel)"}
 LIBRARIES_DIR=${LIBRARIES_DIR:-"${BASE_DIR}/lib"}
 PATCHES_DIR=${PATCHES_DIR:-"${BASE_DIR}/patches"}
 BUILD_DIR=${BUILD_DIR:-"${BASE_DIR}/build"}
 ATFL_DIR=${ATFL_DIR:-"${BUILD_DIR}/atfl"}
-LOG_DIR=${LOGS_DIR:-"${BASE_DIR}/logs"}
+LOGS_DIR=${LOGS_DIR:-"${BASE_DIR}/logs"}
 OUTPUT_DIR=${OUTPUT_DIR:-"${BASE_DIR}/output"}
 
 #########################
@@ -171,14 +171,14 @@ Environment Variables:
                         (default: ${MKMODULEDIRS_PATH})
     SOURCES_DIR         The directory where all source code will be stored
                         (default: $SOURCES_DIR)
-    LIBRARIES_DIR       The directory where the ArmPL veclibs will be stored
+    LIBRARIES_DIR       The optional directory where the ArmPL veclibs will be stored
                         (default: $LIBRARIES_DIR)
     PATCHES_DIR         The optional directory where all patches will be stored
                         (default: $PATCHES_DIR)
     BUILD_DIR           The directory where all build output will be stored
                         (default: $BUILD_DIR)
-    LOG_DIR             The directory where all build logs will be stored
-                        (default: $LOG_DIR)
+    LOGS_DIR            The directory where all build logs will be stored
+                        (default: $LOGS_DIR)
     OUTPUT_DIR          The directory where all build output will be stored
                         (default: $OUTPUT_DIR)
     RELEASE_FLAGS       Enable release flags in the build true/false
@@ -192,6 +192,14 @@ Environment Variables:
     ZLIB_STATIC_PATH    Specifies the location of the static zlib library (libz.a)
                         (default: ${ZLIB_STATIC_PATH})
 EOF
+}
+
+libraries_present() {
+    if [ "$(ls -A "${LIBRARIES_DIR}")" ]; then
+        return 0
+    else
+        return 1
+    fi
 }
 
 patches_present() {
@@ -251,13 +259,13 @@ bootstrap_compiler_build() {
         -DCOMPILER_RT_USE_LLVM_UNWINDER=ON \
         -DCOMPILER_RT_ENABLE_STATIC_UNWINDER=ON \
         "${COMMON_CMAKE_FLAGS[@]}" "${LIBUNWIND_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
-        tee "${LOG_DIR}/bootstrap_compiler.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOG_DIR}/bootstrap_compiler.txt"
-    run_command cmake --install . 2>&1 | tee -a "${LOG_DIR}/bootstrap_compiler.txt"
+        tee "${LOGS_DIR}/bootstrap_compiler.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BUILD_DIR}/bootstrap_compiler/bin:$PATH"
     echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
     echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
-    run_command ninja ${NINJA_ARGS} check-all 2>&1 | tee -a "${LOG_DIR}/bootstrap_compiler.txt"
+    run_command ninja ${NINJA_ARGS} check-all 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
 }
 
 libcpp_build() {
@@ -291,15 +299,16 @@ libcpp_build() {
         -DLIBCXX_ENABLE_THREADS=ON \
         -DLIBCXX_HAS_EXTERNAL_THREAD_API=OFF \
         -DLIBCXX_ENABLE_LOCALIZATION=ON \
+        -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=OFF \
         -DLIBCXX_ENABLE_UNICODE=ON \
         -DLIBCXX_ENABLE_WIDE_CHARACTERS=ON \
         "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${LIBUNWIND_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
-        tee "${LOG_DIR}/libcpp.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOG_DIR}/libcpp.txt"
-    run_command cmake --install . 2>&1 | tee -a "${LOG_DIR}/libcpp.txt"
+        tee "${LOGS_DIR}/libcpp.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     export LD_LIBRARY_PATH="${ATFL_DIR}/lib:$LD_LIBRARY_PATH"
-    run_command ninja ${NINJA_ARGS} check-cxx 2>&1 | tee -a "${LOG_DIR}/libcpp.txt"
-    run_command ninja ${NINJA_ARGS} check-cxxabi 2>&1 | tee -a "${LOG_DIR}/libcpp.txt"
+    run_command ninja ${NINJA_ARGS} check-cxx 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
+    run_command ninja ${NINJA_ARGS} check-cxxabi 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
 }
 
 product_build() {
@@ -316,10 +325,10 @@ product_build() {
         -DBUILD_SHARED_LIBS=False \
         -DLIBOMP_ENABLE_SHARED=True \
         "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
-        tee "${LOG_DIR}/product.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOG_DIR}/product.txt"
-    run_command cmake --install . 2>&1 | tee -a "${LOG_DIR}/product.txt"
-    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOG_DIR}/product.txt"
+        tee "${LOGS_DIR}/product.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
 }
 
 shared_lib_build() {
@@ -336,11 +345,11 @@ shared_lib_build() {
         -DBUILD_SHARED_LIBS=True \
         -DLIBOMP_ENABLE_SHARED=False \
         "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
-        tee "${LOG_DIR}/shared_lib.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOG_DIR}/shared_lib.txt"
+        tee "${LOGS_DIR}/shared_lib.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
     rm -rf "${ATFL_DIR}.keep" "${ATFL_DIR}.libs"
     mv "${ATFL_DIR}" "${ATFL_DIR}.keep"
-    run_command cmake --install . 2>&1 | tee -a "${LOG_DIR}/shared_lib.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
     mv "${ATFL_DIR}" "${ATFL_DIR}.libs"
     mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
     cp "${ATFL_DIR}.libs/lib/aarch64-unknown-linux-gnu/libomp.a" \
@@ -352,7 +361,7 @@ shared_lib_build() {
     rm -r "${ATFL_DIR}.libs"
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
-    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOG_DIR}/shared_lib.txt"
+    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
 }
 
 package() {
@@ -363,14 +372,18 @@ package() {
     sed -i "s/%ATFL_BUILD%/unknown/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_INSTALL_PREFIX%/\$\(dirname \$\(dirname \`realpath \$BASH_SOURCE\`\)\)/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     chmod 0755 ${ATFL_DIR}/arm/mkmoduledirs.sh
-    cp "${LIBRARIES_DIR}/libamath.a" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
-    cp "${LIBRARIES_DIR}/libamath.so" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+    if ! libraries_present; then
+      echo "The Amath libraries will not be packaged."
+    else
+      cp "${LIBRARIES_DIR}/libamath.a" \
+          "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+      cp "${LIBRARIES_DIR}/libamath.so" \
+          "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+    fi
     cp "${ATFL_DIR}/lib/libFortranDecimal.a" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+      "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
     cp "${ATFL_DIR}/lib/libFortranRuntime.a" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+      "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
     cp ${ATFL_DIR}/include/flang/omp* "${ATFL_DIR}/include"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
     echo "export PS1=\"(ATfL ${ATFL_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
@@ -379,13 +392,17 @@ package() {
     ln -sf clang++ armclang++
     ln -sf flang armflang
     ln -sf llvm-objdump armllvm-objdump
-    echo "-fveclib=ArmPL -mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0" > atfl-performance.cfg
+    if ! libraries_present; then
+      echo "-mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0" > atfl-performance.cfg
+    else
+      echo "-fveclib=ArmPL -mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0" > atfl-performance.cfg
+    fi
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang.cfg
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang++.cfg
     echo "-frtlib-add-rpath @atfl-performance.cfg" > flang.cfg
     cd -
     run_command tar --owner=root --group=root -czf "$OUTPUT_DIR/$TAR_NAME" -C "$BUILD_DIR" atfl |
-        tee "${LOG_DIR}/package.txt"
+        tee "${LOGS_DIR}/package.txt"
 }
 
 ################
@@ -446,12 +463,6 @@ then
   exit 1
 fi
 
-if ! [[ -e "${LIBRARIES_DIR}" ]]
-then
-  echo "The ArmPL vector libraries directory is configured incorrectly or does not exist."
-  exit 1
-fi
-
 if ! [[ -e "${ZLIB_STATIC_PATH}" ]]
 then
   echo "The path to libz.a file is configured incorrectly or does not exist."
@@ -467,7 +478,7 @@ fi
 
 mkdir -p "${BUILD_DIR}"
 mkdir -p "${OUTPUT_DIR}"
-mkdir -p "${LOG_DIR}"
+mkdir -p "${LOGS_DIR}"
 
 main
 trap : 0

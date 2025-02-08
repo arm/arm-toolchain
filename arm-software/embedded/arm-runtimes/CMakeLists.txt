@@ -1,18 +1,9 @@
 #
-# Copyright (c) 2024, Arm Limited and affiliates.
-# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2024-2025, Arm Limited and affiliates.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
 # CMake build for a library variant, combining a chosen C library
@@ -98,7 +89,9 @@ set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (pi
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
-set(LIBC_HDRGEN "" CACHE PATH "Path to prebuilt lbc-hdrgen if not included in LLVM binaries set by LLVM_BINARY_DIR")
+
+set(PROJECT_PREFIX "subproj" CACHE STRING "Directory to build subprojects in.")
+set(VARIANT_BUILD_ID "${VARIANT}" CACHE STRING "Name to use to identify build directories." )
 
 # Temporary location to collect the libraries as they are built.
 set(TEMP_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/tmp_install")
@@ -206,10 +199,10 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
     list(JOIN lit_test_executor " " lit_test_executor)
 endif()
 
-set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS}")
+set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS} --sysroot ${TEMP_LIB_DIR}")
 # Compiling the libraries benefits from some extra optimization
 # flags, and requires a sysroot.
-set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident --sysroot ${TEMP_LIB_DIR}")
+set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident")
 
 # Generic target names for the C library.
 # Declare these now, since compiler-rt requires the 'install' dependency.
@@ -264,6 +257,10 @@ endif()
 ExternalProject_Add(
     compiler_rt
     SOURCE_DIR ${llvmproject_src_dir}/compiler-rt
+    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
+    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
+    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
+    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
     INSTALL_DIR compiler-rt/install
     CMAKE_ARGS
     ${compiler_launcher_cmake_args}
@@ -382,6 +379,10 @@ if(C_LIBRARY STREQUAL picolibc)
 
     ExternalProject_Add(
         picolibc
+        STAMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${picolibc_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS compiler_rt-install
@@ -486,6 +487,10 @@ if(C_LIBRARY STREQUAL newlib)
 
     ExternalProject_Add(
         newlib
+        STAMP_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/newlib/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${newlib_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
         CONFIGURE_COMMAND
@@ -586,41 +591,22 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
     )
 
-    if(LIBC_HDRGEN)
-        # If libc-hdrgen is provided, there is no need to build it,
-        # but a target is still needed to satisfy the dependency.
-        add_custom_target(libc_hdrgen)
-    elseif(EXISTS ${LLVM_BINARY_DIR}/bin/libc-hdrgen${CMAKE_EXECUTABLE_SUFFIX})
-        set(LIBC_HDRGEN ${LLVM_BINARY_DIR}/bin/libc-hdrgen${CMAKE_EXECUTABLE_SUFFIX})
-        add_custom_target(libc_hdrgen)
-    else()
-        ExternalProject_Add(
-            libc_hdrgen
-            SOURCE_DIR ${llvmproject_src_dir}/llvm
-            CMAKE_ARGS
-                -DLLVM_ENABLE_RUNTIMES=libc
-                -DLLVM_LIBC_FULL_BUILD=ON
-                -DCMAKE_BUILD_TYPE=Debug
-            BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libc-hdrgen
-            INSTALL_COMMAND ${CMAKE_COMMAND} -E true
-            CONFIGURE_HANDLED_BY_BUILD TRUE
-        )
-        ExternalProject_Get_property(libc_hdrgen BINARY_DIR)
-        set(LIBC_HDRGEN ${BINARY_DIR}/bin/libc-hdrgen${CMAKE_EXECUTABLE_SUFFIX})
-    endif()
-
     ExternalProject_Add(
         llvmlibc
+        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR llvmlibc/install
-        DEPENDS libc_hdrgen
         CMAKE_ARGS
         ${compiler_launcher_cmake_args}
         ${common_llvmlibc_cmake_args}
         -DLIBC_TARGET_TRIPLE=${target_triple}
-        -DLIBC_HDRGEN_EXE=${LIBC_HDRGEN}
         -DLIBC_CONFIG_PATH=${LIBC_CFG_DIR}
         -DLIBC_CONF_TIME_64BIT=ON
+        -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
+        -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
         -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
         -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
         -DLLVM_ENABLE_RUNTIMES=libc
@@ -650,6 +636,10 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
     ExternalProject_Add(
         llvmlibc-support
+        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS ${lib_tool_dependencies} llvmlibc-install
@@ -719,6 +709,10 @@ if(ENABLE_CXX_LIBS)
 
     ExternalProject_Add(
         cxxlibs
+        STAMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS compiler_rt-install clib-install
@@ -801,6 +795,14 @@ if(ENABLE_CXX_LIBS)
         endforeach()
     endif()
 
+else() # if not ENABLE_CXX_LIBS
+
+    # The parent arm-multilib cmake script will still want to invoke
+    # build targets like 'cxxlibs-configure', whether we actually have
+    # C++ libraries or not. So we should define them, even if they
+    # don't do anything.
+    add_custom_target(cxxlibs-configure)
+    add_custom_target(cxxlibs-build)
 endif()
 
 install(
