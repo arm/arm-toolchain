@@ -9,6 +9,7 @@ on:
 jobs:
   Fetch-Upstream:
     runs-on: ubuntu-latest
+    if: github.repository == 'arm/arm-toolchain'
     strategy:
       matrix:
         branch: [main, release/20.x]
