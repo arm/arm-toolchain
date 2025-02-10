@@ -354,9 +354,7 @@ shared_lib_build() {
     mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
     cp "${ATFL_DIR}.libs/lib/aarch64-unknown-linux-gnu/libomp.a" \
         "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
-    cp -d ${ATFL_DIR}.libs/lib/libFortranDecimal.so* \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
-    cp -d ${ATFL_DIR}.libs/lib/libFortranRuntime.so* \
+    cp -d ${ATFL_DIR}.libs/lib/libflang_rt* \
         "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
     rm -r "${ATFL_DIR}.libs"
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
@@ -380,9 +378,7 @@ package() {
       cp "${LIBRARIES_DIR}/libamath.so" \
           "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
     fi
-    cp "${ATFL_DIR}/lib/libFortranDecimal.a" \
-      "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
-    cp "${ATFL_DIR}/lib/libFortranRuntime.a" \
+    cp "${ATFL_DIR}/lib/libflang_rt.runtime.a" \
       "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
     cp ${ATFL_DIR}/include/flang/omp* "${ATFL_DIR}/include"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
