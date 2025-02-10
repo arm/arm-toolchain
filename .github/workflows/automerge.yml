@@ -11,6 +11,7 @@ on:
 jobs:
   Run-Automerge:
     runs-on: ubuntu-24.04-arm
+    if: github.repository == 'arm/arm-toolchain'
     strategy:
       matrix:
         branches:
