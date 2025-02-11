@@ -32,7 +32,8 @@ INTERACTIVE=false
 
 RELEASE_FLAGS=${RELEASE_FLAGS:-"false"}
 ATFL_VERSION=${ATFL_VERSION:-"0.0"}
-TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-linux-aarch64.tar.gz"}
+OS_NAME=${OS_NAME:-"linux"}
+TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-aarch64.tar.gz"}
 ATFL_ASSERTIONS=${ATFL_ASSERTIONS:-"ON"}
 PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
 PARALLEL_JOBS=${PARALLEL_JOBS:-"${PROCESSOR_COUNT}"}
@@ -187,6 +188,10 @@ Environment Variables:
                         (default: $PARALLEL_JOBS)
     ATFL_ASSERTIONS     Enable assertions in the build ON/OFF
                         (default: $ATFL_ASSERTIONS)
+    ATFL_VERSION        Specify the version string
+                        (default: $ATFL_VERSION)
+    OS_NAME             Specify the OS name
+                        (default: $OS_NAME)
     TAR_NAME            The name of the tarball to be created
                         (default: $TAR_NAME)
     ZLIB_STATIC_PATH    Specifies the location of the static zlib library (libz.a)
