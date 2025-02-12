@@ -3253,9 +3253,11 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
       return RValue::get(emitUnaryMaybeConstrainedFPBuiltin(
           *this, E, Intrinsic::sinh, Intrinsic::experimental_constrained_sinh));
 
+      /* Downstream change: #87 (sincos vectorization)*/
     case Builtin::BIsincos:
     case Builtin::BIsincosf:
     case Builtin::BIsincosl:
+      /* End downstream change: #87 */
     case Builtin::BI__builtin_sincos:
     case Builtin::BI__builtin_sincosf:
     case Builtin::BI__builtin_sincosf16:
