@@ -1,4 +1,4 @@
-From bd1dcaa0e3e77260e264cc0c2580bf32f704a0ed Mon Sep 17 00:00:00 2001
+From 253cf7620fe0f935831d5dd4d408ff0b907cd31c Mon Sep 17 00:00:00 2001
 From: Simi Pallipurath <simi.pallipurath@arm.com>
 Date: Thu, 14 Nov 2024 10:07:08 +0000
 Subject: Enable libcxx builds
@@ -11,10 +11,10 @@ libc++ builds.
  2 files changed, 15 insertions(+)
 
 diff --git a/meson.build b/meson.build
-index b8f43c800..9d3f5c672 100644
+index 75dac5275..bc7286442 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -1319,6 +1319,18 @@ if get_option('newlib-retargetable-locking') != get_option('newlib-multithread')
+@@ -1364,6 +1364,18 @@ if get_option('newlib-retargetable-locking') != get_option('newlib-multithread')
    error('newlib-retargetable-locking and newlib-multithread must be set to the same value')
  endif
  
@@ -34,13 +34,13 @@ index b8f43c800..9d3f5c672 100644
  	      cc.has_argument('-fno-tree-loop-distribute-patterns'),
  	      description: 'Compiler flag to prevent detecting memcpy/memset patterns')
 diff --git a/picolibc.ld.in b/picolibc.ld.in
-index 7b63ba172..cda5e1e7e 100644
+index 295131644..0abacadf0 100644
 --- a/picolibc.ld.in
 +++ b/picolibc.ld.in
 @@ -68,6 +68,9 @@ SECTIONS
  		*(.literal.unlikely .text.unlikely .literal.unlikely.* .text.unlikely.*)
  		*(.literal.startup .text.startup .literal.startup.* .text.startup.*)
- 		*(.literal .text .literal.* .text.* .opd .opd.*)
+ 		*(.literal .text .literal.* .text.* .opd .opd.* @EXTRA_TEXT_SECTIONS@)
 +		PROVIDE (__start___lcxx_override = .);
 +		*(__lcxx_override)
 +		PROVIDE (__stop___lcxx_override = .);
