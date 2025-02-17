@@ -116,6 +116,9 @@ Mappings:
 - Match: --target=thumbv7-unknown-none-eabi
   Flags:
   - --target=armv7-unknown-none-eabi
+- Match: --target=thumbebv7-unknown-none-eabi
+  Flags:
+  - --target=armebv7-unknown-none-eabi
 - Match: --target=thumbv7-unknown-none-eabihf
   Flags:
   - --target=armv7-unknown-none-eabihf
@@ -137,6 +140,9 @@ Mappings:
 - Match: --target=(arm|thumb)v7ve-unknown-none-eabi
   Flags:
   - --target=armv7-unknown-none-eabi
+- Match: --target=(arm|thumb)ebv7ve-unknown-none-eabi
+  Flags:
+  - --target=armebv7-unknown-none-eabi
 - Match: --target=(arm|thumb)v7ve-unknown-none-eabihf
   Flags:
   - --target=armv7-unknown-none-eabihf

@@ -126,6 +126,20 @@
 # SOFT-VFPV3-EXN-RTTI: arm-none-eabi/armv7a_soft_vfpv3_d16_exn_rtti{{$}}
 # SOFT-VFPV3-EXN-RTTI-EMPTY:
 
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=neon-vfpv3 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-d16-fp16 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-fp16 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv4-d16 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv4 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=neon-fp16 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=neon-vfpv4 -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -marm -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -mthumb -mfloat-abi=softfp -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-EXN-RTTI-BE %s
+# SOFT-VFPV3-EXN-RTTI-BE: arm-none-eabi/armebv7a_soft_vfpv3_d16_exn_rtti{{$}}
+# SOFT-VFPV3-EXN-RTTI-BE-EMPTY:
+
 # RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mfpu=vfpv3-d16 -mfloat-abi=softfp -fno-exceptions -fno-rtti | FileCheck --check-prefix=SOFT-VFPV3-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mfpu=neon-vfpv3 -mfloat-abi=softfp -fno-exceptions -fno-rtti | FileCheck --check-prefix=SOFT-VFPV3-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mfpu=vfpv3 -mfloat-abi=softfp -fno-exceptions -fno-rtti | FileCheck --check-prefix=SOFT-VFPV3-UNALIGNED %s
@@ -153,6 +167,20 @@
 # RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mfpu=vfpv3-d16 -mthumb -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3 %s
 # SOFT-VFPV3: arm-none-eabi/armv7a_soft_vfpv3_d16{{$}}
 # SOFT-VFPV3-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=neon-vfpv3 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-d16-fp16 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-fp16 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv4-d16 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv4 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=neon-fp16 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=neon-vfpv4 -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -marm -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -mthumb -mfloat-abi=softfp -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=SOFT-VFPV3-BE %s
+# SOFT-VFPV3-BE: arm-none-eabi/armebv7a_soft_vfpv3_d16{{$}}
+# SOFT-VFPV3-BE-EMPTY:
 
 # We have no valid variant for this configuration, yet.
 # RUN: %clang -print-multi-directory --target=armv7a-none-eabi -mfpu=vfpv3xd 2>&1 | FileCheck --check-prefix=NOT-FOUND %s
