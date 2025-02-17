@@ -18,8 +18,14 @@ if(NOT ${armtoolchain_COMMIT} MATCHES "^[a-f0-9]+$")
 endif()
 
 if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)) # libc in a separate repo?
+    if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
+        set(base_library newlib)
+    else()
+        set(base_library $(LLVM_TOOLCHAIN_C_LIBRARY))
+    endif()
+
     execute_process(
-        COMMAND git -C ${${LLVM_TOOLCHAIN_C_LIBRARY}_SOURCE_DIR} rev-parse HEAD
+        COMMAND git -C ${${base_library}_SOURCE_DIR} rev-parse HEAD
         OUTPUT_VARIABLE ${LLVM_TOOLCHAIN_C_LIBRARY}_COMMIT
         OUTPUT_STRIP_TRAILING_WHITESPACE 
         COMMAND_ERROR_IS_FATAL ANY

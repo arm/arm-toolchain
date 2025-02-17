@@ -37,7 +37,7 @@ Armv8-M or later architecture, including the
 |Binutils​|`objdump`, `readelf`, ...|`llvm-objdump`, `llvm-readelf`, ...|
 |Compiler runtime library​|`libgcc​`|`compiler-rt`​|
 |Unwinder​|`libgcc`​|`libunwind`​|
-|C standard library​|`newlib`, `newlib-nano`|`picolibc`|​
+|C standard library​|`newlib`, `newlib-nano`|`picolibc` (or `newlib`/`newlib-nano` as overlay)|​
 |C++ ABI library​|`libsupc++.a`|`libc++abi`​|​
 |C++ standard library​|`libstdc++​`|`libc++`​|
 
@@ -90,7 +90,7 @@ however uses different command line options to control selection of semihosting.
 |--------|-----------|------------|
 |No semihosting|`--specs=nosys.specs`|
 |Semihosting|`--specs=rdimon.specs`|`-nostartfiles -lcrt0-semihost -lsemihost`|
-|Newlib-nano|`--specs=nano.specs`|Not available: `picolibc` is an equivalent of `newlib-nano`.
+|Newlib-nano|`--specs=nano.specs`|`--config=newlib-nano.cfg` (with [`newlib-nano` overlay](./newlib.md) installed)|
 
 ## Linker
 
