@@ -119,6 +119,9 @@ Mappings:
 - Match: --target=thumbv7-unknown-none-eabihf
   Flags:
   - --target=armv7-unknown-none-eabihf
+- Match: --target=thumbebv7-unknown-none-eabihf
+  Flags:
+  - --target=armebv7-unknown-none-eabihf
 - Match: --target=thumbv4t-unknown-none-eabi
   Flags:
   - --target=armv4t-unknown-none-eabi
@@ -140,6 +143,9 @@ Mappings:
 - Match: --target=(arm|thumb)v7ve-unknown-none-eabihf
   Flags:
   - --target=armv7-unknown-none-eabihf
+- Match: --target=(arm|thumb)ebv7ve-unknown-none-eabihf
+  Flags:
+  - --target=armebv7-unknown-none-eabihf
 
 # Higher versions of the architecture such as v8-A and v9-A are a superset of
 # v7-A.
