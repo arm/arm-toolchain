@@ -416,10 +416,6 @@ public:
   /// has a vectorized variant available.
   bool hasVectorCallVariants() const { return VecCallVariantsFound; }
 
-  /* Downstream change: #87 (sincos vectorization)*/
-  // Removed hasStructVectorCall()
-  /* End downstream change: #87 */
-
   unsigned getNumStores() const { return LAI->getNumStores(); }
   unsigned getNumLoads() const { return LAI->getNumLoads(); }
 
@@ -638,10 +634,6 @@ private:
   /// (potentially) make a better decision on the maximum VF and enable
   /// the use of those function variants.
   bool VecCallVariantsFound = false;
-
-  /* Downstream change: #87 (sincos vectorization)*/
-  // Removed StructVecCallFound
-  /* End downstream change: #87 */
 
   /// Keep track of all the countable and uncountable exiting blocks if
   /// the exact backedge taken count is not computable.

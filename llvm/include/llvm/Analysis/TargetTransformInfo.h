@@ -1473,13 +1473,11 @@ public:
                                      TTI::TargetCostKind CostKind,
                                      unsigned Index = -1) const;
 
-  /* Downstream change: #87 (sincos vectorization)*/
   /// \return The expected cost of aggregate inserts and extracts. This is
   /// used when the instruction is not available; a typical use case is to
   /// provision the cost of vectorization/scalarization in vectorizer passes.
   InstructionCost getInsertExtractValueCost(unsigned Opcode,
                                             TTI::TargetCostKind CostKind) const;
-  /* End downstream change: #87 */
 
   /// \return The cost of replication shuffle of \p VF elements typed \p EltTy
   /// \p ReplicationFactor times.
@@ -2213,10 +2211,8 @@ public:
                             const APInt &DemandedDstElts,
                             TTI::TargetCostKind CostKind) = 0;
 
-  /* Downstream change: #87 (sincos vectorization)*/
   virtual InstructionCost
   getInsertExtractValueCost(unsigned Opcode, TTI::TargetCostKind CostKind) = 0;
-  /* End downstream change: #87 */
 
   virtual InstructionCost
   getMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
@@ -2939,13 +2935,11 @@ public:
     return Impl.getReplicationShuffleCost(EltTy, ReplicationFactor, VF,
                                           DemandedDstElts, CostKind);
   }
-  /* Downstream change: #87 (sincos vectorization)*/
   InstructionCost
   getInsertExtractValueCost(unsigned Opcode,
                             TTI::TargetCostKind CostKind) override {
     return Impl.getInsertExtractValueCost(Opcode, CostKind);
   }
-  /* End downstream change: #87 */
   InstructionCost getMemoryOpCost(unsigned Opcode, Type *Src, Align Alignment,
                                   unsigned AddressSpace,
                                   TTI::TargetCostKind CostKind,

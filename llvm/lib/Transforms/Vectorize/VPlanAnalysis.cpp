@@ -124,14 +124,12 @@ Type *VPTypeAnalysis::inferScalarTypeForRecipe(const VPWidenRecipe *R) {
   case Instruction::FNeg:
   case Instruction::Freeze:
     return inferScalarType(R->getOperand(0));
-  /* Downstream change: #87 (sincos vectorization)*/
   case Instruction::ExtractValue: {
     assert(R->getNumOperands() == 2 && "expected single level extractvalue");
     auto *StructTy = cast<StructType>(inferScalarType(R->getOperand(0)));
     auto *CI = cast<ConstantInt>(R->getOperand(1)->getLiveInIRValue());
     return StructTy->getTypeAtIndex(CI->getZExtValue());
   }
-  /* End downstream change: #87 */
   default:
     break;
   }
