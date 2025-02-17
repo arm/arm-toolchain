@@ -21,7 +21,7 @@ if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)) # libc in a separate repo?
     if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
         set(base_library newlib)
     else()
-        set(base_library $(LLVM_TOOLCHAIN_C_LIBRARY))
+        set(base_library ${LLVM_TOOLCHAIN_C_LIBRARY})
     endif()
 
     execute_process(
