@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 # A bash script to build the newlib overlay for the Arm Toolchain for Embedded
 
 # The script creates a build of the toolchain in the 'build_newlib_overlay'
