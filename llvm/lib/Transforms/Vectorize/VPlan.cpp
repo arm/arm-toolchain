@@ -334,10 +334,12 @@ Value *VPTransformState::get(VPValue *Def, bool NeedsScalar) {
   } else {
     // Initialize packing with insertelements to start from undef.
     assert(!VF.isScalable() && "VF is assumed to be non scalable.");
+    /* Downstream change: #87 (sincos vectorization)*/
     Value *Undef = PoisonValue::get(toVectorizedTy(LastInst->getType(), VF));
     set(Def, Undef);
     for (unsigned Lane = 0; Lane < VF.getKnownMinValue(); ++Lane)
       packScalarIntoVectorizedValue(Def, Lane);
+    /* End downstream change: #87 */
     VectorValue = get(Def);
   }
   Builder.restoreIP(OldIP);
@@ -390,6 +392,7 @@ void VPTransformState::setDebugLocFrom(DebugLoc DL) {
     Builder.SetCurrentDebugLocation(DIL);
 }
 
+/* Downstream change: #87 (sincos vectorization)*/
 void VPTransformState::packScalarIntoVectorizedValue(VPValue *Def,
                                                      const VPLane &Lane) {
   Value *ScalarInst = get(Def, Lane);
@@ -409,6 +412,7 @@ void VPTransformState::packScalarIntoVectorizedValue(VPValue *Def,
   }
   set(Def, WideValue);
 }
+/* End downstream change: #87 */
 
 BasicBlock *
 VPBasicBlock::createEmptyBasicBlock(VPTransformState::CFGState &CFG) {

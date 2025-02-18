@@ -954,6 +954,7 @@ bool LoopVectorizationLegality::canVectorizeInstrs() {
       if (CI && !VFDatabase::getMappings(*CI).empty())
         VecCallVariantsFound = true;
 
+      /* Downstream change: #87 (sincos vectorization)*/
       auto CanWidenInstructionTy = [](Instruction const &Inst) {
         Type *InstTy = Inst.getType();
         if (!isa<StructType>(InstTy))
@@ -965,6 +966,7 @@ bool LoopVectorizationLegality::canVectorizeInstrs() {
         return isa<CallInst>(Inst) && canWidenCallReturnType(InstTy) &&
                all_of(Inst.users(), IsaPred<ExtractValueInst>);
       };
+      /* End downstream change: #87 */
 
       // Check that the instruction return type is vectorizable.
       // We can't vectorize casts from vector type to scalar type.
