@@ -20,10 +20,17 @@ jobs:
           - from_branch: release/20.x
             to_branch: release/arm-software/20.x
     steps:
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
         with:
-            ref: ${{ matrix.branches.to_branch }}
+          ref: ${{ matrix.branches.to_branch }}
+          token: ${{ steps.generate-token.outputs.token }}
       - name: Configure Git Identity
         run: |
           git config --local user.name "github-actions[bot]"
