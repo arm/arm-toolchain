@@ -8,7 +8,9 @@ import sys
 from os import environ
 from os import path
 from dataclasses import dataclass
+from platform import uname
 import shlex
+
 
 @dataclass
 class FVP:
@@ -17,23 +19,34 @@ class FVP:
     crypto_plugin: str
     cmdline_param: str
 
+
+# The location of files within the FVP install directory can differ
+# between the packages for different platforms.
+uname_machine = uname().machine.lower()
+if uname_machine == "x86_64":
+    platform_dir = "Linux64_GCC-9.3"
+elif uname_machine == "aarch64":
+    platform_dir = "Linux64_armv8l_GCC-9.3"
+else:
+    raise Exception(f"{uname_machine} is not a recognised uname machine")
+
 MODELS = {
     "corstone-310": FVP(
-        "Corstone-310/models/Linux64_GCC-9.3/FVP_Corstone_SSE-310",
-        "Corstone-310/plugins/Linux64_GCC-9.3/TarmacTrace.so",
-        "FastModelsPortfolio_11.27/plugins/Linux64_GCC-9.3/Crypto.so",
+        f"Corstone-310/models/{platform_dir}/FVP_Corstone_SSE-310",
+        f"Corstone-310/plugins/{platform_dir}/TarmacTrace.so",
+        f"FastModelsPortfolio_11.27/plugins/{platform_dir}/Crypto.so",
         "cpu0.semihosting-cmd_line",
     ),
     "aem-a": FVP(
-        "Base_RevC_AEMvA_pkg/models/Linux64_GCC-9.3/FVP_Base_RevC-2xAEMvA",
-        "Base_RevC_AEMvA_pkg/plugins/Linux64_GCC-9.3/TarmacTrace.so",
-        "FastModelsPortfolio_11.27/plugins/Linux64_GCC-9.3/Crypto.so",
+        f"Base_RevC_AEMvA_pkg/models/{platform_dir}/FVP_Base_RevC-2xAEMvA",
+        f"Base_RevC_AEMvA_pkg/plugins/{platform_dir}/TarmacTrace.so",
+        f"FastModelsPortfolio_11.27/plugins/{platform_dir}/Crypto.so",
         "cluster0.cpu0.semihosting-cmd_line",
     ),
     "aem-r": FVP(
-        "AEMv8R_base_pkg/models/Linux64_GCC-9.3/FVP_BaseR_AEMv8R",
-        "AEMv8R_base_pkg/plugins/Linux64_GCC-9.3/TarmacTrace.so",
-        "FastModelsPortfolio_11.27/plugins/Linux64_GCC-9.3/Crypto.so",
+        f"AEMv8R_base_pkg/models/{platform_dir}/FVP_BaseR_AEMv8R",
+        f"AEMv8R_base_pkg/plugins/{platform_dir}/TarmacTrace.so",
+        f"FastModelsPortfolio_11.27/plugins/{platform_dir}/Crypto.so",
         "cluster0.cpu0.semihosting-cmd_line",
     ),
 }
