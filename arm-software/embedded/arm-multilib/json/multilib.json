@@ -87,32 +87,38 @@
         {
             "variant": "aarch64r_soft_nofp_exn_rtti_unaligned",
             "json": "aarch64r_soft_nofp_exn_rtti_unaligned.json",
-            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft"
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft",
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "aarch64r_soft_nofp_unaligned",
             "json": "aarch64r_soft_nofp_unaligned.json",
-            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft"
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft",
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "aarch64r_soft_nofp_exn_rtti",
             "json": "aarch64r_soft_nofp_exn_rtti.json",
-            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft -mno-unaligned-access"
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft -mno-unaligned-access",
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "aarch64r_soft_nofp",
             "json": "aarch64r_soft_nofp.json",
-            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft -mno-unaligned-access"
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft -mno-unaligned-access",
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "aarch64r_be_soft_nofp_exn_rtti",
             "json": "aarch64r_be_soft_nofp_exn_rtti.json",
-            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft"
+            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft",
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "aarch64r_be_soft_nofp",
             "json": "aarch64r_be_soft_nofp.json",
-            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft"
+            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft",
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "armv4t_exn_rtti",
