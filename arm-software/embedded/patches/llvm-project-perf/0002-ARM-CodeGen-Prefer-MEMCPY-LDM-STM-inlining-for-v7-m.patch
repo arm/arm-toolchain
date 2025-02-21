@@ -1,8 +1,14 @@
-From 411bab1ff439215c060127b6a5188ed0c9ed5d65 Mon Sep 17 00:00:00 2001
-From: Vrukesh V Panse <vrukesh.panse@arm.com>
-Date: Thu, 2 Jan 2025 10:29:56 +0000
-Subject: [NFC]: Update the patch file with upstream changes of SelectionDAG
+From 56b1d9becf044649a759129b986de71cc43b4c29 Mon Sep 17 00:00:00 2001
+From: Scott Douglass <scott.douglass@arm.com>
+Date: Tue, 13 Aug 2024 10:55:51 +0100
+Subject: [ARM][CodeGen]Prefer MEMCPY LDM/STM inlining for v7-m
 
+This patch changes the behaviour of memcpy inlining on v7m targets.
+The old behaviour was to inline memcpys with LDM/STM instructions.
+Alternatively, using LD/ST instructions for memcpy inlining allowed
+for performance gains of 1% to 2% on selected benchmarks.
+
+Co-authored-by: Nashe Mncube <nashe.mncube@arm.com>
 ---
  llvm/lib/Target/ARM/ARMSelectionDAGInfo.cpp | 120 +++++++++++++++
  llvm/lib/Target/ARM/ARMSelectionDAGInfo.h   |   6 +
@@ -340,5 +346,5 @@ index 000000000000..e549958494dc
 +  ret void
 +}
 -- 
-2.34.1
+2.43.0
 
