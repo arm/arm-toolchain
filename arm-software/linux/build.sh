@@ -423,6 +423,26 @@ main() {
     echo_bold "Executed build stages."
     echo_bold "Packaging...."
     package
+    echo_bold "Packaged."
+    echo_bold "Preparing compilers.yaml..."
+    cat <<SPACK_EOF >$OUTPUT_DIR/compilers.yaml
+compilers:
+- compiler:
+    spec: arm@=${ATFL_VERSION}
+    paths:
+      cc: ${ATFL_DIR}/bin/armclang
+      cxx: ${ATFL_DIR}/bin/armclang++
+      f77: ${ATFL_DIR}/bin/armflang
+      fc: ${ATFL_DIR}/bin/armflang
+    flags:
+      cflags: -Wno-error=implicit-function-declaration
+      cxxflags: -Wno-error=implicit-function-declaration
+    operating_system: $(source /etc/os-release && echo ${ID}${VERSION_ID})
+    target: $(uname -m)
+    modules: []
+    environment: {}
+    extra_rpaths: []
+SPACK_EOF
     echo_bold "Done."
 }
 
