@@ -3263,6 +3263,10 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
     case Builtin::BI__builtin_sincosf16:
     case Builtin::BI__builtin_sincosl:
     case Builtin::BI__builtin_sincosf128:
+      /* Downstream change: #87 (sincos vectorization)*/
+      if (Builder.getIsFPConstrained())
+        break; // TODO: Emit constrained sincos intrinsic once one exists.
+      /* Downstream change: #87 (sincos vectorization)*/
       emitSincosBuiltin(*this, E, Intrinsic::sincos);
       return RValue::get(nullptr);
 

@@ -1,5 +1,6 @@
 // RUN: %clang_cc1 -triple=aarch64-gnu-linux -emit-llvm -O1 %s -o - | FileCheck --check-prefix=NO-MATH-ERRNO %s
 // RUN: %clang_cc1 -triple=aarch64-gnu-linux -emit-llvm -fmath-errno %s -o - | FileCheck --check-prefix=MATH-ERRNO %s
+// RUN: %clang_cc1 -triple=aarch64-gnu-linux -emit-llvm -ffp-exception-behavior=strict %s -o - | FileCheck --check-prefix=STRICT-FP %s
 
 void sincos(double, double*, double*);
 void sincosf(float, float*, float*);
@@ -14,6 +15,9 @@ void sincosl(long double, long double*, long double*);
 //
 // MATH-ERRNO-LABEL: @sincos_f32
 //      MATH-ERRNO:    call void @sincosf(
+//
+// STRICT-FP-LABEL: @sincos_f32
+//      STRICT-FP:    call void @sincosf(
 //
 void sincos_f32(float x, float* fp0, float* fp1) {
   sincosf(x, fp0, fp1);
@@ -43,6 +47,9 @@ void sincos_builtin_f32(float x, float* fp0, float* fp1) {
 // MATH-ERRNO-LABEL: @sincos_f64
 //      MATH-ERRNO:    call void @sincos(
 //
+// STRICT-FP-LABEL: @sincos_f64
+//      STRICT-FP:    call void @sincos(
+//
 void sincos_f64(double x, double* dp0, double* dp1) {
   sincos(x, dp0, dp1);
 }
@@ -70,6 +77,9 @@ void sincos_builtin_f64(double x, double* dp0, double* dp1) {
 //
 // MATH-ERRNO-LABEL: @sincos_f128
 //      MATH-ERRNO:    call void @sincosl(
+//
+// STRICT-FP-LABEL: @sincos_f128
+//      STRICT-FP:    call void @sincosl(
 //
 void sincos_f128(long double x, long double* ldp0, long double* ldp1) {
   sincosl(x, ldp0, ldp1);
