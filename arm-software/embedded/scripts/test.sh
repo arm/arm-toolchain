@@ -15,5 +15,10 @@ set -ex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C ${SCRIPT_DIR} rev-parse --show-toplevel )
 
+# In order to get results for all variants, ignore any failures
+# in the individual library tests. --ignore-fail only works with
+# lit based tests.
+export LIT_OPTS="--ignore-fail"
+
 cd ${REPO_ROOT}/build
-ninja check-llvm-toolchain
+ninja check-all check-llvm-toolchain check-cxxabi check-unwind check-package-llvm-toolchain
