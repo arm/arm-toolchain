@@ -187,12 +187,12 @@
         {
             "variant": "armebv7a_soft_nofp_exn_rtti",
             "json": "armebv7a_soft_nofp_exn_rtti.json",
-            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none -mno-unaligned-access"
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none"
         },
         {
             "variant": "armebv7a_soft_nofp",
             "json": "armebv7a_soft_nofp.json",
-            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv7a_hard_vfpv3_d16_exn_rtti_unaligned",
@@ -217,12 +217,12 @@
         {
             "variant": "armebv7a_hard_vfpv3_d16_exn_rtti",
             "json": "armebv7a_hard_vfpv3_d16_exn_rtti.json",
-            "flags": "--target=armebv7-unknown-none-eabihf -mfpu=vfpv3-d16 -mno-unaligned-access"
+            "flags": "--target=armebv7-unknown-none-eabihf -mfpu=vfpv3-d16"
         },
         {
             "variant": "armebv7a_hard_vfpv3_d16",
             "json": "armebv7a_hard_vfpv3_d16.json",
-            "flags": "--target=armebv7-unknown-none-eabihf -mfpu=vfpv3-d16 -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=armebv7-unknown-none-eabihf -mfpu=vfpv3-d16 -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv7a_soft_vfpv3_d16_exn_rtti_unaligned",
@@ -247,12 +247,12 @@
         {
             "variant": "armebv7a_soft_vfpv3_d16_exn_rtti",
             "json": "armebv7a_soft_vfpv3_d16_exn_rtti.json",
-            "flags": "--target=armebv7-unknown-none-eabi -mfpu=vfpv3-d16 -mno-unaligned-access"
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=vfpv3-d16"
         },
         {
             "variant": "armebv7a_soft_vfpv3_d16",
             "json": "armebv7a_soft_vfpv3_d16.json",
-            "flags": "--target=armebv7-unknown-none-eabi -mfpu=vfpv3-d16 -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=vfpv3-d16 -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv7r_soft_nofp_exn_rtti_unaligned",
