@@ -2884,9 +2884,11 @@ LoopVectorizationCostModel::getVectorIntrinsicCost(CallInst *CI,
                  std::back_inserter(ParamTys),
                  [&](Type *Ty) { return maybeVectorizeType(Ty, VF); });
 
+  /* Downstream change: #87 (sincos vectorization)*/
   IntrinsicCostAttributes CostAttrs(ID, RetTy, Arguments, ParamTys, FMF,
                                     dyn_cast<IntrinsicInst>(CI),
                                     InstructionCost::getInvalid(), TLI);
+  /* End downstream change: #87 */
   return TTI.getIntrinsicInstrCost(CostAttrs, CostKind);
 }
 

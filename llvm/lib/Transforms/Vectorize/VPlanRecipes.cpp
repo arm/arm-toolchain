@@ -1149,10 +1149,12 @@ InstructionCost VPWidenIntrinsicRecipe::computeCost(ElementCount VF,
 
   // TODO: Rework TTI interface to avoid reliance on underlying IntrinsicInst.
   FastMathFlags FMF = hasFastMathFlags() ? getFastMathFlags() : FastMathFlags();
+  /* Downstream change: #87 (sincos vectorization)*/
   IntrinsicCostAttributes CostAttrs(
       VectorIntrinsicID, RetTy, Arguments, ParamTys, FMF,
       dyn_cast_or_null<IntrinsicInst>(getUnderlyingValue()),
       InstructionCost::getInvalid(), &Ctx.TLI);
+  /* End downstream change: #87 */
   return Ctx.TTI.getIntrinsicInstrCost(CostAttrs, Ctx.CostKind);
 }
 

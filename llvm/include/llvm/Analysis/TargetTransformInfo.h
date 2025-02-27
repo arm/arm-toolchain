@@ -126,13 +126,17 @@ class IntrinsicCostAttributes {
   // If ScalarizationCost is UINT_MAX, the cost of scalarizing the
   // arguments and the return value will be computed based on types.
   InstructionCost ScalarizationCost = InstructionCost::getInvalid();
+  /* Downstream change: #87 (sincos vectorization)*/
   TargetLibraryInfo const *LibInfo = nullptr;
+  /* End downstream change: #87 */
 
 public:
+  /* Downstream change: #87 (sincos vectorization)*/
   IntrinsicCostAttributes(
       Intrinsic::ID Id, const CallBase &CI,
       InstructionCost ScalarCost = InstructionCost::getInvalid(),
       bool TypeBasedOnly = false, TargetLibraryInfo const *LibInfo = nullptr);
+  /* End downstream change: #87 */
 
   IntrinsicCostAttributes(
       Intrinsic::ID Id, Type *RTy, ArrayRef<Type *> Tys,
@@ -142,12 +146,14 @@ public:
   IntrinsicCostAttributes(Intrinsic::ID Id, Type *RTy,
                           ArrayRef<const Value *> Args);
 
+  /* Downstream change: #87 (sincos vectorization)*/
   IntrinsicCostAttributes(
       Intrinsic::ID Id, Type *RTy, ArrayRef<const Value *> Args,
       ArrayRef<Type *> Tys, FastMathFlags Flags = FastMathFlags(),
       const IntrinsicInst *I = nullptr,
       InstructionCost ScalarCost = InstructionCost::getInvalid(),
       TargetLibraryInfo const *LibInfo = nullptr);
+  /* End downstream change: #87 */
 
   Intrinsic::ID getID() const { return IID; }
   const IntrinsicInst *getInst() const { return II; }
@@ -156,7 +162,10 @@ public:
   InstructionCost getScalarizationCost() const { return ScalarizationCost; }
   const SmallVectorImpl<const Value *> &getArgs() const { return Arguments; }
   const SmallVectorImpl<Type *> &getArgTypes() const { return ParamTys; }
+
+  /* Downstream change: #87 (sincos vectorization)*/
   const TargetLibraryInfo *getLibInfo() const { return LibInfo; }
+  /* End downstream change: #87 */
 
   bool isTypeBasedOnly() const {
     return Arguments.empty();

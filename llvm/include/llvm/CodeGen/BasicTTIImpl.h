@@ -286,6 +286,7 @@ private:
     return false;
   }
 
+  /* Downstream change: #87 (sincos vectorization)*/
   /// Several intrinsics that return structs (including llvm.sincos[pi] and
   /// llvm.modf) can be lowered to a vector library call (for certain VFs). The
   /// vector library functions correspond to the scalar calls (e.g. sincos or
@@ -343,6 +344,7 @@ private:
     }
     return Cost;
   }
+  /* End downstream change: #87 */
 
 protected:
   explicit BasicTTIImplBase(const TargetMachine *TM, const DataLayout &DL)
@@ -1775,8 +1777,10 @@ public:
 
     Type *RetTy = ICA.getReturnType();
 
+    /* Downstream change: #87 (sincos vectorization)*/
     ElementCount RetVF = isVectorizedTy(RetTy) ? getVectorizedTypeVF(RetTy)
                                                : ElementCount::getFixed(1);
+    /* End downstream change: #87 */
 
     const IntrinsicInst *I = ICA.getInst();
     const SmallVectorImpl<const Value *> &Args = ICA.getArgs();
@@ -2030,6 +2034,7 @@ public:
     }
     case Intrinsic::experimental_vector_match:
       return thisT()->getTypeBasedIntrinsicInstrCost(ICA, CostKind);
+      /* Downstream change: #87 (sincos vectorization)*/
     case Intrinsic::sincos: {
       Type *Ty = getContainedTypes(RetTy).front();
       EVT VT = getTLI()->getValueType(DL, Ty);
@@ -2040,6 +2045,7 @@ public:
       // Otherwise, fallback to default scalarization cost.
       break;
     }
+      /* End downstream change: #87 */
     }
 
     // Assume that we need to scalarize this intrinsic.)
@@ -2048,6 +2054,7 @@ public:
     InstructionCost ScalarizationCost = InstructionCost::getInvalid();
     if (RetVF.isVector() && !RetVF.isScalable()) {
       ScalarizationCost = 0;
+      /* Downstream change: #87 (sincos vectorization)*/
       if (!RetTy->isVoidTy()) {
         for (Type *VectorTy : getContainedTypes(RetTy)) {
           ScalarizationCost += getScalarizationOverhead(
@@ -2055,6 +2062,7 @@ public:
               /*Insert=*/true, /*Extract=*/false, CostKind);
         }
       }
+      /* End downstream change: #87 */
       ScalarizationCost +=
           getOperandsScalarizationOverhead(Args, ICA.getArgTypes(), CostKind);
     }
@@ -2709,6 +2717,7 @@ public:
     // Else, assume that we need to scalarize this intrinsic. For math builtins
     // this will emit a costly libcall, adding call overhead and spills. Make it
     // very expensive.
+    /* Downstream change: #87 (sincos vectorization)*/
     if (isVectorizedTy(RetTy)) {
       ArrayRef<Type *> RetVTys = getContainedTypes(RetTy);
 
@@ -2735,6 +2744,7 @@ public:
         ScalarTys.push_back(Ty);
       }
       IntrinsicCostAttributes Attrs(IID, toScalarizedTy(RetTy), ScalarTys, FMF);
+      /* End downstream change: #87 */
       InstructionCost ScalarCost =
           thisT()->getIntrinsicInstrCost(Attrs, CostKind);
       for (Type *Ty : Tys) {

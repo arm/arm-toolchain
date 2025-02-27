@@ -44,10 +44,12 @@ static cl::opt<bool> TypeBasedIntrinsicCost("type-based-intrinsic-cost",
     cl::desc("Calculate intrinsics cost based only on argument types"),
     cl::init(false));
 
+/* Downstream change: #87 (sincos vectorization)*/
 static cl::opt<bool> PreferIntrinsicCost(
     "prefer-intrinsic-cost",
     cl::desc("Prefer using getIntrinsicInstrCost over getInstructionCost"),
     cl::init(false));
+/* End downstream change: #87 */
 
 #define CM_NAME "cost-model"
 #define DEBUG_TYPE CM_NAME
@@ -55,6 +57,7 @@ static cl::opt<bool> PreferIntrinsicCost(
 PreservedAnalyses CostModelPrinterPass::run(Function &F,
                                             FunctionAnalysisManager &AM) {
   auto &TTI = AM.getResult<TargetIRAnalysis>(F);
+  // Downstream change: #87 (sincos vectorization)
   auto &TLI = AM.getResult<TargetLibraryAnalysis>(F);
   OS << "Printing analysis 'Cost Model Analysis' for function '" << F.getName() << "':\n";
   for (BasicBlock &B : F) {
@@ -63,12 +66,14 @@ PreservedAnalyses CostModelPrinterPass::run(Function &F,
       // which cost kind to print.
       InstructionCost Cost;
       auto *II = dyn_cast<IntrinsicInst>(&Inst);
+      /* Downstream change: #87 (sincos vectorization)*/
       if (II && (PreferIntrinsicCost || TypeBasedIntrinsicCost)) {
         IntrinsicCostAttributes ICA(
             II->getIntrinsicID(), *II, InstructionCost::getInvalid(),
             /*TypeBasedOnly=*/TypeBasedIntrinsicCost, &TLI);
         Cost = TTI.getIntrinsicInstrCost(ICA, CostKind);
       } else {
+        /* End downstream change: #87 */
         Cost = TTI.getInstructionCost(&Inst, CostKind);
       }
 
