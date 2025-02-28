@@ -35,6 +35,7 @@ ATFL_VERSION=${ATFL_VERSION:-"0.0"}
 OS_NAME=${OS_NAME:-"linux"}
 TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-aarch64.tar.gz"}
 ATFL_ASSERTIONS=${ATFL_ASSERTIONS:-"ON"}
+ATFL_TARGET_TRIPLE=${ATFL_TARGET_TRIPLE:-"aarch64-unknown-linux-gnu"}
 PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
 PARALLEL_JOBS=${PARALLEL_JOBS:-"${PROCESSOR_COUNT}"}
 # " <-- this is to help syntax highlighters to find a matching double quote
@@ -58,6 +59,7 @@ COMMON_CMAKE_FLAGS=(
     -DLLVM_ENABLE_PLUGINS=ON
     -DLLVM_TOOL_LIBUNWIND_BUILD=ON
     -DLLVM_TARGETS_TO_BUILD=AArch64
+    -DLLVM_DEFAULT_TARGET_TRIPLE=${ATFL_TARGET_TRIPLE}
     -DZLIB_LIBRARY_RELEASE=${ZLIB_STATIC_PATH}
 )
 PRODUCT_CMAKE_FLAGS=(
@@ -94,7 +96,7 @@ COMPILER_CMAKE_FLAGS=(
     -DCOMPILER_RT_BUILD_STANDALONE_LIBATOMIC=OFF
     -DCOMPILER_RT_USE_ATOMIC_LIBRARY=ON
     -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF
-    -DCOMPILER_RT_LIBRARY_atomic_aarch64-unknown-linux-gnu="-rtlib=compiler-rt"
+    -DCOMPILER_RT_LIBRARY_atomic_${ATFL_TARGET_TRIPLE}="-rtlib=compiler-rt"
     -DLIBOMP_COPY_EXPORTS=False
     -DLIBOMP_USE_HWLOC=False
     -DLIBOMP_OMPT_SUPPORT=ON
@@ -191,6 +193,8 @@ Environment Variables:
                         (default: $ATFL_ASSERTIONS)
     ATFL_VERSION        Specify the version string
                         (default: $ATFL_VERSION)
+    ATFL_TARGET_TRIPLE  Specify the default target triple
+                        (default: $ATFL_TARGET_TRIPLE)
     OS_NAME             Specify the OS name
                         (default: $OS_NAME)
     TAR_NAME            The name of the tarball to be created
@@ -358,12 +362,12 @@ shared_lib_build() {
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
     mv "${ATFL_DIR}" "${ATFL_DIR}.libs"
     mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
-    cp "${ATFL_DIR}.libs/lib/aarch64-unknown-linux-gnu/libomp.a" \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+    cp "${ATFL_DIR}.libs/lib/${ATFL_TARGET_TRIPLE}/libomp.a" \
+        "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     cp -d ${ATFL_DIR}.libs/lib/libFortranDecimal.so* \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+        "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     cp -d ${ATFL_DIR}.libs/lib/libFortranRuntime.so* \
-        "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+        "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
@@ -382,14 +386,14 @@ package() {
       echo "The Amath libraries will not be packaged."
     else
       cp "${LIBRARIES_DIR}/libamath.a" \
-          "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+          "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
       cp "${LIBRARIES_DIR}/libamath.so" \
-          "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+          "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     fi
     cp "${ATFL_DIR}/lib/libFortranDecimal.a" \
-      "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+      "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     cp "${ATFL_DIR}/lib/libFortranRuntime.a" \
-      "${ATFL_DIR}/lib/aarch64-unknown-linux-gnu"
+      "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     cp ${ATFL_DIR}/include/flang/omp* "${ATFL_DIR}/include"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
     echo "export PS1=\"(ATfL ${ATFL_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
