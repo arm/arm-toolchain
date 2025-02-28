@@ -154,6 +154,8 @@ The `build.sh` script reads the following environment variables:
   (default: ON), set this to `OFF` when doing a proper release (not nightly) build
 - `ATFL_TARGET_TRIPLE` - Specify the default target triple
   (default: aarch64-unknown-linux-gnu), Set it to aarch64-amazon-linux when building for Amazon Linux
+- `OS_NAME` - Specify the OS name
+  (default: `linux`), this name will be used as a part of the output tarball name (if not overwritten by `TAR_NAME`)
 - `TAR_NAME` - The name of the tarball to be created
   (default: atfl-0.0-linux-aarch64.tar.gz)
 - `ZLIB_STATIC_PATH` - Specifies the location of the static zlib library (libz.a)
