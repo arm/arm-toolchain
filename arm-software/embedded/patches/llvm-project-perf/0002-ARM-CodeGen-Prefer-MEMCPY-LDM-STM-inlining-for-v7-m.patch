@@ -1,4 +1,4 @@
-From 56b1d9becf044649a759129b986de71cc43b4c29 Mon Sep 17 00:00:00 2001
+From 23be49e6a7b89ff4d831afb812c371a3610d0643 Mon Sep 17 00:00:00 2001
 From: Scott Douglass <scott.douglass@arm.com>
 Date: Tue, 13 Aug 2024 10:55:51 +0100
 Subject: [ARM][CodeGen]Prefer MEMCPY LDM/STM inlining for v7-m
@@ -346,5 +346,5 @@ index 000000000000..e549958494dc
 +  ret void
 +}
 -- 
-2.43.0
+2.47.1
 
