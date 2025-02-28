@@ -1,4 +1,4 @@
-From 3c25466248617c03c4db62504b226f82b568be5e Mon Sep 17 00:00:00 2001
+From aa109995a14c1f83b47fc0999c90539112cc471e Mon Sep 17 00:00:00 2001
 From: Volodymyr Turanskyy <volodymyr.turanskyy@arm.com>
 Date: Thu, 19 Dec 2024 12:01:58 +0000
 Subject: [PATCH] Revert order of libraries and update tests
@@ -11,10 +11,10 @@ Subject: [PATCH] Revert order of libraries and update tests
  4 files changed, 22 insertions(+), 23 deletions(-)
 
 diff --git a/clang/lib/Driver/ToolChains/BareMetal.cpp b/clang/lib/Driver/ToolChains/BareMetal.cpp
-index eecaaa9a4293..7d07079b5dd4 100644
+index ffb1c6e34d60..6df60270bd74 100644
 --- a/clang/lib/Driver/ToolChains/BareMetal.cpp
 +++ b/clang/lib/Driver/ToolChains/BareMetal.cpp
-@@ -491,9 +491,8 @@ void baremetal::Linker::ConstructJob(Compilation &C, const JobAction &JA,
+@@ -498,9 +498,8 @@ void baremetal::Linker::ConstructJob(Compilation &C, const JobAction &JA,
    }
  
    if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nodefaultlibs)) {
@@ -238,5 +238,5 @@ index 6d6255ef5970..08c49a1beec0 100644
  
  // Check that compiler-rt library without the arch filename suffix will
 -- 
-2.47.0
+2.34.1
 

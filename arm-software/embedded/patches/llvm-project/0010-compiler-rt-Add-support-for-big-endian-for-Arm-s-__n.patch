@@ -1,0 +1,36 @@
+From 2c5da3adea204dc5e6fe4d990a34571a04e9ecb4 Mon Sep 17 00:00:00 2001
+From: Victor Campos <victor.campos@arm.com>
+Date: Mon, 17 Feb 2025 11:43:36 +0000
+Subject: [compiler-rt] Add support for big endian for Arm's __negdf2vfp
+ (#127096)
+
+In soft floating-point ABI, this function takes the double argument as a
+pair of registers r0 and r1.
+
+The ordering of these two registers follow the endianness rules,
+therefore the register on which the bit flipping must happen depends on
+the endianness.
+---
+ compiler-rt/lib/builtins/arm/negdf2vfp.S | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/compiler-rt/lib/builtins/arm/negdf2vfp.S b/compiler-rt/lib/builtins/arm/negdf2vfp.S
+index b7cf91877e38..329c6de757f6 100644
+--- a/compiler-rt/lib/builtins/arm/negdf2vfp.S
++++ b/compiler-rt/lib/builtins/arm/negdf2vfp.S
+@@ -20,7 +20,11 @@ DEFINE_COMPILERRT_FUNCTION(__negdf2vfp)
+ #if defined(COMPILER_RT_ARMHF_TARGET)
+ 	vneg.f64 d0, d0
+ #else
+-	eor	r1, r1, #-2147483648	// flip sign bit on double in r0/r1 pair
++#if _YUGA_BIG_ENDIAN
++	eor	r0, r0, #0x80000000	// flip sign bit on double in r0/r1 pair
++#else
++	eor	r1, r1, #0x80000000	// flip sign bit on double in r0/r1 pair
++#endif
+ #endif
+ 	bx	lr
+ END_COMPILERRT_FUNCTION(__negdf2vfp)
+-- 
+2.34.1
+

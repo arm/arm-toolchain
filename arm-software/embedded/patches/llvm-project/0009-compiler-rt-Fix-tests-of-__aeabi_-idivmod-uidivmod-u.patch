@@ -1,0 +1,131 @@
+From 25f3995ae6fd70a1eb0fb804229ecb5848137f96 Mon Sep 17 00:00:00 2001
+From: Victor Campos <victor.campos@arm.com>
+Date: Tue, 11 Feb 2025 09:49:56 +0000
+Subject: [compiler-rt] Fix tests of __aeabi_(idivmod|uidivmod|uldivmod) to
+ support big endian (#126277)
+
+This patch makes these functions' tests work in big endian mode:
+ - `__aeabi_idivmod`.
+ - `__aeabi_uidivmod`.
+ -  `__aeabi_uldivmod`.
+
+The three functions return a struct containing two fields, quotient and
+remainder, via *value in regs* calling convention. They differ in the
+integer type of each field.
+
+In the tests of the first two, a 64-bit integer is used as the return
+type of the call. And as consequence of the ABI rules for structs
+(Composite Types), the quotient resides in `r0` and the remainder in
+`r1` regardless of endianness. So, in order to access each component
+from the 64-bit integer in the caller code, care must be taken to access
+the correct bits as they do depend on endianness in this case.
+
+In the test of the third one, the caller code has inline assembly to
+access the components. This assembly code assumed little endian, so it
+had to be made flexible for big endian as well.
+
+`_YUGA_BIG_ENDIAN` is defined in `int_endianness.h`. It's a macro
+internal to compiler-rt that's in theory compatible with more toolchains
+than gcc and clang.
+---
+ .../builtins/Unit/arm/aeabi_idivmod_test.c    | 11 +++++++++
+ .../builtins/Unit/arm/aeabi_uidivmod_test.c   | 11 +++++++++
+ .../builtins/Unit/arm/aeabi_uldivmod_test.c   | 23 ++++++++++++++++---
+ 3 files changed, 42 insertions(+), 3 deletions(-)
+
+diff --git a/compiler-rt/test/builtins/Unit/arm/aeabi_idivmod_test.c b/compiler-rt/test/builtins/Unit/arm/aeabi_idivmod_test.c
+index ff767d754eb9..e4953bf51b03 100644
+--- a/compiler-rt/test/builtins/Unit/arm/aeabi_idivmod_test.c
++++ b/compiler-rt/test/builtins/Unit/arm/aeabi_idivmod_test.c
+@@ -14,8 +14,19 @@ int test__aeabi_idivmod(si_int a, si_int b,
+ {
+ 	  si_int rem;
+     du_int ret = __aeabi_idivmod(a, b);
++    // __aeabi_idivmod actually returns a struct { quotient; remainder; } using
++    // value_in_regs calling convention. Due to the ABI rules, struct fields
++    // come in the same order regardless of endianness. However since the
++    // result is received here as a 64-bit integer, in which endianness does
++    // matter, the position of each component (quotient and remainder) varies
++    // depending on endianness.
++#  if _YUGA_BIG_ENDIAN
++    rem = ret & 0xFFFFFFFF;
++    si_int result = ret >> 32;
++#  else
+     rem = ret >> 32;
+     si_int result = ret & 0xFFFFFFFF;
++#  endif
+     if (result != expected_result) {
+         printf("error in __aeabi_idivmod: %d / %d = %d, expected %d\n",
+                a, b, result, expected_result);
+diff --git a/compiler-rt/test/builtins/Unit/arm/aeabi_uidivmod_test.c b/compiler-rt/test/builtins/Unit/arm/aeabi_uidivmod_test.c
+index de5a43d5b814..a507267c4460 100644
+--- a/compiler-rt/test/builtins/Unit/arm/aeabi_uidivmod_test.c
++++ b/compiler-rt/test/builtins/Unit/arm/aeabi_uidivmod_test.c
+@@ -13,8 +13,19 @@ int test__aeabi_uidivmod(su_int a, su_int b,
+ 						su_int expected_result, su_int expected_rem)
+ {
+     du_int ret = __aeabi_uidivmod(a, b);
++    // __aeabi_uidivmod actually returns a struct { quotient; remainder; }
++    // using value_in_regs calling convention. Due to the ABI rules, struct
++    // fields come in the same order regardless of endianness. However since
++    // the result is received here as a 64-bit integer, in which endianness
++    // does matter, the position of each component (quotient and remainder)
++    // varies depending on endianness.
++#  if _YUGA_BIG_ENDIAN
++    su_int rem = ret & 0xFFFFFFFF;
++    si_int result = ret >> 32;
++#  else
+     su_int rem = ret >> 32;
+     si_int result = ret & 0xFFFFFFFF;
++#  endif
+ 
+     if (result != expected_result) {
+         printf("error in __aeabi_uidivmod: %u / %u = %u, expected %u\n",
+diff --git a/compiler-rt/test/builtins/Unit/arm/aeabi_uldivmod_test.c b/compiler-rt/test/builtins/Unit/arm/aeabi_uldivmod_test.c
+index 98611a75e85f..2c04061a2ef6 100644
+--- a/compiler-rt/test/builtins/Unit/arm/aeabi_uldivmod_test.c
++++ b/compiler-rt/test/builtins/Unit/arm/aeabi_uldivmod_test.c
+@@ -14,20 +14,37 @@ COMPILER_RT_ABI void /* __value_in_regs */ __aeabi_uldivmod(du_int a, du_int b);
+ int test_aeabi_uldivmod(du_int a, du_int b, du_int expected_q, du_int expected_r)
+ {
+     du_int q, r;
++    // __aeabi_uldivmod returns a struct { quotient; remainder; } using
++    // value_in_regs calling convention. Each field is a 64-bit integer, so the
++    // quotient resides in r0 and r1, while the remainder in r2 and r3. The
++    // byte order however depends on the endianness.
+     __asm__(
++#  if _YUGA_BIG_ENDIAN
++        "movs r1, %Q[a] \n"
++        "movs r0, %R[a] \n"
++        "movs r3, %Q[b] \n"
++        "movs r2, %R[b] \n"
++#  else
+         "movs r0, %Q[a] \n"
+         "movs r1, %R[a] \n"
+         "movs r2, %Q[b] \n"
+         "movs r3, %R[b] \n"
++#  endif
+         "bl __aeabi_uldivmod \n"
++#  if _YUGA_BIG_ENDIAN
++        "movs %Q[q], r1\n"
++        "movs %R[q], r0\n"
++        "movs %Q[r], r3\n"
++        "movs %R[r], r2\n"
++#  else
+         "movs %Q[q], r0\n"
+         "movs %R[q], r1\n"
+         "movs %Q[r], r2\n"
+         "movs %R[r], r3\n"
+-        : [q] "=r" (q), [r] "=r"(r)
++#  endif
++        : [q] "=r"(q), [r] "=r"(r)
+         : [a] "r"(a), [b] "r"(b)
+-        : "lr", "r0", "r1", "r2", "r3"
+-        );
++        : "lr", "r0", "r1", "r2", "r3");
+     if (q != expected_q || r != expected_r)
+         printf("error in aeabi_uldivmod: %llX / %llX = %llX, R = %llX, expected %llX, %llX\n",
+                a, b, q, r, expected_q, expected_r);
+-- 
+2.34.1
+

@@ -1,0 +1,96 @@
+From 2bd9e642a2f585b9042b3b472ddb387c838a94d6 Mon Sep 17 00:00:00 2001
+From: Simon Tatham <simon.tatham@arm.com>
+Date: Fri, 21 Feb 2025 09:08:53 +0000
+Subject: [libcxx] Work around picolibc argv handling in tests. (#127662)
+
+This fixes some test failures when the libcxx tests are run against an
+up-to-date picolibc on embedded Arm, because those tests depend on an
+unsupported locale but the `hasAnyLocale` preliminary check wrongly
+concluded that the locale _was_ supported.
+
+`hasAnyLocale` passes a set of locale strings to a test program via the
+command line, and checks if the libc under test reports that any of the
+locales can be successfully set via setlocale(). In some invocations one
+of the locale names contains a space, e.g. the Windows-style locale name
+"English_United States.1252".
+
+Unfortunately picolibc's crt0, when running under Arm semihosting,
+fetches the single command string from the host and then splits it up at
+spaces without implementing any kind of quoting. So it simply isn't
+possible to get a space into an argv word. As a result, we end up
+testing for the locale (in this example) "English_United". In up-to-date
+versions of picolibc, this is actually accepted, since it contains no
+objectionable character set specification (or indeed any at all). So the
+lit check wrongly concludes that libc supports that locale, and enables
+some locale tests, which fail.
+
+This patch works around the issue entirely within `hasAnyLocale()`, by
+abandoning the use of argv completely, and instead encoding the list of
+locales to check as an array of strings inside the test program.
+---
+ libcxx/utils/libcxx/test/dsl.py | 31 ++++++++++++++++++++++++-------
+ 1 file changed, 24 insertions(+), 7 deletions(-)
+
+diff --git a/libcxx/utils/libcxx/test/dsl.py b/libcxx/utils/libcxx/test/dsl.py
+index 7ff4be0ee7cf..9a97e61efbe7 100644
+--- a/libcxx/utils/libcxx/test/dsl.py
++++ b/libcxx/utils/libcxx/test/dsl.py
+@@ -9,7 +9,6 @@
+ import os
+ import pickle
+ import platform
+-import shlex
+ import shutil
+ import tempfile
+ 
+@@ -274,23 +273,41 @@ def hasAnyLocale(config, locales):
+     %{exec} -- this means that the command may be executed on a remote host
+     depending on the %{exec} substitution.
+     """
+-    program = """
++
++    # Convert the locale names into C string literals. We expect all currently
++    # known locale names to be printable ASCII and not contain awkward
++    # characters like \ or ", so this should be trivial.
++    assert all(
++        0x20 <= ord(ch) <= 0x7E and ch not in {'"', "\\"}
++        for locale in locales
++        for ch in locale
++    )
++    name_string_literals = ", ".join('"' + locale + '"' for locale in locales)
++
++    program = (
++        """
+     #include <stddef.h>
+     #if defined(_LIBCPP_VERSION) && !_LIBCPP_HAS_LOCALIZATION
+       int main(int, char**) { return 1; }
+     #else
+       #include <locale.h>
+-      int main(int argc, char** argv) {
+-        for (int i = 1; i < argc; i++) {
+-          if (::setlocale(LC_ALL, argv[i]) != NULL) {
++      static const char *const test_locale_names[] = {
++          """
++        + name_string_literals
++        + """, nullptr,
++      };
++      int main() {
++        for (size_t i = 0; test_locale_names[i]; i++) {
++          if (::setlocale(LC_ALL, test_locale_names[i]) != NULL) {
+             return 0;
+           }
+         }
+         return 1;
+       }
+     #endif
+-  """
+-    return programSucceeds(config, program, args=[shlex.quote(l) for l in locales])
++    """
++    )
++    return programSucceeds(config, program)
+ 
+ 
+ @_memoizeExpensiveOperation(lambda c, flags="": (c.substitutions, c.environment, flags))
+-- 
+2.34.1
+
