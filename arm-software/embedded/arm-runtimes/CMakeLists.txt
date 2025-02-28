@@ -369,11 +369,14 @@ if(C_LIBRARY STREQUAL picolibc)
     # and flags e.g. 'path/to/clang', '--target=armv6m-none-eabi',
     # '-march=armv6m'
     set(picolibc_flags "${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX} ${lib_compile_flags}")
+    set(picolibcpp_flags "${LLVM_BINARY_DIR}/bin/clang++${CMAKE_EXECUTABLE_SUFFIX} ${lib_compile_flags}")
     if(CMAKE_C_COMPILER_LAUNCHER)
         set(picolibc_flags "${CMAKE_C_COMPILER_LAUNCHER} ${picolibc_flags}")
     endif()
     separate_arguments(picolibc_flags)
+    separate_arguments(picolibcpp_flags)
     to_meson_list("${picolibc_flags}" picolibc_meson_flags)
+    to_meson_list("${picolibcpp_flags}" picolibcpp_meson_flags)
 
     if(ENABLE_LIBC_TESTS)
         set(picolibc_test_executor_bin ${CMAKE_CURRENT_SOURCE_DIR}/test-support/picolibc-test-wrapper.py)
