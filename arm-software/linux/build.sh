@@ -33,9 +33,9 @@ INTERACTIVE=false
 RELEASE_FLAGS=${RELEASE_FLAGS:-"false"}
 ATFL_VERSION=${ATFL_VERSION:-"0.0"}
 OS_NAME=${OS_NAME:-"linux"}
-TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-aarch64.tar.gz"}
+TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-`uname -m`.tar.gz"}
 ATFL_ASSERTIONS=${ATFL_ASSERTIONS:-"ON"}
-ATFL_TARGET_TRIPLE=${ATFL_TARGET_TRIPLE:-"aarch64-unknown-linux-gnu"}
+ATFL_TARGET_TRIPLE=${ATFL_TARGET_TRIPLE:-"`uname -m`-unknown-linux-gnu"}
 PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
 PARALLEL_JOBS=${PARALLEL_JOBS:-"${PROCESSOR_COUNT}"}
 # " <-- this is to help syntax highlighters to find a matching double quote
@@ -45,7 +45,7 @@ STAGES=(
     "product_build"
     "shared_lib_build"
 )
-ZLIB_STATIC_PATH=${ZLIB_STATIC_PATH:-"/usr/lib/aarch64-linux-gnu/libz.a"}
+ZLIB_STATIC_PATH=${ZLIB_STATIC_PATH:-"/usr/lib/`uname -m`-linux-gnu/libz.a"}
 COMMON_CMAKE_FLAGS=(
     ${COMMON_CMAKE_FLAGS}
     -DLLVM_ENABLE_ZLIB=ON
