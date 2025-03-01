@@ -16,7 +16,6 @@ The following packages need to be installed (using `apt`):
 - `binutils-dev`
 - `build-essential`
 - `cmake`
-- `figlet`
 - `git`
 - `libzstd-dev`
 - `ninja-build`
@@ -39,7 +38,6 @@ The following packages need to be installed (using `apt`):
 - `binutils-devel`
 - `make`
 - `cmake`
-- `figlet`
 - `git`
 - `ninja-build`
 - `zlib-devel`
@@ -53,7 +51,14 @@ The following packages need to be installed (using `apt`):
 - `libmpc-devel`
 - `isl`
 - `isl-devel`
+- `perl-FindBin`
+- `perl-Hash-Util`
+- `perl-Hash-Util-FieldHash`
+- `perl-Sys-Hostname`
+- `perl-File-Copy`
 - `cpio`
+- `tar`
+- `gzip`
 
 #### Additionally, on older `.rpm`-based systems (RHEL8, CentOS8):
 
