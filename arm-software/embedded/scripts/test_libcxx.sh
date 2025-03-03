@@ -18,5 +18,11 @@ set -ex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C ${SCRIPT_DIR} rev-parse --show-toplevel )
 
+# If a test fails, lit will ordinarily return a non-zero result,
+# which prevents further testing. Setting the --ignore-fail flag
+# will cause testing to continue, so that CI systems can get a
+# full set of results.
+export LIT_OPTS="--ignore-fail"
+
 cd ${REPO_ROOT}/build
 ninja check-cxx
