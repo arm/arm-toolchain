@@ -1,4 +1,4 @@
-From 55004e55d9c29408500c1362fbf86a689d7ac2ee Mon Sep 17 00:00:00 2001
+From 9c2048aa841cafd80e0c6752cf6872a9d42e6eb3 Mon Sep 17 00:00:00 2001
 From: Steven Cooreman <steven.cooreman@gmail.com>
 Date: Tue, 18 Feb 2025 12:12:23 +0100
 Subject: [libc++] Do not guard inclusion of wchar.h with
@@ -25,6 +25,8 @@ top
 of a C library which doesn't provide `<wchar.h>` (since it would then
 still
 go look for `<uchar.h>` or error out).
+
+(cherry picked from commit 762001118c068317ec67274221497be2e6499c6a)
 ---
  libcxx/include/__mbstate_t.h | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
