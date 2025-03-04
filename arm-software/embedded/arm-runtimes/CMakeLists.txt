@@ -429,26 +429,28 @@ if(C_LIBRARY STREQUAL picolibc)
         # So reconfigure to enable tests at a later point.
         ExternalProject_Add_Step(
             picolibc
-            enable-tests
+            compile-tests
             COMMAND ${MESON_EXECUTABLE} setup -Dtests=true --reconfigure <BINARY_DIR> <SOURCE_DIR>
+            COMMAND ${MESON_EXECUTABLE} compile -C <BINARY_DIR>
             USES_TERMINAL TRUE
-            EXCLUDE_FROM_MAIN TRUE
         )
-        ExternalProject_Add_StepTargets(picolibc enable-tests)
+        ExternalProject_Add_StepTargets(picolibc compile-tests)
         ExternalProject_Add_StepDependencies(
             picolibc
-            enable-tests
+            compile-tests
             picolibc-build
             compiler_rt-install
         )
+
+        # Configure a script to run the picolibc tests in order
+        # to handle the return code.
+        ExternalProject_Get_property(picolibc BINARY_DIR)
+        configure_file(check-picolibc.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/check-picolibc.cmake)
+
         ExternalProject_Add_Step(
             picolibc
             check
-            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR>
-            COMMAND ${Python3_EXECUTABLE}
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-support/modify-picolibc-xml.py
-            --dir <BINARY_DIR>
-            --variant ${VARIANT}
+            COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/check-picolibc.cmake
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
@@ -457,7 +459,7 @@ if(C_LIBRARY STREQUAL picolibc)
         ExternalProject_Add_StepDependencies(
             picolibc
             check
-            picolibc-enable-tests
+            picolibc-compile-tests
         )
         add_dependencies(check-picolibc picolibc-check)
     endif()
