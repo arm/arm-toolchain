@@ -1,4 +1,4 @@
-From 119f253eb9c95c208cd55df4f2025e3d3904525b Mon Sep 17 00:00:00 2001
+From 73748307742ad7c866b45723eeecb8061514b57d Mon Sep 17 00:00:00 2001
 From: Victor Campos <victor.campos@arm.com>
 Date: Thu, 31 Oct 2024 14:03:58 +0000
 Subject: [libcxx] Remove xfails due to picolibc's support for char16_t and

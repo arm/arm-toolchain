@@ -1,4 +1,4 @@
-From 25f3995ae6fd70a1eb0fb804229ecb5848137f96 Mon Sep 17 00:00:00 2001
+From 98bf707741ce72e83eea3632417e884dfcf3b47a Mon Sep 17 00:00:00 2001
 From: Victor Campos <victor.campos@arm.com>
 Date: Tue, 11 Feb 2025 09:49:56 +0000
 Subject: [compiler-rt] Fix tests of __aeabi_(idivmod|uidivmod|uldivmod) to

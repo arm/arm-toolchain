@@ -1,0 +1,88 @@
+From 3f644811502c3047e6b0c830aba54324559494b5 Mon Sep 17 00:00:00 2001
+From: Victor Campos <victor.campos@arm.com>
+Date: Mon, 17 Feb 2025 10:10:35 +0000
+Subject: [LLD][ELF][ARM] Fix resolution of R_ARM_THM_JUMP8 and
+ R_ARM_THM_JUMP11 for big endian (#126933)
+
+These relocations apply to 16-bit Thumb instructions, so reading 16 bits
+rather than 32 bits ensures the correct bits are masked and written
+back. This fixes the incorrect masking and aligns the relocation logic
+with the instruction encoding.
+
+Before this patch, 32 bits were read from the ELF object. This did not
+align with the instruction size of 16 bits, but the masking incidentally
+made it all work nonetheless. However, this was the case only in little
+endian.
+
+In big endian mode, the read 32-bit word had to have its bytes reversed.
+With this byte reordering, the masking would be applied to the wrong
+bits, hence causing the incorrect encoding to be produced as a result of
+the relocation resolution.
+
+The added test checks the result for both little and big endian modes.
+---
+ lld/ELF/Arch/ARM.cpp              |  4 ++--
+ lld/test/ELF/arm-thumb-jump8-11.s | 32 +++++++++++++++++++++++++++++++
+ 2 files changed, 34 insertions(+), 2 deletions(-)
+ create mode 100644 lld/test/ELF/arm-thumb-jump8-11.s
+
+diff --git a/lld/ELF/Arch/ARM.cpp b/lld/ELF/Arch/ARM.cpp
+index 7d2953ddf64f..e667fdc0633c 100644
+--- a/lld/ELF/Arch/ARM.cpp
++++ b/lld/ELF/Arch/ARM.cpp
+@@ -663,12 +663,12 @@ void ARM::relocate(uint8_t *loc, const Relocation &rel, uint64_t val) const {
+   case R_ARM_THM_JUMP8:
+     // We do a 9 bit check because val is right-shifted by 1 bit.
+     checkInt(ctx, loc, val, 9, rel);
+-    write16(ctx, loc, (read32(ctx, loc) & 0xff00) | ((val >> 1) & 0x00ff));
++    write16(ctx, loc, (read16(ctx, loc) & 0xff00) | ((val >> 1) & 0x00ff));
+     break;
+   case R_ARM_THM_JUMP11:
+     // We do a 12 bit check because val is right-shifted by 1 bit.
+     checkInt(ctx, loc, val, 12, rel);
+-    write16(ctx, loc, (read32(ctx, loc) & 0xf800) | ((val >> 1) & 0x07ff));
++    write16(ctx, loc, (read16(ctx, loc) & 0xf800) | ((val >> 1) & 0x07ff));
+     break;
+   case R_ARM_THM_JUMP19:
+     // Encoding T3: Val = S:J2:J1:imm6:imm11:0
+diff --git a/lld/test/ELF/arm-thumb-jump8-11.s b/lld/test/ELF/arm-thumb-jump8-11.s
+new file mode 100644
+index 000000000000..ed54f3c0cc94
+--- /dev/null
++++ b/lld/test/ELF/arm-thumb-jump8-11.s
+@@ -0,0 +1,32 @@
++# REQUIRES: arm
++
++# RUN: llvm-mc -triple thumbv6m-arm-eabi --filetype=obj %s -o %t.o
++# RUN: ld.lld %t.o -o %t
++# RUN: llvm-objdump -d %t --no-show-raw-insn | FileCheck %s --check-prefixes=CHECK,CHECK-LE
++
++# RUN: llvm-mc -triple thumbebv6m-arm-eabi --filetype=obj %s -o %t.o
++# RUN: ld.lld %t.o -o %t
++# RUN: llvm-objdump -d %t --no-show-raw-insn | FileCheck %s --check-prefixes=CHECK,CHECK-BE
++
++# CHECK-LE:                    file format elf32-littlearm
++# CHECK-BE:                    file format elf32-bigarm
++
++# CHECK:                       Disassembly of section .text:
++
++# CHECK-LABEL: [[#%x,TARGET:]] <target>:
++# CHECK-NEXT:      [[#TARGET]]: bx lr
++
++# CHECK-LABEL:                 <_start>:
++# CHECK-NEXT:                   b      0x[[#TARGET]] <target>
++# CHECK-NEXT:                   beq    0x[[#TARGET]] <target>
++
++    .thumb
++    .section .text.1, "ax", %progbits
++target:
++    bx lr
++
++    .section .text.2, "ax", %progbits
++    .globl _start
++_start:
++    b.n target   // R_ARM_THM_JUMP11
++    beq.n target // R_ARM_THM_JUMP8
+-- 
+2.34.1
+

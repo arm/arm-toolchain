@@ -1,4 +1,4 @@
-From 2c5da3adea204dc5e6fe4d990a34571a04e9ecb4 Mon Sep 17 00:00:00 2001
+From f74b4bc2866fe4bf1c744dd9b67738754c6ff127 Mon Sep 17 00:00:00 2001
 From: Victor Campos <victor.campos@arm.com>
 Date: Mon, 17 Feb 2025 11:43:36 +0000
 Subject: [compiler-rt] Add support for big endian for Arm's __negdf2vfp

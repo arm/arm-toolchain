@@ -1,4 +1,4 @@
-From 9c2048aa841cafd80e0c6752cf6872a9d42e6eb3 Mon Sep 17 00:00:00 2001
+From dfd92edcb6bf4396894faa26e6012af3fab436fb Mon Sep 17 00:00:00 2001
 From: Steven Cooreman <steven.cooreman@gmail.com>
 Date: Tue, 18 Feb 2025 12:12:23 +0100
 Subject: [libc++] Do not guard inclusion of wchar.h with
@@ -53,5 +53,5 @@ index e013384454b4..c23ea7113ca7 100644
  
  #endif // _LIBCPP___MBSTATE_T_H
 -- 
-2.47.1
+2.34.1
 
