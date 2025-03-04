@@ -1,4 +1,4 @@
-From 3f644811502c3047e6b0c830aba54324559494b5 Mon Sep 17 00:00:00 2001
+From 4b484c0ae0e7f1352c2467b4e50dc24cd619c655 Mon Sep 17 00:00:00 2001
 From: Victor Campos <victor.campos@arm.com>
 Date: Mon, 17 Feb 2025 10:10:35 +0000
 Subject: [LLD][ELF][ARM] Fix resolution of R_ARM_THM_JUMP8 and
@@ -20,6 +20,8 @@ bits, hence causing the incorrect encoding to be produced as a result of
 the relocation resolution.
 
 The added test checks the result for both little and big endian modes.
+
+(cherry picked from commit 501c77da6024959438c92f33bd997fe6f39e6b6c)
 ---
  lld/ELF/Arch/ARM.cpp              |  4 ++--
  lld/test/ELF/arm-thumb-jump8-11.s | 32 +++++++++++++++++++++++++++++++

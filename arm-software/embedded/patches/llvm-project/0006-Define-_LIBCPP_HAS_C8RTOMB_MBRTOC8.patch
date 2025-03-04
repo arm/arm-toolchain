@@ -1,4 +1,4 @@
-From 4bcc2556dfeae6acad38a3cf8326d91483a170eb Mon Sep 17 00:00:00 2001
+From 5bb335dbc17a626e547a79a5cf19ae4bce253dbd Mon Sep 17 00:00:00 2001
 From: Victor Campos <victor.campos@arm.com>
 Date: Thu, 31 Oct 2024 09:58:34 +0000
 Subject: Define _LIBCPP_HAS_C8RTOMB_MBRTOC8

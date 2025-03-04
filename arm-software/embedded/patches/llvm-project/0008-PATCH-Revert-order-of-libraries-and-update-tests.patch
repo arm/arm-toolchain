@@ -1,4 +1,4 @@
-From 33c02bbbce37db0f1a6445c35951f20203c23c05 Mon Sep 17 00:00:00 2001
+From aa808a6c7e5a2482c282d1ee48655f276aa00b81 Mon Sep 17 00:00:00 2001
 From: Volodymyr Turanskyy <volodymyr.turanskyy@arm.com>
 Date: Thu, 19 Dec 2024 12:01:58 +0000
 Subject: [PATCH] Revert order of libraries and update tests
