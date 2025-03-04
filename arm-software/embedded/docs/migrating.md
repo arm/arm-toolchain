@@ -3,7 +3,7 @@
 ## Overview
 
 [Arm GNU Toolchain](https://developer.arm.com/Tools%20and%20Software/GNU%20Toolchain)
-is the GNU Toolchain for the Arm Architecture released by Arm and traditionally
+is the GNU Toolchain for the Arm® architecture released by Arm and traditionally
 used for embedded development.
 
 Generally the LLVM toolchain tries to be a drop in replacement for the GNU toolchain,
@@ -24,7 +24,7 @@ and [samples](https://github.com/arm/arm-toolchain/-/blob/arm-software/embedded/
 
 Arm Toolchain for Embedded provides superior performance when targeting the
 Armv8-M or later architecture, including the
-[Arm Helium Technology](https://www.arm.com/technologies/helium)
+[Arm® Helium™ technology](https://www.arm.com/technologies/helium)
 (M-Profile Vector Extension, MVE).
 
 ## Key toolchain components

@@ -1,7 +1,7 @@
 # Arm Toolchain for Embedded
 
 This repository contains build scripts and auxiliary material for building a
-bare-metal LLVM based toolchain targeting Arm based on:
+bare-metal LLVM based toolchain targeting Arm® architecture based on:
 * clang + llvm
 * lld
 * libc++abi
