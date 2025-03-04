@@ -295,4 +295,7 @@
 
 #cmakedefine HAVE_BUILTIN_THREAD_POINTER ${HAVE_BUILTIN_THREAD_POINTER}
 
+/* Downstream change issue: #124 (Arm Toolchain ID) */
+#cmakedefine ARM_TOOLCHAIN_ID "${ARM_TOOLCHAIN_ID}"
+
 #endif
