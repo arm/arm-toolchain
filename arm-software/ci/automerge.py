@@ -53,6 +53,12 @@ class Git:
         return git_process.stdout
 
 
+def is_merge_in_progress(git_repo: Git) -> bool:
+    # The `.git/MERGE_HEAD` file only exists when a merge operation is in progress.
+    merge_head_path = Path(git_repo.repo_path) / '.git' / 'MERGE_HEAD'
+    return merge_head_path.exists()
+
+
 def restore_changes_to_ignored_files(git_repo: Git, ignore_list: list[str]) -> None:
     if not ignore_list:
         return
@@ -87,7 +93,13 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths:
     if verbose:
         current_head = git_repo.run_cmd(["log", "--no-walk", "HEAD", "--pretty=reference"])
         logger.debug("Current HEAD of %s is %s", to_branch, current_head)
+    # `git merge` will return a non-zero exit status if there's a conflict, but
+    # the conflict might be resolved by applying our ignore list. We work around
+    # that by not checking the exist status and validating that a merge is in
+    # progress after `git merge` runs.
     git_repo.run_cmd(["merge", commit_hash, "--no-commit", "--no-ff"], check=False)
+    if not is_merge_in_progress(git_repo):
+        raise RuntimeError("Unexpected error occurred when running git merge")
     restore_changes_to_ignored_files(git_repo, ignored_paths)
     if has_unresolved_conflicts(git_repo):
         logger.info("Merge failed")
