@@ -49,6 +49,7 @@ class Git:
         git_cmd = ["git", "-C", str(self.repo_path)] + args
         logger.debug("Running git command: %s", git_cmd)
         git_process = subprocess.run(git_cmd, check=check, capture_output=True, text=True)
+        logger.debug("Stdout:\n%s\nStderr:\n%s", git_process.stdout, git_process.stderr)
         return git_process.stdout
 
 
@@ -94,6 +95,9 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths:
         raise MergeConflictError(commit_hash)
     git_repo.run_cmd(["commit", "--reuse-message", commit_hash])
     prefix_current_commit_message(git_repo)
+    if verbose:
+        merge_reference = git_repo.run_cmd(["log", "--no-walk", "HEAD", "--pretty=reference"])
+        logger.debug("Merge commit finalized: %s", merge_reference)
     if dry_run:
         logger.info("Dry run. Skipping push into remote repository.")
     else:
