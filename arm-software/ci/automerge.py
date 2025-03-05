@@ -47,7 +47,9 @@ class Git:
 
     def run_cmd(self, args: list[str], check: bool = True) -> str:
         git_cmd = ["git", "-C", str(self.repo_path)] + args
+        logger.debug("Running git command: %s", git_cmd)
         git_process = subprocess.run(git_cmd, check=check, capture_output=True, text=True)
+        logger.debug("Stdout:\n%s\nStderr:\n%s", git_process.stdout, git_process.stderr)
         return git_process.stdout
 
 
@@ -79,9 +81,12 @@ def prefix_current_commit_message(git_repo: Git) -> None:
     git_repo.run_cmd(["commit", "--amend", "--message=" + commit_msg])
 
 
-def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths: list[str], dry_run: bool) -> None:
+def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths: list[str], dry_run: bool, verbose: bool) -> None:
     logger.info("Merging commit %s into %s", commit_hash, to_branch)
     git_repo.run_cmd(["switch", to_branch])
+    if verbose:
+        current_head = git_repo.run_cmd(["log", "--no-walk", "HEAD", "--pretty=reference"])
+        logger.debug("Current HEAD of %s is %s", to_branch, current_head)
     git_repo.run_cmd(["merge", commit_hash, "--no-commit", "--no-ff"], check=False)
     restore_changes_to_ignored_files(git_repo, ignored_paths)
     if has_unresolved_conflicts(git_repo):
@@ -90,6 +95,9 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths:
         raise MergeConflictError(commit_hash)
     git_repo.run_cmd(["commit", "--reuse-message", commit_hash])
     prefix_current_commit_message(git_repo)
+    if verbose:
+        merge_reference = git_repo.run_cmd(["log", "--no-walk", "HEAD", "--pretty=reference"])
+        logger.debug("Merge commit finalized: %s", merge_reference)
     if dry_run:
         logger.info("Dry run. Skipping push into remote repository.")
     else:
@@ -180,8 +188,16 @@ def main():
         action="store_true",
         help="Process changes locally, but don't merge them into the remote repository and don't create PRs",
     )
+    arg_parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Print verbose log messages during automerge run",
+    )
 
     args = arg_parser.parse_args()
+
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
 
     try:
         if pr_exist_for_label(args.project_name, MERGE_CONFLICT_LABEL):
@@ -196,7 +212,7 @@ def main():
 
         merge_commits = get_merge_commit_list(git_repo, args.from_branch, args.to_branch)
         for commit_hash in merge_commits:
-            merge_commit(git_repo, args.to_branch, commit_hash, ignored_paths, args.dry_run)
+            merge_commit(git_repo, args.to_branch, commit_hash, ignored_paths, args.dry_run, args.verbose)
     except MergeConflictError as conflict:
         process_conflict(
             git_repo,
