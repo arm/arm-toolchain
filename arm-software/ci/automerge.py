@@ -92,9 +92,6 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths:
         logger.info("Merge failed")
         git_repo.run_cmd(["merge", "--abort"])
         raise MergeConflictError(commit_hash)
-    if verbose:
-        commit_content = git_repo.run_cmd(["diff", "--cached"])
-        logger.debug("Changes being commited:\n%s", commit_content)
     git_repo.run_cmd(["commit", "--reuse-message", commit_hash])
     prefix_current_commit_message(git_repo)
     if dry_run:
