@@ -445,7 +445,7 @@ if(C_LIBRARY STREQUAL picolibc)
         # Configure a script to run the picolibc tests in order
         # to handle the return code.
         ExternalProject_Get_property(picolibc BINARY_DIR)
-        configure_file(check-picolibc.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/check-picolibc.cmake)
+        configure_file(check-picolibc.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/check-picolibc.cmake @ONLY)
 
         ExternalProject_Add_Step(
             picolibc
@@ -462,6 +462,7 @@ if(C_LIBRARY STREQUAL picolibc)
             picolibc-compile-tests
         )
         add_dependencies(check-picolibc picolibc-check)
+        add_dependencies(clib-build ${C_LIBRARY}-compile-tests)
     endif()
 
 endif()
