@@ -10,9 +10,9 @@ endif()
 # This will be equal to the number of test failures.
 execute_process(
     COMMAND
-        ${MESON_EXECUTABLE}
+        @MESON_EXECUTABLE@
         test
-        -C ${BINARY_DIR}
+        -C @BINARY_DIR@
         --no-rebuild
     RESULT_VARIABLE
         failure_count
@@ -22,15 +22,15 @@ execute_process(
 # variant specific.
 execute_process(
     COMMAND
-        ${Python3_EXECUTABLE}
-        ${CMAKE_CURRENT_SOURCE_DIR}/test-support/modify-picolibc-xml.py
-        --dir ${BINARY_DIR}
-        --variant ${VARIANT}
+        @Python3_EXECUTABLE@
+        @CMAKE_CURRENT_SOURCE_DIR@/test-support/modify-picolibc-xml.py
+        --dir @BINARY_DIR@
+        --variant @VARIANT@
     COMMAND_ERROR_IS_FATAL
         ANY
 )
 
 # Use a message to set a return code.
 if(failure_count GREATER 0 AND NOT ignore_fail)
-message(FATAL_ERROR "Stopping due to test failures.")
+    message(FATAL_ERROR "Stopping due to test failures.")
 endif()
