@@ -22,6 +22,14 @@ else()
     set(build_number 0)
 endif()
 
+# Pad build number
+string(LENGTH ${build_number} len_build_number)
+if(len_build_number LESS 4)
+    math(EXPR pad_len "4 - ${len_build_number}")
+    string(REPEAT "0" ${pad_len} pad_chars)
+    string(PREPEND build_number ${pad_chars})
+endif()
+
 # Version suffix should be optional.
 if(DEFINED LLVM_TOOLCHAIN_VERSION_SUFFIX)
     set(ID_SUFFIX "-${LLVM_TOOLCHAIN_VERSION_SUFFIX}")
@@ -35,3 +43,9 @@ set(ARM_TOOLCHAIN_ID
     "${LLVM_TOOLCHAIN_PROJECT_CODE}${build_number}${ID_SUFFIX} (${builder_name_hash})" CACHE STRING
     "Toolchain ID to identify product."
 )
+
+# Print the ID in script mode.
+get_property(cmake_role GLOBAL PROPERTY CMAKE_ROLE)
+if(cmake_role STREQUAL SCRIPT)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E echo ${ARM_TOOLCHAIN_ID})
+endif()
