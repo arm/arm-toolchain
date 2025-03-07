@@ -47,5 +47,5 @@ set(ARM_TOOLCHAIN_ID
 # Print the ID in script mode.
 get_property(cmake_role GLOBAL PROPERTY CMAKE_ROLE)
 if(cmake_role STREQUAL SCRIPT)
-    message(${ARM_TOOLCHAIN_ID})
+    execute_process(COMMAND ${CMAKE_COMMAND} -E echo ${ARM_TOOLCHAIN_ID})
 endif()
