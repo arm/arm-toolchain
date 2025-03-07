@@ -37,7 +37,7 @@ jobs:
         run: |
           git remote set-branches --add origin ${{ matrix.branches.from_branch }}
           git fetch origin ${{ matrix.branches.from_branch }}:${{ matrix.branches.from_branch }}
-          git fetch origin --update-head-ok --unshallow ${{ matrix.branches.to_branch }}:${{ matrix.branches.to_branch }}
+          git pull --unshallow --ff-only origin ${{ matrix.branches.to_branch }}
       - name: Run automerge
         run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ matrix.branches.from_branch }} --to-branch ${{ matrix.branches.to_branch }} --verbose
         env:
