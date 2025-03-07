@@ -166,6 +166,12 @@ def pr_exist_for_label(project_name: str, label: str) -> bool:
     return len(json.loads(gh_process.stdout)) > 0
 
 
+def is_worktree_clean(git_repo: Git) -> bool:
+    # `git status --porcelain` returns an empty result if worktree is clean
+    status_output = git_repo.run_cmd(["status", "--porcelain"]).strip()
+    return len(status_output) == 0
+
+
 def main():
     arg_parser = argparse.ArgumentParser(
         prog="automerge",
@@ -218,6 +224,10 @@ def main():
         logger.info("No pending merge conflicts. Proceeding with automerge.")
 
         git_repo = Git(args.repo_path)
+
+        if not is_worktree_clean(git_repo):
+            logger.error("The repository worktree is not clean. Cannot continue.")
+            sys.exit(1)
 
         with open(MERGE_IGNORE_PATHSPEC_FILE) as ignored_paths_file:
             ignored_paths = ignored_paths_file.read().splitlines()
