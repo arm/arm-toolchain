@@ -169,7 +169,7 @@ def pr_exist_for_label(project_name: str, label: str) -> bool:
 def is_worktree_clean(git_repo: Git) -> bool:
     # `git status --porcelain` returns an empty result if worktree is clean
     status_output = git_repo.run_cmd(["status", "--porcelain"]).strip()
-    return len(status_output) > 0
+    return len(status_output) == 0
 
 
 def main():
