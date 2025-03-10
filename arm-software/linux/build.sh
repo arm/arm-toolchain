@@ -36,6 +36,7 @@ OS_NAME=${OS_NAME:-"linux"}
 TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-`uname -m`.tar.gz"}
 ATFL_ASSERTIONS=${ATFL_ASSERTIONS:-"ON"}
 ATFL_TARGET_TRIPLE=${ATFL_TARGET_TRIPLE:-"`uname -m`-unknown-linux-gnu"}
+ARM_TOOLCHAIN_ID=$(cmake -DLLVM_TOOLCHAIN_PROJECT_CODE=L -P ${SOURCES_DIR}/arm-software/shared/cmake/generate_toolchain_id.cmake)
 PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
 PARALLEL_JOBS=${PARALLEL_JOBS:-"${PROCESSOR_COUNT}"}
 # " <-- this is to help syntax highlighters to find a matching double quote
@@ -103,6 +104,7 @@ COMPILER_CMAKE_FLAGS=(
     -DLIBOMP_USE_HWLOC=False
     -DLIBOMP_OMPT_SUPPORT=ON
     -DLIBOMP_OMPD_GDB_SUPPORT=OFF
+    -DARM_TOOLCHAIN_ID="${ARM_TOOLCHAIN_ID}"
     -DCLANG_VENDOR="Arm Toolchain for Linux ${ATFL_VERSION}"
     -DFLANG_VENDOR="Arm Toolchain for Linux ${ATFL_VERSION}"
     -DLLVM_VERSION_SUFFIX=""
