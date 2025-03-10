@@ -38,10 +38,36 @@ while true; do
     esac
 done
 
-URL_CORSTONE_310='https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/OSS/FVP/Corstone-310/FVP_Corstone_SSE-310_11.24_13_Linux64.tgz?rev=c370b571bdff42d3a0152471eca3d798&hash=1E388EE3B6E8F675D02D2832DBE61946DEC0386A'
-URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64.tgz'
-URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_AEMv8R_11.27_19_Linux64.tgz'
-URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.27/FastModels_crypto_11.27.019_Linux64.tgz'
+# Downloads are currently found on the following pages:
+# Corstone:
+# https://developer.arm.com/Tools%20and%20Software/Fixed%20Virtual%20Platforms/IoT%20FVPs
+# AEMv8A and AEMv8R:
+# https://developer.arm.com/Tools%20and%20Software/Fixed%20Virtual%20Platforms/Arm%20Architecture%20FVPs
+# Crypto plug-in:
+# https://developer.arm.com/Tools%20and%20Software/Fast%20Models#Downloads
+
+MACHINE_HARDWARE=$(uname -m)
+
+if [ "$MACHINE_HARDWARE" == 'x86_64' ]; then
+    URL_CORSTONE_310='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64.tgz'
+    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64.tgz'
+    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_AEMv8R_11.27_19_Linux64.tgz'
+    URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.27/FastModels_crypto_11.27.019_Linux64.tgz'
+elif [ "$MACHINE_HARDWARE" == 'aarch64' ]; then
+    URL_CORSTONE_310='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64_armv8l.tgz'
+    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64_armv8l.tgz'
+    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_AEMv8R_11.27_19_Linux64_armv8l.tgz'
+    URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.27/FastModels_crypto_11.27.019_Linux64_armv8l.tgz'
+else
+    echo Unknown architecture: $MACHINE_HARDWARE
+    exit 1
+fi
+
+FILENAME_CORSTONE_310=$(basename "$URL_CORSTONE_310")
+FILENAME_BASE_AEM_A=$(basename "$URL_BASE_AEM_A")
+FILENAME_BASE_AEM_R=$(basename "$URL_BASE_AEM_R")
+FILENAME_CRYPTO=$(basename "$URL_CRYPTO")
+EXTRACTEDNAME_CRYPTO=$(basename "$URL_CRYPTO" .tgz)
 
 mkdir -p download
 pushd download
@@ -56,24 +82,24 @@ mkdir -p install
 pushd install
 
 if [ ! -d "Corstone-310" ]; then
-tar -xf ${DOWNLOAD_DIR}/FVP_Corstone_SSE-310_11.24_13_Linux64.tgz
+tar -xf ${DOWNLOAD_DIR}/${FILENAME_CORSTONE_310}
 ./FVP_Corstone_SSE-310.sh --destination ./Corstone-310 "${INSTALLER_FLAGS_CORSTONE[@]}"
 fi
 
 if [ ! -d "Base_RevC_AEMvA_pkg" ]; then
-tar -xf ${DOWNLOAD_DIR}/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64.tgz
+tar -xf ${DOWNLOAD_DIR}/${FILENAME_BASE_AEM_A}
 # (Extracted directly into ./Base_RevC_AEMvA_pkg/, no installer)
 fi
 
 if [ ! -d "AEMv8R_base_pkg" ]; then
-tar -xf ${DOWNLOAD_DIR}/FVP_Base_AEMv8R_11.27_19_Linux64.tgz
+tar -xf ${DOWNLOAD_DIR}/${FILENAME_BASE_AEM_R}
 # (Extracted directly into ./AEMv8R_base_pkg/, no installer)
 fi
 
 if [ ! -d "FastModelsPortfolio_11.27" ]; then
-tar -xf ${DOWNLOAD_DIR}/FastModels_crypto_11.27.019_Linux64.tgz
+tar -xf ${DOWNLOAD_DIR}/${FILENAME_CRYPTO}
 # SDDKW-93582: Non-interactive installation fails if cwd is different.
-pushd FastModels_crypto_11.27.019_Linux64
+pushd ${EXTRACTEDNAME_CRYPTO}
 # This installer doesn't allow providing a default path for
 # interactive installation. The user will have to enter the install
 # directory as the target by hand.

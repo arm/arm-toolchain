@@ -6,6 +6,8 @@
 |*
 \*===----------------------------------------------------------------------===*/
 
+// Copyright (c) 2023-2025, Arm Limited and affiliates.
+
 // This file is derived from various files in compiler-rt of the llvm-project,
 // see https://github.com/llvm/llvm-project/tree/main/compiler-rt/lib/profile
 

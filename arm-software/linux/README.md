@@ -58,7 +58,7 @@ the final executable binary is linked against the vectorized functions library.
 ## Using Arm Performance Libraries (ArmPL) with ATfL
 
 The Arm Performance Libraries suite (ArmPL) provides optimized standard core
-math libraries for numerical applications on 64-bit Arm (AArch64) processors.
+math libraries for numerical applications on 64-bit Arm(R) processors (AArch64).
 
 In order to use ArmPL with ATfL, a special version of ArmPL needs to be
 downloaded from this page: https://developer.arm.com/Tools%20and%20Software/Arm%20Performance%20Libraries#Downloads

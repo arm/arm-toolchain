@@ -1,18 +1,9 @@
 #
-# Copyright (c) 2024, Arm Limited and affiliates.
-# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2024-2025, Arm Limited and affiliates.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
 # CMake build for a library variant, combining a chosen C library
@@ -30,7 +21,7 @@ set(llvmproject_src_dir ${TOOLCHAIN_SOURCE_DIR}/../..)
 # CMake arguments are loaded from the JSON file depending on which C
 # library is used, so this must be set before the JSON is processed.
 set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
-set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib llvmlibc)
+set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
 set(VARIANT_JSON "" CACHE STRING "JSON file to load args from.")
 if(VARIANT_JSON)
@@ -46,7 +37,12 @@ if(VARIANT_JSON)
         set(${json_param}_def ${json_val})
     endforeach()
     # Load arguments specific to the chosen library, overwriting any existing values.
-    string(JSON json_args GET ${variant_json_read} "args" ${C_LIBRARY})
+    if(C_LIBRARY MATCHES "^newlib")
+        # Treat newlib variants as newlib for library compatibility
+        string(JSON json_args GET ${variant_json_read} "args" "newlib")
+    else()
+        string(JSON json_args GET ${variant_json_read} "args" ${C_LIBRARY})
+    endif()
     string(JSON json_args_len LENGTH ${json_args})
     math(EXPR json_args_len_dec "${json_args_len} - 1")
     foreach(json_idx RANGE ${json_args_len_dec})
@@ -94,11 +90,13 @@ set(PICOLIBC_BUILD_TYPE ${PICOLIBC_BUILD_TYPE_def} CACHE STRING "Picolibc config
 set_property(CACHE PICOLIBC_BUILD_TYPE PROPERTY STRINGS minsize release)
 
 set(ENABLE_CXX_LIBS ${ENABLE_CXX_LIBS_def} CACHE BOOL "Build CXX libs")
-set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib or llvm-libc).")
+set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
-set(LIBC_HDRGEN "" CACHE PATH "Path to prebuilt lbc-hdrgen if not included in LLVM binaries set by LLVM_BINARY_DIR")
+
+set(PROJECT_PREFIX "subproj" CACHE STRING "Directory to build subprojects in.")
+set(VARIANT_BUILD_ID "${VARIANT}" CACHE STRING "Name to use to identify build directories." )
 
 # Temporary location to collect the libraries as they are built.
 set(TEMP_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/tmp_install")
@@ -206,12 +204,15 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
     list(JOIN lit_test_executor " " lit_test_executor)
 endif()
 
-set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS}")
+set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS} --sysroot ${TEMP_LIB_DIR}")
 # Compiling the libraries benefits from some extra optimization
 # flags, and requires a sysroot.
-set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident --sysroot ${TEMP_LIB_DIR}")
+set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident")
 
-# Declare this target now, since compiler-rt requires the dependency.
+# Generic target names for the C library.
+# Declare these now, since compiler-rt requires the 'install' dependency.
+add_custom_target(clib-configure)
+add_custom_target(clib-build)
 add_custom_target(clib-install)
 
 ###############################################################################
@@ -261,6 +262,10 @@ endif()
 ExternalProject_Add(
     compiler_rt
     SOURCE_DIR ${llvmproject_src_dir}/compiler-rt
+    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
+    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
+    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
+    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
     INSTALL_DIR compiler-rt/install
     CMAKE_ARGS
     ${compiler_launcher_cmake_args}
@@ -289,8 +294,8 @@ ExternalProject_Add(
     -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
     ${compiler_rt_test_cmake_args}
-    STEP_TARGETS build install
-    USES_TERMINAL_CONFIGURE FALSE
+    STEP_TARGETS configure build install
+    USES_TERMINAL_CONFIGURE TRUE
     USES_TERMINAL_BUILD TRUE
     USES_TERMINAL_INSTALL TRUE
     LIST_SEPARATOR ,
@@ -364,11 +369,14 @@ if(C_LIBRARY STREQUAL picolibc)
     # and flags e.g. 'path/to/clang', '--target=armv6m-none-eabi',
     # '-march=armv6m'
     set(picolibc_flags "${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX} ${lib_compile_flags}")
+    set(picolibcpp_flags "${LLVM_BINARY_DIR}/bin/clang++${CMAKE_EXECUTABLE_SUFFIX} ${lib_compile_flags}")
     if(CMAKE_C_COMPILER_LAUNCHER)
         set(picolibc_flags "${CMAKE_C_COMPILER_LAUNCHER} ${picolibc_flags}")
     endif()
     separate_arguments(picolibc_flags)
+    separate_arguments(picolibcpp_flags)
     to_meson_list("${picolibc_flags}" picolibc_meson_flags)
+    to_meson_list("${picolibcpp_flags}" picolibcpp_meson_flags)
 
     if(ENABLE_LIBC_TESTS)
         set(picolibc_test_executor_bin ${CMAKE_CURRENT_SOURCE_DIR}/test-support/picolibc-test-wrapper.py)
@@ -379,6 +387,10 @@ if(C_LIBRARY STREQUAL picolibc)
 
     ExternalProject_Add(
         picolibc
+        STAMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${picolibc_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS compiler_rt-install
@@ -389,6 +401,7 @@ if(C_LIBRARY STREQUAL picolibc)
             -Dlibdir=lib
             -Dspecsdir=none
             -Dmultilib=false
+            -Ddebug=false
             -Dtests-enable-stack-protector=false
             -Dtest-long-double=${enable_picolibc_long_double_test}
             -Dtest-machine=${TEST_EXECUTOR}
@@ -400,12 +413,13 @@ if(C_LIBRARY STREQUAL picolibc)
             <SOURCE_DIR>
         BUILD_COMMAND ${MESON_EXECUTABLE} compile
         INSTALL_COMMAND ${MESON_EXECUTABLE} install ${MESON_INSTALL_QUIET}
-        USES_TERMINAL_CONFIGURE FALSE
+        USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
+        USES_TERMINAL_INSTALL TRUE
         LIST_SEPARATOR ,
         CONFIGURE_HANDLED_BY_BUILD TRUE
         TEST_EXCLUDE_FROM_MAIN TRUE
-        STEP_TARGETS build install
+        STEP_TARGETS configure build install
     )
 
     add_custom_target(check-picolibc)
@@ -415,26 +429,28 @@ if(C_LIBRARY STREQUAL picolibc)
         # So reconfigure to enable tests at a later point.
         ExternalProject_Add_Step(
             picolibc
-            enable-tests
+            compile-tests
             COMMAND ${MESON_EXECUTABLE} setup -Dtests=true --reconfigure <BINARY_DIR> <SOURCE_DIR>
+            COMMAND ${MESON_EXECUTABLE} compile -C <BINARY_DIR>
             USES_TERMINAL TRUE
-            EXCLUDE_FROM_MAIN TRUE
         )
-        ExternalProject_Add_StepTargets(picolibc enable-tests)
+        ExternalProject_Add_StepTargets(picolibc compile-tests)
         ExternalProject_Add_StepDependencies(
             picolibc
-            enable-tests
+            compile-tests
             picolibc-build
             compiler_rt-install
         )
+
+        # Configure a script to run the picolibc tests in order
+        # to handle the return code.
+        ExternalProject_Get_property(picolibc BINARY_DIR)
+        configure_file(check-picolibc.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/check-picolibc.cmake @ONLY)
+
         ExternalProject_Add_Step(
             picolibc
             check
-            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR>
-            COMMAND ${Python3_EXECUTABLE}
-            ${CMAKE_CURRENT_SOURCE_DIR}/test-support/modify-picolibc-xml.py
-            --dir <BINARY_DIR>
-            --variant ${VARIANT}
+            COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/check-picolibc.cmake
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
@@ -443,9 +459,10 @@ if(C_LIBRARY STREQUAL picolibc)
         ExternalProject_Add_StepDependencies(
             picolibc
             check
-            picolibc-enable-tests
+            picolibc-compile-tests
         )
         add_dependencies(check-picolibc picolibc-check)
+        add_dependencies(clib-build ${C_LIBRARY}-compile-tests)
     endif()
 
 endif()
@@ -454,9 +471,58 @@ endif()
 # newlib
 ###############################################################################
 
-if(C_LIBRARY STREQUAL newlib)
+if(C_LIBRARY MATCHES "^newlib")
     if(ENABLE_LIBC_TESTS)
         message(FATAL_ERROR "Tests cannot yet be enabled using newlib libc.")
+    endif()
+
+    if(C_LIBRARY STREQUAL newlib-nano)
+        set(newlib_optim_flags
+            "-g -Oz")
+        if(TARGET_ARCH MATCHES "^aarch64")
+            # When trying to build newlib-nano on AArch64, fall back to regular newlib
+            # See https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/blob/9e3db8c042400c9c59686dec8eda2e8c44e5fb5d/build-baremetal-toolchain.sh#L625
+            # ARMGCC just skips building the nano libs for AArch64, but in order to not break integration and testing of multilib, we are building
+            # regular newlib for AArch64 with extreme size optimisation and calling it newlib-nano.
+            set(newlib_flags
+                --enable-newlib-io-long-long
+                --enable-newlib-register-fini
+                --disable-newlib-supplied-syscalls
+                --enable-newlib-io-c99-formats
+                --disable-nls
+                --enable-lite-exit
+                --disable-multilib
+                --enable-newlib-retargetable-locking)
+        else()
+            # Taken from https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/blob/9e3db8c042400c9c59686dec8eda2e8c44e5fb5d/build-baremetal-toolchain.sh#L582
+            set(newlib_flags
+                --disable-newlib-supplied-syscalls
+                --disable-nls
+                --enable-lite-exit
+                --disable-multilib
+                --enable-newlib-retargetable-locking
+                --enable-newlib-nano-malloc
+                --disable-newlib-unbuf-stream-opt
+                --enable-newlib-reent-small
+                --disable-newlib-fseek-optimization
+                --enable-newlib-nano-formatted-io
+                --disable-newlib-fvwrite-in-streamio
+                --disable-newlib-wide-orient
+                --enable-lite-exit
+                --enable-newlib-global-atexit)
+        endif()
+    else()
+        set(newlib_flags
+            --enable-newlib-io-long-long
+            --enable-newlib-register-fini
+            --disable-newlib-supplied-syscalls
+            --enable-newlib-io-c99-formats
+            --disable-nls
+            --enable-lite-exit
+            --disable-multilib
+            --enable-newlib-retargetable-locking)
+        set(newlib_optim_flags
+            "-g -O2")
     endif()
 
     include(${TOOLCHAIN_SOURCE_DIR}/cmake/fetch_newlib.cmake)
@@ -469,8 +535,8 @@ if(C_LIBRARY STREQUAL newlib)
         "RANLIB_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-ranlib"
         "READELF_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-readelf"
         "STRIP_FOR_TARGET=${LLVM_BINARY_DIR}/bin/llvm-strip"
-        "CFLAGS_FOR_TARGET=${flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI --sysroot ${TEMP_LIB_DIR}"
-        "CCASFLAGS=${flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI --sysroot ${TEMP_LIB_DIR}"
+        "CFLAGS_FOR_TARGET=${flags} ${newlib_optim_flags} ${lib_compile_flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI"
+        "CCASFLAGS=${flags} ${newlib_optim_flags} ${lib_compile_flags} -Wno-error=implicit-function-declaration -D__USES_INITFINI__ -U_HAVE_INIT_FINI"
     )
 
     include(ProcessorCount)
@@ -481,7 +547,11 @@ if(C_LIBRARY STREQUAL newlib)
     endif()
 
     ExternalProject_Add(
-        newlib
+        ${C_LIBRARY}
+        STAMP_DIR ${PROJECT_PREFIX}/${C_LIBRARY}/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/${C_LIBRARY}/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/${C_LIBRARY}/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/${C_LIBRARY}/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${newlib_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
         CONFIGURE_COMMAND
@@ -490,14 +560,7 @@ if(C_LIBRARY STREQUAL newlib)
             --target=${target_triple}
             --prefix "${TEMP_LIB_DIR}"
             --exec_prefix <BINARY_DIR>/tmpinstall
-            --enable-newlib-io-long-long
-            --enable-newlib-register-fini
-            --disable-newlib-supplied-syscalls
-            --enable-newlib-io-c99-formats
-            --disable-nls
-            --enable-lite-exit
-            --disable-multilib
-            --enable-newlib-retargetable-locking
+            ${newlib_flags}
         BUILD_COMMAND
             ${CMAKE_COMMAND} -E env ${build_env}
             make ${make_flags}
@@ -524,12 +587,13 @@ if(C_LIBRARY STREQUAL newlib)
             <BINARY_DIR>/${target_triple}/libgloss/${cpu_family}/libcrt0-nosys.a
             ${TEMP_LIB_DIR}/lib
         # FIXME: TEST_COMMAND?
-        USES_TERMINAL_CONFIGURE FALSE
+        USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
+        USES_TERMINAL_INSTALL TRUE
         # Always run the build command so that incremental builds are correct.
         CONFIGURE_HANDLED_BY_BUILD TRUE
         TEST_EXCLUDE_FROM_MAIN TRUE
-        STEP_TARGETS install # FIXME: test?
+        STEP_TARGETS configure build install # FIXME: test?
     )
 endif()
 
@@ -581,51 +645,31 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
     )
 
-    if(LIBC_HDRGEN)
-        # If libc-hdrgen is provided, there is no need to build it,
-        # but a target is still needed to satisfy the dependency.
-        add_custom_target(libc_hdrgen)
-    elseif(EXISTS ${LLVM_BINARY_DIR}/bin/libc-hdrgen${CMAKE_EXECUTABLE_SUFFIX})
-        set(LIBC_HDRGEN ${LLVM_BINARY_DIR}/bin/libc-hdrgen${CMAKE_EXECUTABLE_SUFFIX})
-        add_custom_target(libc_hdrgen)
-    else()
-        ExternalProject_Add(
-            libc_hdrgen
-            SOURCE_DIR ${llvmproject_src_dir}/llvm
-            CMAKE_ARGS
-                -DLLVM_ENABLE_RUNTIMES=libc
-                -DLLVM_LIBC_FULL_BUILD=ON
-                -DCMAKE_BUILD_TYPE=Debug
-            BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libc-hdrgen
-            INSTALL_COMMAND ${CMAKE_COMMAND} -E true
-            CONFIGURE_HANDLED_BY_BUILD TRUE
-        )
-        ExternalProject_Get_property(libc_hdrgen BINARY_DIR)
-        set(LIBC_HDRGEN ${BINARY_DIR}/bin/libc-hdrgen${CMAKE_EXECUTABLE_SUFFIX})
-    endif()
-
     ExternalProject_Add(
         llvmlibc
+        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR llvmlibc/install
-        DEPENDS libc_hdrgen
         CMAKE_ARGS
         ${compiler_launcher_cmake_args}
         ${common_llvmlibc_cmake_args}
         -DLIBC_TARGET_TRIPLE=${target_triple}
-        -DLIBC_HDRGEN_EXE=${LIBC_HDRGEN}
         -DLIBC_CONFIG_PATH=${LIBC_CFG_DIR}
         -DLIBC_CONF_TIME_64BIT=ON
+        -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
+        -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
         -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
         -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
         -DLLVM_ENABLE_RUNTIMES=libc
         -DLLVM_INCLUDE_TESTS=OFF # llvmlibc's tests require C++, so can't be built until llvmlibc can support libc++
         -DLLVM_LIBC_FULL_BUILD=ON
-        STEP_TARGETS build install
-        USES_TERMINAL_CONFIGURE FALSE
+        STEP_TARGETS configure build install
+        USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
         USES_TERMINAL_INSTALL TRUE
-        USES_TERMINAL_TEST TRUE
         LIST_SEPARATOR ,
         CONFIGURE_HANDLED_BY_BUILD TRUE
         INSTALL_COMMAND ${CMAKE_COMMAND} --install .
@@ -646,6 +690,10 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
     ExternalProject_Add(
         llvmlibc-support
+        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS ${lib_tool_dependencies} llvmlibc-install
@@ -653,7 +701,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ${compiler_launcher_cmake_args}
         ${common_llvmlibc_cmake_args}
         STEP_TARGETS build install
-        USES_TERMINAL_CONFIGURE FALSE
+        USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
         USES_TERMINAL_INSTALL TRUE
         USES_TERMINAL_TEST TRUE
@@ -662,6 +710,8 @@ if(C_LIBRARY STREQUAL llvmlibc)
     )
 endif()
 
+add_dependencies(clib-configure ${C_LIBRARY}-configure)
+add_dependencies(clib-build ${C_LIBRARY}-build)
 add_dependencies(clib-install ${C_LIBRARY}-install)
 
 ###############################################################################
@@ -696,20 +746,42 @@ if(ENABLE_CXX_LIBS)
                 -DLLVM_LIT_ARGS=${cxxlibs_lit_args}
             )
         endif()
-    elseif(C_LIBRARY STREQUAL newlib)
+    elseif(C_LIBRARY MATCHES "^newlib")
         set(cxxlibs_extra_cmake_options
             -DLIBCXXABI_ENABLE_THREADS=OFF
-            -DLIBCXX_ENABLE_THREADS=OFF
             -DLIBCXX_ENABLE_MONOTONIC_CLOCK=OFF
             -DLIBCXX_ENABLE_RANDOM_DEVICE=OFF
-            -DLIBCXX_ENABLE_WIDE_CHARACTERS=ON
-            -DLIBCXX_ENABLE_LOCALIZATION=OFF
+            -DLIBCXX_ENABLE_THREADS=OFF
             -DLIBUNWIND_ENABLE_THREADS=OFF
+            -DLIBCXXABI_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
+            -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
+            -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
+            -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
         )
+
+        if(C_LIBRARY STREQUAL newlib-nano)
+            set(lib_compile_flags "${lib_compile_flags} -g -Oz")
+        endif()
+
+        if(C_LIBRARY STREQUAL newlib-nano AND NOT TARGET_ARCH MATCHES "^aarch64")
+            set(cxxlibs_extra_cmake_options
+                ${cxxlibs_extra_cmake_options}
+                -DLIBCXX_ENABLE_WIDE_CHARACTERS=OFF
+            )
+        else()
+            set(cxxlibs_extra_cmake_options
+                ${cxxlibs_extra_cmake_options}
+                -DLIBCXX_ENABLE_WIDE_CHARACTERS=ON
+            )
+        endif()
     endif()
 
     ExternalProject_Add(
         cxxlibs
+        STAMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR ${TEMP_LIB_DIR}
         DEPENDS compiler_rt-install clib-install
@@ -759,11 +831,10 @@ if(ENABLE_CXX_LIBS)
         -DRUNTIME_VARIANT_NAME=${VARIANT}
         ${cxxlibs_extra_cmake_options}
         ${cxxlibs_test_cmake_options}
-        STEP_TARGETS build install
-        USES_TERMINAL_CONFIGURE FALSE
+        STEP_TARGETS configure build install
+        USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
         USES_TERMINAL_INSTALL TRUE
-        USES_TERMINAL_TEST TRUE
         LIST_SEPARATOR ,
         CONFIGURE_HANDLED_BY_BUILD TRUE
     )
@@ -793,6 +864,14 @@ if(ENABLE_CXX_LIBS)
         endforeach()
     endif()
 
+else() # if not ENABLE_CXX_LIBS
+
+    # The parent arm-multilib cmake script will still want to invoke
+    # build targets like 'cxxlibs-configure', whether we actually have
+    # C++ libraries or not. So we should define them, even if they
+    # don't do anything.
+    add_custom_target(cxxlibs-configure)
+    add_custom_target(cxxlibs-build)
 endif()
 
 install(

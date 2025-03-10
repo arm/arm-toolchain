@@ -22,7 +22,7 @@
             "ENABLE_CXX_LIBS": "ON",
             "ENABLE_LIBC_TESTS": "ON",
             "ENABLE_COMPILER_RT_TESTS": "ON",
-            "ENABLE_LIBCXX_TESTS": "ON"
+            "ENABLE_LIBCXX_TESTS": "OFF"
         },
         "newlib": {
             "ENABLE_CXX_LIBS": "ON",

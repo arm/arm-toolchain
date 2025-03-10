@@ -1,13 +1,13 @@
 # Arm Toolchain for Embedded
 
 This repository contains build scripts and auxiliary material for building a
-bare-metal LLVM based toolchain targeting Arm based on:
+bare-metal LLVM based toolchain targeting Arm® architecture based on:
 * clang + llvm
 * lld
 * libc++abi
 * libc++
 * compiler-rt
-* picolibc, or optionally newlib or LLVM's libc
+* picolibc, or optionally newlib(-nano) or LLVM's libc
 
 ## Goal
 
@@ -54,7 +54,7 @@ picolibc   | https://github.com/picolibc/picolibc
 
 ## License
 
-Content of this repository is licensed under Apache-2.0, see
+Content of this repository is licensed under Apache-2.0 with LLVM Exceptions, see
 [LICENSE.txt](LICENSE.txt). Individual patch files under the
 [patches](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/tree/main/patches)
 folder may contain code under the upstream project license, if they are
@@ -191,7 +191,7 @@ relying on the Arm GNU Toolchain.
 > *Note:* `picolibc` provides excellent
 > [support for Arm GNU Toolchain](https://github.com/picolibc/picolibc/blob/main/doc/using.md),
 > so projects that require using both Arm GNU Toolchain and Arm Toolchain for Embedded
-> can choose either `picolibc` or `newlib`.
+> can choose either `picolibc` or `newlib`/`newlib-nano`.
 
 ## Building from source
 

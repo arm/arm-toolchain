@@ -8,7 +8,9 @@ Implementation Status
    arpa/inet
    assert
    complex
+   cpio
    ctype
+   endian
    errno
    fenv
    float
@@ -17,20 +19,28 @@ Implementation Status
    math/index.rst
    net/if
    netinet/in
-   pthread
    search
    setjmp
    signal
    stdbit
+   stdfix
    stdio
    stdlib
    string
    strings
    sys/mman
    sys/resource
+   sys/stat
+   sys/statvfs
+   sys/time
    sys/wait
+   termios
    threads
    time
    uchar
+   unistd
    wchar
    wctype
+..
+   TODO: https://github.com/llvm/llvm-project/issues/123821
+   pthread

@@ -1,18 +1,9 @@
 #
-# Copyright (c) 2022, Arm Limited and affiliates.
-# SPDX-License-Identifier: Apache-2.0
+# Copyright (c) 2022-2025, Arm Limited and affiliates.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
 
@@ -144,6 +135,20 @@ option(
     as it can also make the inital build slower due to the cold cache."
 )
 option(
+    ENABLE_PARALLEL_LIB_CONFIG
+    "Run the library variant configuration steps in parallel."
+    ON
+)
+option(
+    ENABLE_PARALLEL_LIB_BUILD
+    "Run the library variant build steps in parallel."
+    OFF
+)
+set(PARALLEL_LIB_BUILD_LEVELS
+    "1" CACHE STRING
+    "If ENABLE_PARALLEL_LIB_BUILD is ON, this number of processes will be assigned to each variant built."
+)
+option(
     ENABLE_QEMU_TESTING
     "Enable tests that use QEMU. This option is ON by default."
     ON
@@ -165,7 +170,15 @@ set(LLVM_TOOLCHAIN_C_LIBRARY
     "Which C library to use."
 )
 set_property(CACHE LLVM_TOOLCHAIN_C_LIBRARY
-    PROPERTY STRINGS picolibc newlib llvmlibc)
+    PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
+
+option(
+    SHORT_BUILD_PATHS
+    "Shorten the lengths of internal build paths, which may help with OS path
+    length limits. This replaces the variant suffixes in build directories with
+    index numbers, which is shorter but less descriptive."
+    OFF
+)
 
 # Previously, the LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL option was
 # called LLVM_TOOLCHAIN_NEWLIB_OVERLAY_INSTALL. Detect a setting of
@@ -225,6 +238,9 @@ set(LLVM_TARGETS_TO_BUILD AArch64;ARM CACHE STRING "")
 set(LLVM_DEFAULT_TARGET_TRIPLE aarch64-linux-gnu CACHE STRING "")
 set(LLVM_APPEND_VC_REV OFF CACHE BOOL "")
 set(LLVM_ENABLE_TERMINFO OFF CACHE BOOL "")
+set(LLVM_ENABLE_ZLIB OFF CACHE BOOL "")
+set(LLVM_ENABLE_ZSTD OFF CACHE BOOL "")
+set(LLVM_ENABLE_LIBXML2 OFF CACHE BOOL "")
 set(CLANG_DEFAULT_LINKER lld CACHE STRING "")
 
 # Default to a release build
@@ -273,7 +289,7 @@ include(ProcessorCount)
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_picolibc.cmake)
 endif()
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL newlib)
+if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_newlib.cmake)
 endif()
 
@@ -296,12 +312,18 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 ##################################################################################################
 
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL newlib)
+if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
     install(
         FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/newlib.cfg
+        ${CMAKE_CURRENT_SOURCE_DIR}/${LLVM_TOOLCHAIN_C_LIBRARY}.cfg
         DESTINATION bin
-        COMPONENT llvm-toolchain-newlib-configs
+        COMPONENT llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
+    )
+    install(
+        DIRECTORY
+        ${CMAKE_CURRENT_SOURCE_DIR}/newlib-samples/
+        DESTINATION samples
+        COMPONENT llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
     )
 endif()
 
@@ -312,6 +334,12 @@ install(
     DESTINATION bin
     COMPONENT llvm-toolchain-config-files
 )
+
+# Generate a toolchain ID.
+# Product code 'E' for Embedded.
+set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
+set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
+include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 
 set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 add_subdirectory(
@@ -332,25 +360,6 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
       DESTINATION samples
       COMPONENT llvm-toolchain-llvmlibc-configs
     )
-
-    # We need to build libc-hdrgen
-    ExternalProject_Add(
-        libc_hdrgen
-        SOURCE_DIR ${llvmproject_src_dir}/llvm
-        DEPENDS ${lib_tool_dependencies}
-        CMAKE_ARGS
-            -DLLVM_ENABLE_RUNTIMES=libc
-            -DLLVM_LIBC_FULL_BUILD=ON
-            -DCMAKE_BUILD_TYPE=Debug
-        STEP_TARGETS build install
-        BUILD_COMMAND ${CMAKE_COMMAND} --build . --target libc-hdrgen
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E true
-        # Always run the build command so that incremental builds are correct.
-        BUILD_ALWAYS TRUE
-        CONFIGURE_HANDLED_BY_BUILD TRUE
-    )
-    ExternalProject_Get_property(libc_hdrgen BINARY_DIR)
-    set(LIBC_HDRGEN ${BINARY_DIR}/bin/libc-hdrgen${CMAKE_EXECUTABLE_SUFFIX})
 
     # LLVM libc lacks a configuration for AArch64, but the AArch32 one works
     # fine. However, setting the configuration for both architectures to the
@@ -580,10 +589,15 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
     # LIST_SEPARATOR option will handle switching it back.
     string(REPLACE ";" "," ENABLE_VARIANTS_PASSTHROUGH "${LLVM_TOOLCHAIN_LIBRARY_VARIANTS}")
 
+    set(multilib_prefix ${CMAKE_BINARY_DIR}/multilib-builds)
+
     ExternalProject_Add(
         multilib-${LLVM_TOOLCHAIN_C_LIBRARY}
-        PREFIX ${CMAKE_BINARY_DIR}/multilib-builds
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arm-multilib
+        STAMP_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-stamp
+        BINARY_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-build
+        DOWNLOAD_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-dl
+        TMP_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-tmp
         INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR}${library_subdir}
         DEPENDS ${lib_tool_dependencies}
         CMAKE_ARGS
@@ -592,7 +606,9 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         -DLLVM_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/llvm
         -DMULTILIB_JSON=${LLVM_TOOLCHAIN_MULTILIB_JSON}
         -DENABLE_VARIANTS=${ENABLE_VARIANTS_PASSTHROUGH}
-        -DLIBC_HDRGEN=${LIBC_HDRGEN}
+        -DENABLE_PARALLEL_LIB_CONFIG=${ENABLE_PARALLEL_LIB_CONFIG}
+        -DENABLE_PARALLEL_LIB_BUILD=${ENABLE_PARALLEL_LIB_BUILD}
+        -DPARALLEL_LIB_BUILD_LEVELS=${PARALLEL_LIB_BUILD_LEVELS}
         -DFVP_INSTALL_DIR=${FVP_INSTALL_DIR}
         -DENABLE_QEMU_TESTING=${ENABLE_QEMU_TESTING}
         -DENABLE_FVP_TESTING=${ENABLE_FVP_TESTING}
@@ -600,9 +616,10 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=${FETCHCONTENT_SOURCE_DIR_PICOLIBC}
         -DFETCHCONTENT_SOURCE_DIR_NEWLIB=${FETCHCONTENT_SOURCE_DIR_NEWLIB}
         -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        USES_TERMINAL_CONFIGURE FALSE
+        -DPROJECT_PREFIX=${multilib_prefix}
+        -DNUMERICAL_BUILD_NAMES=${SHORT_BUILD_PATHS}
+        USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
-        USES_TERMINAL_TEST TRUE
         LIST_SEPARATOR ,
         CONFIGURE_HANDLED_BY_BUILD TRUE
         TEST_EXCLUDE_FROM_MAIN TRUE
@@ -723,7 +740,7 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc)
         ${picolibc_SOURCE_DIR}/COPYING.picolibc         COPYING.picolibc
     )
 endif()
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL newlib)
+if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
     list(APPEND third_party_license_files
         ${newlib_SOURCE_DIR}/COPYING.NEWLIB             COPYING.NEWLIB
         ${newlib_SOURCE_DIR}/COPYING.LIBGLOSS           COPYING.LIBGLOSS
@@ -765,9 +782,8 @@ install(
 add_custom_target(
     install-llvm-toolchain
 )
-set(LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS_ALL ${LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS})
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
-    list(APPEND LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS_ALL llvm-toolchain-mingw)
+    list(APPEND LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS llvm-toolchain-mingw)
 endif()
 foreach(component ${LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS})
     add_custom_target(

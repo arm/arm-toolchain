@@ -10,25 +10,35 @@ on:
   workflow_dispatch:
 jobs:
   Run-Automerge:
-    runs-on: ubuntu-latest
-    env:
-      FROM_BRANCH: main
-      TO_BRANCH: arm-software
+    runs-on: ubuntu-24.04-arm
+    if: github.repository == 'arm/arm-toolchain'
+    strategy:
+      matrix:
+        branches:
+          - from_branch: main
+            to_branch: arm-software
     steps:
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
       - name: Checkout
         uses: actions/checkout@v4
         with:
-            ref: ${{ env.TO_BRANCH }}
+          ref: ${{ matrix.branches.to_branch }}
+          token: ${{ steps.generate-token.outputs.token }}
       - name: Configure Git Identity
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Fetch Branches
         run: |
-          git remote set-branches --add origin ${{ env.FROM_BRANCH }}
-          git fetch origin ${{ env.FROM_BRANCH }}:${{ env.FROM_BRANCH }}
-          git fetch origin --update-head-ok --unshallow ${{ env.TO_BRANCH }}:${{ env.TO_BRANCH }}
+          git remote set-branches --add origin ${{ matrix.branches.from_branch }}
+          git fetch origin ${{ matrix.branches.from_branch }}:${{ matrix.branches.from_branch }}
+          git pull --unshallow --ff-only origin ${{ matrix.branches.to_branch }}
       - name: Run automerge
-        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ env.FROM_BRANCH }} --to-branch ${{ env.TO_BRANCH }}
+        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ matrix.branches.from_branch }} --to-branch ${{ matrix.branches.to_branch }} --verbose
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

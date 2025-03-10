@@ -46,8 +46,6 @@ define half @fadd_f16(half %a, half %b) nounwind strictfp {
 ; AVX-NEXT:    vxorps %xmm1, %xmm1, %xmm1
 ; AVX-NEXT:    vblendps {{.*#+}} xmm0 = xmm0[0],xmm1[1,2,3]
 ; AVX-NEXT:    vcvtps2ph $4, %xmm0, %xmm0
-; AVX-NEXT:    vmovd %xmm0, %eax
-; AVX-NEXT:    vpinsrw $0, %eax, %xmm0, %xmm0
 ; AVX-NEXT:    retq
 ;
 ; X86-LABEL: fadd_f16:
@@ -96,8 +94,6 @@ define half @fsub_f16(half %a, half %b) nounwind strictfp {
 ; AVX-NEXT:    vxorps %xmm1, %xmm1, %xmm1
 ; AVX-NEXT:    vblendps {{.*#+}} xmm0 = xmm0[0],xmm1[1,2,3]
 ; AVX-NEXT:    vcvtps2ph $4, %xmm0, %xmm0
-; AVX-NEXT:    vmovd %xmm0, %eax
-; AVX-NEXT:    vpinsrw $0, %eax, %xmm0, %xmm0
 ; AVX-NEXT:    retq
 ;
 ; X86-LABEL: fsub_f16:
@@ -146,8 +142,6 @@ define half @fmul_f16(half %a, half %b) nounwind strictfp {
 ; AVX-NEXT:    vxorps %xmm1, %xmm1, %xmm1
 ; AVX-NEXT:    vblendps {{.*#+}} xmm0 = xmm0[0],xmm1[1,2,3]
 ; AVX-NEXT:    vcvtps2ph $4, %xmm0, %xmm0
-; AVX-NEXT:    vmovd %xmm0, %eax
-; AVX-NEXT:    vpinsrw $0, %eax, %xmm0, %xmm0
 ; AVX-NEXT:    retq
 ;
 ; X86-LABEL: fmul_f16:
@@ -196,8 +190,6 @@ define half @fdiv_f16(half %a, half %b) nounwind strictfp {
 ; AVX-NEXT:    vxorps %xmm1, %xmm1, %xmm1
 ; AVX-NEXT:    vblendps {{.*#+}} xmm0 = xmm0[0],xmm1[1,2,3]
 ; AVX-NEXT:    vcvtps2ph $4, %xmm0, %xmm0
-; AVX-NEXT:    vmovd %xmm0, %eax
-; AVX-NEXT:    vpinsrw $0, %eax, %xmm0, %xmm0
 ; AVX-NEXT:    retq
 ;
 ; X86-LABEL: fdiv_f16:
@@ -316,8 +308,7 @@ define void @fptrunc_float_to_f16(ptr %val, ptr%ret) nounwind strictfp {
 ; AVX:       # %bb.0:
 ; AVX-NEXT:    vmovss {{.*#+}} xmm0 = mem[0],zero,zero,zero
 ; AVX-NEXT:    vcvtps2ph $4, %xmm0, %xmm0
-; AVX-NEXT:    vmovd %xmm0, %eax
-; AVX-NEXT:    movw %ax, (%rsi)
+; AVX-NEXT:    vpextrw $0, %xmm0, (%rsi)
 ; AVX-NEXT:    retq
 ;
 ; X86-LABEL: fptrunc_float_to_f16:
@@ -411,8 +402,7 @@ define void @fsqrt_f16(ptr %a) nounwind strictfp {
 ; AVX-NEXT:    vxorps %xmm1, %xmm1, %xmm1
 ; AVX-NEXT:    vblendps {{.*#+}} xmm0 = xmm0[0],xmm1[1,2,3]
 ; AVX-NEXT:    vcvtps2ph $4, %xmm0, %xmm0
-; AVX-NEXT:    vmovd %xmm0, %eax
-; AVX-NEXT:    movw %ax, (%rdi)
+; AVX-NEXT:    vpextrw $0, %xmm0, (%rdi)
 ; AVX-NEXT:    retq
 ;
 ; X86-LABEL: fsqrt_f16:
@@ -481,8 +471,6 @@ define half @fma_f16(half %a, half %b, half %c) nounwind strictfp {
 ; F16C-NEXT:    vxorps %xmm1, %xmm1, %xmm1
 ; F16C-NEXT:    vblendps {{.*#+}} xmm0 = xmm0[0],xmm1[1,2,3]
 ; F16C-NEXT:    vcvtps2ph $4, %xmm0, %xmm0
-; F16C-NEXT:    vmovd %xmm0, %eax
-; F16C-NEXT:    vpinsrw $0, %eax, %xmm0, %xmm0
 ; F16C-NEXT:    popq %rax
 ; F16C-NEXT:    retq
 ;
@@ -504,8 +492,6 @@ define half @fma_f16(half %a, half %b, half %c) nounwind strictfp {
 ; AVX512-NEXT:    vxorps %xmm0, %xmm0, %xmm0
 ; AVX512-NEXT:    vblendps {{.*#+}} xmm0 = xmm2[0],xmm0[1,2,3]
 ; AVX512-NEXT:    vcvtps2ph $4, %xmm0, %xmm0
-; AVX512-NEXT:    vmovd %xmm0, %eax
-; AVX512-NEXT:    vpinsrw $0, %eax, %xmm0, %xmm0
 ; AVX512-NEXT:    retq
 ;
 ; X86-LABEL: fma_f16:

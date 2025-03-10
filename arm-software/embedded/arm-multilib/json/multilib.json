@@ -34,25 +34,91 @@
             "variant": "aarch64a_soft_nofp_exn_rtti",
             "json": "aarch64a_soft_nofp_exn_rtti.json",
             "flags": "--target=aarch64-unknown-none-elf -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft",
-            "libraries_supported": "picolibc,newlib"
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "aarch64a_soft_nofp",
             "json": "aarch64a_soft_nofp.json",
             "flags": "--target=aarch64-unknown-none-elf -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft -fno-exceptions -fno-rtti",
-            "libraries_supported": "picolibc,newlib"
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "aarch64a_be_soft_nofp_exn_rtti",
             "json": "aarch64a_be_soft_nofp_exn_rtti.json",
             "flags": "--target=aarch64_be-unknown-none-elf -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft",
-            "libraries_supported": "picolibc,newlib"
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "aarch64a_be_soft_nofp",
             "json": "aarch64a_be_soft_nofp.json",
             "flags": "--target=aarch64_be-unknown-none-elf -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft -fno-exceptions -fno-rtti",
-            "libraries_supported": "picolibc,newlib"
+            "libraries_supported": "picolibc"
+        },
+        {
+            "variant": "aarch64r_exn_rtti_unaligned",
+            "json": "aarch64r_exn_rtti_unaligned.json",
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r"
+        },
+        {
+            "variant": "aarch64r_unaligned",
+            "json": "aarch64r_unaligned.json",
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -fno-exceptions -fno-rtti"
+        },
+        {
+            "variant": "aarch64r_be_exn_rtti",
+            "json": "aarch64r_be_exn_rtti.json",
+            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r"
+        },
+        {
+            "variant": "aarch64r_be",
+            "json": "aarch64r_be.json",
+            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r -fno-exceptions -fno-rtti"
+        },
+        {
+            "variant": "aarch64r_exn_rtti",
+            "json": "aarch64r_exn_rtti.json",
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -mno-unaligned-access"
+        },
+        {
+            "variant": "aarch64r",
+            "json": "aarch64r.json",
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -fno-exceptions -fno-rtti -mno-unaligned-access"
+        },
+        {
+            "variant": "aarch64r_soft_nofp_exn_rtti_unaligned",
+            "json": "aarch64r_soft_nofp_exn_rtti_unaligned.json",
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft",
+            "libraries_supported": "picolibc"
+        },
+        {
+            "variant": "aarch64r_soft_nofp_unaligned",
+            "json": "aarch64r_soft_nofp_unaligned.json",
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft",
+            "libraries_supported": "picolibc"
+        },
+        {
+            "variant": "aarch64r_soft_nofp_exn_rtti",
+            "json": "aarch64r_soft_nofp_exn_rtti.json",
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft -mno-unaligned-access",
+            "libraries_supported": "picolibc"
+        },
+        {
+            "variant": "aarch64r_soft_nofp",
+            "json": "aarch64r_soft_nofp.json",
+            "flags": "--target=aarch64-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft -mno-unaligned-access",
+            "libraries_supported": "picolibc"
+        },
+        {
+            "variant": "aarch64r_be_soft_nofp_exn_rtti",
+            "json": "aarch64r_be_soft_nofp_exn_rtti.json",
+            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -mabi=aapcs-soft",
+            "libraries_supported": "picolibc"
+        },
+        {
+            "variant": "aarch64r_be_soft_nofp",
+            "json": "aarch64r_be_soft_nofp.json",
+            "flags": "--target=aarch64_be-unknown-none-elf -march=armv8-r -march=armvX+nofp -march=armvX+nosimd -fno-exceptions -fno-rtti -mabi=aapcs-soft",
+            "libraries_supported": "picolibc"
         },
         {
             "variant": "armv4t_exn_rtti",
@@ -125,6 +191,16 @@
             "flags": "--target=armv7-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
         },
         {
+            "variant": "armebv7a_soft_nofp_exn_rtti",
+            "json": "armebv7a_soft_nofp_exn_rtti.json",
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none"
+        },
+        {
+            "variant": "armebv7a_soft_nofp",
+            "json": "armebv7a_soft_nofp.json",
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
+        },
+        {
             "variant": "armv7a_hard_vfpv3_d16_exn_rtti_unaligned",
             "json": "armv7a_hard_vfpv3_d16_exn_rtti_unaligned.json",
             "flags": "--target=armv7-unknown-none-eabihf -mfpu=vfpv3-d16"
@@ -145,6 +221,16 @@
             "flags": "--target=armv7-unknown-none-eabihf -mfpu=vfpv3-d16 -fno-exceptions -fno-rtti -mno-unaligned-access"
         },
         {
+            "variant": "armebv7a_hard_vfpv3_d16_exn_rtti",
+            "json": "armebv7a_hard_vfpv3_d16_exn_rtti.json",
+            "flags": "--target=armebv7-unknown-none-eabihf -mfpu=vfpv3-d16"
+        },
+        {
+            "variant": "armebv7a_hard_vfpv3_d16",
+            "json": "armebv7a_hard_vfpv3_d16.json",
+            "flags": "--target=armebv7-unknown-none-eabihf -mfpu=vfpv3-d16 -fno-exceptions -fno-rtti"
+        },
+        {
             "variant": "armv7a_soft_vfpv3_d16_exn_rtti_unaligned",
             "json": "armv7a_soft_vfpv3_d16_exn_rtti_unaligned.json",
             "flags": "--target=armv7-unknown-none-eabi -mfpu=vfpv3-d16"
@@ -163,6 +249,16 @@
             "variant": "armv7a_soft_vfpv3_d16",
             "json": "armv7a_soft_vfpv3_d16.json",
             "flags": "--target=armv7-unknown-none-eabi -mfpu=vfpv3-d16 -fno-exceptions -fno-rtti -mno-unaligned-access"
+        },
+        {
+            "variant": "armebv7a_soft_vfpv3_d16_exn_rtti",
+            "json": "armebv7a_soft_vfpv3_d16_exn_rtti.json",
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=vfpv3-d16"
+        },
+        {
+            "variant": "armebv7a_soft_vfpv3_d16",
+            "json": "armebv7a_soft_vfpv3_d16.json",
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=vfpv3-d16 -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv7r_soft_nofp_exn_rtti_unaligned",
@@ -265,6 +361,16 @@
             "flags": "--target=thumbv7m-unknown-none-eabi -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access"
         },
         {
+            "variant": "armebv7m_soft_fpv4_sp_d16_exn_rtti",
+            "json": "armebv7m_soft_fpv4_sp_d16_exn_rtti.json",
+            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=fpv4-sp-d16"
+        },
+        {
+            "variant": "armebv7m_soft_fpv4_sp_d16",
+            "json": "armebv7m_soft_fpv4_sp_d16.json",
+            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti"
+         },
+        {
             "variant": "armv7m_hard_fpv4_sp_d16_exn_rtti_unaligned",
             "json": "armv7m_hard_fpv4_sp_d16_exn_rtti_unaligned.json",
             "flags": "--target=thumbv7m-unknown-none-eabihf -mfpu=fpv4-sp-d16"
@@ -275,6 +381,11 @@
             "flags": "--target=thumbv7m-unknown-none-eabihf -mfpu=fpv4-sp-d16 -mno-unaligned-access"
         },
         {
+            "variant": "armebv7m_hard_fpv4_sp_d16_exn_rtti",
+            "json": "armebv7m_hard_fpv4_sp_d16_exn_rtti.json",
+            "flags": "--target=thumbebv7m-unknown-none-eabihf -mfpu=fpv4-sp-d16"
+        },
+        {
             "variant": "armv7m_hard_fpv4_sp_d16_unaligned",
             "json": "armv7m_hard_fpv4_sp_d16_unaligned.json",
             "flags": "--target=thumbv7m-unknown-none-eabihf -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti"
@@ -283,6 +394,11 @@
             "variant": "armv7m_hard_fpv4_sp_d16",
             "json": "armv7m_hard_fpv4_sp_d16.json",
             "flags": "--target=thumbv7m-unknown-none-eabihf -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access"
+        },
+        {
+            "variant": "armebv7m_hard_fpv4_sp_d16",
+            "json": "armebv7m_hard_fpv4_sp_d16.json",
+            "flags": "--target=thumbebv7m-unknown-none-eabihf -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv7m_hard_fpv5_d16_exn_rtti",
@@ -313,6 +429,16 @@
             "variant": "armv7m_soft_nofp",
             "json": "armv7m_soft_nofp.json",
             "flags": "--target=thumbv7m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
+        },
+        {
+            "variant": "armebv7m_soft_nofp_exn_rtti",
+            "json": "armebv7m_soft_nofp_exn_rtti.json",
+            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=none"
+        },
+        {
+            "variant": "armebv7m_soft_nofp",
+            "json": "armebv7m_soft_nofp.json",
+            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv8m.main_soft_nofp_exn_rtti",

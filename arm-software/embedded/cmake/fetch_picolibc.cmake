@@ -14,7 +14,7 @@ read_repo_version(picolibc picolibc)
 get_patch_command(${CMAKE_CURRENT_LIST_DIR}/.. picolibc picolibc_patch_command)
 
 FetchContent_Declare(picolibc
-    GIT_REPOSITORY https://github.com/picolibc/picolibc.git
+    GIT_REPOSITORY "${picolibc_URL}"
     GIT_TAG "${picolibc_TAG}"
     GIT_SHALLOW "${picolibc_SHALLOW}"
     GIT_PROGRESS TRUE
