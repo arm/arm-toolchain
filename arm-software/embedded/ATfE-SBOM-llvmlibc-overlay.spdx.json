@@ -1,7 +1,7 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-05T00:00:00Z",
+        "created": "2025-03-10T16:14:01Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
@@ -30,8 +30,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "compiler-rt",
-            "originator": "Organization: https://foundation.llvm.org/ (info@llvm.org)",
-            "supplier": "Organization: https://foundation.llvm.org/ (info@llvm.org)"
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-09ef5819-9c48-5d94-b42b-4a918b20f6e4",
@@ -41,8 +41,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "libc",
-            "originator": "Organization: https://foundation.llvm.org/ (info@llvm.org)",
-            "supplier": "Organization: https://foundation.llvm.org/ (info@llvm.org)"
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
         }
     ],
     "relationships": [

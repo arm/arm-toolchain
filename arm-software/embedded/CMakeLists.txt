@@ -321,7 +321,7 @@ if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
     )
     install(
         FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/sbom_atfe_newlib.spdx.json
+        ${CMAKE_CURRENT_SOURCE_DIR}/ATfE-SBOM-newlib-overlay.spdx.json
         DESTINATION .
         COMPONENT llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
     )
@@ -362,7 +362,7 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
 
     install(
         FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/sbom_atfe_llvmlibc.spdx.json
+        ${CMAKE_CURRENT_SOURCE_DIR}/ATfE-SBOM-llvmlibc-overlay.spdx.json
         DESTINATION .
         COMPONENT llvm-toolchain-llvmlibc-configs
     )
@@ -700,7 +700,7 @@ install(
 )
 
 install(
-    FILES CHANGELOG.md LICENSE.txt README.md sbom_atfe.spdx.json
+    FILES CHANGELOG.md LICENSE.txt README.md ATfE-SBOM.spdx.json
     DESTINATION .
     COMPONENT llvm-toolchain-docs
 )

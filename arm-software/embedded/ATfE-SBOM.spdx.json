@@ -1,13 +1,13 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-05T00:00:00Z",
+        "created": "2025-03-10T16:13:58Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
     },
     "dataLicense": "CC0-1.0",
-    "name": "Arm Toolchain for Embedded newlib overlay",
+    "name": "Arm Toolchain for Embedded",
     "spdxVersion": "SPDX-2.3",
     "documentNamespace": "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
     "packages": [
@@ -23,6 +23,39 @@
             "supplier": "Organization: Arm Limited (open-source-office@arm.com)"
         },
         {
+            "SPDXID": "SPDXRef-Package-e47101d8-f397-517a-826a-074c99307e4a",
+            "downloadLocation": "https://github.com/llvm/llvm-project",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "llvm-project",
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-2f874dca-9a59-5f2c-8623-486b883acceb",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/clang",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "clang",
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-a247e320-5008-5abf-98dd-286d8ce8d45d",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/lld",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "lld",
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+        },
+        {
             "SPDXID": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",
             "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/compiler-rt",
             "filesAnalyzed": false,
@@ -30,8 +63,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "compiler-rt",
-            "originator": "Organization: https://foundation.llvm.org/ (info@llvm.org)",
-            "supplier": "Organization: https://foundation.llvm.org/ (info@llvm.org)"
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-55633fe2-115b-594e-a5ec-84ece9a16f80",
@@ -41,8 +74,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "libcxx",
-            "originator": "Organization: https://foundation.llvm.org/ (info@llvm.org)",
-            "supplier": "Organization: https://foundation.llvm.org/ (info@llvm.org)"
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-90f44391-c061-5db7-ad32-4c0951366e9e",
@@ -52,8 +85,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "libcxxabi",
-            "originator": "Organization: https://foundation.llvm.org/ (info@llvm.org)",
-            "supplier": "Organization: https://foundation.llvm.org/ (info@llvm.org)"
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-95411904-8af0-5830-8fbc-4185e16949de",
@@ -63,17 +96,17 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "libunwind",
-            "originator": "Organization: https://foundation.llvm.org/ (info@llvm.org)",
-            "supplier": "Organization: https://foundation.llvm.org/ (info@llvm.org)"
+            "originator": "Organization: LLVM foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM foundation (info@llvm.org)"
         },
         {
-            "SPDXID": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
-            "downloadLocation": "https://sourceware.org/newlib/",
+            "SPDXID": "SPDXRef-Package-8f339123-88e4-5ff4-9a69-bc4b0c8d65d0",
+            "downloadLocation": "https://github.com/picolibc/picolibc",
             "filesAnalyzed": false,
-            "licenseComments": "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.NEWLIB",
-            "name": "newlib",
-            "originator": "Organization: https://sourceware.org/newlib/ (newlib@sourceware.org)",
-            "supplier": "Organization: https://sourceware.org/newlib/ (newlib@sourceware.org)"
+            "licenseComments": "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.picolibc",
+            "name": "picolibc",
+            "originator": "Person: Keith Packard (https://github.com/keith-packard)",
+            "supplier": "Person: Keith Packard (https://github.com/keith-packard)"
         }
     ],
     "relationships": [
@@ -85,6 +118,21 @@
         {
             "spdxElementId": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
             "relatedSpdxElement": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
+            "relationshipType": "CONTAINS"
+        },
+        {
+            "spdxElementId": "SPDXRef-Package-e47101d8-f397-517a-826a-074c99307e4a",
+            "relatedSpdxElement": "SPDXRef-Package-e47101d8-f397-517a-826a-074c99307e4a",
+            "relationshipType": "CONTAINS"
+        },
+        {
+            "spdxElementId": "SPDXRef-Package-2f874dca-9a59-5f2c-8623-486b883acceb",
+            "relatedSpdxElement": "SPDXRef-Package-2f874dca-9a59-5f2c-8623-486b883acceb",
+            "relationshipType": "CONTAINS"
+        },
+        {
+            "spdxElementId": "SPDXRef-Package-a247e320-5008-5abf-98dd-286d8ce8d45d",
+            "relatedSpdxElement": "SPDXRef-Package-a247e320-5008-5abf-98dd-286d8ce8d45d",
             "relationshipType": "CONTAINS"
         },
         {
@@ -108,8 +156,8 @@
             "relationshipType": "CONTAINS"
         },
         {
-            "spdxElementId": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
-            "relatedSpdxElement": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
+            "spdxElementId": "SPDXRef-Package-8f339123-88e4-5ff4-9a69-bc4b0c8d65d0",
+            "relatedSpdxElement": "SPDXRef-Package-8f339123-88e4-5ff4-9a69-bc4b0c8d65d0",
             "relationshipType": "CONTAINS"
         }
     ]

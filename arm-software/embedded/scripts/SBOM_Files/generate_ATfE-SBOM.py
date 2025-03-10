@@ -1,14 +1,18 @@
 #  SPDX-FileCopyrightText: 2023 spdx contributors
 #
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+#
 #  SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-# Purpose: This script helps to generate SBOM for ATfE newlib overlay package.
+# Purpose: This script helps to generate SBOM for ATfE.
 #
 # Installation: Kindly refer https://github.com/spdx/tools-python for pre-requisite installation.
 #
-# Usage: python spdx2_document_from_scratch_newlib.py
+# Usage: python generate_ATfE-SBOM.py
 #
-# Output file generated: sbom_atfe_newlib.spdx.json
+# Output file generated: ATfE-SBOM.spdx.json
 #
 import logging
 import uuid
@@ -60,22 +64,19 @@ def create_Package(
 creation_info = CreationInfo(
     spdx_version="SPDX-2.3",
     spdx_id="SPDXRef-DOCUMENT",
-    name="Arm Toolchain for Embedded newlib overlay",
+    name="Arm Toolchain for Embedded",
     data_license="CC0-1.0",
     document_namespace="https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
     creators=[
         Actor(ActorType.ORGANIZATION, "Arm Limited", "open-source-office@arm.com")
     ],
-    created=datetime(2025, 3, 5),
+    created=datetime.now()
 )
 
 # creation_info is the only required property of the Document class (have a look there!), the rest are optional lists.
-# So, we are set up to create a new document instance.
 document = Document(creation_info)
 
 # The document currently does not describe anything. Let's create a package that we can add to it.
-# The Package class has quite a few properties (have a look there!),
-# but only name, spdx_id and download_location are mandatory in SPDX v2.3.
 package_url = (
     "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded"
 )
@@ -93,6 +94,49 @@ package_atfe = create_Package(
     "",
 )
 
+package_url = "https://github.com/llvm/llvm-project"
+package_uuid_llvm = "SPDXRef-Package-" + str(
+    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
+)
+package_llvm = create_Package(
+    "llvm-project",
+    package_uuid_llvm,
+    package_url,
+    ActorType.ORGANIZATION,
+    "LLVM foundation",
+    "info@llvm.org",
+    "Apache-2.0 WITH LLVM-exception",
+    "",
+)
+
+package_url = "https://github.com/llvm/llvm-project/tree/main/clang"
+package_uuid_clang = "SPDXRef-Package-" + str(
+    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
+)
+package_clang = create_Package(
+    "clang",
+    package_uuid_clang,
+    package_url,
+    ActorType.ORGANIZATION,
+    "LLVM foundation",
+    "info@llvm.org",
+    "Apache-2.0 WITH LLVM-exception",
+    "",
+)
+
+package_url = "https://github.com/llvm/llvm-project/tree/main/lld"
+package_uuid_lld = "SPDXRef-Package-" + str(uuid.uuid5(uuid.NAMESPACE_URL, package_url))
+package_lld = create_Package(
+    "lld",
+    package_uuid_lld,
+    package_url,
+    ActorType.ORGANIZATION,
+    "LLVM foundation",
+    "info@llvm.org",
+    "Apache-2.0 WITH LLVM-exception",
+    "",
+)
+
 package_url = "https://github.com/llvm/llvm-project/tree/main/compiler-rt"
 package_uuid_compiler_rt = "SPDXRef-Package-" + str(
     uuid.uuid5(uuid.NAMESPACE_URL, package_url)
@@ -102,7 +146,7 @@ package_compiler_rt = create_Package(
     package_uuid_compiler_rt,
     package_url,
     ActorType.ORGANIZATION,
-    "https://foundation.llvm.org/",
+    "LLVM foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -117,7 +161,7 @@ package_libcxx = create_Package(
     package_uuid_libcxx,
     package_url,
     ActorType.ORGANIZATION,
-    "https://foundation.llvm.org/",
+    "LLVM foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -132,7 +176,7 @@ package_libcxxabi = create_Package(
     package_uuid_libcxxabi,
     package_url,
     ActorType.ORGANIZATION,
-    "https://foundation.llvm.org/",
+    "LLVM foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -147,35 +191,38 @@ package_libunwind = create_Package(
     package_uuid_libunwind,
     package_url,
     ActorType.ORGANIZATION,
-    "https://foundation.llvm.org/",
+    "LLVM foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
 )
 
-package_url = "https://sourceware.org/newlib/"
-package_uuid_newlib = "SPDXRef-Package-" + str(
+package_url = "https://github.com/picolibc/picolibc"
+package_uuid_picolibc = "SPDXRef-Package-" + str(
     uuid.uuid5(uuid.NAMESPACE_URL, package_url)
 )
-package_newlib = create_Package(
-    "newlib",
-    package_uuid_newlib,
+package_picolibc = create_Package(
+    "picolibc",
+    package_uuid_picolibc,
     package_url,
-    ActorType.ORGANIZATION,
-    "https://sourceware.org/newlib/",
-    "newlib@sourceware.org",
+    ActorType.PERSON,
+    "Keith Packard",
+    "https://github.com/keith-packard",
     "",
-    "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.NEWLIB",
+    "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.picolibc",
 )
 
 # Now that we have a package defined, we can add it to the document's package property.
 document.packages = [
     package_atfe,
+    package_llvm,
+    package_clang,
+    package_lld,
     package_compiler_rt,
     package_libcxx,
     package_libcxxabi,
     package_libunwind,
-    package_newlib,
+    package_picolibc,
 ]
 
 # A DESCRIBES relationship asserts that the document indeed describes the package.
@@ -184,18 +231,18 @@ describes_relationship = Relationship(
 )
 document.relationships = [describes_relationship]
 
-# Assuming the package contains those two files, we create two CONTAINS relationships.
-
-# This library uses run-time type checks when assigning properties.
-# Because in-place alterations like .append() circumvent these checks, we don't use them here.
-
-# We now have created a document with basic creation information, describing a package that contains two files.
-# You can also add Annotations, Snippets and ExtractedLicensingInfo to the document in an analogous manner to the above.
-# Have a look at their respective classes if you are unsure about their properties.
-
-# Assuming the package contains those two files, we create two CONTAINS relationships.
+# We now have created a document with basic creation information, describing a package.
 contains_relationship_atfe = Relationship(
     package_uuid_atfe, RelationshipType.CONTAINS, package_uuid_atfe
+)
+contains_relationship_llvm = Relationship(
+    package_uuid_llvm, RelationshipType.CONTAINS, package_uuid_llvm
+)
+contains_relationship_clang = Relationship(
+    package_uuid_clang, RelationshipType.CONTAINS, package_uuid_clang
+)
+contains_relationship_lld = Relationship(
+    package_uuid_lld, RelationshipType.CONTAINS, package_uuid_lld
 )
 contains_relationship_compiler_rt = Relationship(
     package_uuid_compiler_rt, RelationshipType.CONTAINS, package_uuid_compiler_rt
@@ -209,26 +256,26 @@ contains_relationship_libcxxabi = Relationship(
 contains_relationship_libunwind = Relationship(
     package_uuid_libunwind, RelationshipType.CONTAINS, package_uuid_libunwind
 )
-contains_relationship_newlib = Relationship(
-    package_uuid_newlib, RelationshipType.CONTAINS, package_uuid_newlib
+contains_relationship_picolibc = Relationship(
+    package_uuid_picolibc, RelationshipType.CONTAINS, package_uuid_picolibc
 )
 
 # Because in-place alterations like .append() circumvent these checks, we don't use them here.
 document.relationships += [
     contains_relationship_atfe,
+    contains_relationship_llvm,
+    contains_relationship_clang,
+    contains_relationship_lld,
     contains_relationship_compiler_rt,
     contains_relationship_libcxx,
     contains_relationship_libcxxabi,
     contains_relationship_libunwind,
-    contains_relationship_newlib,
+    contains_relationship_picolibc,
 ]
 
 # This library provides comprehensive validation against the SPDX specification.
-# Note that details of the validation depend on the SPDX version of the document.
 validation_messages: List[ValidationMessage] = validate_full_spdx_document(document)
 
-# You can have a look at each entry's message and context (like spdx_id, parent_id, full_element)
-# which will help you pinpoint the location of the invalidity.
 for message in validation_messages:
     logging.warning(message.validation_message)
     logging.warning(message.context)
@@ -236,7 +283,5 @@ for message in validation_messages:
 # If the document is valid, validation_messages will be empty.
 assert validation_messages == []
 
-# Finally, we can serialize the document to any of the five supported formats.
-# Using the write_file() method from the write_anything module,
-# the format will be determined by the file ending: .spdx (tag-value), .json, .xml, .yaml. or .rdf (or .rdf.xml)
-write_file(document, "sbom_atfe_newlib.spdx.json")
+# Using the write_file() method from the write_anything module.
+write_file(document, "ATfE-SBOM.spdx.json")
