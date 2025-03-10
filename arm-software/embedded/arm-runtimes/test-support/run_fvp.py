@@ -149,6 +149,7 @@ def run_fvp(
     Ethos-U rev [0-9a-z]+ --- \w{3} {1,2}\d{1,2} \d{4} \d{2}:\d{2}:\d{2}
     \(C\) COPYRIGHT (?:\d{4}|\d{4}-\d{4})(?:,\s?(?:\d{4}|\d{4}-\d{4}))* Arm Limited
     ALL RIGHTS RESERVED
+
 """
         # Not all Corstone-310 versions print the "Info" message.
         stop_info_pattern = "\nInfo: /OSCI/SystemC: Simulation stopped by user.\n"
