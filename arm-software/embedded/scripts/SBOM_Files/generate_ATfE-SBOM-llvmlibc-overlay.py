@@ -130,23 +130,22 @@ package_libc = create_Package(
 document.packages = [package_atfe, package_compiler_rt, package_libc]
 
 # A DESCRIBES relationship asserts that the document indeed describes the package.
-describes_relationship = Relationship(
+describes_relationship_atfe = Relationship(
     "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_atfe
 )
-document.relationships = [describes_relationship]
 
-# We now have created a document with basic creation information, describing a package.
-contains_relationship_compiler_rt = Relationship(
-    package_uuid_compiler_rt, RelationshipType.CONTAINS, package_uuid_compiler_rt
-)
-contains_relationship_libc = Relationship(
-    package_uuid_libc, RelationshipType.CONTAINS, package_uuid_libc
+describes_relationship_compiler_rt = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_compiler_rt
 )
 
-# Because in-place alterations like .append() circumvent these checks, we don't use them here.
-document.relationships += [
-    contains_relationship_compiler_rt,
-    contains_relationship_libc,
+describes_relationship_libc = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libc
+)
+
+document.relationships = [
+    describes_relationship_atfe,
+    describes_relationship_compiler_rt,
+    describes_relationship_libc,
 ]
 
 # This library provides comprehensive validation against the SPDX specification.

@@ -1,7 +1,7 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-11T13:49:34Z",
+        "created": "2025-03-11T14:57:55Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
@@ -52,14 +52,14 @@
             "relationshipType": "DESCRIBES"
         },
         {
-            "spdxElementId": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",
+            "spdxElementId": "SPDXRef-DOCUMENT",
             "relatedSpdxElement": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",
-            "relationshipType": "CONTAINS"
+            "relationshipType": "DESCRIBES"
         },
         {
-            "spdxElementId": "SPDXRef-Package-09ef5819-9c48-5d94-b42b-4a918b20f6e4",
+            "spdxElementId": "SPDXRef-DOCUMENT",
             "relatedSpdxElement": "SPDXRef-Package-09ef5819-9c48-5d94-b42b-4a918b20f6e4",
-            "relationshipType": "CONTAINS"
+            "relationshipType": "DESCRIBES"
         }
     ]
 }

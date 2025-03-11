@@ -182,35 +182,38 @@ document.packages = [
 ]
 
 # A DESCRIBES relationship asserts that the document indeed describes the package.
-describes_relationship = Relationship(
+describes_relationship_atfe = Relationship(
     "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_atfe
 )
-document.relationships = [describes_relationship]
 
-# We now have created a document with basic creation information, describing a package.
-contains_relationship_compiler_rt = Relationship(
-    package_uuid_compiler_rt, RelationshipType.CONTAINS, package_uuid_compiler_rt
-)
-contains_relationship_libcxx = Relationship(
-    package_uuid_libcxx, RelationshipType.CONTAINS, package_uuid_libcxx
-)
-contains_relationship_libcxxabi = Relationship(
-    package_uuid_libcxxabi, RelationshipType.CONTAINS, package_uuid_libcxxabi
-)
-contains_relationship_libunwind = Relationship(
-    package_uuid_libunwind, RelationshipType.CONTAINS, package_uuid_libunwind
-)
-contains_relationship_newlib = Relationship(
-    package_uuid_newlib, RelationshipType.CONTAINS, package_uuid_newlib
+describes_relationship_compiler_rt = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_compiler_rt
 )
 
-# Because in-place alterations like .append() circumvent these checks, we don't use them here.
+describes_relationship_libcxx = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libcxx
+)
+
+
+describes_relationship_libcxxabi = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libcxxabi
+)
+
+describes_relationship_libunwind = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libunwind
+)
+
+describes_relationship_newlib = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_newlib
+)
+
 document.relationships += [
-    contains_relationship_compiler_rt,
-    contains_relationship_libcxx,
-    contains_relationship_libcxxabi,
-    contains_relationship_libunwind,
-    contains_relationship_newlib,
+    describes_relationship_atfe,
+    describes_relationship_compiler_rt,
+    describes_relationship_libcxx,
+    describes_relationship_libcxxabi,
+    describes_relationship_libunwind,
+    describes_relationship_newlib,
 ]
 
 # This library provides comprehensive validation against the SPDX specification.

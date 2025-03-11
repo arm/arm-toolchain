@@ -228,47 +228,52 @@ document.packages = [
 ]
 
 # A DESCRIBES relationship asserts that the document indeed describes the package.
-describes_relationship = Relationship(
+describes_relationship_atfe = Relationship(
     "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_atfe
 )
-document.relationships = [describes_relationship]
 
-# We now have created a document with basic creation information, describing a package.
-contains_relationship_llvm = Relationship(
-    package_uuid_llvm, RelationshipType.CONTAINS, package_uuid_llvm
-)
-contains_relationship_clang = Relationship(
-    package_uuid_clang, RelationshipType.CONTAINS, package_uuid_clang
-)
-contains_relationship_lld = Relationship(
-    package_uuid_lld, RelationshipType.CONTAINS, package_uuid_lld
-)
-contains_relationship_compiler_rt = Relationship(
-    package_uuid_compiler_rt, RelationshipType.CONTAINS, package_uuid_compiler_rt
-)
-contains_relationship_libcxx = Relationship(
-    package_uuid_libcxx, RelationshipType.CONTAINS, package_uuid_libcxx
-)
-contains_relationship_libcxxabi = Relationship(
-    package_uuid_libcxxabi, RelationshipType.CONTAINS, package_uuid_libcxxabi
-)
-contains_relationship_libunwind = Relationship(
-    package_uuid_libunwind, RelationshipType.CONTAINS, package_uuid_libunwind
-)
-contains_relationship_picolibc = Relationship(
-    package_uuid_picolibc, RelationshipType.CONTAINS, package_uuid_picolibc
+describes_relationship_llvm = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_llvm
 )
 
-# Because in-place alterations like .append() circumvent these checks, we don't use them here.
-document.relationships += [
-    contains_relationship_llvm,
-    contains_relationship_clang,
-    contains_relationship_lld,
-    contains_relationship_compiler_rt,
-    contains_relationship_libcxx,
-    contains_relationship_libcxxabi,
-    contains_relationship_libunwind,
-    contains_relationship_picolibc,
+describes_relationship_clang = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_clang
+)
+
+describes_relationship_lld = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_lld
+)
+
+describes_relationship_compiler_rt = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_compiler_rt
+)
+
+describes_relationship_libcxx = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libcxx
+)
+
+describes_relationship_libcxxabi = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libcxxabi
+)
+
+describes_relationship_libunwind = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libunwind
+)
+
+describes_relationship_picolibc = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_picolibc
+)
+
+document.relationships = [
+    describes_relationship_atfe,
+    describes_relationship_llvm,
+    describes_relationship_clang,
+    describes_relationship_lld,
+    describes_relationship_compiler_rt,
+    describes_relationship_libcxx,
+    describes_relationship_libcxxabi,
+    describes_relationship_libunwind,
+    describes_relationship_picolibc,
 ]
 
 # This library provides comprehensive validation against the SPDX specification.
