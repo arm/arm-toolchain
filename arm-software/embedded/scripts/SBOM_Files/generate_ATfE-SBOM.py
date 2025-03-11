@@ -36,6 +36,7 @@ from spdx_tools.spdx.writer.write_anything import write_file
 # This example shows how to use the spdx-tools to create an SPDX document from scratch,
 # validate it and write it to a file.
 
+
 def create_Package(
     name,
     uuid,
@@ -60,6 +61,7 @@ def create_Package(
 
     return package
 
+
 # First up, we need general information about the creation of the document, summarised by the CreationInfo class.
 creation_info = CreationInfo(
     spdx_version="SPDX-2.3",
@@ -70,7 +72,7 @@ creation_info = CreationInfo(
     creators=[
         Actor(ActorType.ORGANIZATION, "Arm Limited", "open-source-office@arm.com")
     ],
-    created=datetime.now()
+    created=datetime.now(),
 )
 
 # creation_info is the only required property of the Document class (have a look there!), the rest are optional lists.
@@ -103,7 +105,7 @@ package_llvm = create_Package(
     package_uuid_llvm,
     package_url,
     ActorType.ORGANIZATION,
-    "LLVM foundation",
+    "LLVM Foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -118,7 +120,7 @@ package_clang = create_Package(
     package_uuid_clang,
     package_url,
     ActorType.ORGANIZATION,
-    "LLVM foundation",
+    "LLVM Foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -131,7 +133,7 @@ package_lld = create_Package(
     package_uuid_lld,
     package_url,
     ActorType.ORGANIZATION,
-    "LLVM foundation",
+    "LLVM Foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -146,7 +148,7 @@ package_compiler_rt = create_Package(
     package_uuid_compiler_rt,
     package_url,
     ActorType.ORGANIZATION,
-    "LLVM foundation",
+    "LLVM Foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -161,7 +163,7 @@ package_libcxx = create_Package(
     package_uuid_libcxx,
     package_url,
     ActorType.ORGANIZATION,
-    "LLVM foundation",
+    "LLVM Foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -176,7 +178,7 @@ package_libcxxabi = create_Package(
     package_uuid_libcxxabi,
     package_url,
     ActorType.ORGANIZATION,
-    "LLVM foundation",
+    "LLVM Foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -191,7 +193,7 @@ package_libunwind = create_Package(
     package_uuid_libunwind,
     package_url,
     ActorType.ORGANIZATION,
-    "LLVM foundation",
+    "LLVM Foundation",
     "info@llvm.org",
     "Apache-2.0 WITH LLVM-exception",
     "",
@@ -232,9 +234,6 @@ describes_relationship = Relationship(
 document.relationships = [describes_relationship]
 
 # We now have created a document with basic creation information, describing a package.
-contains_relationship_atfe = Relationship(
-    package_uuid_atfe, RelationshipType.CONTAINS, package_uuid_atfe
-)
 contains_relationship_llvm = Relationship(
     package_uuid_llvm, RelationshipType.CONTAINS, package_uuid_llvm
 )
@@ -262,7 +261,6 @@ contains_relationship_picolibc = Relationship(
 
 # Because in-place alterations like .append() circumvent these checks, we don't use them here.
 document.relationships += [
-    contains_relationship_atfe,
     contains_relationship_llvm,
     contains_relationship_clang,
     contains_relationship_lld,

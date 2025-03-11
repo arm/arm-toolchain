@@ -1,7 +1,7 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-10T16:14:01Z",
+        "created": "2025-03-11T13:49:34Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
@@ -30,8 +30,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "compiler-rt",
-            "originator": "Organization: LLVM foundation (info@llvm.org)",
-            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-09ef5819-9c48-5d94-b42b-4a918b20f6e4",
@@ -41,8 +41,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "libc",
-            "originator": "Organization: LLVM foundation (info@llvm.org)",
-            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
         }
     ],
     "relationships": [
@@ -50,11 +50,6 @@
             "spdxElementId": "SPDXRef-DOCUMENT",
             "relatedSpdxElement": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
             "relationshipType": "DESCRIBES"
-        },
-        {
-            "spdxElementId": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
-            "relatedSpdxElement": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
-            "relationshipType": "CONTAINS"
         },
         {
             "spdxElementId": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",

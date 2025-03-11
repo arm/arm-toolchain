@@ -1,7 +1,7 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-10T16:13:59Z",
+        "created": "2025-03-11T13:49:39Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
@@ -30,8 +30,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "compiler-rt",
-            "originator": "Organization: LLVM foundation (info@llvm.org)",
-            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-55633fe2-115b-594e-a5ec-84ece9a16f80",
@@ -41,8 +41,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "libcxx",
-            "originator": "Organization: LLVM foundation (info@llvm.org)",
-            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-90f44391-c061-5db7-ad32-4c0951366e9e",
@@ -52,8 +52,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "libcxxabi",
-            "originator": "Organization: LLVM foundation (info@llvm.org)",
-            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-95411904-8af0-5830-8fbc-4185e16949de",
@@ -63,8 +63,8 @@
             "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
             "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
             "name": "libunwind",
-            "originator": "Organization: LLVM foundation (info@llvm.org)",
-            "supplier": "Organization: LLVM foundation (info@llvm.org)"
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
         },
         {
             "SPDXID": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
@@ -81,11 +81,6 @@
             "spdxElementId": "SPDXRef-DOCUMENT",
             "relatedSpdxElement": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
             "relationshipType": "DESCRIBES"
-        },
-        {
-            "spdxElementId": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
-            "relatedSpdxElement": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
-            "relationshipType": "CONTAINS"
         },
         {
             "spdxElementId": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",
