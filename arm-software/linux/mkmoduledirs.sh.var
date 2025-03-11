@@ -77,14 +77,20 @@ set install_prefix ${ATFL_INSTALL_PREFIX}
 #   from the install directory
 set module_prefix [file dirname \$ModulesCurrentModulefile]/../..
 
-# Base directory of all dependant modules
-set moduledeps       \$module_prefix/moduledeps
+###########################################################################
+# Helper Functions                                                      #
+###########################################################################
+proc is-lmod {} {
+  global env
+  if { [info exists env(LMOD_VERSION_MAJOR)] } {
+       return true
+  }
+  return false
+}
 
 ###########################################################################
 # Main section                                                            #
 ###########################################################################
-# Pull in some utility functions
-source \$module_prefix/moduleglobals/compiler_functions/${ATFL_VERSION}
 
 # Install directory of this package
 set package_prefix   \$install_prefix
@@ -99,9 +105,6 @@ set package_prefix   \$install_prefix
    prepend-path LIBRARY_PATH \$package_prefix/lib
    append-path LIBRARY_PATH \$package_prefix/lib/aarch64-unknown-linux-gnu
    prepend-path MANPATH \$package_prefix/share/man
-
-# Make dependant modules available
-prepend-path    MODULEPATH                       \$moduledeps/atfl/${ATFL_VERSION}
 
 if { [is-lmod] } {
   # Lmod family
@@ -125,37 +128,3 @@ switch -- \$SHELL {
 }
 EOT
 ) > "modulefiles/atfl/${ATFL_VERSION}"
-
-mkdir -p "moduleglobals/compiler_functions"
-(
-cat <<EOT
-#%Module1.0################################################################
-##
-##  Utility functions for Arm modulefiles
-##
-##
-##  Copyright 2015-2025 Arm Limited. All rights reserved.
-##
-
-# Helper function, to load/unload a set of prerequisite modules
-proc depends-on {dependencies} {
-  foreach dep \$dependencies {
-    if { [module-info mode load] } {
-      # This will load the module if it has not already been loaded
-      # is-loaded only triggers on a mode load, so it would not allow an auto-unload
-      if { ! [is-loaded \$dep] } {
-        module load \$dep
-      }
-    }
-  }
-}
-
-proc is-lmod {} {
-  global env
-  if { [info exists env(LMOD_VERSION_MAJOR)] } {
-       return true
-  }
-  return false
-}
-EOT
-) > "moduleglobals/compiler_functions/${ATFL_VERSION}"
