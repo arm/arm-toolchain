@@ -504,7 +504,7 @@ install(
     FILES
     ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
     DESTINATION .
-    COMPONENT llvm-toolchain-docs
+    COMPONENT llvm-toolchain-third-party-licenses
 )
 
 
