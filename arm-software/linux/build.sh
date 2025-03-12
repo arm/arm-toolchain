@@ -381,7 +381,7 @@ package() {
     mkdir -p "${ATFL_DIR}/arm"
     cp "${MKMODULEDIRS_PATH}" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_VERSION%/${ATFL_VERSION}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
-    sed -i "s/%ATFL_BUILD%/unknown/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
+    sed -i "s/%ATFL_BUILD%/${BUILD_NUMBER:-"unknown"}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_INSTALL_PREFIX%/\$\(dirname \$\(dirname \`realpath \$BASH_SOURCE\`\)\)/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     chmod 0755 ${ATFL_DIR}/arm/mkmoduledirs.sh
     if ! libraries_present; then
