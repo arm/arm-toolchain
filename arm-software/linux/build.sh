@@ -411,6 +411,9 @@ package() {
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang++.cfg
     echo "-frtlib-add-rpath @atfl-performance.cfg" > flang.cfg
     cd -
+    echo "complete -F _clang armclang" >> ${ATFL_DIR}/share/clang/bash-autocomplete.sh
+    echo "complete -F _clang armclang++" >> ${ATFL_DIR}/share/clang/bash-autocomplete.sh
+    echo "complete -F _clang armflang" >> ${ATFL_DIR}/share/clang/bash-autocomplete.sh
     run_command tar --owner=root --group=root -czf "$OUTPUT_DIR/$TAR_NAME" -C "$BUILD_DIR" atfl |
         tee "${LOGS_DIR}/package.txt"
 }

@@ -4,41 +4,6 @@ ATFL_VERSION="%ATFL_VERSION%"
 ATFL_BUILD="%ATFL_BUILD%"
 ATFL_INSTALL_PREFIX="%ATFL_INSTALL_PREFIX%"
 
-mkdir -p "moduledeps/atfl/${ATFL_VERSION}/clang-autocomplete"
-(
-cat <<EOT
-----------------------------------------------------------------
---
---         clang-autocomplete
---
---
---  Copyright 2015-2025 Arm Limited. All rights reserved.
---
-
----------------------------------------------------------------------------
--- Variable definitions                                                  --
----------------------------------------------------------------------------
-
--- Base install directory of ATfL
-local install_prefix = "${ATFL_INSTALL_PREFIX}"
-
----------------------------------------------------------------------------
--- Main section                                                          --
----------------------------------------------------------------------------
-
--- Install directory of this package
-local package_prefix = pathJoin(install_prefix, "")
-
-local autocomplete_file = pathJoin(package_prefix, "/share/clang/bash-autocomplete.sh")
-
-execute{cmd="source " .. autocomplete_file, modeA={"load"}}
-
--- Lmod can't figure out how to unsource files without help, so we undo it here
-execute{cmd="complete -r armclang armflang armclang++", modeA={"unload"}}
-execute{cmd="unset -f _clang", modeA={"unload"}}
-EOT
-) > "moduledeps/atfl/${ATFL_VERSION}/clang-autocomplete/${ATFL_VERSION}.lua"
-
 mkdir -p "modulefiles/atfl"
 (
 cat <<EOT
@@ -106,18 +71,16 @@ set package_prefix   \$install_prefix
    append-path LIBRARY_PATH \$package_prefix/lib/aarch64-unknown-linux-gnu
    prepend-path MANPATH \$package_prefix/share/man
 
-if { [is-lmod] } {
-  # Lmod family
-  # When this modulefile is used with lmod, This ensures only one compiler is loaded at once
-  family "compiler"
-}
-
 # Source the bash-autocomplete.sh
 set SHELL [module-info shell]
 switch -- \$SHELL {
   {sh} - {bash} {
     if { [is-lmod] } {
-      module load clang-autocomplete/${ATFL_VERSION}
+      local autocomplete_file = pathJoin(package_prefix, "/share/clang/bash-autocomplete.sh")
+      execute{cmd="source " .. autocomplete_file, modeA={"load"}}
+      ## Lmod can't figure out how to unsource files without help, so we undo it here
+      execute{cmd="complete -r armclang armflang armclang++", modeA={"unload"}}
+      execute{cmd="unset -f _clang", modeA={"unload"}}
     } else {
       set autocomplete_file \$package_prefix/share/clang/bash-autocomplete.sh
       if { [file exists \$autocomplete_file] } {
