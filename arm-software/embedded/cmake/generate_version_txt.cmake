@@ -30,6 +30,11 @@ if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)) # libc in a separate repo?
         OUTPUT_STRIP_TRAILING_WHITESPACE 
         COMMAND_ERROR_IS_FATAL ANY
     )
+    set(LLVM_TOOLCHAIN_C_LIBRARY_URL ${${base_library}_URL})
+    set(LLVM_TOOLCHAIN_C_LIBRARY_COMMIT ${${base_library}_COMMIT})
+else()
+    set(LLVM_TOOLCHAIN_C_LIBRARY_URL "https://github.com/arm/arm-toolchain/tree/arm-software/libc")
+    set(LLVM_TOOLCHAIN_C_LIBRARY_COMMIT ${armtoolchain_COMMIT})
 endif()
 
 configure_file(

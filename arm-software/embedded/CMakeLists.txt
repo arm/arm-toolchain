@@ -503,10 +503,12 @@ add_custom_target(
     -DArmToolchainForEmbedded_VERSION=${ArmToolchainForEmbedded_VERSION}
     -DArmToolchainForEmbedded_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
     -Dllvmproject_src_dir=${llvmproject_src_dir}
-    # at most one of picolibc and newlib source dirs is needed, but easiest to
+    # at most one of picolibc and newlib options is needed, but easiest to
     # specify both definitions
     -Dpicolibc_SOURCE_DIR=${picolibc_SOURCE_DIR}
+    -Dpicolibc_URL=${picolibc_URL}
     -Dnewlib_SOURCE_DIR=${newlib_SOURCE_DIR}
+    -Dnewlib_URL=${newlib_URL}
     # but we do tell the script which library we're actually using
     -DLLVM_TOOLCHAIN_C_LIBRARY=${LLVM_TOOLCHAIN_C_LIBRARY}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_version_txt.cmake
@@ -516,7 +518,7 @@ install(
     FILES
     ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
     DESTINATION .
-    COMPONENT llvm-toolchain-docs
+    COMPONENT llvm-toolchain-third-party-licenses
 )
 
 
