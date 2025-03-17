@@ -26,7 +26,7 @@ if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)) # libc in a separate repo?
 
     execute_process(
         COMMAND git -C ${${base_library}_SOURCE_DIR} rev-parse HEAD
-        OUTPUT_VARIABLE ${LLVM_TOOLCHAIN_C_LIBRARY}_COMMIT
+        OUTPUT_VARIABLE ${base_library}_COMMIT
         OUTPUT_STRIP_TRAILING_WHITESPACE 
         COMMAND_ERROR_IS_FATAL ANY
     )
