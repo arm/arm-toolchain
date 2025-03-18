@@ -11,6 +11,7 @@ fi
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 README_MD_PATH=${README_MD_PATH:-"${BASE_DIR}/README.md"}
+SBOM_FILE_PATH=${SBOM_FILE_PATH:-"${BASE_DIR}/SBOM_Files/ATfL-SBOM.spdx.json"}
 MKMODULEDIRS_PATH=${MKMODULEDIRS_PATH:-"${BASE_DIR}/mkmoduledirs.sh.var"}
 SOURCES_DIR=${SOURCES_DIR:-"$(git -C "${BASE_DIR}" rev-parse --show-toplevel)"}
 LIBRARIES_DIR=${LIBRARIES_DIR:-"${BASE_DIR}/lib"}
@@ -175,6 +176,8 @@ Environment Variables:
 
     README_MD_PATH      Specifies the location of the README.md file to bundle
                         (default: ${README_MD_PATH})
+    SBOM_FILE_PATH      Specifies the location of the SBOM JSON file to bundle
+                        (default: ${SBOM_FILE_PATH})
     MKMODULEDIRS_PATH   Specifies the location of mkmoduledirs.sh.var to tweak
                         (default: ${MKMODULEDIRS_PATH})
     SOURCES_DIR         The directory where all source code will be stored
@@ -378,6 +381,7 @@ shared_lib_build() {
 
 package() {
     cp "${README_MD_PATH}" "${ATFL_DIR}/README.md"
+    cp "${SBOM_FILE_PATH}" "${ATFL_DIR}/ATfL-SBOM.spdx.json"
     mkdir -p "${ATFL_DIR}/arm"
     cp "${MKMODULEDIRS_PATH}" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_VERSION%/${ATFL_VERSION}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
@@ -481,6 +485,12 @@ fi
 if ! [[ -f "${README_MD_PATH}" ]]
 then
   echo "The path to README.md file is configured incorrectly or does not exist."
+  exit 1
+fi
+
+if ! [[ -f "${SBOM_FILE_PATH}" ]]
+then
+  echo "The path to SBOM JSON file is configured incorrectly or does not exist."
   exit 1
 fi
 
