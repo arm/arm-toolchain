@@ -2,9 +2,11 @@
 
 # SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from os import environ
 from os import path
 from dataclasses import dataclass
@@ -125,9 +127,9 @@ def run_fvp(
     # propagated to the exit status of the FVP, so that tests returning 77
     # for "test skipped" can be automatically detected.
     shfeatures_path = path.join(working_directory, ":semihosting-features")
-    if not path.exists(shfeatures_path):
-        with open(shfeatures_path, "wb") as fh:
-            fh.write(b"SHFB\x01")
+    with tempfile.NamedTemporaryFile(dir=os.path.dirname(shfeatures_path)) as fh:
+        fh.write(b"SHFB\x01")  # NamedTemporaryFile is binary already
+        os.rename(fh.name, shfeatures_path)
 
     result = subprocess.run(
         command,
