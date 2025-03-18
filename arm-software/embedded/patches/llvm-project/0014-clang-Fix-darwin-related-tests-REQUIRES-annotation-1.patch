@@ -1,0 +1,101 @@
+From 67aacb5bd630e5287382e215ba9f82ea25daff76 Mon Sep 17 00:00:00 2001
+From: Lucas Duarte Prates <lucas.prates@arm.com>
+Date: Tue, 18 Mar 2025 09:11:43 +0000
+Subject: [clang] Fix darwin-related tests' REQUIRES annotation (#130138)
+
+The tests updated by this commit were designed to check features in the
+clang's driver and index that require clang to be targgeting a darwin
+platform while running on a darwin host. For that, their execution is
+currently gated by the `REQUIRES: system-darwin` annotation.
+
+This approach becomes a problem when trying to run such tests on a
+cross-compiling build of clang on a darwin platform. When the default
+target is not darwin (e.g. via `LLVM_DEFAULT_TARGET_TRIPLE `), the
+tests will still run on a darwin host and fail spuriously because of the
+mismatch with the target detection.
+
+To fix this issue, this patch introduces an extra condition to the
+tests' REQUIRES annotation, `target={{.*}}-{{darwin|macos}}{{.*}}`,
+ensuring they only run when the relevant target is present.
+
+(cherry picked from commit 44e4b27aec8639823030dd90eb04afa6545c8352)
+---
+ clang/test/Driver/apple-arm64-arch.c                            | 2 +-
+ clang/test/Driver/compilation_database_multiarch.c              | 2 +-
+ .../Driver/darwin-ld-platform-version-macos-requires-darwin.c   | 2 +-
+ clang/test/Driver/mtargetos-darwin.c                            | 2 +-
+ clang/test/Driver/xros-driver-requires-darwin-host.c            | 2 +-
+ clang/test/Index/pch-from-libclang.c                            | 2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/clang/test/Driver/apple-arm64-arch.c b/clang/test/Driver/apple-arm64-arch.c
+index a111260b38a6..a714cb2596ad 100644
+--- a/clang/test/Driver/apple-arm64-arch.c
++++ b/clang/test/Driver/apple-arm64-arch.c
+@@ -1,6 +1,6 @@
+ // RUN: env SDKROOT="/" %clang -arch arm64 -c -### %s 2>&1 | \
+ // RUN:   FileCheck %s
+ //
+-// REQUIRES: system-darwin
++// REQUIRES: system-darwin && target={{.*}}-{{darwin|macos}}{{.*}}
+ //
+ // CHECK: "-triple" "arm64-apple-macosx{{[0-9.]+}}"
+diff --git a/clang/test/Driver/compilation_database_multiarch.c b/clang/test/Driver/compilation_database_multiarch.c
+index 1540a8d29ec5..06b0c3729180 100644
+--- a/clang/test/Driver/compilation_database_multiarch.c
++++ b/clang/test/Driver/compilation_database_multiarch.c
+@@ -1,4 +1,4 @@
+-// REQUIRES: system-darwin
++// REQUIRES: system-darwin && target={{.*}}-{{darwin|macos}}{{.*}}
+ 
+ // RUN: rm -rf %t && mkdir -p %t
+ // RUN: %clang -fdriver-only -o %t/out %s -mtargetos=macos12 -arch arm64 -arch x86_64 -MJ %t/compilation_database.json
+diff --git a/clang/test/Driver/darwin-ld-platform-version-macos-requires-darwin.c b/clang/test/Driver/darwin-ld-platform-version-macos-requires-darwin.c
+index 6026ab5d41d3..c6fc9827d709 100644
+--- a/clang/test/Driver/darwin-ld-platform-version-macos-requires-darwin.c
++++ b/clang/test/Driver/darwin-ld-platform-version-macos-requires-darwin.c
+@@ -7,4 +7,4 @@
+ 
+ // CHECK: "-platform_version" "macos" "{{[0-9]+}}.0.0" "{{[0-9]+}}.{{[0-9]+}}"
+ 
+-// REQUIRES: system-darwin
++// REQUIRES: system-darwin && target={{.*}}-{{darwin|macos}}{{.*}}
+diff --git a/clang/test/Driver/mtargetos-darwin.c b/clang/test/Driver/mtargetos-darwin.c
+index 7e86ab15279b..35cffac6027c 100644
+--- a/clang/test/Driver/mtargetos-darwin.c
++++ b/clang/test/Driver/mtargetos-darwin.c
+@@ -11,7 +11,7 @@
+ // RUN: not %clang -mtargetos=darwin20 -arch arm64 -c %s -o %t.o -### 2>&1 | FileCheck --check-prefix=INVALIDOS %s
+ // RUN: not %clang -mtargetos=ios -arch arm64 -c %s -o %t.o -### 2>&1 | FileCheck --check-prefix=NOVERSION %s
+ 
+-// REQUIRES: system-darwin
++// REQUIRES: system-darwin && target={{.*}}-{{darwin|macos}}{{.*}}
+ 
+ // MACOS: "-cc1" "-triple" "arm64-apple-macosx11.0.0"
+ // MACOS-NEXT: "-cc1" "-triple" "x86_64-apple-macosx11.0.0"
+diff --git a/clang/test/Driver/xros-driver-requires-darwin-host.c b/clang/test/Driver/xros-driver-requires-darwin-host.c
+index e5bfccae2c20..94c13b9f414a 100644
+--- a/clang/test/Driver/xros-driver-requires-darwin-host.c
++++ b/clang/test/Driver/xros-driver-requires-darwin-host.c
+@@ -1,4 +1,4 @@
+-// REQUIRES: system-darwin
++// REQUIRES: system-darwin && target={{.*}}-{{darwin|macos}}{{.*}}
+ 
+ // RUN: env XROS_DEPLOYMENT_TARGET=1.0 %clang -arch arm64 -c -### %s 2>&1 | FileCheck %s
+ 
+diff --git a/clang/test/Index/pch-from-libclang.c b/clang/test/Index/pch-from-libclang.c
+index 52722b629982..00b9db052555 100644
+--- a/clang/test/Index/pch-from-libclang.c
++++ b/clang/test/Index/pch-from-libclang.c
+@@ -18,7 +18,7 @@
+ // RUN: c-index-test -test-load-source local %s -include %t.clang.h -fmodules -fmodules-cache-path=%t.mcp -Xclang -triple -Xclang x86_64-apple-darwin | FileCheck %s
+ 
+ // FIXME: Still fails on at least some linux boxen.
+-// REQUIRES: system-darwin
++// REQUIRES: system-darwin && target={{.*}}-{{darwin|macos}}{{.*}}
+ 
+ #ifndef HEADER
+ #define HEADER
+-- 
+2.47.1
+
