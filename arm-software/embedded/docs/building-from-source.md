@@ -98,7 +98,7 @@ ninja llvm-toolchain
 To make it easy to get started, the above command checks out and patches the picolibc Git repo automatically.
 If you prefer you can check out and patch the repos manually and use those, see commands below.
 Note, the patching of the llvm-project fork is not done automatically. See [Divergences from upstream](#Divergences-from-upstream)
-If you check out repos manually then it is your responsibility to ensure that the correct revisions are checked out - see `versions.json` to identify these - and to apply the necessary patches from the [patches](patches) folder.
+If you check out repos manually then it is your responsibility to ensure that the correct revisions are checked out - see `versions.json` to identify these - and to apply the necessary patches from the [patches](../patches) folder.
 
 ```
 export CC=clang
@@ -163,7 +163,7 @@ The same build directory can be used for both native and MinGW toolchains.
 
 ## Divergences from upstream
 
-See the [patches](patches) directory for the current set of differences from upstream.
+See the [patches](../patches) directory for the current set of differences from upstream.
 
 The patches for llvm-project are split between two folders, llvm-project and
 llvm-project-perf. The former are generally required for building and
