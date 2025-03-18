@@ -46,7 +46,7 @@ For more information see https://libcxx.llvm.org/DesignDocs/ABIVersioning.html.
 
 Libc++ testing has been fully completed for only a few of the variants. The specific
 variants for which testing is enabled can be found in the corresponding JSON files
-located at the [path](arm-multilib/json/variantis).
+located at the [path](arm-multilib/json/variants).
 
 ## Components
 
@@ -61,7 +61,7 @@ picolibc   | https://github.com/picolibc/picolibc
 
 Content of this repository is licensed under Apache-2.0 with LLVM Exceptions, see
 [LICENSE.txt](LICENSE.txt). Individual patch files under the
-[patches](patches) folder may contain code under the upstream project license, if they are
+[patches](patches) folder may contain code under the upstream project license. If they are
 cherry-picks of upstream commits into the Arm Toolchain for Embedded release branches,
 see corresponding pull requests for references.
 
