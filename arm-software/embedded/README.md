@@ -31,6 +31,7 @@ embedded and realtime operating systems.
 - AArch32 Armv8-A
 - AArch32 Armv8-R
 - AArch64 Armv8-A
+- AArch64 Armv8-R
 
 ## C++ support
 
@@ -42,6 +43,10 @@ Arm Toolchain for Embedded uses the unstable libc++ ABI version. This ABI
 uses all the latest libc++ improvements and bugfixes, but may result in link
 errors when linking against objects compiled against older versions of the ABI.
 For more information see https://libcxx.llvm.org/DesignDocs/ABIVersioning.html.
+
+Libc++ testing has been fully completed for only a few of the variants. The specific
+variants for which testing is enabled can be found in the corresponding JSON files
+located at the [path](arm-multilib/json/variants).
 
 ## Components
 
@@ -56,10 +61,9 @@ picolibc   | https://github.com/picolibc/picolibc
 
 Content of this repository is licensed under Apache-2.0 with LLVM Exceptions, see
 [LICENSE.txt](LICENSE.txt). Individual patch files under the
-[patches](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/tree/main/patches)
-folder may contain code under the upstream project license, if they are
-cherry-picks of upstream commits into the LLVM Embedded Toolchain for Arm
-release branches, see corresponding pull requests for references.
+[patches](patches) folder may contain code under the upstream project license. If they are
+cherry-picks of upstream commits into the Arm Toolchain for Embedded release branches,
+see corresponding pull requests for references.
 
 The resulting binaries are covered under their respective open source licenses,
 see component links above.
