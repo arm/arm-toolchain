@@ -1,7 +1,7 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-11T14:57:58Z",
+        "created": "2025-03-18T15:54:51Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
@@ -70,7 +70,7 @@
             "SPDXID": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
             "downloadLocation": "https://sourceware.org/newlib/",
             "filesAnalyzed": false,
-            "licenseComments": "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.NEWLIB",
+            "licenseComments": "Detailed list of licenses is at: https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.NEWLIB;hb=HEAD and https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.LIBGLOSS;hb=HEAD",
             "name": "newlib",
             "originator": "Organization: https://sourceware.org/newlib/ (newlib@sourceware.org)",
             "supplier": "Organization: https://sourceware.org/newlib/ (newlib@sourceware.org)"

@@ -168,7 +168,7 @@ package_newlib = create_Package(
     "https://sourceware.org/newlib/",
     "newlib@sourceware.org",
     "",
-    "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.NEWLIB",
+    "Detailed list of licenses is at: https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.NEWLIB;hb=HEAD and https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.LIBGLOSS;hb=HEAD",
 )
 
 # Now that we have a package defined, we can add it to the document's package property.
