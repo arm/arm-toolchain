@@ -96,9 +96,9 @@ ninja llvm-toolchain
 ```
 
 To make it easy to get started, the above command checks out and patches the picolibc Git repo automatically.
-If you prefer you can check out and patch the repos manually and use those.
+If you prefer you can check out and patch the repos manually and use those, see commands below.
 Note, the patching of the llvm-project fork is not done automatically. See [Divergences from upstream](#Divergences-from-upstream)
-If you check out repos manually then it is your responsibility to ensure that the correct revisions are checked out - see `versions.json` to identify these.
+If you check out repos manually then it is your responsibility to ensure that the correct revisions are checked out - see `versions.json` to identify these - and to apply the necessary patches from the [patches](patches) folder.
 
 ```
 export CC=clang
@@ -106,6 +106,7 @@ export CXX=clang++
 mkdir repos
 git -C repos clone https://github.com/picolibc/picolibc.git
 git -C repos/picolibc am -k "$PWD"/patches/picolibc/*.patch
+git -C arm-toolchain am -k "$PWD"/patches/llvm-project/*.patch
 mkdir build
 cd build
 cmake .. -GNinja -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=../repos/picolibc
@@ -162,17 +163,21 @@ The same build directory can be used for both native and MinGW toolchains.
 
 ## Divergences from upstream
 
-See [patches](https://github.com/arm/arm-toolchain/-/blob/arm-software/embedded/patches)
-directory for the current set of differences from upstream.
+See the [patches](patches) directory for the current set of differences from upstream.
 
 The patches for llvm-project are split between two folders, llvm-project and
 llvm-project-perf. The former are generally required for building and
 successfully running all tests. The patches in llvm-project-perf are optional,
 and designed to improve performance in certain circumstances.
 
-If not already applied, these must be done so manually before building, e.g.:
+Similarly, there are patches available for both Picolibc and Newlib. The Picolibc
+patches are essential for building and successfully running all picolibc tests. The
+Newlib patches are required to enable exceptions and RTTI builds of libcxx with newlib.
+
+If not already applied, these must be done so manually before building, like below:
 ```
 git -C arm-toolchain am -k "$PWD"/patches/llvm-project/*.patch
+git -C repos/picolibc am -k "$PWD"/patches/picolibc/*.patch
 ```
 
 ## Building individual library variants
