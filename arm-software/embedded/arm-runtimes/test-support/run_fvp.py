@@ -124,10 +124,10 @@ def run_fvp(
     # request will work. This permits the test program's exit status to be
     # propagated to the exit status of the FVP, so that tests returning 77
     # for "test skipped" can be automatically detected.
-    with open(
-        path.join(working_directory, ":semihosting-features"), "wb"
-    ) as fh:
-        fh.write(b"SHFB\x01")
+    shfeatures_path = path.join(working_directory, ":semihosting-features")
+    if not path.exists(shfeatures_path):
+        with open(shfeatures_path, "wb") as fh:
+            fh.write(b"SHFB\x01")
 
     result = subprocess.run(
         command,
