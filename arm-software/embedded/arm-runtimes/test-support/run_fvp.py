@@ -131,10 +131,16 @@ def run_fvp(
     # to prevent one process reading an incomplete file being written from
     # another. This is done by creating a temporary file and replacing.
     shfeatures_path = path.join(working_directory, ":semihosting-features")
-    with tempfile.NamedTemporaryFile(dir=working_directory, delete=False) as fh:
+    try:
+        fh = tempfile.NamedTemporaryFile(dir=working_directory, delete=False)
         fh.write(b"SHFB\x01")  # NamedTemporaryFile is binary already.
-        fh.flush()  # Ensure file is complete before renaming.
+        fh.close()
         os.replace(fh.name, shfeatures_path)
+    finally:
+        try:
+            os.remove(fh.name)
+        except FileNotFoundError:
+            pass
 
     result = subprocess.run(
         command,
