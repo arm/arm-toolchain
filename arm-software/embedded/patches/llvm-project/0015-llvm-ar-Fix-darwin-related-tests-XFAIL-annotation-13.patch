@@ -1,0 +1,51 @@
+From 50da06f400c6fd5a959d4ae9fafb8b1ba23540a8 Mon Sep 17 00:00:00 2001
+From: Lucas Duarte Prates <lucas.prates@arm.com>
+Date: Fri, 7 Mar 2025 10:53:10 +0000
+Subject: [llvm-ar] Fix darwin-related tests' XFAIL annotation (#130144)
+
+The tests updated by this commit are expected to fail when targetting a
+darwin platform. As they rely on target detection based on the host,
+this is currently checked by using the `XFAIL: system-darwin`
+annotation.
+
+This approach becomes a problem when trying to run such tests on a
+cross-compiling build of clang on a darwin platform. When no darwin
+targets are included in the build, the XFAIL will still apply even
+though the target used is not related to the darwin platform, and the
+tests will unexpectedly pass.
+
+To fix this issue, this patch updates the condition used by the tests'
+XFAIL annotation to `target={{.*}}-darwin{{.*}}`, ensuring they only are
+xfailed when the relevant target is used.
+
+(cherry picked from commit dc69eae1c47a0545ae8c3129e44a8fa662612d7c)
+---
+ llvm/test/tools/llvm-ar/extract.test | 2 +-
+ llvm/test/tools/llvm-ar/print.test   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/llvm/test/tools/llvm-ar/extract.test b/llvm/test/tools/llvm-ar/extract.test
+index ccad703f3a14..bf46cc0743c7 100644
+--- a/llvm/test/tools/llvm-ar/extract.test
++++ b/llvm/test/tools/llvm-ar/extract.test
+@@ -1,5 +1,5 @@
+ ## Test extract operation.
+-# XFAIL: system-darwin
++# XFAIL: target={{.*}}-darwin{{.*}}
+ 
+ # RUN: rm -rf %t && mkdir -p %t/extracted/
+ 
+diff --git a/llvm/test/tools/llvm-ar/print.test b/llvm/test/tools/llvm-ar/print.test
+index a27cab4a227e..997c05f225a8 100644
+--- a/llvm/test/tools/llvm-ar/print.test
++++ b/llvm/test/tools/llvm-ar/print.test
+@@ -1,5 +1,5 @@
+ ## Test Print output
+-# XFAIL: system-darwin
++# XFAIL: target={{.*}}-darwin{{.*}}
+ 
+ # RUN: rm -rf %t && mkdir -p %t
+ # RUN: echo file1 > %t/1.txt
+-- 
+2.47.1
+
