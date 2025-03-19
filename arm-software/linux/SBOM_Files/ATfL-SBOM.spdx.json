@@ -1,0 +1,209 @@
+{
+    "SPDXID": "SPDXRef-DOCUMENT",
+    "creationInfo": {
+        "created": "2025-03-19T11:32:04Z",
+        "creators": [
+            "Organization: Arm Limited (open-source-office@arm.com)"
+        ]
+    },
+    "dataLicense": "CC0-1.0",
+    "name": "Arm Toolchain for Linux",
+    "spdxVersion": "SPDX-2.3",
+    "documentNamespace": "https://github.com/arm/arm-toolchain/tree/release/arm-software/20.x/arm-software/linux",
+    "packages": [
+        {
+            "SPDXID": "SPDXRef-Package-37bb5ee7-1c83-515e-9765-e992ae62c4ec",
+            "downloadLocation": "https://github.com/arm/arm-toolchain/tree/release/arm-software/20.x/arm-software/linux",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "Arm Toolchain for Linux",
+            "originator": "Organization: Arm Limited (open-source-office@arm.com)",
+            "supplier": "Organization: Arm Limited (open-source-office@arm.com)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-76d3426c-6918-5acf-8031-633f7069a3bb",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "llvm-project",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-81de4012-6de9-54ed-a921-354bcfa8e2cf",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0/clang",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "clang",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-ff65f62a-5f78-5906-9db9-ffbc8593376c",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0/lld",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "lld",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-d1e59c04-8142-5b6f-80e9-865dbefb908c",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0/compiler-rt",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "compiler-rt",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-9950a68a-8cb1-5122-b54a-62cc239be3da",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0/libcxx",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libcxx",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-ed6e4e4c-c9d8-59e2-a9c1-8ba83215dd89",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0/libcxxabi",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libcxxabi",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-2b319418-9078-5c3d-b946-a6888c475b54",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0/libunwind",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libunwind",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-31d3d0c3-4f0d-59f0-b0ed-23becff47fc6",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0/openmp",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "openmp",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-35eac354-6cc2-5901-92ef-9f1d99b08a1b",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/llvmorg-20.1.0/flang",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "flang",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-8dcd07b7-27cd-5214-abb6-3b75cefd2036",
+            "downloadLocation": "https://github.com/madler/zlib",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Zlib",
+            "licenseDeclared": "Zlib",
+            "name": "zlib",
+            "originator": "Person: Jean-loup Gailly and Mark Adler (zlib@gzip.org)",
+            "supplier": "Person: Jean-loup Gailly and Mark Adler (zlib@gzip.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-b6230829-4834-5ab5-bad3-5ff4aa04ae8a",
+            "downloadLocation": "https://github.com/facebook/zstd",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "BSD-3-Clause AND GPL-2.0-only",
+            "licenseDeclared": "BSD-3-Clause AND GPL-2.0-only",
+            "name": "zstd",
+            "originator": "Person: Yann Collet, Nick Terrell, Przemyslaw Skibinski (cyan@fb.com, msk@fb.com)",
+            "supplier": "Person: Yann Collet, Nick Terrell, Przemyslaw Skibinski (cyan@fb.com, msk@fb.com)"
+        }
+    ],
+    "relationships": [
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-37bb5ee7-1c83-515e-9765-e992ae62c4ec",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-76d3426c-6918-5acf-8031-633f7069a3bb",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-81de4012-6de9-54ed-a921-354bcfa8e2cf",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-ff65f62a-5f78-5906-9db9-ffbc8593376c",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-d1e59c04-8142-5b6f-80e9-865dbefb908c",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-9950a68a-8cb1-5122-b54a-62cc239be3da",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-ed6e4e4c-c9d8-59e2-a9c1-8ba83215dd89",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-2b319418-9078-5c3d-b946-a6888c475b54",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-35eac354-6cc2-5901-92ef-9f1d99b08a1b",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-31d3d0c3-4f0d-59f0-b0ed-23becff47fc6",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-8dcd07b7-27cd-5214-abb6-3b75cefd2036",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-b6230829-4834-5ab5-bad3-5ff4aa04ae8a",
+            "relationshipType": "DESCRIBES"
+        }
+    ]
+}
