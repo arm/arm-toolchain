@@ -229,6 +229,21 @@ package_flang = create_Package(
     "",
 )
 
+package_url = "https://github.com/llvm/llvm-project/tree/main/flang-rt"
+package_uuid_flang_rt = "SPDXRef-Package-" + str(
+    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
+)
+package_flang_rt = create_Package(
+    "flang-rt",
+    package_uuid_flang_rt,
+    package_url,
+    ActorType.ORGANIZATION,
+    "LLVM Foundation",
+    "info@llvm.org",
+    "Apache-2.0 WITH LLVM-exception",
+    "",
+)
+
 package_url = "https://github.com/madler/zlib"
 package_uuid_zlib = "SPDXRef-Package-" + str(
     uuid.uuid5(uuid.NAMESPACE_URL, package_url)
@@ -271,6 +286,7 @@ document.packages = [
     package_libunwind,
     package_openmp,
     package_flang,
+    package_flang_rt,
     package_zlib,
     package_zstd
 ]
@@ -312,6 +328,10 @@ describes_relationship_flang = Relationship(
     "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_flang
 )
 
+describes_relationship_flang_rt = Relationship(
+    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_flang_rt
+)
+
 describes_relationship_openmp = Relationship(
     "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_openmp
 )
@@ -334,6 +354,7 @@ document.relationships = [
     describes_relationship_libcxxabi,
     describes_relationship_libunwind,
     describes_relationship_flang,
+    describes_relationship_flang_rt,
     describes_relationship_openmp,
     describes_relationship_zlib,
     describes_relationship_zstd,
