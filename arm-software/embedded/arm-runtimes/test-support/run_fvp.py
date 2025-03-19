@@ -129,12 +129,12 @@ def run_fvp(
     # Since multiple tests can potentially be run concurrently in the same
     # working directory, the file should be created in an atomic operation
     # to prevent one process reading an incomplete file being written from
-    # another. This is done by creating a temporary file and renaming.
+    # another. This is done by creating a temporary file and replacing.
     shfeatures_path = path.join(working_directory, ":semihosting-features")
-    with tempfile.NamedTemporaryFile(dir=working_directory) as fh:
+    with tempfile.NamedTemporaryFile(dir=working_directory, delete=False) as fh:
         fh.write(b"SHFB\x01")  # NamedTemporaryFile is binary already.
         fh.flush()  # Ensure file is complete before renaming.
-        os.rename(fh.name, shfeatures_path)
+        os.replace(fh.name, shfeatures_path)
 
     result = subprocess.run(
         command,
