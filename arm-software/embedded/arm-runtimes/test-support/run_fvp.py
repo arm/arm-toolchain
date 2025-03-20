@@ -2,9 +2,11 @@
 
 # SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from os import environ
 from os import path
 from dataclasses import dataclass
@@ -124,10 +126,21 @@ def run_fvp(
     # request will work. This permits the test program's exit status to be
     # propagated to the exit status of the FVP, so that tests returning 77
     # for "test skipped" can be automatically detected.
-    with open(
-        path.join(working_directory, ":semihosting-features"), "wb"
-    ) as fh:
-        fh.write(b"SHFB\x01")
+    # Since multiple tests can potentially be run concurrently in the same
+    # working directory, the file should be created in an atomic operation
+    # to prevent one process reading an incomplete file being written from
+    # another. This is done by creating a temporary file and replacing.
+    shfeatures_path = path.join(working_directory, ":semihosting-features")
+    try:
+        fh = tempfile.NamedTemporaryFile(dir=working_directory, delete=False)
+        fh.write(b"SHFB\x01")  # NamedTemporaryFile is binary already.
+        fh.close()
+        os.replace(fh.name, shfeatures_path)
+    finally:
+        try:
+            os.remove(fh.name)
+        except FileNotFoundError:
+            pass
 
     result = subprocess.run(
         command,
