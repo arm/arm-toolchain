@@ -74,11 +74,10 @@ models, which have their own licenses. These are not used by default, see
 
 ## Host platforms
 
-Arm Toolchain for Embedded is built and tested on Ubuntu 18.04 LTS.
-
-The Windows version is built on Windows Server 2019 and lightly tested on Windows 10.
-
-Building on macOS is functional for x86_64 and Apple Silicon.
+Arm Toolchain for Embedded is built and tested on:
+* Linux Ubuntu 22.04 LTS on x86_64 and AArch64.
+* macOS on x86_64 and Apple Silicon.
+* Windows Server 2019 with Visual Studio on x86_64.
 
 [Binary packages](https://github.com/arm/arm-toolchain/-/releases)
 are provided for major LLVM releases for Linux and Windows.
