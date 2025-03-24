@@ -10,7 +10,7 @@ include ../../Makefile.conf
 build: hello.elf
 
 hello.elf: *.c
-	$(BIN_PATH)/clang $(AARCH64_TARGET) $(CRT_SEMIHOST) -g -T ../../ldscripts/raspi3b.ld -o hello.elf $^
+	$(BIN_PATH)/clang $(AARCH64_TARGET) $(CRT_SEMIHOST) -Wl,--pic-veneer -mno-unaligned-access -g -T ../../ldscripts/raspi3b.ld -o hello.elf $^
 
 %.img: %.elf
 	$(BIN_PATH)/llvm-objcopy -O binary $< $@
