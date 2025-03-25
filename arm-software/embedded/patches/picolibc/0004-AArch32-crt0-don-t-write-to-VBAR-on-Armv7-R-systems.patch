@@ -1,0 +1,34 @@
+From b399940a9e590032b6dff9f325215c41ac6dbde2 Mon Sep 17 00:00:00 2001
+From: Simon Tatham <simon.tatham@arm.com>
+Date: Mon, 24 Mar 2025 11:36:35 +0000
+Subject: [PATCH] AArch32 crt0: don't write to VBAR on Armv7-R systems.
+
+This CP15 register, which controls the exception vector table base
+address, is part of the Security Extensions, which are not available
+in Armv7-R. So the MCR instruction which writes to them will provoke
+an UNDEF exception on an Armv7-R CPU.
+
+This MCR instruction was already conditionally compiled: if you're
+compiling crt0.c for a platform without it, you just have to make sure
+your ld script puts the exception vectors in the default place. This
+patch tightens the existing condition to exclude Armv7-R.
+---
+ picocrt/machine/arm/crt0.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/picocrt/machine/arm/crt0.c b/picocrt/machine/arm/crt0.c
+index f4d2d28ac..792bf5978 100644
+--- a/picocrt/machine/arm/crt0.c
++++ b/picocrt/machine/arm/crt0.c
+@@ -259,7 +259,7 @@ _cstart(void)
+ 
+ /* Set up exception table base address (register VBAR_ELx).
+    Architectures earlier than v7 have the base address fixed. */
+-#if __ARM_ARCH >= 7
++#if __ARM_ARCH >= 7 && __ARM_ARCH_PROFILE != 'R'
+     __asm__("mcr p15, #0, %0, c12, c0, 0" : : "r"(__vector_table) :);
+ #endif
+ 
+-- 
+2.43.0
+
