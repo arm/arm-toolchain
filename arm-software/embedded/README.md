@@ -79,13 +79,13 @@ Arm Toolchain for Embedded is built and tested on:
 * macOS on x86_64 and Apple Silicon.
 * Windows Server 2019 with Visual Studio on x86_64.
 
-[Binary packages](https://github.com/arm/arm-toolchain/-/releases)
+[Binary packages](https://github.com/arm/arm-toolchain/releases)
 are provided for major LLVM releases for Linux and Windows.
 
 ## Getting started
 
 Download a release of the toolchain for your platform from [Github
-releases](https://github.com/arm/arm-toolchain/-/releases)
+releases](https://github.com/arm/arm-toolchain/releases)
 and extract the archive into an arbitrary directory.
 
 ### Pre-requisite for using toolchain on Windows
