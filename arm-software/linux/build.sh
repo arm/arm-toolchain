@@ -16,6 +16,7 @@ MKMODULEDIRS_PATH=${MKMODULEDIRS_PATH:-"${BASE_DIR}/mkmoduledirs.sh.var"}
 SOURCES_DIR=${SOURCES_DIR:-"$(git -C "${BASE_DIR}" rev-parse --show-toplevel)"}
 LIBRARIES_DIR=${LIBRARIES_DIR:-"${BASE_DIR}/lib"}
 PATCHES_DIR=${PATCHES_DIR:-"${BASE_DIR}/patches"}
+DOCS_DIR=${DOCS_DIR:-"${BASE_DIR}/docs"}
 BUILD_DIR=${BUILD_DIR:-"${BASE_DIR}/build"}
 ATFL_DIR=${ATFL_DIR:-"${BUILD_DIR}/atfl"}
 LOGS_DIR=${LOGS_DIR:-"${BASE_DIR}/logs"}
@@ -186,6 +187,8 @@ Environment Variables:
                         (default: $LIBRARIES_DIR)
     PATCHES_DIR         The optional directory where all patches will be stored
                         (default: $PATCHES_DIR)
+    DOCS_DIR            The directory where ATfL documents will be stored
+                        (default: $DOCS_DIR)
     BUILD_DIR           The directory where all build output will be stored
                         (default: $BUILD_DIR)
     LOGS_DIR            The directory where all build logs will be stored
@@ -384,6 +387,8 @@ package() {
     cp "${SBOM_FILE_PATH}" "${ATFL_DIR}/ATfL-SBOM.spdx.json"
     mkdir -p "${ATFL_DIR}/arm"
     cp "${MKMODULEDIRS_PATH}" "${ATFL_DIR}/arm/mkmoduledirs.sh"
+    mkdir -p "${ATFL_DIR}/arm/docs"
+    cp "${DOCS_DIR}"/*.md "${ATFL_DIR}/arm/docs"
     sed -i "s/%ATFL_VERSION%/${ATFL_VERSION}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_BUILD%/${BUILD_NUMBER:-"unknown"}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_INSTALL_PREFIX%/\$\(dirname \$\(dirname \`realpath \$BASH_SOURCE\`\)\)/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
@@ -497,6 +502,12 @@ fi
 if ! [[ -f "${MKMODULEDIRS_PATH}" ]]
 then
   echo "The path to mkmoduledirs.sh.var file is configured incorrectly or does not exist."
+  exit 1
+fi
+
+if ! [[ -e "${DOCS_DIR}" ]]
+then
+  echo "The documentation directory is configured incorrectly or does not exist."
   exit 1
 fi
 
