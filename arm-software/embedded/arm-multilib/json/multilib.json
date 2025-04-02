@@ -441,24 +441,24 @@
             "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
-            "variant": "armv8m.main_soft_nofp_exn_rtti",
-            "json": "armv8m.main_soft_nofp_exn_rtti.json",
-            "flags": "--target=thumbv8m.main-unknown-none-eabi -mfpu=none"
+            "variant": "armv8m.main_soft_nofp_exn_rtti_unaligned",
+            "json": "armv8m.main_soft_nofp_exn_rtti_unaligned.json",
+            "flags": "--target=thumbv8m.main-unknown-none-eabi -mfpu=none -munaligned-access"
         },
         {
-            "variant": "armv8m.main_soft_nofp",
-            "json": "armv8m.main_soft_nofp.json",
-            "flags": "--target=thumbv8m.main-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
+            "variant": "armv8m.main_soft_nofp_unaligned",
+            "json": "armv8m.main_soft_nofp_unaligned.json",
+            "flags": "--target=thumbv8m.main-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -munaligned-access"
         },
         {
-            "variant": "armv8m.main_hard_fp_exn_rtti",
-            "json": "armv8m.main_hard_fp_exn_rtti.json",
-            "flags": "--target=thumbv8m.main-unknown-none-eabihf -mfpu=fpv5-sp-d16"
+            "variant": "armv8m.main_hard_fp_exn_rtti_unaligned",
+            "json": "armv8m.main_hard_fp_exn_rtti_unaligned.json",
+            "flags": "--target=thumbv8m.main-unknown-none-eabihf -mfpu=fpv5-sp-d16 -munaligned-access"
         },
         {
-            "variant": "armv8m.main_hard_fp",
-            "json": "armv8m.main_hard_fp.json",
-            "flags": "--target=thumbv8m.main-unknown-none-eabihf -mfpu=fpv5-sp-d16 -fno-exceptions -fno-rtti"
+            "variant": "armv8m.main_hard_fp_unaligned",
+            "json": "armv8m.main_hard_fp_unaligned.json",
+            "flags": "--target=thumbv8m.main-unknown-none-eabihf -mfpu=fpv5-sp-d16 -fno-exceptions -fno-rtti -munaligned-access"
         },
         {
             "variant": "armv8.1m.main_soft_nofp_nomve_exn_rtti",
