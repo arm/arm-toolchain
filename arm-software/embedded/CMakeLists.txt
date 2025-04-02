@@ -404,6 +404,12 @@ project(
 # Set package name for shorter archive file name
 set(SHORT_PACKAGE_NAME "ATfE")
 
+# Set directory name containing CFI ignore file
+set(TARGET_CFI_DIR
+    "lib/clang/${LLVM_VERSION_MAJOR}/share" CACHE STRING
+    "Directory containing the CFI ignore file."
+)
+
 # Set package name and version.
 if(DEFINED LLVM_TOOLCHAIN_PACKAGE_NAME)
     set(PACKAGE_NAME ${LLVM_TOOLCHAIN_PACKAGE_NAME})
@@ -696,6 +702,14 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         endforeach()
     endforeach()
 endif()
+
+FILE(WRITE "${CMAKE_BINARY_DIR}/${TARGET_CFI_DIR}/cfi_ignorelist.txt" "")
+install(
+    FILES
+    ${CMAKE_BINARY_DIR}/${TARGET_CFI_DIR}/cfi_ignorelist.txt
+    DESTINATION ${TARGET_CFI_DIR}
+    COMPONENT llvm-toolchain-libs
+)
 
 install(
     DIRECTORY ${LLVM_BINARY_DIR}/${TARGET_LIBRARIES_DIR}/.
