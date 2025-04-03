@@ -1,0 +1,86 @@
+From 0ab1883ad76b6687998e118064c98ac06f3deffa Mon Sep 17 00:00:00 2001
+From: Simi Pallipurath <simi.pallipurath@arm.com>
+Date: Thu, 3 Apr 2025 11:16:05 +0100
+Subject: [Clang][ARM] Ensure both -mno-unaligned-access and
+ -munaligned-access are passed to multilib selection logic (#134099)
+
+Previously, alignment option was passed to multilib selection logic only
+when -mno-unaligned-access was explicitly specified on the command line.
+
+Now this change ensure both -mno-unaligned-access and -munaligned-access
+are passed to the multilib selection logic, which now also considers the
+target architecture when determining alignment access policy.
+
+(cherry picked from commit cb0d1305d12ea6637a541028eb0a4438750164b9)
+---
+ clang/lib/Driver/ToolChain.cpp                | 22 +++++++------------
+ .../test/Driver/print-multi-selection-flags.c | 10 +++++++++
+ 2 files changed, 18 insertions(+), 14 deletions(-)
+
+diff --git a/clang/lib/Driver/ToolChain.cpp b/clang/lib/Driver/ToolChain.cpp
+index acf9d264d631..c998535b07ad 100644
+--- a/clang/lib/Driver/ToolChain.cpp
++++ b/clang/lib/Driver/ToolChain.cpp
+@@ -237,13 +237,10 @@ static void getAArch64MultilibFlags(const Driver &D,
+     Result.push_back(BranchProtectionArg->getAsString(Args));
+   }
+ 
+-  if (Arg *AlignArg = Args.getLastArg(
+-          options::OPT_mstrict_align, options::OPT_mno_strict_align,
+-          options::OPT_mno_unaligned_access, options::OPT_munaligned_access)) {
+-    if (AlignArg->getOption().matches(options::OPT_mstrict_align) ||
+-        AlignArg->getOption().matches(options::OPT_mno_unaligned_access))
+-      Result.push_back(AlignArg->getAsString(Args));
+-  }
++  if (FeatureSet.contains("+strict-align"))
++    Result.push_back("-mno-unaligned-access");
++  else
++    Result.push_back("-munaligned-access");
+ 
+   if (Arg *Endian = Args.getLastArg(options::OPT_mbig_endian,
+                                     options::OPT_mlittle_endian)) {
+@@ -311,13 +308,10 @@ static void getARMMultilibFlags(const Driver &D,
+     Result.push_back(BranchProtectionArg->getAsString(Args));
+   }
+ 
+-  if (Arg *AlignArg = Args.getLastArg(
+-          options::OPT_mstrict_align, options::OPT_mno_strict_align,
+-          options::OPT_mno_unaligned_access, options::OPT_munaligned_access)) {
+-    if (AlignArg->getOption().matches(options::OPT_mstrict_align) ||
+-        AlignArg->getOption().matches(options::OPT_mno_unaligned_access))
+-      Result.push_back(AlignArg->getAsString(Args));
+-  }
++  if (FeatureSet.contains("+strict-align"))
++    Result.push_back("-mno-unaligned-access");
++  else
++    Result.push_back("-munaligned-access");
+ 
+   if (Arg *Endian = Args.getLastArg(options::OPT_mbig_endian,
+                                     options::OPT_mlittle_endian)) {
+diff --git a/clang/test/Driver/print-multi-selection-flags.c b/clang/test/Driver/print-multi-selection-flags.c
+index 5a35ae374f01..5f9383fbed8f 100644
+--- a/clang/test/Driver/print-multi-selection-flags.c
++++ b/clang/test/Driver/print-multi-selection-flags.c
+@@ -69,9 +69,19 @@
+ // CHECK-BRANCH-PROTECTION: -mbranch-protection=standard
+ 
+ // RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi -mno-unaligned-access | FileCheck --check-prefix=CHECK-NO-UNALIGNED-ACCESS %s
++// RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi -mstrict-align | FileCheck --check-prefix=CHECK-NO-UNALIGNED-ACCESS %s
++// RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi | FileCheck --check-prefix=CHECK-NO-UNALIGNED-ACCESS %s
+ // RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=aarch64-none-elf -mno-unaligned-access | FileCheck --check-prefix=CHECK-NO-UNALIGNED-ACCESS %s
++// RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=aarch64-none-elf -mstrict-align | FileCheck --check-prefix=CHECK-NO-UNALIGNED-ACCESS %s
+ // CHECK-NO-UNALIGNED-ACCESS: -mno-unaligned-access
+ 
++// RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi -mno-strict-align | FileCheck --check-prefix=CHECK-UNALIGNED-ACCESS %s
++// RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi -munaligned-access | FileCheck --check-prefix=CHECK-UNALIGNED-ACCESS %s
++// RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=aarch64-none-elf | FileCheck --check-prefix=CHECK-UNALIGNED-ACCESS %s
++// RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=aarch64-none-elf -mno-strict-align | FileCheck --check-prefix=CHECK-UNALIGNED-ACCESS %s
++// RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=aarch64-none-elf -munaligned-access | FileCheck --check-prefix=CHECK-UNALIGNED-ACCESS %s
++// CHECK-UNALIGNED-ACCESS: -munaligned-access
++
+ // RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi -mbig-endian | FileCheck --check-prefix=CHECK-BIG-ENDIAN %s
+ // RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=aarch64-none-elf -mbig-endian | FileCheck --check-prefix=CHECK-BIG-ENDIAN %s
+ // CHECK-BIG-ENDIAN: -mbig-endian
+-- 
+2.34.1
+
