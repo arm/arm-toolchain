@@ -5,15 +5,15 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
-include ../../../Makefile.conf
+include ../../Makefile.conf
 
 build: hello.elf
 
 hello.elf: *.c
-	../$(BIN_PATH)/clang --config=llvmlibc.cfg $(MICROBIT_TARGET) -nostartfiles -lsemihost -lm -g -fno-exceptions -fno-rtti -T microbit-llvmlibc.ld -o hello.elf $^
+	$(BIN_PATH)/clang --config=llvmlibc.cfg $(MICROBIT_TARGET) -nostartfiles -lsemihost -lm -g -fno-exceptions -fno-rtti -T microbit-llvmlibc.ld -o hello.elf $^
 
 %.hex: %.elf
-	../$(BIN_PATH)/llvm-objcopy -O ihex $< $@
+	$(BIN_PATH)/llvm-objcopy -O ihex $< $@
 
 run: hello.hex
 	qemu-system-arm -M microbit -semihosting -nographic -device loader,file=$<
