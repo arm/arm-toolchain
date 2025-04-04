@@ -32,7 +32,7 @@
             "ENABLE_LIBCXX_TESTS": "OFF"
         },
         "llvmlibc": {
-            "ENABLE_CXX_LIBS": "OFF",
+            "ENABLE_CXX_LIBS": "ON",
             "ENABLE_LIBC_TESTS": "OFF",
             "ENABLE_COMPILER_RT_TESTS": "OFF",
             "ENABLE_LIBCXX_TESTS": "OFF"

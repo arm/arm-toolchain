@@ -610,9 +610,6 @@ if(C_LIBRARY STREQUAL llvmlibc)
     if(ENABLE_LIBC_TESTS)
         message(FATAL_ERROR "Tests cannot yet be enabled using llvm libc.")
     endif()
-    if(ENABLE_CXX_LIBS)
-        message(FATAL_ERROR "We aren't yet able to build C++ libraries to go with llvm-libc.")
-    endif()
 
     # LLVM libc lacks a configuration for AArch64, but the AArch32 one works
     # fine. However, setting the configuration for both architectures to the
@@ -751,6 +748,23 @@ if(ENABLE_CXX_LIBS)
                 -DLLVM_LIT_ARGS=${cxxlibs_lit_args}
             )
         endif()
+    elseif(C_LIBRARY STREQUAL llvmlibc)
+        set(cxxlibs_extra_cmake_options
+            -DLIBCXXABI_ENABLE_THREADS=OFF
+            -DLIBCXX_ENABLE_MONOTONIC_CLOCK=OFF
+            -DLIBCXX_ENABLE_RANDOM_DEVICE=OFF
+            -DLIBCXX_ENABLE_THREADS=OFF
+            -DLIBCXX_ENABLE_WIDE_CHARACTERS=OFF
+            -DLIBCXX_ENABLE_FILESYSTEM=OFF
+            -DLIBCXX_ENABLE_LOCALIZATION=OFF
+            -DLIBCXX_ENABLE_UNICODE=OFF
+            -DLIBUNWIND_ENABLE_THREADS=OFF
+            -DLIBCXXABI_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
+            -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
+            -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
+            -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            )
+            set(lib_compile_flags "${lib_compile_flags} \"-Dvfprintf(stream$<COMMA> format$<COMMA> vlist)=vprintf(format$<COMMA> vlist)\" \"-Dfprintf(stream$<COMMA> format$<COMMA> ...)=printf(format)\" -D_LIBCPP_PRINT=1")
     elseif(C_LIBRARY MATCHES "^newlib")
         set(cxxlibs_extra_cmake_options
             -DLIBCXXABI_ENABLE_THREADS=OFF
