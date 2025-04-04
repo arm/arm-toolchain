@@ -71,8 +71,8 @@ directory containing sample programs that use LLVM libc.
 
 ## Limitations of LLVM libc in Arm Toolchain for Embedded
 
-At present, this toolchain does not build any C++ libraries to go with
-LLVM libc.
+At present, this toolchain builds C++ libraries limited to what is supported with
+LLVM libc, for example, iostream is not available.
 
 At the time of writing this (2024-07), LLVM libc is a work in
 progress. It is incomplete: not all standard C library functionality
