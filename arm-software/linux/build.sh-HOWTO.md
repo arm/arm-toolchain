@@ -147,6 +147,8 @@ The `build.sh` script reads the following environment variables:
   (default: `arm-software/linux/lib`)
 - `PATCHES_DIR` - The **optional** directory where all patches will be stored
   (default: `arm-software/linux/patches`)
+- `DOCS_DIR` - The directory where ATfL documents will be stored
+  (default: `arm-software/linux/docs`)
 - `BUILD_DIR` - The directory where all build will be happening
   (default: `arm-software/linux/build`)
 - `LOGS_DIR` - The directory where all build logs will be stored
