@@ -355,4 +355,4 @@ generates  portable output suitable for any Armv8-A-based target.
 
 * Code containing non-standard features/intrinsics might not work as expected.
 
-* CMake versions older than 3.20 are not supported.
+* CMake versions older than 3.28 are not supported.
