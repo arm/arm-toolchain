@@ -2,9 +2,9 @@
 
 ## Host platforms
 
-Arm Toolchain for Embedded is built and tested on Linux Ubuntu, Mac and Windows.
+Arm Toolchain for Embedded is built and tested on Linux Ubuntu, macOS and Windows.
 
-Please refer _Host Platforms_ section in the [README](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/README.md#host-platforms), for details.
+Please refer to the _Host Platforms_ section in the [README](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/README.md#host-platforms), for details.
 
 ## Installing prerequisites
 
