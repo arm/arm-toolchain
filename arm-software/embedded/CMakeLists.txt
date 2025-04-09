@@ -703,10 +703,10 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
     endforeach()
 endif()
 
-FILE(WRITE "${CMAKE_BINARY_DIR}/${TARGET_CFI_DIR}/cfi_ignorelist.txt" "")
+FILE(WRITE "${CMAKE_BINARY_DIR}/llvm/${TARGET_CFI_DIR}/cfi_ignorelist.txt" "")
 install(
     FILES
-    ${CMAKE_BINARY_DIR}/${TARGET_CFI_DIR}/cfi_ignorelist.txt
+    ${CMAKE_BINARY_DIR}/llvm/${TARGET_CFI_DIR}/cfi_ignorelist.txt
     DESTINATION ${TARGET_CFI_DIR}
     COMPONENT llvm-toolchain-libs
 )
