@@ -1,10 +1,3 @@
-<!--===- docs/StandardsSupport.md
-
-   Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
-   See https://llvm.org/LICENSE.txt for license information.
-   SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-
--->
 # C Standard Support
 
 Refer to the [Clang C status page](https://clang.llvm.org/c_status.html) for details on C standard support.
@@ -15,12 +8,6 @@ Refer to the [Clang C++ status page](https://clang.llvm.org/cxx_status.html) for
 
 # Fortran Standards Support
 
-```{contents}
----
-local:
----
-```
-
 This section summarizes Fortran standards support in Flang. The information is only provided as a guideline. The
 TODOs/Not Yet Implemented messages emitted by the compiler for unimplemented features should be treated as authoritative.
 
@@ -30,10 +17,10 @@ the letters **P**, **Y**, **N** for the implementation status:
 - **Y** : When the implementation is complete
 - **N** : When the implementation is absent
 
-Note : No distinction is made between the support in the Parser/Semantics and MLIR or Lowering support.
+Note: No distinction is made between the support in the Parser/Semantics and MLIR or Lowering support.
 
 ## Fortran 2023
-See [document](https://github.com/llvm/llvm-project/blob/main/flang/docs/F202X.md) for a brief discussion about the new features in Fortran 2023. The following table summarizes the
+See [this document](https://github.com/llvm/llvm-project/blob/main/flang/docs/F202X.md) for a brief discussion about the new features in Fortran 2023. The following table summarizes the
 status of all important Fortran 2023 features.
 
 | Feature                                                    | Status | Comments                                                |

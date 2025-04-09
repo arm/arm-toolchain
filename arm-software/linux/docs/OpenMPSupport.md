@@ -1,22 +1,9 @@
-<!--===- docs/OpenMPSupport.md
-
-   Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
-   See https://llvm.org/LICENSE.txt for license information.
-   SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-
--->
 
 # Clang OpenMP support
 
-Refer to the (status page](https://releases.llvm.org/20.1.0/tools/clang/docs/OpenMPSupport.html) for details on Clang OpenMP support.
+Refer to the [status page](https://releases.llvm.org/20.1.0/tools/clang/docs/OpenMPSupport.html) for details on Clang OpenMP support.
 
 # Flang OpenMP Support
-
-```{contents}
----
-local:
----
-```
 
 This section outlines the OpenMP API features supported by Flang. It is intended as a general reference.
 For the most accurate information on unimplemented features, rely on the compiler’s TODO or “Not Yet Implemented”
@@ -31,7 +18,7 @@ the letters **P**, **Y**, **N** for the implementation status:
 - **Y** : Yes. When the implementation is complete
 - **N** : No. When the implementation is absent
 
-Note : No distinction is made between the support in Parser/Semantics, MLIR, Lowering or the OpenMPIRBuilder.
+Note: No distinction is made between the support in Parser/Semantics, MLIR, Lowering or the OpenMPIRBuilder.
 
 ## OpenMP 4.0
 
