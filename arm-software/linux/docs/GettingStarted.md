@@ -335,8 +335,8 @@ generates  portable output suitable for any Armv8-A-based target.
 
 ### Standards support
 
-For information on C, C++, and Fortran language support in ATfL, see the [Standards Support page](StandardsSupport).
-For details on OpenMP support in ATfL, refer to the [OpenMP Support page](OpenMPSupport).
+For information on C, C++, and Fortran language support in ATfL, see the [Standards Support page](StandardsSupport.md).
+For details on OpenMP support in ATfL, refer to the [OpenMP Support page](OpenMPSupport.md).
 
 ### Fortran Recommendations
 
