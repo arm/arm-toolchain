@@ -2,13 +2,13 @@
     "args": {
         "common": {
             "TARGET_ARCH": "armv8.1m.main",
-            "VARIANT": "armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti",
-            "COMPILE_FLAGS": "-mfloat-abi=hard -march=armv8.1m.main+mve+pacbti -mfpu=none -mbranch-protection=pac-ret+bti",
-            "ENABLE_EXCEPTIONS": "ON",
-            "ENABLE_RTTI": "ON",
+            "VARIANT": "armv8.1m.main_hard_fp_nomve_pacret_bti_unaligned",
+            "COMPILE_FLAGS": "-mfloat-abi=hard -march=armv8.1m.main+nomve+pacbti -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti",
+            "ENABLE_EXCEPTIONS": "OFF",
+            "ENABLE_RTTI": "OFF",
             "TEST_EXECUTOR": "fvp",
             "FVP_MODEL": "corstone-310",
-            "FVP_CONFIG": "cortex-m85 m-pacbti m-nofp mve-int",
+            "FVP_CONFIG": "cortex-m85 m-pacbti m-fp mve-none",
             "BOOT_FLASH_ADDRESS": "0x01000000",
             "BOOT_FLASH_SIZE": "2M",
             "FLASH_ADDRESS": "0x60000000",

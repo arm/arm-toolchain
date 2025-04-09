@@ -57,6 +57,8 @@
 
 # RUN: %clang -print-multi-directory --target=armv7m-none-eabihf -mfpu=fpv4-sp-d16 -mno-unaligned-access | FileCheck --check-prefix=FPV4-EXN-RTTI %s
 # RUN: %clang -print-multi-directory --target=armv7em-none-eabihf -mfpu=fpv4-sp-d16 -mno-unaligned-access | FileCheck --check-prefix=FPV4-EXN-RTTI %s
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabihf -mfpu=fpv5-d16 -mno-unaligned-access | FileCheck --check-prefix=FPV4-EXN-RTTI %s
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabihf -mfpu=fpv5-d16 -mno-unaligned-access | FileCheck --check-prefix=FPV4-EXN-RTTI %s
 # FPV4-EXN-RTTI: arm-none-eabi/armv7m_hard_fpv4_sp_d16_exn_rtti{{$}}
 # FPV4-EXN-RTTI-EMPTY:
 
@@ -67,12 +69,14 @@
 
 # RUN: %clang -print-multi-directory --target=armv7m-none-eabihf -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=FPV4 %s
 # RUN: %clang -print-multi-directory --target=armv7em-none-eabihf -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=FPV4 %s
+# RUN: %clang -print-multi-directory --target=armv7m-none-eabihf -mfpu=fpv5-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=FPV4 %s
+# RUN: %clang -print-multi-directory --target=armv7em-none-eabihf -mfpu=fpv5-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=FPV4 %s
 # FPV4: arm-none-eabi/armv7m_hard_fpv4_sp_d16{{$}}
 # FPV4-EMPTY:
 
 # RUN: %clang -print-multi-directory --target=armv7m-none-eabihf -mfpu=fpv5-d16 | FileCheck --check-prefix=FPV5 %s
 # RUN: %clang -print-multi-directory --target=armv7em-none-eabihf -mfpu=fpv5-d16 | FileCheck --check-prefix=FPV5 %s
-# FPV5: arm-none-eabi/armv7m_hard_fpv5_d16_exn_rtti{{$}}
+# FPV5: arm-none-eabi/armv7m_hard_fpv5_d16_exn_rtti_unaligned{{$}}
 # FPV5-EMPTY:
 
 # RUN: %clang -print-multi-directory --target=armv7m-none-eabihf -mbig-endian -mfpu=fpv4-sp-d16 -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=CHECK-BE-FPV4

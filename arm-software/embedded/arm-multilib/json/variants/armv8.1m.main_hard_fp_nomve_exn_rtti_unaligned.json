@@ -2,10 +2,10 @@
     "args": {
         "common": {
             "TARGET_ARCH": "armv8.1m.main",
-            "VARIANT": "armv8.1m.main_soft_nofp_nomve",
-            "COMPILE_FLAGS": "-mfloat-abi=soft -march=armv8.1m.main+nomve -mfpu=none",
-            "ENABLE_EXCEPTIONS": "OFF",
-            "ENABLE_RTTI": "OFF",
+            "VARIANT": "armv8.1m.main_hard_fp_nomve_exn_rtti_unaligned",
+            "COMPILE_FLAGS": "-mfloat-abi=hard -march=armv8.1m.main+nomve -mfpu=fp-armv8-fullfp16-sp-d16",
+            "ENABLE_EXCEPTIONS": "ON",
+            "ENABLE_RTTI": "ON",
             "TEST_EXECUTOR": "qemu",
             "QEMU_MACHINE": "mps3-an547",
             "QEMU_CPU": "cortex-m55",
