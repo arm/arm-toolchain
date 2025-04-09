@@ -2,13 +2,9 @@
 
 ## Host platforms
 
-Arm Toolchain for Embedded is built and tested on Ubuntu 18.04 LTS.
+Arm Toolchain for Embedded is built and tested on Linux Ubuntu, macOS and Windows.
 
-The Windows version of LLVM tools is built on Windows Server 2019
-and lightly tested on Windows 10. Windows package provides runtime libraries
-built on Linux, because of their limited Windows support.
-
-Building and testing on macOS is functional but experimental.
+Please refer to the _Host Platforms_ section in the [README](https://github.com/arm/arm-toolchain/blob/release/arm-software/20.x/arm-software/embedded/README.md#host-platforms), for details.
 
 ## Installing prerequisites
 
