@@ -333,6 +333,11 @@ generates  portable output suitable for any Armv8-A-based target.
   `-mcpu=<target>` where `<target>` is the target processor that you will run
   the application on.
 
+### Standards support
+
+For information on C, C++, and Fortran language support in ATfL, see the [Standards Support page](StandardsSupport.md).
+For details on OpenMP support in ATfL, refer to the [OpenMP Support page](OpenMPSupport.md).
+
 ### Fortran Recommendations
 
 #### Who should use Arm Toolchain For Linux
