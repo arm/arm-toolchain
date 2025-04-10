@@ -57,7 +57,6 @@ Note: No distinction is made between the support in Parser/Semantics, MLIR, Lowe
 | Feature                                                    | Status | Comments                                                |
 |------------------------------------------------------------|--------|---------------------------------------------------------|
 | intent(in) in firstprivate                                 | Y      | |
-| const-qualified types in firstprivate                      | N      | |
 | pointers in firstprivate and lastprivate                   | Y      | |
 | final and mergeable clauses in task                        | Y      | |
 | taskyield construct                                        | Y      | |
