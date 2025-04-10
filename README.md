@@ -1,8 +1,5 @@
 # Arm Toolchain
 
-> [!WARNING]
-> This project is under construction.
-
 Welcome to the Arm Toolchain project!
 
 This repository contains the source code for the Arm Toolchain
