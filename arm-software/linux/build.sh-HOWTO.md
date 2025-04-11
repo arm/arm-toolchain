@@ -137,6 +137,8 @@ The `build.sh` script reads the following environment variables:
 
 - `README_MD_PATH` - Specifies the location of the README.md file to bundle
   (default: `arm-software/linux/README.md`)
+- `CHANGELOG_MD_PATH` - Specifies the location of the CHANGELOG.md file to bundle
+  (default: `arm-software/linux/CHANGELOG.md`)
 - `SBOM_FILE_PATH` - Specifies the location of the SBOM JSON file to bundle
   (default: `arm-software/linux/SBOM_Files/ATfL-SBOM.spdx.json`)
 - `MKMODULEDIRS_PATH` - Specifies the location of mkmoduledirs.sh.var to tweak
