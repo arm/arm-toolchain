@@ -34,7 +34,7 @@ INTERACTIVE=false
 ##########################
 
 RELEASE_FLAGS=${RELEASE_FLAGS:-"false"}
-ATFL_VERSION=${ATFL_VERSION:-"0.0"}
+ATFL_VERSION=${ATFL_VERSION:-"20.1"}
 OS_NAME=${OS_NAME:-"linux"}
 TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-`uname -m`.tar.gz"}
 ATFL_ASSERTIONS=${ATFL_ASSERTIONS:-"ON"}
