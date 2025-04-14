@@ -12,7 +12,7 @@
       "tag": "main"
     },
     "newlib": {
-      "url": "https://sourceware.org/git/newlib-cygwin.git",
+      "url": "https://github.com/bminor/newlib.git",
       "tagType": "tag",
       "tag": "newlib-4.5.0"
     }
