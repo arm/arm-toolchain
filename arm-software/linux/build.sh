@@ -380,6 +380,8 @@ shared_lib_build() {
     cp -d ${ATFL_DIR}.libs/lib/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
+    echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
+    echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
 }
 
