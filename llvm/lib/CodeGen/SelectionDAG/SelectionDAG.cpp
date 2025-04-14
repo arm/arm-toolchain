@@ -2554,7 +2554,19 @@ bool SelectionDAG::expandMultipleResultFPLibCall(
   EVT VT = Node->getValueType(0);
   unsigned NumResults = Node->getNumValues();
 
-  const char *LCName = TLI->getLibcallName(LC);
+  /* Downstream change: #87 (sincos vectorization)*/
+  auto getLibcallName = [&] {
+    if (VT.isVector()) {
+      if (LC == RTLIB::SINCOS_F32)
+        return "sincosf";
+      if (LC == RTLIB::SINCOS_F64)
+        return "sincos";
+    }
+    return TLI->getLibcallName(LC);
+  };
+  /* End downstream change: #87 */
+
+  const char *LCName = getLibcallName();
   if (!LC || !LCName)
     return false;
 

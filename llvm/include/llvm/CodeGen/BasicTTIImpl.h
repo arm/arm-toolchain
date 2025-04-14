@@ -308,8 +308,16 @@ private:
         !isVectorizedStructTy(cast<StructType>(RetTy)))
       return std::nullopt;
 
+    auto getLibcallName = [&] {
+      if (LC == RTLIB::SINCOS_F32)
+        return "sincosf";
+      if (LC == RTLIB::SINCOS_F64)
+        return "sincos";
+      return getTLI()->getLibcallName(LC);
+    };
+
     // Find associated libcall.
-    const char *LCName = getTLI()->getLibcallName(LC);
+    const char *LCName = getLibcallName();
     if (!LCName)
       return std::nullopt;
 
