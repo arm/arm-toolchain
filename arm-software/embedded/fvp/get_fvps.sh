@@ -50,13 +50,13 @@ MACHINE_HARDWARE=$(uname -m)
 
 if [ "$MACHINE_HARDWARE" == 'x86_64' ]; then
     URL_CORSTONE_310='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64.tgz'
-    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64.tgz'
-    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_AEMv8R_11.27_19_Linux64.tgz'
+    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.28/FVP_Base_RevC-2xAEMvA_11.28_23_Linux64.tgz'
+    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.28/FVP_Base_AEMv8R_11.28_23_Linux64.tgz'
     URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.27/FastModels_crypto_11.27.019_Linux64.tgz'
 elif [ "$MACHINE_HARDWARE" == 'aarch64' ]; then
     URL_CORSTONE_310='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64_armv8l.tgz'
-    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_RevC-2xAEMvA_11.27_19_Linux64_armv8l.tgz'
-    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/Fixed-Virtual-Platforms/FM-11.27/FVP_Base_AEMv8R_11.27_19_Linux64_armv8l.tgz'
+    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.28/FVP_Base_RevC-2xAEMvA_11.28_23_Linux64_armv8l.tgz'
+    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.28/FVP_Base_AEMv8R_11.28_23_Linux64_armv8l.tgz'
     URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.27/FastModels_crypto_11.27.019_Linux64_armv8l.tgz'
 else
     echo Unknown architecture: $MACHINE_HARDWARE
