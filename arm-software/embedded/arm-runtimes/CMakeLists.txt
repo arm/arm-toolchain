@@ -611,19 +611,6 @@ if(C_LIBRARY STREQUAL llvmlibc)
         message(FATAL_ERROR "Tests cannot yet be enabled using llvm libc.")
     endif()
 
-    # LLVM libc lacks a configuration for AArch64, but the AArch32 one works
-    # fine. However, setting the configuration for both architectures to the
-    # arm config directory means the baremetal config.json is never loaded,
-    # as it resides in the directory above. To ensure both are used, copy
-    # them to the same location and point libc to that.
-    set(LIBC_CFG_DIR ${CMAKE_BINARY_DIR}/llvmlibc-config)
-    file(COPY
-        ${llvmproject_src_dir}/libc/config/baremetal/config.json
-        ${llvmproject_src_dir}/libc/config/baremetal/${cpu_family}/.
-        DESTINATION
-        ${LIBC_CFG_DIR}
-    )
-
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
 
     set(common_llvmlibc_cmake_args
@@ -659,7 +646,6 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ${compiler_launcher_cmake_args}
         ${common_llvmlibc_cmake_args}
         -DLIBC_TARGET_TRIPLE=${target_triple}
-        -DLIBC_CONFIG_PATH=${LIBC_CFG_DIR}
         -DLIBC_CONF_TIME_64BIT=ON
         -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
         -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
