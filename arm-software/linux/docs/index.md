@@ -10,7 +10,6 @@ platforms.
 .. toctree::
    :titlesonly:
 
-   Installation
    GettingStarted
    UsingArmPL
    PortingFromACfL
