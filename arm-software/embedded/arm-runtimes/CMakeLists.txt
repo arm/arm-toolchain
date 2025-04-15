@@ -619,7 +619,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
     set(LIBC_CFG_DIR ${CMAKE_BINARY_DIR}/llvmlibc-config)
     file(COPY
         ${llvmproject_src_dir}/libc/config/baremetal/config.json
-        ${llvmproject_src_dir}/libc/config/baremetal/arm/.
+        ${llvmproject_src_dir}/libc/config/baremetal/${cpu_family}/.
         DESTINATION
         ${LIBC_CFG_DIR}
     )
