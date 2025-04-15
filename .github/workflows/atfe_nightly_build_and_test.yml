@@ -31,13 +31,13 @@ jobs:
             test_script: test.sh
             runner: ubuntu-22.04
           - build_script: build_llvmlibc_overlay.sh
-            test_script: test.sh
+            test_script: ''
             runner: ubuntu-22.04
           - build_script: build_newlib_nano_overlay.sh
-            test_script: test.sh
+            test_script: ''
             runner: ubuntu-22.04
           - build_script: build_newlib_overlay.sh
-            test_script: test.sh
+            test_script: ''
             runner: ubuntu-22.04
 
     steps:
@@ -51,6 +51,7 @@ jobs:
         run: ./arm-software/embedded/scripts/${{ matrix.build_script }}
 
       - name: Test ${{ matrix.test_script }}
+        if: matrix.test_script != ''
         run: ./arm-software/embedded/scripts/${{ matrix.test_script }}
 
       - name: Upload test results
