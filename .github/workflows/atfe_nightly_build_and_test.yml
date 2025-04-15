@@ -45,14 +45,26 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: ./arm-software/embedded/scripts/install_dependencies.sh
+        run: bash ./arm-software/embedded/scripts/install_dependencies.sh
+
+      - name: Apply llvm-project patches
+        run: |
+          python3 arm-software/embedded/cmake/patch_repo.py \
+            --method apply \
+            arm-software/embedded/patches/llvm-project
+
+      - name: Apply llvm-project-perf patches
+        run: |
+          python3 arm-software/embedded/cmake/patch_repo.py \
+            --method apply \
+            arm-software/embedded/patches/llvm-project-perf
 
       - name: Build ${{ matrix.build_script }}
-        run: ./arm-software/embedded/scripts/${{ matrix.build_script }}
+        run: bash ./arm-software/embedded/scripts/${{ matrix.build_script }}
 
       - name: Test ${{ matrix.test_script }}
         if: matrix.test_script != ''
-        run: ./arm-software/embedded/scripts/${{ matrix.test_script }}
+        run: bash ./arm-software/embedded/scripts/${{ matrix.test_script }}
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -62,3 +74,13 @@ jobs:
           path: |
             build/**/*results.xml
             build/**/*.junit.xml
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: built-packages-${{ matrix.build_script }}
+          path: |
+            build/**/*.dmg
+            build/**/*.tar.xz
+            build/**/*.zip
