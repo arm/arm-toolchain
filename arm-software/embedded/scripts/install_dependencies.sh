@@ -14,7 +14,8 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     ninja-build=1.10.1-1 \
     clang=1:14.0-55~exp2 \
     python3-pip \
-    python3-setuptools
+    python3-setuptools \
+    qemu-system-x86=1:6.2+dfsg-2ubuntu6.26
 
 # Upgrade pip and install meson with a pinned version
 python3 -m pip install --upgrade pip
