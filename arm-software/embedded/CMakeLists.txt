@@ -354,6 +354,9 @@ add_subdirectory(
     ${llvmproject_src_dir}/llvm llvm
 )
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin elf2bin)
+add_dependencies(check-all check-elf2bin)
+
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
     install(
         FILES
