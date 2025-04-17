@@ -57,8 +57,8 @@
 
 # RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=ARMV7M-HARD %s
 # RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-sp-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=ARMV7M-HARD %s
-# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti | FileCheck --check-prefix=HARD-FPDP-UNALIGNED %s
-# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti | FileCheck --check-prefix=HARD-FPDP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=ARMV7M-HARD %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=ARMV7M-HARD %s
 # ARMV7M-HARD: arm-none-eabi/armv7m_hard_fpv4_sp_d16{{$}}
 # ARMV7M-HARD-EMPTY:
 
