@@ -13,9 +13,9 @@ installed Linux distribution.
 #### Ubuntu 22.04
 
 ```
-$ curl "http://obs.oss.arm.com:82/arm-toolchains:/ubuntu-22/linux/Release.key" | sudo gpg --dearmor -o /usr/share/keyrings/obs-oss-arm-com.gpg
+$ curl "https://developer.arm.com/packages/arm-toolchains:ubuntu-22/jammy/Release.key" | sudo gpg --dearmor -o /usr/share/keyrings/obs-oss-arm-com.gpg
 
-$ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] http://obs.oss.arm.com:82/arm-toolchains:/ubuntu-22/linux/ ./" | sudo tee /etc/apt/sources.list.d/obs-oss-arm-com.list
+$ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] https://developer.arm.com/packages/arm-toolchains:ubuntu-22/jammy/ ./" | sudo tee /etc/apt/sources.list.d/obs-oss-arm-com.list
 
 $ sudo apt update
 ```
@@ -23,9 +23,9 @@ $ sudo apt update
 #### Ubuntu 24.04
 
 ```
-$ curl "http://obs.oss.arm.com:82/arm-toolchains:/ubuntu-24/linux/Release.key" | sudo gpg --dearmor -o /usr/share/keyrings/obs-oss-arm-com.gpg
+$ curl "https://developer.arm.com/packages/arm-toolchains:ubuntu-24/noble/Release.key" | sudo gpg --dearmor -o /usr/share/keyrings/obs-oss-arm-com.gpg
 
-$ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] http://obs.oss.arm.com:82/arm-toolchains:/ubuntu-24/linux/ ./" | sudo tee /etc/apt/sources.list.d/obs-oss-arm-com.list
+$ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] https://developer.arm.com/packages/arm-toolchains:ubuntu-24/noble/ ./" | sudo tee /etc/apt/sources.list.d/obs-oss-arm-com.list
 
 $ sudo apt update
 ```
@@ -35,7 +35,7 @@ $ sudo apt update
 ```
 $ sudo dnf install 'dnf-command(config-manager)'
 
-$ sudo dnf config-manager -y --add-repo http://obs.oss.arm.com:82/arm-toolchains:/rhel-8/linux/arm-toolchains:rhel-8.repo
+$ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-toolchains:rhel-8/el8/arm-toolchains:rhel-8.repo
 ```
 
 #### Red Hat Entrprise Linux 9
@@ -43,7 +43,7 @@ $ sudo dnf config-manager -y --add-repo http://obs.oss.arm.com:82/arm-toolchains
 ```
 $ sudo dnf install 'dnf-command(config-manager)'
 
-$ sudo dnf config-manager -y --add-repo http://obs.oss.arm.com:82/arm-toolchains:/rhel-9/linux/arm-toolchains:rhel-9.repo
+$ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-toolchains:rhel-9/el9/arm-toolchains:rhel-9.repo
 ```
 
 #### Amazon Linux 2023
@@ -51,13 +51,13 @@ $ sudo dnf config-manager -y --add-repo http://obs.oss.arm.com:82/arm-toolchains
 ```
 $ sudo dnf install 'dnf-command(config-manager)'
 
-$ sudo dnf config-manager -y --add-repo http://obs.oss.arm.com:82/arm-toolchains:/amzn-2023/linux/arm-toolchains:amzn-2023.repo
+$ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-toolchains:amzn-2023/al2023/arm-toolchains:amzn-2023.repo
 ```
 
 #### SUSE Linux Enterprise Server 15
 
 ```
-$ sudo zypper ar -f http://obs.oss.arm.com:82/arm-toolchains:/sles-15/linux/arm-toolchains:sles-15.repo
+$ sudo zypper ar -f https://developer.arm.com/packages/arm-toolchains:sles-15/sl15/arm-toolchains:sles-15.repo
 ```
 
 ### Installation step
