@@ -10,7 +10,6 @@ fi
 ################################
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-README_MD_PATH=${README_MD_PATH:-"${BASE_DIR}/README.md"}
 CHANGELOG_MD_PATH=${CHANGELOG_MD_PATH:-"${BASE_DIR}/CHANGELOG.md"}
 SBOM_FILE_PATH=${SBOM_FILE_PATH:-"${BASE_DIR}/SBOM_Files/ATfL-SBOM.spdx.json"}
 MKMODULEDIRS_PATH=${MKMODULEDIRS_PATH:-"${BASE_DIR}/mkmoduledirs.sh.var"}
@@ -176,8 +175,6 @@ Options:
 
 Environment Variables:
 
-    README_MD_PATH      Specifies the location of the README.md file to bundle
-                        (default: ${README_MD_PATH})
     CHANGELOG_MD_PATH   Specifies the location of the CHANGELOG.md file to bundle
                         (default: ${CHANGELOG_MD_PATH})
     SBOM_FILE_PATH      Specifies the location of the SBOM JSON file to bundle
@@ -386,7 +383,6 @@ shared_lib_build() {
 }
 
 package() {
-    cp "${README_MD_PATH}" "${ATFL_DIR}/README.md"
     cp "${CHANGELOG_MD_PATH}" "${ATFL_DIR}/CHANGELOG.md"
     cp "${SBOM_FILE_PATH}" "${ATFL_DIR}/ATfL-SBOM.spdx.json"
     mkdir -p "${ATFL_DIR}/arm"
@@ -489,12 +485,6 @@ if [[ $# -gt 0 ]]; then
         exit 1
         ;;
     esac
-fi
-
-if ! [[ -f "${README_MD_PATH}" ]]
-then
-  echo "The path to README.md file is configured incorrectly or does not exist."
-  exit 1
 fi
 
 if ! [[ -f "${CHANGELOG_MD_PATH}" ]]
