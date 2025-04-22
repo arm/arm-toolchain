@@ -383,6 +383,7 @@ shared_lib_build() {
 }
 
 package() {
+    cp "${SOURCES_DIR}/LICENSE.TXT" "${ATFL_DIR}/LICENSE.TXT"
     cp "${CHANGELOG_MD_PATH}" "${ATFL_DIR}/CHANGELOG.md"
     cp "${SBOM_FILE_PATH}" "${ATFL_DIR}/ATfL-SBOM.spdx.json"
     mkdir -p "${ATFL_DIR}/arm"
