@@ -45,10 +45,109 @@
 # HARD-NOFP-MVE-EXN-RTTI-UNALIGNED: arm-none-eabi/armv8.1m.main_hard_nofp_mve_exn_rtti_unaligned{{$}}
 # HARD-NOFP-MVE-EXN-RTTI-UNALIGNED-EMPTY:
 
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -mno-unaligned-access | FileCheck --check-prefix=HARD-NOFP-MVE-EXN-RTTI %s
+# HARD-NOFP-MVE-EXN-RTTI: arm-none-eabi/armv8.1m.main_hard_nofp_mve_exn_rtti{{$}}
+# HARD-NOFP-MVE-EXN-RTTI-EMPTY:
+
 # RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti | FileCheck --check-prefix=HARD-NOFP-MVE-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -munaligned-access | FileCheck --check-prefix=HARD-NOFP-MVE-UNALIGNED %s
 # HARD-NOFP-MVE-UNALIGNED: arm-none-eabi/armv8.1m.main_hard_nofp_mve_unaligned{{$}}
 # HARD-NOFP-MVE-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access | FileCheck --check-prefix=HARD-NOFP-MVE %s
+# HARD-NOFP-MVE: arm-none-eabi/armv8.1m.main_hard_nofp_mve{{$}}
+# HARD-NOFP-MVE-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-FPDP-PACBTI-EXN-RTTI %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-FPDP-PACBTI-EXN-RTTI %s
+# HARD-FPDP-PACBTI-EXN-RTTI: arm-none-eabi/armv8.1m.main_hard_fpdp_nomve_pacret_bti_exn_rtti{{$}}
+# HARD-FPDP-PACBTI-EXN-RTTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-FPDP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-FPDP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-FPDP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-FPDP-PACBTI-EXN-RTTI-UNALIGNED %s
+# HARD-FPDP-PACBTI-EXN-RTTI-UNALIGNED: arm-none-eabi/armv8.1m.main_hard_fpdp_nomve_pacret_bti_exn_rtti_unaligned{{$}}
+# HARD-FPDP-PACBTI-EXN-RTTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-FPDP-PACBTI %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-FPDP-PACBTI %s
+# HARD-FPDP-PACBTI: arm-none-eabi/armv8.1m.main_hard_fpdp_nomve_pacret_bti{{$}}
+# HARD-FPDP-PACBTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-FPDP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-FPDP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-FPDP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-FPDP-PACBTI-UNALIGNED %s
+# HARD-FPDP-PACBTI-UNALIGNED: arm-none-eabi/armv8.1m.main_hard_fpdp_nomve_pacret_bti_unaligned{{$}}
+# HARD-FPDP-PACBTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-FP-PACBTI-EXN-RTTI %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-FP-PACBTI-EXN-RTTI %s
+# HARD-FP-PACBTI-EXN-RTTI: arm-none-eabi/armv8.1m.main_hard_fp_nomve_pacret_bti_exn_rtti{{$}}
+# HARD-FP-PACBTI-EXN-RTTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-FP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-FP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-FP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-FP-PACBTI-EXN-RTTI-UNALIGNED %s
+# HARD-FP-PACBTI-EXN-RTTI-UNALIGNED: arm-none-eabi/armv8.1m.main_hard_fp_nomve_pacret_bti_exn_rtti_unaligned{{$}}
+# HARD-FP-PACBTI-EXN-RTTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-sp-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-FP-PACBTI %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-sp-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-FP-PACBTI %s
+# HARD-FP-PACBTI: arm-none-eabi/armv8.1m.main_hard_fp_nomve_pacret_bti{{$}}
+# HARD-FP-PACBTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-sp-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-FP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main -mfpu=fp-armv8-fullfp16-sp-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-FP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-sp-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-FP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=fp-armv8-fullfp16-sp-d16 -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-FP-PACBTI-UNALIGNED %s
+# HARD-FP-PACBTI-UNALIGNED: arm-none-eabi/armv8.1m.main_hard_fp_nomve_pacret_bti_unaligned{{$}}
+# HARD-FP-PACBTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-NOFP-MVE-PACBTI-EXN-RTTI %s
+# HARD-NOFP-MVE-PACBTI-EXN-RTTI: arm-none-eabi/armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti{{$}}
+# HARD-NOFP-MVE-PACBTI-EXN-RTTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-NOFP-MVE-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-NOFP-MVE-PACBTI-EXN-RTTI-UNALIGNED %s
+# HARD-NOFP-MVE-PACBTI-EXN-RTTI-UNALIGNED: arm-none-eabi/armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_unaligned{{$}}
+# HARD-NOFP-MVE-PACBTI-EXN-RTTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=HARD-NOFP-MVE-PACBTI %s
+# HARD-NOFP-MVE-PACBTI: arm-none-eabi/armv8.1m.main_hard_nofp_mve_pacret_bti{{$}}
+# HARD-NOFP-MVE-PACBTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=HARD-NOFP-MVE-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabihf -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=HARD-NOFP-MVE-PACBTI-UNALIGNED %s
+# HARD-NOFP-MVE-PACBTI-UNALIGNED: arm-none-eabi/armv8.1m.main_hard_nofp_mve_pacret_bti_unaligned{{$}}
+# HARD-NOFP-MVE-PACBTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main -mfpu=none -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=SOFT-NOFP-PACBTI-EXN-RTTI %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=SOFT-NOFP-PACBTI-EXN-RTTI %s
+# SOFT-NOFP-PACBTI-EXN-RTTI: arm-none-eabi/armv8.1m.main_soft_nofp_nomve_pacret_bti_exn_rtti{{$}}
+# SOFT-NOFP-PACBTI-EXN-RTTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main -mfpu=none -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=SOFT-NOFP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main -mfpu=none -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=SOFT-NOFP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=SOFT-NOFP-PACBTI-EXN-RTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=SOFT-NOFP-PACBTI-EXN-RTTI-UNALIGNED %s
+# SOFT-NOFP-PACBTI-EXN-RTTI-UNALIGNED: arm-none-eabi/armv8.1m.main_soft_nofp_nomve_pacret_bti_exn_rtti_unaligned{{$}}
+# SOFT-NOFP-PACBTI-EXN-RTTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=SOFT-NOFP-PACBTI %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -mno-unaligned-access | FileCheck --check-prefix=SOFT-NOFP-PACBTI %s
+# SOFT-NOFP-PACBTI: arm-none-eabi/armv8.1m.main_soft_nofp_nomve_pacret_bti{{$}}
+# SOFT-NOFP-PACBTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=SOFT-NOFP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=SOFT-NOFP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti | FileCheck --check-prefix=SOFT-NOFP-PACBTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8.1m.main-none-eabi -march=armv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -mbranch-protection=pac-ret+bti -munaligned-access | FileCheck --check-prefix=SOFT-NOFP-PACBTI-UNALIGNED %s
+# SOFT-NOFP-PACBTI-UNALIGNED: arm-none-eabi/armv8.1m.main_soft_nofp_nomve_pacret_bti_unaligned{{$}}
+# SOFT-NOFP-PACBTI-UNALIGNED-EMPTY:
+
 
 ### Fallback to Armv7-M ###
 

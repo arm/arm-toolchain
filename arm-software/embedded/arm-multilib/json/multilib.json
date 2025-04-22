@@ -486,9 +486,19 @@
             "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+mve -mfpu=none -munaligned-access"
         },
         {
+            "variant": "armv8.1m.main_hard_nofp_mve_exn_rtti",
+            "json": "armv8.1m.main_hard_nofp_mve_exn_rtti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+mve -mfpu=none -mno-unaligned-access"
+        },
+        {
             "variant": "armv8.1m.main_hard_nofp_mve_unaligned",
             "json": "armv8.1m.main_hard_nofp_mve_unaligned.json",
             "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -munaligned-access"
+        },
+        {
+            "variant": "armv8.1m.main_hard_nofp_mve",
+            "json": "armv8.1m.main_hard_nofp_mve.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+mve -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
         },
         {
             "variant": "armv8.1m.main_softfp_nomve",
@@ -501,9 +511,19 @@
             "flags": "--target=thumbv8.1m.main-unknown-none-eabi -mfpu=none -mbranch-protection=pac-ret+bti -munaligned-access"
         },
         {
+            "variant": "armv8.1m.main_soft_nofp_nomve_pacret_bti_exn_rtti",
+            "json": "armv8.1m.main_soft_nofp_nomve_pacret_bti_exn_rtti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabi -mfpu=none -mbranch-protection=pac-ret+bti -mno-unaligned-access"
+        },
+        {
             "variant": "armv8.1m.main_soft_nofp_nomve_pacret_bti_unaligned",
             "json": "armv8.1m.main_soft_nofp_nomve_pacret_bti_unaligned.json",
             "flags": "--target=thumbv8.1m.main-unknown-none-eabi -mfpu=none -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti -munaligned-access"
+        },
+        {
+            "variant": "armv8.1m.main_soft_nofp_nomve_pacret_bti",
+            "json": "armv8.1m.main_soft_nofp_nomve_pacret_bti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabi -mfpu=none -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti -mno-unaligned-access"
         },
         {
             "variant": "armv8.1m.main_hard_fp_nomve_pacret_bti_exn_rtti_unaligned",
@@ -511,9 +531,19 @@
             "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -munaligned-access"
         },
         {
+            "variant": "armv8.1m.main_hard_fp_nomve_pacret_bti_exn_rtti",
+            "json": "armv8.1m.main_hard_fp_nomve_pacret_bti_exn_rtti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -mno-unaligned-access"
+        },
+        {
             "variant": "armv8.1m.main_hard_fp_nomve_pacret_bti_unaligned",
             "json": "armv8.1m.main_hard_fp_nomve_pacret_bti_unaligned.json",
             "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti -munaligned-access"
+        },
+        {
+            "variant": "armv8.1m.main_hard_fp_nomve_pacret_bti",
+            "json": "armv8.1m.main_hard_fp_nomve_pacret_bti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti -mno-unaligned-access"
         },
         {
             "variant": "armv8.1m.main_hard_fpdp_nomve_pacret_bti_exn_rtti_unaligned",
@@ -521,9 +551,19 @@
             "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti -munaligned-access"
         },
         {
+            "variant": "armv8.1m.main_hard_fpdp_nomve_pacret_bti_exn_rtti",
+            "json": "armv8.1m.main_hard_fpdp_nomve_pacret_bti_exn_rtti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti -mno-unaligned-access"
+        },
+        {
             "variant": "armv8.1m.main_hard_fpdp_nomve_pacret_bti_unaligned",
             "json": "armv8.1m.main_hard_fpdp_nomve_pacret_bti_unaligned.json",
             "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti -munaligned-access"
+        },
+        {
+            "variant": "armv8.1m.main_hard_fpdp_nomve_pacret_bti",
+            "json": "armv8.1m.main_hard_fpdp_nomve_pacret_bti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-d16 -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti -mno-unaligned-access"
         },
         {
             "variant": "armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_unaligned",
@@ -531,9 +571,19 @@
             "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti -munaligned-access"
         },
         {
+            "variant": "armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti",
+            "json": "armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti -mno-unaligned-access"
+        },
+        {
             "variant": "armv8.1m.main_hard_nofp_mve_pacret_bti_unaligned",
             "json": "armv8.1m.main_hard_nofp_mve_pacret_bti_unaligned.json",
             "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti -munaligned-access"
+        },
+        {
+            "variant": "armv8.1m.main_hard_nofp_mve_pacret_bti",
+            "json": "armv8.1m.main_hard_nofp_mve_pacret_bti.json",
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+mve -mfpu=none -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti -mno-unaligned-access"
         }
     ]
 }
