@@ -230,7 +230,7 @@
 # RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
 # RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
 # RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
-# CHECK-VFPV3-SOFTFP-EXNRTTI-BE: arm-none-eabi/armebv7a_soft_vfpv3_d16_exn_rtti
+# CHECK-VFPV3-SOFTFP-EXNRTTI-BE: arm-none-eabi/armebv7a_soft_vfpv3_d16_exn_rtti{{$}}
 # CHECK-VFPV3-SOFTFP-EXNRTTI-BE-EMPTY:
 
 # RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
