@@ -14,4 +14,6 @@ platforms.
    GettingStarted
    UsingArmPL
    PortingFromACfL
+   StandardsSupport
+   OpenMPSupport
 ```
