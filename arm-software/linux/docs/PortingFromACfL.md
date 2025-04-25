@@ -12,11 +12,12 @@ the names of these frontends are consistent across both: `armclang` for C,
 The quadmath is supported by ATfL, while it was not supported by ACfL.
 
 ### Reference Version
+The table below lists the version numbers of the toolchains for which this porting guide is applicable.
 
 |Compiler                      |Version|
 |------------------------------|-------|
 |Arm Compiler for Linux (ACfL) |24.10  |
-|Arm Toolchain for Linux (ATfL)|20.0   |
+|Arm Toolchain for Linux (ATfL)|20.1   |
 
 ### ArmPL integration
 
@@ -52,6 +53,8 @@ focus on the differences in Fortran support between the two toolchains.
 
 #### Major difference
 
+The table below lists the major difference between the two toolchains.
+
 |                |Compatibility|
 |----------------|-------------|
 |Binary          |No           |
@@ -59,6 +62,8 @@ focus on the differences in Fortran support between the two toolchains.
 |Array descriptor|No           |
 
 #### Difference in Fortran features
+
+The table below lists the difference in Fortran features between the two toolchains.
 
 |Feature                   |ACfL                                                                                         |ATfL                                                                                                 |
 |--------------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
@@ -74,7 +79,7 @@ focus on the differences in Fortran support between the two toolchains.
 #### Difference in command line flags
 
 The following table summarises some of the most commonly used compiler flags in
-gfortran and gives their equivalent in the Arm Fortran compiler:
+ACfL and gives their equivalent in ATfL:
 
 |ACfL              |ATfL                      |Description                                                                                        |
 |------------------|--------------------------|---------------------------------------------------------------------------------------------------|
@@ -87,7 +92,7 @@ gfortran and gives their equivalent in the Arm Fortran compiler:
 #### Pre-defined macros
 
 `armflang` has the following compiler and machine specific predefined processor
-macros:
+macros in the two toolchains:
 
 |ACfL                  |ATfL                  |Value        |Description                                               |
 |----------------------|----------------------|-------------|----------------------------------------------------------|

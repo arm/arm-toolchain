@@ -8,7 +8,7 @@ Refer to the [status page](https://releases.llvm.org/20.1.0/tools/clang/docs/Ope
 This section outlines the OpenMP API features supported by Flang. It is intended as a general reference.
 For the most accurate information on unimplemented features, rely on the compiler’s TODO or “Not Yet Implemented”
 messages, which are considered authoritative.  With the exception of a few corner cases, Flang
-offers full support for (OpenMP 2.5)[#openmp-25-openmp-11], and partial support for [OpenMP 3.1](#openmp-31-openmp-30) 
+offers full support for [OpenMP 2.5](#openmp-25-openmp-11), and partial support for [OpenMP 3.1](#openmp-31-openmp-30)
 and [OpenMP 4.0](#openmp-40). The tables below outline the current status of OpenMP 4.0, 3.1, 3.0 feature support.
 Work is ongoing to add support for OpenMP 4.5 and newer versions; a support statement for these will be shared in the future.
 
@@ -21,6 +21,8 @@ the letters **P**, **Y**, **N** for the implementation status:
 Note: No distinction is made between the support in Parser/Semantics, MLIR, Lowering or the OpenMPIRBuilder.
 
 ## OpenMP 4.0
+
+The table below details the implementation status of OpenMP 4.0 features.
 
 | Feature                                                    | Status | Comments                                                |
 |------------------------------------------------------------|--------|---------------------------------------------------------|
@@ -53,6 +55,8 @@ Note: No distinction is made between the support in Parser/Semantics, MLIR, Lowe
 | target teams distribute parallel loop simd construct       | N      | |
 
 ## OpenMP 3.1, OpenMP 3.0
+
+The table below details the implementation status of OpenMP 3.* features.
 
 | Feature                                                    | Status | Comments                                                |
 |------------------------------------------------------------|--------|---------------------------------------------------------|
