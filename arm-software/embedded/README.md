@@ -208,4 +208,4 @@ Please raise an issue via [Github issues](https://github.com/arm/arm-toolchain/i
 
 ## Contributions and Pull Requests
 
-Please see the [Contribution Guide](docs/contributing.md) for details.
+Please see the [Contribution Guide](../../CONTRIBUTING.md) for details.
