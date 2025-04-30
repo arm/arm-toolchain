@@ -84,7 +84,7 @@ are provided for major LLVM releases for Linux and Windows.
 
 ## Getting started
 
-Download a release of the toolchain for your platform from [Github
+Download a release of the toolchain for your platform from [GitHub
 releases](https://github.com/arm/arm-toolchain/releases)
 and extract the archive into an arbitrary directory.
 
@@ -204,7 +204,7 @@ guide for detailed instructions.
 
 ## Providing feedback and reporting issues
 
-Please raise an issue via [Github issues](https://github.com/arm/arm-toolchain/issues)
+Please raise an issue via [GitHub issues](https://github.com/arm/arm-toolchain/issues)
 and add the `ATfE` label if it is specific to the Arm Toolchain for Embedded.
 
 ## Contributions and Pull Requests

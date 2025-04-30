@@ -306,7 +306,7 @@ $ chrpath -l ./example
 
 ## Providing feedback and reporting issues
 
-Please raise an issue via [Github issues](https://github.com/arm/arm-toolchain/issues)
+Please raise an issue via [GitHub issues](https://github.com/arm/arm-toolchain/issues)
 and add the `ATfL` label if it is specific to the Arm Toolchain for Linux.
 
 ## Contributions and Pull Requests
