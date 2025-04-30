@@ -14,3 +14,7 @@ the necessary libraries and tools for building C and C++ toolchains
 for:
 * Bare-metal: [Arm Toolchain for Embedded](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/README.md)
 * Native AArch64 Linux: [Arm Toolchain for Linux](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/linux/README.md)
+
+## Quick Links
+
+Getting binary [releases](https://github.com/arm/arm-toolchain/releases) • Getting started for [Embedded](arm-software/embedded/README.md#getting-started) and [Linux](arm-software/linux/README.md#usage) • Reporting [issues](CONTRIBUTING.md#report-an-issue) • [Contributing](CONTRIBUTING.md)
