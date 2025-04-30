@@ -26,13 +26,13 @@ assignees: ''
 [Optional: Highlight why the proposal makes sense, especially if this is not a problem solving, but exploiting an opportunity]
 
 **[Implementation or Transition]**
-[Optional: Some solutions many need multiple steps to be implemented or require migration/transition period from the previous approach - outline the plan here]
+[Optional: Some solutions may need multiple steps to be implemented or require migration/transition period from the previous approach - outline the plan here]
 
 **[Risks]**
 [Optional: Consider risks and mitigations, if relevant]
 
 **Alternatives**
-[Optional: Explain what alternatives exist or were evaluated and rejected, why]
+[Explain what alternatives exist or were evaluated and rejected, why]
 
 **[Request for Comments]**
 [Optional: If it is not obvious, specifically list what questions/insights are asked from reviewers]
