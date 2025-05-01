@@ -49,6 +49,9 @@ jobs:
       - name: Install dependencies
         run: bash ./arm-software/embedded/scripts/install_dependencies.sh
 
+      - name: Add ~/.local/bin to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Apply llvm-project patches
         run: |
           python3 arm-software/embedded/cmake/patch_repo.py \
