@@ -204,8 +204,7 @@ guide for detailed instructions.
 
 ## Providing feedback and reporting issues
 
-Please raise an issue via [GitHub issues](https://github.com/arm/arm-toolchain/issues)
-and add the `ATfE` label if it is specific to the Arm Toolchain for Embedded.
+Please see the [Contribution Guide](../../CONTRIBUTING.md#report-an-issue) for guidance on how to report an issue or raise a feature request.
 
 ## Contributions and Pull Requests
 
