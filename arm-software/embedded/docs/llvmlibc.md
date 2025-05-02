@@ -1,0 +1,79 @@
+# Experimental LLVM libc support
+
+Arm Toolchain for Embedded uses
+[`picolibc`](https://github.com/picolibc/picolibc) as the standard C
+library. For experimental and evaluation purposes, you can instead
+choose to use the LLVM project's own C library.
+
+> **NOTE:** `llvmlibc` support in Arm Toolchain for Embedded is
+> an experimental technology preview, with significant limitations.
+
+## Building the toolchain with LLVM libc
+
+> **NOTE:** Building the LLVM libc package is only supported on Linux
+> and macOS.
+
+Configure the toolchain with the CMake setting
+`-DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc` to build a version of the
+toolchain based on LLVM libc.
+
+If you also add `-DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on` then the
+`package-llvm-toolchain` CMake target will generate an overlay package
+similar to the [newlib overlay
+package](/docs/newlib.md).
+If you unpack this over an existing installation of the toolchain,
+then you can switch to LLVM libc by adding `--config=llvmlibc.cfg` on
+the command line.
+
+## Using LLVM libc
+
+To compile a program with this LLVM libc, you must provide the
+following command line options, in addition to `--target`, `-march` or
+`-mcpu`, and the input and output files:
+
+* `--config=llvmlibc.cfg` if you are using LLVM libc as an overlay
+  package (but you do not need this if you have built the whole
+  toolchain with only LLVM libc)
+
+* `-lcrt0` to include a library defining the `_start` symbol (or else
+  provide that symbol yourself)
+
+* `-lsemihost` to include a library that implements porting functions
+  in LLVM's libc in terms of the Arm semihosting API (or else provide
+  an alternative implementation of those functions yourself)
+
+* `-Wl,--defsym=__stack=0x`_nnnnnn_ to define the starting value of
+  your stack pointer. Alternatively, use a linker script that defines
+  the symbol `__stack` in addition to whatever other memory layout you
+  want.
+
+* `-Wl,__llvm_libc_heap_limit=0x`_nnnnnn_ if you are using the heap.
+  The heap start defined by the value of the symbol `_end` which will
+  be defined by the linker if no linker script is used. Alternatively
+  use a linker script that defines the symbols `_end` and
+  `__llvm_libc_heap_limit` in addition to whatever other memory layout
+  you want.
+
+* LLVM libc does not define errno. If you are using a function that
+  sets errno then you must implement the function `int *__llvm_libc_errno()`
+  that returns the address of your definition of errno.
+
+For example:
+
+```
+clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m -o hello hello.c -lsemihost -lcrt0 -Wl,--defsym=__stack=0x200000
+```
+
+## Samples
+
+The overlay package installs a llvmlibc directory in the samples/src
+directory containing sample programs that use LLVM libc.
+
+## Limitations of LLVM libc in Arm Toolchain for Embedded
+
+At present, this toolchain builds C++ libraries limited to what is supported with
+LLVM libc, for example, iostream is not available.
+
+At the time of writing this (2024-07), LLVM libc is a work in
+progress. It is incomplete: not all standard C library functionality
+is provided.

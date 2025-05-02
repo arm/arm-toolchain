@@ -554,6 +554,8 @@ static bool format(StringRef FileName, bool ErrorOnIncompleteFormat = false) {
 
 static void PrintVersion(raw_ostream &OS) {
   OS << clang::getClangToolFullVersion("clang-format") << '\n';
+  // Downstream change issue: #124 (Arm Toolchain ID)
+  OS << "Arm Toolchain ID: " << ARM_TOOLCHAIN_ID << '\n';
 }
 
 // Dump the configuration.

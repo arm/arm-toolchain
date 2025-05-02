@@ -1,0 +1,46 @@
+# This workflow executes the automerge python script to automatically merge
+# changes from the `main` branch of upstream LLVM into the `arm-software`
+# branch of the arm/arm-toolchain repository.
+name: Automerge
+on:
+  workflow_run:
+    workflows: [Sync from Upstream LLVM]
+    types:
+      - completed
+  workflow_dispatch:
+jobs:
+  Run-Automerge:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      pull-requests: write
+    if: github.repository == 'arm/arm-toolchain'
+    strategy:
+      matrix:
+        branches:
+          - from_branch: main
+            to_branch: arm-software
+    steps:
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branches.to_branch }}
+          token: ${{ steps.generate-token.outputs.token }}
+      - name: Configure Git Identity
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Fetch Branches
+        run: |
+          git remote set-branches --add origin ${{ matrix.branches.from_branch }}
+          git fetch origin ${{ matrix.branches.from_branch }}:${{ matrix.branches.from_branch }}
+          git pull --unshallow --ff-only origin ${{ matrix.branches.to_branch }}
+      - name: Run automerge
+        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ matrix.branches.from_branch }} --to-branch ${{ matrix.branches.to_branch }} --verbose
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}

@@ -1,0 +1,473 @@
+From 24fb12a2a1a46d759221b3d59b41502021cc877b Mon Sep 17 00:00:00 2001
+From: Volodymyr Turanskyy <volodymyr.turanskyy@arm.com>
+Date: Thu, 2 Jan 2025 16:23:27 +0000
+Subject: [PATCH] Update patch for newlib-4.5.0 tag
+
+Change-Id: Iec24f4305ad35a3a6df1672bb14555bf81249130
+---
+ libgloss/Makefile.in               |   2 +-
+ libgloss/aarch64/syscalls.c        |   6 ++
+ libgloss/arm/cpu-init/rdimon-aem.S | 107 +++++++++++++++--------------
+ libgloss/arm/crt0.S                |   2 +-
+ libgloss/arm/linux-crt0.c          |   2 +-
+ libgloss/arm/syscalls.c            |   6 +-
+ libgloss/arm/trap.S                |   2 +-
+ newlib/libc/include/sys/features.h |   3 +
+ newlib/libc/machine/arm/setjmp.S   |   4 +-
+ newlib/libc/string/wcwidth.c       |   2 +-
+ newlib/libc/sys/arm/crt0.S         |   2 +-
+ newlib/libc/sys/arm/trap.S         |   2 +-
+ 12 files changed, 75 insertions(+), 65 deletions(-)
+
+diff --git a/libgloss/Makefile.in b/libgloss/Makefile.in
+index 54a00614d..be1450749 100644
+--- a/libgloss/Makefile.in
++++ b/libgloss/Makefile.in
+@@ -1864,7 +1864,7 @@ AM_V_texidevnull = $(am__v_texidevnull_@AM_V@)
+ am__v_texidevnull_ = $(am__v_texidevnull_@AM_DEFAULT_V@)
+ am__v_texidevnull_0 = > /dev/null
+ am__v_texidevnull_1 = 
+-INFO_DEPS = $(srcdir)/doc/porting.info
++INFO_DEPS = 
+ am__TEXINFO_TEX_DIR = $(srcdir)/../texinfo
+ DVIS = doc/porting.dvi
+ PDFS = doc/porting.pdf
+diff --git a/libgloss/aarch64/syscalls.c b/libgloss/aarch64/syscalls.c
+index 5b4071893..cfe1d6d23 100644
+--- a/libgloss/aarch64/syscalls.c
++++ b/libgloss/aarch64/syscalls.c
+@@ -172,6 +172,12 @@ newslot (void)
+   return i;
+ }
+ 
++int __aarch64_sme_accessible() {
++  int result = 0;
++  asm volatile ( "mrs %x[result], id_aa64pfr1_el1" : [result]"=r"(result) :  : );
++  return (result & 0x3000000) != 0;
++}
++
+ void
+ initialise_monitor_handles (void)
+ {
+diff --git a/libgloss/arm/cpu-init/rdimon-aem.S b/libgloss/arm/cpu-init/rdimon-aem.S
+index 95b86e4d4..b91034ae6 100644
+--- a/libgloss/arm/cpu-init/rdimon-aem.S
++++ b/libgloss/arm/cpu-init/rdimon-aem.S
+@@ -60,7 +60,7 @@
+ 
+ _rdimon_hw_init_hook:
+     @ Only run the code on CPU 0 - otherwise spin
+-    mrc         15, 0, r4, cr0, cr0, 5  @ Read MPIDR
++    mrc         p15, 0, r4, cr0, cr0, 5  @ Read MPIDR
+     ands        r4, r4, #15
+ spin:
+     bne spin
+@@ -70,15 +70,15 @@ spin:
+ #ifdef __ARMEB__
+     @ Setup for Big Endian
+     setend      be
+-    mrc         15, 0, r4, cr1, cr0, 0  @ Read SCTLR
++    mrc         p15, 0, r4, cr1, cr0, 0  @ Read SCTLR
+     orr         r4, r4, #(1<<25)        @ Switch to Big Endian (Set SCTLR.EE)
+-    mcr         15, 0, r4, cr1, cr0, 0  @ Write SCTLR
++    mcr         p15, 0, r4, cr1, cr0, 0  @ Write SCTLR
+ #else
+     @ Setup for Little Endian
+     setend      le
+-    mrc         15, 0, r4, cr1, cr0, 0  @ Read SCTLR
++    mrc         p15, 0, r4, cr1, cr0, 0  @ Read SCTLR
+     bic         r4, r4, #(1<<25)        @ Switch to LE (unset SCTLR.EE)
+-    mcr         15, 0, r4, cr1, cr0, 0  @ Write SCTLR
++    mcr         p15, 0, r4, cr1, cr0, 0  @ Write SCTLR
+ #endif
+ 
+     bl          is_a15_a7
+@@ -87,44 +87,44 @@ spin:
+     @ Write zero into the ACTLR to turn everything on.
+     itt		eq
+     moveq       r4, #0
+-    mcreq       15, 0, r4, c1, c0, 1
++    mcreq       p15, 0, r4, c1, c0, 1
+     isb
+ 
+     @ For Cortex-A15 and Cortex-A7 only:
+     @ Set ACTLR:SMP bit before enabling the caches and MMU,
+     @ or performing any cache and TLB maintenance operations.
+     ittt	eq
+-    mrceq       15, 0, r4, c1, c0, 1    @ Read ACTLR
++    mrceq       p15, 0, r4, c1, c0, 1    @ Read ACTLR
+     orreq       r4, r4, #(1<<6)         @ Enable ACTLR:SMP
+-    mcreq       15, 0, r4, c1, c0, 1    @ Write ACTLR
++    mcreq       p15, 0, r4, c1, c0, 1    @ Write ACTLR
+     isb
+ 
+     @ Setup for exceptions being taken to Thumb/ARM state
+-    mrc         15, 0, r4, cr1, cr0, 0	@ Read SCTLR
++    mrc         p15, 0, r4, cr1, cr0, 0	@ Read SCTLR
+ #if defined(__thumb__)
+     orr         r4, r4, #(1 << 30)	@ Enable SCTLR.TE
+ #else
+     bic         r4, r4, #(1 << 30)      @ Disable SCTLR.TE
+ #endif
+-    mcr         15, 0, r4, cr1, cr0, 0  @ Write SCTLR
++    mcr         p15, 0, r4, cr1, cr0, 0  @ Write SCTLR
+ 
+     bl          __reset_caches
+ 
+-    mrc         15, 0, r4, cr1, cr0, 0  @ Read SCTLR
++    mrc         p15, 0, r4, cr1, cr0, 0  @ Read SCTLR
+     orr         r4, r4, #(1<<22)        @ Enable unaligned mode
+     bic         r4, r4, #2              @ Disable alignment faults
+     bic         r4, r4, #1              @ Disable MMU
+-    mcr         15, 0, r4, cr1, cr0, 0  @ Write SCTLR
++    mcr         p15, 0, r4, cr1, cr0, 0  @ Write SCTLR
+ 
+     mov         r4, #0
+-    mcr         15, 0, r4, cr8, cr7, 0  @ Write TLBIALL - Invaliidate unified
++    mcr         p15, 0, r4, cr8, cr7, 0  @ Write TLBIALL - Invaliidate unified
+                                         @ TLB
+     @ Setup MMU Primary table P=V mapping.
+     mvn         r4, #0
+-    mcr         15, 0, r4, cr3, cr0, 0  @ Write DACR
++    mcr         p15, 0, r4, cr3, cr0, 0  @ Write DACR
+ 
+     mov         r4, #0                  @ Always use TTBR0, no LPAE
+-    mcr         15, 0, r4, cr2, cr0, 2  @ Write TTBCR
++    mcr         p15, 0, r4, cr2, cr0, 2  @ Write TTBCR
+     adr         r4, page_table_addr	@ Load the base for vectors
+     ldr         r4, [r4]
+     mrc         p15, 0, r0, c0, c0, 5   @ read MPIDR
+@@ -138,24 +138,24 @@ spin:
+     addne       r4, r4, #0x58
+     add         r4, r4, #1
+ 
+-    mcr         15, 0, r4, cr2, cr0, 0  @ Write TTBR0
++    mcr         p15, 0, r4, cr2, cr0, 0  @ Write TTBR0
+ 
+     mov         r0, #34 @ 0x22          @ TR0 and TR1 - normal memory
+     orr         r0, r0, #(1 << 19)      @ Shareable
+-    mcr         15, 0, r0, cr10, cr2, 0 @ Write PRRR
++    mcr         p15, 0, r0, cr10, cr2, 0 @ Write PRRR
+     movw        r0, #0x33
+     movt        r0, #0x33
+-    mcr         15, 0, r0, cr10, cr2, 1 @ Write NMRR
+-    mrc         15, 0, r0, cr1, cr0, 0  @ Read SCTLR
++    mcr         p15, 0, r0, cr10, cr2, 1 @ Write NMRR
++    mrc         p15, 0, r0, cr1, cr0, 0  @ Read SCTLR
+     bic         r0, r0, #(1 << 28)      @ Clear TRE bit
+-    mcr         15, 0, r0, cr1, cr0, 0  @ Write SCTLR
++    mcr         p15, 0, r0, cr1, cr0, 0  @ Write SCTLR
+ 
+     @ Now install the vector code - we move the Vector code from where it is
+     @ in the image to be based at _rdimon_vector_base.  We have to do this copy
+     @ as the code is all PC-relative.  We actually cheat and do a BX <reg> so
+     @ that we are at a known address relatively quickly and have to move as
+     @ little code as possible.
+-    mov         r7, #(VectorCode_Limit - VectorCode)
++    mov         r7, #:lower16:(VectorCode_Limit - VectorCode)
+     adr         r5, VectorCode
+     adr         r6, vector_base_addr	@ Load the base for vectors
+     ldr         r6, [r6]
+@@ -166,25 +166,25 @@ copy_loop:                              @ Do the copy
+     subs        r7, r7, #4
+     bne         copy_loop
+ 
+-    mrc         15, 0, r4, cr1, cr0, 0  @ Read SCTLR
++    mrc         p15, 0, r4, cr1, cr0, 0  @ Read SCTLR
+     bic         r4, r4, #0x1000         @ Disable I Cache
+     bic         r4, r4, #4              @ Disable D Cache
+     orr         r4, r4, #1              @ Enable MMU
+     bic         r4, r4, #(1 << 28)      @ Clear TRE bit
+-    mcr         15, 0, r4, cr1, cr0, 0  @ Write SCTLR
+-    mrc         15, 0, r4, cr1, cr0, 2  @ Read CPACR
++    mcr         p15, 0, r4, cr1, cr0, 0  @ Write SCTLR
++    mrc         p15, 0, r4, cr1, cr0, 2  @ Read CPACR
+     orr         r4, r4, #0x00f00000     @ Turn on VFP Co-procs
+     bic         r4, r4, #0x80000000     @ Clear ASEDIS bit
+-    mcr         15, 0, r4, cr1, cr0, 2  @ Write CPACR
++    mcr         p15, 0, r4, cr1, cr0, 2  @ Write CPACR
+     isb
+     mov         r4, #0
+-    mcr         15, 0, r4, cr7, cr5, 4  @ Flush prefetch buffer
+-    mrc         15, 0, r4, cr1, cr0, 2  @ Read CPACR
++    mcr         p15, 0, r4, cr7, cr5, 4  @ Flush prefetch buffer
++    mrc         p15, 0, r4, cr1, cr0, 2  @ Read CPACR
+     ubfx        r4, r4, #20, #4		@ Extract bits [20, 23)
+     cmp         r4, #0xf		@ If not all set then the CPU does not
+     itt		eq			@ have FP or Advanced SIMD.
+     moveq       r4, #0x40000000		@ Enable FP and Advanced SIMD
+-    mcreq       10, 7, r4, cr8, cr0, 0  @ vmsr  fpexc, r4
++    mcreq       p10, 7, r4, cr8, cr0, 0  @ vmsr  fpexc, r4
+ skip_vfp_enable:
+     bl          __enable_caches         @ Turn caches on
+     bx		r10                     @ Return to CRT startup routine
+@@ -286,7 +286,8 @@ vector_common_2:
+     bl          out_nl
+ 
+     @ Dump the registers
+-    adrl        r6, register_names
++    add         r6, pc, #(register_names-.-8) & 0xFF
++    add         r6, r6, #(register_names-.-4) & ~0xFF
+     mov         r7, #0
+ dump_r_loop:
+     mov         r0, r6
+@@ -386,14 +387,14 @@ register_names:
+     @ Enable the caches
+ __enable_caches:
+     mov         r0, #0
+-    mcr         15, 0, r0, cr8, cr7, 0  @ Invalidate all unified-TLB
++    mcr         p15, 0, r0, cr8, cr7, 0  @ Invalidate all unified-TLB
+     mov         r0, #0
+-    mcr         15, 0, r0, cr7, cr5, 6  @ Invalidate branch predictor
+-    mrc         15, 0, r4, cr1, cr0, 0  @ Read SCTLR
++    mcr         p15, 0, r0, cr7, cr5, 6  @ Invalidate branch predictor
++    mrc         p15, 0, r4, cr1, cr0, 0  @ Read SCTLR
+     orr         r4, r4, #0x800          @ Enable branch predictor
+-    mcr         15, 0, r4, cr1, cr0, 0  @ Set SCTLR
++    mcr         p15, 0, r4, cr1, cr0, 0  @ Set SCTLR
+     mov         r5, lr                  @ Save LR as we're going to BL
+-    mrc         15, 0, r4, cr1, cr0, 0  @ Read SCTLR
++    mrc         p15, 0, r4, cr1, cr0, 0  @ Read SCTLR
+     bl          init_cpu_client_enable_icache
+     cmp         r0, #0
+     it		ne
+@@ -402,24 +403,24 @@ __enable_caches:
+     cmp         r0, #0
+     it		ne
+     orrne       r4, r4, #4
+-    mcr         15, 0, r4, cr1, cr0, 0  @ Enable D-Cache
++    mcr         p15, 0, r4, cr1, cr0, 0  @ Enable D-Cache
+     bx          r5                      @ Return
+ 
+ __reset_caches:
+     mov         ip, lr                  @ Save LR
+     mov         r0, #0
+-    mcr         15, 0, r0, cr7, cr5, 6  @ Invalidate branch predictor
+-    mrc         15, 0, r6, cr1, cr0, 0  @ Read SCTLR
+-    mrc         15, 0, r0, cr1, cr0, 0  @ Read SCTLR!
++    mcr         p15, 0, r0, cr7, cr5, 6  @ Invalidate branch predictor
++    mrc         p15, 0, r6, cr1, cr0, 0  @ Read SCTLR
++    mrc         p15, 0, r0, cr1, cr0, 0  @ Read SCTLR!
+     bic         r0, r0, #0x1000         @ Disable I cache
+-    mcr         15, 0, r0, cr1, cr0, 0  @ Write SCTLR
+-    mrc         15, 1, r0, cr0, cr0, 1  @ Read CLIDR
++    mcr         p15, 0, r0, cr1, cr0, 0  @ Write SCTLR
++    mrc         p15, 1, r0, cr0, cr0, 1  @ Read CLIDR
+     tst         r0, #3                  @ Harvard Cache?
+     mov         r0, #0
+     it		ne
+-    mcrne       15, 0, r0, cr7, cr5, 0  @ Invalidate Instruction Cache?
++    mcrne       p15, 0, r0, cr7, cr5, 0  @ Invalidate Instruction Cache?
+ 
+-    mrc         15, 0, r1, cr1, cr0, 0  @ Read SCTLR (again!)
++    mrc         p15, 0, r1, cr1, cr0, 0  @ Read SCTLR (again!)
+     orr         r1, r1, #0x800          @ Enable branch predictor
+ 
+                                         @ If we're not enabling caches we have
+@@ -436,25 +437,25 @@ __reset_caches:
+     cmpeq       r0, #0
+     beq         Finished1
+ 
+-    mcr         15, 0, r1, cr1, cr0, 0  @ Write SCTLR (turn on Branch predictor & I-cache)
++    mcr         p15, 0, r1, cr1, cr0, 0  @ Write SCTLR (turn on Branch predictor & I-cache)
+ 
+-    mrc         15, 1, r0, cr0, cr0, 1  @ Read CLIDR
++    mrc         p15, 1, r0, cr0, cr0, 1  @ Read CLIDR
+     ands        r3, r0, #0x7000000
+     lsr         r3, r3, #23             @ Total cache levels << 1
+     beq         Finished1
+ 
+     mov         lr, #0                  @ lr = cache level << 1
+ Loop11:
+-    mrc         15, 1, r0, cr0, cr0, 1  @ Read CLIDR
++    mrc         p15, 1, r0, cr0, cr0, 1  @ Read CLIDR
+     add         r2, lr, lr, lsr #1      @ r2 holds cache 'set' position
+     lsr         r1, r0, r2              @ Bottom 3-bits are Ctype for this level
+     and         r1, r1, #7              @ Get those 3-bits alone
+     cmp         r1, #2
+     blt         Skip1                   @ No cache or only I-Cache at this level
+-    mcr         15, 2, lr, cr0, cr0, 0  @ Write CSSELR
++    mcr         p15, 2, lr, cr0, cr0, 0  @ Write CSSELR
+     mov         r1, #0
+     isb         sy
+-    mrc         15, 1, r1, cr0, cr0, 0  @ Read CCSIDR
++    mrc         p15, 1, r1, cr0, cr0, 0  @ Read CCSIDR
+     and         r2, r1, #7              @ Extract line length field
+     add         r2, r2, #4              @ Add 4 for the line length offset (log2 16 bytes)
+     movw        r0, #0x3ff
+@@ -469,8 +470,8 @@ Loop31:
+     orr         r1, r1, r5, lsl r2      @ factor in set number
+     tst         r6, #4                  @ D-Cache on?
+     ite         eq
+-    mcreq       15, 0, r1, cr7, cr6, 2  @ No - invalidate by set/way
+-    mcrne       15, 0, r1, cr7, cr14, 2 @ yes - clean + invalidate by set/way
++    mcreq       p15, 0, r1, cr7, cr6, 2  @ No - invalidate by set/way
++    mcrne       p15, 0, r1, cr7, cr14, 2 @ yes - clean + invalidate by set/way
+     subs        r7, r7, #1              @ Decrement way number
+     bge         Loop31
+     subs        r5, r5, #1              @ Decrement set number
+@@ -481,18 +482,18 @@ Skip1:
+     bgt         Loop11
+ Finished1:
+     @ Now we know the caches are clean we can:
+-    mrc         15, 0, r4, cr1, cr0, 0  @ Read SCTLR
++    mrc         p15, 0, r4, cr1, cr0, 0  @ Read SCTLR
+     bic         r4, r4, #4              @ Disable D-Cache
+-    mcr         15, 0, r4, cr1, cr0, 0  @ Write SCTLR
++    mcr         p15, 0, r4, cr1, cr0, 0  @ Write SCTLR
+     mov         r4, #0
+-    mcr         15, 0, r4, cr7, cr5, 6  @ Write BPIALL
++    mcr         p15, 0, r4, cr7, cr5, 6  @ Write BPIALL
+ 
+     bx          ip                      @ Return
+ 
+     @ Set Z if this is a Cortex-A15 or Cortex_A7
+     @ Other flags corrupted
+ is_a15_a7:
+-    mrc         15, 0, r8, c0, c0, 0
++    mrc         p15, 0, r8, c0, c0, 0
+     movw        r9, #0xfff0
+     movt        r9, #0xff0f
+     and         r8, r8, r9
+diff --git a/libgloss/arm/crt0.S b/libgloss/arm/crt0.S
+index 9ff0e6323..b9e768007 100644
+--- a/libgloss/arm/crt0.S
++++ b/libgloss/arm/crt0.S
+@@ -566,7 +566,7 @@ change_back:
+ 
+ 	/* For Thumb, constants must be after the code since only 
+ 	   positive offsets are supported for PC relative addresses.  */
+-	.align 0
++	.p2align 2
+ .LC0:
+ #ifdef ARM_RDI_MONITOR
+ 	.word	HeapBase
+diff --git a/libgloss/arm/linux-crt0.c b/libgloss/arm/linux-crt0.c
+index 6b2d62a9b..000a2c728 100644
+--- a/libgloss/arm/linux-crt0.c
++++ b/libgloss/arm/linux-crt0.c
+@@ -29,7 +29,7 @@ asm("\n"
+ __attribute__((naked, used))
+ static void _start_thumb(void)
+ #else
+-__attribute__((naked))
++//__attribute__((naked))
+ void _start(void)
+ #endif
+ {
+diff --git a/libgloss/arm/syscalls.c b/libgloss/arm/syscalls.c
+index 710a741ee..9e710b09a 100644
+--- a/libgloss/arm/syscalls.c
++++ b/libgloss/arm/syscalls.c
+@@ -180,7 +180,7 @@ initialise_monitor_handles (void)
+   const char * name;
+ 
+   name = ":tt";
+-  asm ("mov r0,%2; mov r1, #0; swi %a1; mov %0, r0"
++  asm ("movs r0,%2; movs r1, #0; swi %a1; mov %0, r0"
+        : "=r"(fh)
+        : "i" (SWI_Open),"r"(name)
+        : "r0","r1");
+@@ -189,14 +189,14 @@ initialise_monitor_handles (void)
+   if (_has_ext_stdout_stderr ())
+   {
+     name = ":tt";
+-    asm ("mov r0,%2; mov r1, #4; swi %a1; mov %0, r0"
++    asm ("movs r0,%2; movs r1, #4; swi %a1; mov %0, r0"
+ 	 : "=r"(fh)
+ 	 : "i" (SWI_Open),"r"(name)
+ 	 : "r0","r1");
+     monitor_stdout = fh;
+ 
+     name = ":tt";
+-    asm ("mov r0,%2; mov r1, #8; swi %a1; mov %0, r0"
++    asm ("movs r0,%2; movs r1, #8; swi %a1; mov %0, r0"
+ 	 : "=r"(fh)
+ 	 : "i" (SWI_Open),"r"(name)
+ 	 : "r0","r1");
+diff --git a/libgloss/arm/trap.S b/libgloss/arm/trap.S
+index 845ad0173..2056c2adf 100644
+--- a/libgloss/arm/trap.S
++++ b/libgloss/arm/trap.S
+@@ -5,7 +5,7 @@
+ 
+ /* .text is used instead of .section .text so it works with arm-aout too.  */
+ 	.text
+-        .align 0
++        .p2align 2
+         .global __rt_stkovf_split_big
+         .global __rt_stkovf_split_small
+ 
+diff --git a/newlib/libc/include/sys/features.h b/newlib/libc/include/sys/features.h
+index 325acdf5f..dfaba8fe7 100644
+--- a/newlib/libc/include/sys/features.h
++++ b/newlib/libc/include/sys/features.h
+@@ -27,6 +27,9 @@ extern "C" {
+ 
+ #include <_newlib_version.h>
+ 
++#define _DEFAULT_SOURCE
++#define _GNU_SOURCE
++
+ /* Macro to test version of GCC.  Returns 0 for non-GCC or too old GCC. */
+ #ifndef __GNUC_PREREQ
+ # if defined __GNUC__ && defined __GNUC_MINOR__
+diff --git a/newlib/libc/machine/arm/setjmp.S b/newlib/libc/machine/arm/setjmp.S
+index 0070f17cd..a53f7918e 100644
+--- a/newlib/libc/machine/arm/setjmp.S
++++ b/newlib/libc/machine/arm/setjmp.S
+@@ -78,10 +78,10 @@
+     covers all the cases we need in this file for hardware
+     floating-point and should be compatible with all required FPUs
+     that we need to support.  */
+-# if __ARM_FP
++# if __ARM_FP && !__clang__
+ 	.fpu vfpxd
+ # endif
+-# if __ARM_FEATURE_MVE
++# if __ARM_FEATURE_MVE && !__clang__
+ 	.arch_extension mve
+ # endif
+ #endif
+diff --git a/newlib/libc/string/wcwidth.c b/newlib/libc/string/wcwidth.c
+index 8348eefe8..65604c061 100644
+--- a/newlib/libc/string/wcwidth.c
++++ b/newlib/libc/string/wcwidth.c
+@@ -230,7 +230,7 @@ __wcwidth (const wint_t ucs)
+ }
+ 
+ int
+-wcwidth (const wint_t wc)
++wcwidth (const wchar_t wc)
+ {
+   wint_t wi = wc;
+ 
+diff --git a/newlib/libc/sys/arm/crt0.S b/newlib/libc/sys/arm/crt0.S
+index dae0f0465..51e86d549 100644
+--- a/newlib/libc/sys/arm/crt0.S
++++ b/newlib/libc/sys/arm/crt0.S
+@@ -557,7 +557,7 @@ change_back:
+ 
+ 	/* For Thumb, constants must be after the code since only 
+ 	   positive offsets are supported for PC relative addresses.  */
+-	.align 0
++	.p2align 2
+ .LC0:
+ #ifdef ARM_RDI_MONITOR
+ 	.word	HeapBase
+diff --git a/newlib/libc/sys/arm/trap.S b/newlib/libc/sys/arm/trap.S
+index 681b3dbe0..8a49f39f3 100644
+--- a/newlib/libc/sys/arm/trap.S
++++ b/newlib/libc/sys/arm/trap.S
+@@ -4,7 +4,7 @@
+ 
+ /* .text is used instead of .section .text so it works with arm-aout too.  */
+ 	.text
+-        .align 0
++        .p2align 2
+         .global __rt_stkovf_split_big
+         .global __rt_stkovf_split_small
+ 
+-- 
+2.47.1
+
