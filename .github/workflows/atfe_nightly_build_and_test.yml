@@ -76,13 +76,11 @@ jobs:
         if: always()
         with:
           name: test-results-${{ matrix.build_script }}
-          path: |
-            build/**/*results.xml
-            build/**/*.junit.xml
+          path: build/**/*.junit.xml
 
       - name: Upload built packages
         uses: actions/upload-artifact@v4
         if: success()
         with:
           name: ATfE-packages-${{ matrix.build_script }}
-          path: build/ATfE-*.tar.xz
+          path: build*/ATfE-*.tar.xz
