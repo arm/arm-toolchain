@@ -334,6 +334,12 @@ set(CLANG_VERSION "${CLANG_VERSION_MAJOR}.${CLANG_VERSION_MINOR}.${CLANG_VERSION
 set(MAX_CLANG_ABI_COMPAT_VERSION "${LLVM_VERSION_MAJOR}")
 message(STATUS "Clang version: ${CLANG_VERSION}")
 
+# Downstream change issue: #124 (Arm Toolchain ID)
+if(NOT DEFINED ARM_TOOLCHAIN_ID)
+  set(ARM_TOOLCHAIN_ID "unset")
+endif()
+# End downstream change: #124
+
 # Configure the Version.inc file.
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/include/clang/Basic/Version.inc.in

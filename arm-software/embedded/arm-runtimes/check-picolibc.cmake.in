@@ -1,0 +1,36 @@
+# If lit is set to ignore test failures, then meson should do the same.
+set(ignore_fail OFF)
+if(DEFINED ENV{LIT_OPTS})
+    if($ENV{LIT_OPTS} MATCHES "--ignore-fail")
+        set(ignore_fail ON)
+    endif()
+endif()
+
+# Run the tests and store the return code.
+# This will be equal to the number of test failures.
+execute_process(
+    COMMAND
+        @MESON_EXECUTABLE@
+        test
+        -C @BINARY_DIR@
+        --no-rebuild
+    RESULT_VARIABLE
+        failure_count
+)
+
+# Process the XML results file to ensure the results are
+# variant specific.
+execute_process(
+    COMMAND
+        @Python3_EXECUTABLE@
+        @CMAKE_CURRENT_SOURCE_DIR@/test-support/modify-picolibc-xml.py
+        --dir @BINARY_DIR@
+        --variant @VARIANT@
+    COMMAND_ERROR_IS_FATAL
+        ANY
+)
+
+# Use a message to set a return code.
+if(failure_count GREATER 0 AND NOT ignore_fail)
+    message(FATAL_ERROR "Stopping due to test failures.")
+endif()

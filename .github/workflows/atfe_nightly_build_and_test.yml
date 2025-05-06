@@ -1,0 +1,86 @@
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow runs all build scripts in parallel on Linux.
+# It is intended to be triggered as part of a **nightly build** to
+# validate all build configurations and test them automatically.
+#
+# Each build script is paired with a corresponding test script using
+# a matrix strategy. Each build+test pair runs as a separate job,
+# allowing for concurrency and clear traceability of failures.
+
+name: ATfE Nightly Build and Test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'  # Every day at 02:00 UTC
+
+jobs:
+  build-and-test-toolchain:
+    name: Build ${{ matrix.build_script }} + Test ${{ matrix.test_script }} on ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    # Ensure the workflow only runs on the arm-toolchain repository and not on forks
+    if: github.repository == 'arm/arm-toolchain'
+
+    strategy:
+      fail-fast: false  # Prevents one job failure from cancelling all
+      matrix:
+        include:
+          - build_script: build.sh
+            test_script: test.sh
+            runner: ah-ubuntu_22_04-c7g_8x-100
+          - build_script: build_llvmlibc_overlay.sh
+            test_script: ''
+            runner: ah-ubuntu_22_04-c7g_8x-100
+          - build_script: build_newlib_nano_overlay.sh
+            test_script: ''
+            runner: ah-ubuntu_22_04-c7g_8x-100
+          - build_script: build_newlib_overlay.sh
+            test_script: ''
+            runner: ah-ubuntu_22_04-c7g_8x-100
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: bash ./arm-software/embedded/scripts/install_dependencies.sh
+
+      - name: Add ~/.local/bin to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Apply llvm-project patches
+        run: |
+          python3 arm-software/embedded/cmake/patch_repo.py \
+            --method apply \
+            arm-software/embedded/patches/llvm-project
+
+      - name: Apply llvm-project-perf patches
+        run: |
+          python3 arm-software/embedded/cmake/patch_repo.py \
+            --method apply \
+            arm-software/embedded/patches/llvm-project-perf
+
+      - name: Build ${{ matrix.build_script }}
+        run: bash ./arm-software/embedded/scripts/${{ matrix.build_script }}
+
+      - name: Test ${{ matrix.test_script }}
+        if: matrix.test_script != ''
+        run: bash ./arm-software/embedded/scripts/${{ matrix.test_script }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.build_script }}
+          path: build/**/*.junit.xml
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ATfE-packages-${{ matrix.build_script }}
+          path: build*/ATfE-*.tar.xz

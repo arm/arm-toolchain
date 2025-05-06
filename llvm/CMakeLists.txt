@@ -1163,6 +1163,12 @@ if (NOT TENSORFLOW_AOT_PATH STREQUAL "")
 
 endif()
 
+# Downstream change issue: #124 (Arm Toolchain ID)
+if(NOT DEFINED ARM_TOOLCHAIN_ID)
+  set(ARM_TOOLCHAIN_ID "unset")
+endif()
+# End downstream change: #124
+
 # Configure the LLVM configuration header files.
 configure_file(
   ${LLVM_MAIN_INCLUDE_DIR}/llvm/Config/config.h.cmake

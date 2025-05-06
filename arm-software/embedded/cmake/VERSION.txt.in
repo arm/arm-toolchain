@@ -1,0 +1,5 @@
+Arm Toolchain for Embedded ${armtoolchain_VERSION}
+
+Sources:
+* arm-toolchain: https://github.com/arm/arm-toolchain (commit ${armtoolchain_COMMIT})
+* ${LLVM_TOOLCHAIN_C_LIBRARY}: ${LLVM_TOOLCHAIN_C_LIBRARY_URL} (commit ${LLVM_TOOLCHAIN_C_LIBRARY_COMMIT})

@@ -2310,6 +2310,9 @@ void Driver::PrintVersion(const Compilation &C, raw_ostream &OS) const {
   // If configuration files were used, print their paths.
   for (auto ConfigFile : ConfigFiles)
     OS << "Configuration file: " << ConfigFile << '\n';
+
+  // Downstream change issue: #124 (Arm Toolchain ID)
+  OS << "Arm Toolchain ID: " << ARM_TOOLCHAIN_ID << '\n';
 }
 
 /// PrintDiagnosticCategories - Implement the --print-diagnostic-categories

@@ -1,0 +1,254 @@
+# Building from source
+
+## Host platforms
+
+Arm Toolchain for Embedded is built and tested on Linux Ubuntu, macOS and Windows.
+
+Please refer to the _Host Platforms_ section in the [README](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/README.md#host-platforms), for details.
+
+## Installing prerequisites
+
+The build requires the following software to be installed, in addition
+to the [LLVM requirements](https://llvm.org/docs/GettingStarted.html#software):
+* CMake 3.20 or above
+* Meson
+* Git
+* Ninja
+* Python
+* QEMU (for running the test suite, so optional)
+
+On macOS, you can use homebrew:
+```
+$ brew install llvm python3 git make ninja qemu cmake
+$ pip install meson
+```
+
+Testing with QEMU is enabled by default, but can be disabled using the 
+`-DENABLE_QEMU_TESTING=OFF` CMake option if testing is not required or QEMU is
+not installed.
+
+Some recent targets are not supported by QEMU, for these the Arm FVP models are
+used instead. These models are available free-of-change but are not
+open-source, and come with their own licenses.
+
+These models can be downloaded and installed (into the source tree) with the
+`fvp/get_fvps.sh` script. This is currently only available for Linux. By
+default, `get_fvps.sh` will run the installers for packages which have them,
+which will prompt you to agree to their licenses. Some of the packages do not
+have installers, instead they place their license file into the
+`fvp/license_terms` directory, which you should read before continuing.
+
+The installer for the cryptography plugin requires a graphical display to run:
+it cannot run in a pure terminal session such as you might start via SSH. Also,
+it will prompt for a directory to install the plugin into. You should enter the
+pathname `fvp/install` relative to the root of your checkout. The installer
+will automatically append a subdirectory `FastModelsPortfolio_11.27` to the end
+of that, and respond with a warning such as 'Directory [...] not found (but in
+patch mode). Continue installation?' Say yes to this prompt, and continue
+clicking 'Next' until installation is complete.
+
+For non-interactive use (for example in CI systems), `get_fvps.sh` can be run
+with the `--non-interactive` option, which causes it to implicitly accept all
+of the EULAs and set up the correct install directories.
+
+If you have previously downloaded and installed the FVPs outside of the source
+tree, you can set the `-DFVP_INSTALL_DIR=...` cmake option to set the path to
+them.
+
+Testing with FVPs is disabled by default, but QEMU tests will still be run, and
+all library variants will still be built. Testing with FVPs can be enabled by
+setting the `-DENABLE_FVP_TESTING=ON` CMake option if you have installed the
+models as described above.
+
+## Customizing
+
+To build additional library variants, edit the `CMakeLists.txt` by adding
+calls to the `add_library_variant` CMake function using existing library
+variant definitions as a template.
+
+To build additional LLVM tools, edit the `CMakeLists.txt` by adding required
+tools to the `LLVM_DISTRIBUTION_COMPONENTS` CMake list.
+
+## Building
+
+The toolchain can be built directly with CMake.
+
+```
+export CC=clang
+export CXX=clang++
+mkdir build
+cd build
+cmake .. -GNinja -DFETCHCONTENT_QUIET=OFF
+ninja llvm-toolchain
+```
+
+To make it easy to get started, the above command checks out and patches the picolibc Git repo automatically.
+If you prefer you can check out and patch the repos manually and use those, see commands below.
+Note, the patching of the llvm-project fork is not done automatically. See [Divergences from upstream](#Divergences-from-upstream)
+If you check out repos manually then it is your responsibility to ensure that the correct revisions are checked out - see `versions.json` to identify these - and to apply the necessary patches from the [patches](../patches) folder.
+
+```
+export CC=clang
+export CXX=clang++
+mkdir repos
+git -C repos clone https://github.com/picolibc/picolibc.git
+git -C repos/picolibc am -k "$PWD"/patches/picolibc/*.patch
+git -C arm-toolchain am -k "$PWD"/patches/llvm-project/*.patch
+mkdir build
+cd build
+cmake .. -GNinja -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=../repos/picolibc
+ninja llvm-toolchain
+```
+
+### Testing the toolchain
+
+```
+ninja check-llvm-toolchain
+```
+
+### Packaging the toolchain
+
+After building, create a zip or tar.xz file as appropriate for the platform:
+```
+ninja package-llvm-toolchain
+```
+
+### Cross-compiling the toolchain for Windows
+
+The Arm Toolchain for Embedded can be cross-compiled to run on Windows.
+The compilation itself still happens on Linux. In addition to the prerequisites
+mentioned in the [Installing prerequisites](#installing-prerequisites) section
+you will also need a Mingw-w64 toolchain based on GCC 7.1.0 or above installed.
+For example, to install it on Ubuntu Linux use the following command:
+```
+# apt-get install mingw-w64
+```
+
+The MinGW build includes GCC & MinGW libraries into the package.
+
+The following three libraries are used:
+
+Library             | Project   | Link
+--------------------|-----------|---------------------
+libstdc++-6.dll     | GCC       | https://gcc.gnu.org
+libgcc_s_seh-1.dll  | GCC       | https://gcc.gnu.org
+libwinpthread-1.dll | Mingw-w64 | http://mingw-w64.org
+
+The libraries are distributed under their own licenses, this needs to
+be taken into consideration if you decide to redistribute the built toolchain.
+
+To enable the MinGW build, set the LLVM_TOOLCHAIN_CROSS_BUILD_MINGW option:
+```
+cmake . -DLLVM_TOOLCHAIN_CROSS_BUILD_MINGW=ON
+ninja package-llvm-toolchain
+```
+The same build directory can be used for both native and MinGW toolchains.
+
+## Known limitations
+* Depending on the state of the sources, build errors may occur when
+  the latest revisions of the llvm-project & picolibc repos are used.
+
+## Divergences from upstream
+
+See the [patches](../patches) directory for the current set of differences from upstream.
+
+The patches for llvm-project are split between two folders, llvm-project and
+llvm-project-perf. The former are generally required for building and
+successfully running all tests. The patches in llvm-project-perf are optional,
+and designed to improve performance in certain circumstances.
+
+Similarly, there are patches available for both Picolibc and Newlib. The Picolibc
+patches are essential for building and successfully running all picolibc tests. The
+Newlib patches are required to enable exceptions and RTTI builds of libcxx with newlib.
+
+If not already applied, these must be done so manually before building, like below:
+```
+git -C arm-toolchain am -k "$PWD"/patches/llvm-project/*.patch
+git -C repos/picolibc am -k "$PWD"/patches/picolibc/*.patch
+```
+
+## Building individual library variants
+
+When working on library code, it may be useful to build a library variant
+without having to rebuild the entire toolchain.
+
+Each variant is built using the `arm-runtimes` sub-project, and can be
+configured and built directly if you provide a path to a LLVM build or install.
+
+The default CMake arguments to build a particular variant are stored in a JSON
+format in the arm-multilib/json/variants folder, which can be loaded at
+configuration with the `-DVARIANT_JSON` setting. Any additional options
+provided on the command line will override values from he JSON. `-DC_LIBRARY`
+will be required to set which library to build, and `-DLLVM_BINARY_DIR` should
+point to the top-level directory of a build or install of LLVM.
+
+(The actual binaries, such as `clang`, are expected to be in
+`$LLVM_BINARY_DIR/bin`, not `$LLVM_BINARY_DIR` itself. For example, if you're
+using the results of a full build of this toolchain itself in another
+directory, then you should set `LLVM_BINARY_DIR` to point at the `llvm`
+subdirectory of the previous build tree, not the `llvm/bin` subdirectory.)
+
+For example, to build the `armv7a_soft_nofp` variant using `picolibc`, using
+an existing LLVM build and source checkouts:
+
+```
+cd arm-software/embedded
+mkdir build-lib
+cd build-lib
+cmake ../arm-runtimes -G Ninja \
+  -DVARIANT_JSON=../arm-multilib/json/variants/armv7a_soft_nofp.json \
+  -DC_LIBRARY=picolibc \
+  -DLLVM_BINARY_DIR=/path/to/llvm \
+  -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=/path/to/picolibc
+ninja
+```
+
+If enabled and the required test executor available, tests can be run with
+using specific test targets:
+`ninja check-picolibc`
+`ninja check-compiler-rt`
+`ninja check-cxx`
+`ninja check-cxxabi`
+`ninja check-unwind`
+
+Alternatively, `ninja check-all` runs all enabled tests. 
+
+## Building sets of libraries
+
+As well as individual libraries, it is also possible to build a set of
+libraries without rebuilding the entire toolchain. The `arm-multilib`
+sub-project builds and collects multiple libraries, and generates a
+`multilib.yaml` file to map compile flags to variants.
+
+The `arm-multilib/multilib.json` file defines which variants are built and
+their order in the mapping. This can be used to configure the project directly
+
+For example, building the picolibc variants using an existing LLVM build and
+source checkouts:
+```
+cd arm-software/embedded
+mkdir build-multilib
+cd build-multilib
+cmake ../arm-multilib -G Ninja \
+  -DMULTILIB_JSON=../arm-multilib/json/multilib.json \
+  -DC_LIBRARY=picolibc \
+  -DLLVM_BINARY_DIR=/path/to/llvm \
+  -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=/path/to/picolibc
+ninja
+```
+To only build a subset of the variants defined in the JSON file,
+the `-DENABLE_VARIANTS` option controls which variants to build.
+E.g, `-DENABLE_VARIANTS="aarch64a;armv7a_soft_nofp"` only builds the two 
+variants of `aarch64a` and `armv7a_soft_nofp`.
+
+If enabled and the required test executor available, tests can be run with
+using specific test targets:
+
+`ninja check-picolibc`
+`ninja check-compiler-rt`
+`ninja check-cxx`
+`ninja check-cxxabi`
+`ninja check-unwind`
+
+Alternatively, `ninja check-all` runs all enabled tests.
+`ninja check-<VARAINT_NAME>` runs all the tests for that specific variant.
