@@ -27,7 +27,7 @@ class FVP:
 uname_machine = uname().machine.lower()
 if uname_machine == "x86_64":
     platform_dir = "Linux64_GCC-9.3"
-elif uname_machine == "aarch64":
+elif uname_machine in ["aarch64", "arm64"]:
     platform_dir = "Linux64_armv8l_GCC-9.3"
 else:
     raise Exception(f"{uname_machine} is not a recognised uname machine")
