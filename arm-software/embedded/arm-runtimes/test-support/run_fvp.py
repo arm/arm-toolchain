@@ -89,7 +89,7 @@ def run_fvp(
     uname_machine = uname().machine.lower()
     if uname_machine == "x86_64":
         fvp_platform = "x86"
-    elif uname_machine in ["aarch64", "arm64"]:
+    elif uname_machine == "aarch64":
         fvp_platform = "aarch64"
     else:
         raise Exception(f"{uname_machine} is not a recognised uname machine")
