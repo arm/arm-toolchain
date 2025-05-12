@@ -183,7 +183,7 @@ requirements below:
 * Any patch that causes the Arm Toolchain to deviate from upstream
   behavior, such as a new command-line option, must have user
   documentation. See [Downstream Feature
-  Documentation](downstream-feature-documentation) for the location
+  Documentation](arm-software/docs/arm-toolchain-features.md) for the location
   and required contents.
 
 ### Downstream Feature Documentation
