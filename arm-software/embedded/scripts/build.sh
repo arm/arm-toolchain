@@ -23,7 +23,6 @@ clang --version
 export CC=clang
 export CXX=clang++
 
-EXTRA_CMAKE_ARGS=""
 if [[ ! -z "${FVP_INSTALL_DIR}" ]]; then
     EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DENABLE_FVP_TESTING=ON -DFVP_INSTALL_DIR=${FVP_INSTALL_DIR}"
 fi
