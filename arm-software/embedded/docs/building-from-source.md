@@ -93,7 +93,7 @@ export CXX=clang++
 mkdir repos
 git -C repos clone https://github.com/picolibc/picolibc.git
 git -C repos/picolibc am -k "$PWD"/patches/picolibc/*.patch
-git -C arm-toolchain am -k "$PWD"/patches/llvm-project/*.patch
+git -C ../.. am -k "$PWD"/patches/llvm-project/*.patch
 mkdir build
 cd build
 cmake .. -GNinja -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=../repos/picolibc
