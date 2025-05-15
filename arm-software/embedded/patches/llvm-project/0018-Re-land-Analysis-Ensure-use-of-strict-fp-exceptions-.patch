@@ -1,0 +1,55 @@
+From 1d4ef4c0f9bc81bdf65773ab06943286f172713e Mon Sep 17 00:00:00 2001
+From: Lucas Duarte Prates <lucas.prates@arm.com>
+Date: Tue, 29 Apr 2025 15:24:52 +0100
+Subject: Re-land: [Analysis] Ensure use of strict fp exceptions in
+ ConstantFolding (#137652)
+
+To perform constant folding in math operations, the implementation of
+the ConstantFolding Analysis relies on the use of the math functions
+from the host's libm. In particular, it relies on checking the value of
+errno and IEEE exceptions to determine when an operation is safe to be
+constant-folded.
+
+On some platforms, such as BSD or Darwin, math library functions don't
+set errno, so the ConstantFolding check depends only on the value of
+IEEE exceptions. As the FP exception behaviour is set to `ignore` by
+default, the compiler can perform optimisations that would get in the
+way of such checks being performed correctly.
+
+This patch sets the FP exception behaviour to `strict` when compiling
+the `ConstantFolding.cpp` source file, ensuring the value of IEEE
+exceptions can be reliably used by its implementation.
+
+This re-lands the changes from #136139, but using the `-ftrapping-math`
+compile option instead of `-ffp-exception-behavior` for GCC support.
+
+(cherry picked from commit 67783eb166664cb0be9da01d1dc83178615a0575)
+---
+ llvm/lib/Analysis/CMakeLists.txt | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/llvm/lib/Analysis/CMakeLists.txt b/llvm/lib/Analysis/CMakeLists.txt
+index 0db5b80f336c..d64f669dc291 100644
+--- a/llvm/lib/Analysis/CMakeLists.txt
++++ b/llvm/lib/Analysis/CMakeLists.txt
+@@ -23,6 +23,17 @@ if (DEFINED LLVM_HAVE_TF_AOT OR LLVM_HAVE_TFLITE)
+   endif()
+ endif()
+ 
++# The implementation of ConstantFolding.cpp relies on the use of math functions
++# from the host. In particular, it relies on the detection of floating point
++# exceptions originating from such math functions to prevent invalid cases
++# from being constant folded. Therefore, we must ensure that fp exceptions are
++# handled correctly.
++if (MSVC)
++  set_source_files_properties(ConstantFolding.cpp PROPERTIES COMPILE_OPTIONS "/fp:except")
++elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
++  set_source_files_properties(ConstantFolding.cpp PROPERTIES COMPILE_OPTIONS "-ftrapping-math")
++endif()
++
+ add_llvm_component_library(LLVMAnalysis
+   AliasAnalysis.cpp
+   AliasAnalysisEvaluator.cpp
+-- 
+2.43.0
+
