@@ -17,4 +17,9 @@ There are no experimental features implemented.
 
 # Features
 
-There are no additional features implemented.
+In addition to the LLVM tools, Arm Toolchain for Embedded provides a
+utility `elf2bin`. This extracts the contents of the loadable segments
+from an ELF executable file, and outputs it in various forms suitable
+for loading into embedded targets, such as Intel Hex, Motorola
+S-records, or raw binary files. The documentation for `elf2bin` can be
+found in `elf2bin.md`.
