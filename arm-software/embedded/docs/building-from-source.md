@@ -71,6 +71,8 @@ tools to the `LLVM_DISTRIBUTION_COMPONENTS` CMake list.
 
 ## Building
 
+The commands in the sections below assume you are in the `arm-toolchain/arm-software/embedded` directory.
+
 The toolchain can be built directly with CMake.
 
 ```
