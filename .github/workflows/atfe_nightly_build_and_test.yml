@@ -31,7 +31,7 @@ jobs:
         include:
           - build_script: build.sh
             test_script: test.sh
-            runner: ah-ubuntu_22_04-c7g_8x-100
+            runner: ToolchainGroup_LargeRunner_Linux-x64
           - build_script: build_llvmlibc_overlay.sh
             test_script: ''
             runner: ah-ubuntu_22_04-c7g_8x-100
