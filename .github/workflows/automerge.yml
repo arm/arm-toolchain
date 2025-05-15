@@ -19,6 +19,8 @@ jobs:
         branches:
           - from_branch: main
             to_branch: arm-software
+          - from_branch: release/20.x
+            to_branch: release/arm-software/20.x
     steps:
       - name: Configure Access Token
         uses: actions/create-github-app-token@v1
