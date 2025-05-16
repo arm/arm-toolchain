@@ -72,19 +72,17 @@ PRODUCT_CMAKE_FLAGS=(
     -DCMAKE_CXX_COMPILER="${BUILD_DIR}/bootstrap_compiler/bin/clang++"
     -DCMAKE_INSTALL_PREFIX="${ATFL_DIR}"
     -DLLVM_ENABLE_LLD=ON
-    -DLLVM_ENABLE_LIBCXX=ON
 )
 COMPILER_CMAKE_FLAGS=(
-    -DCMAKE_C_FLAGS="-I${ATFL_DIR}/include"
-    -DCMAKE_CXX_FLAGS="-I${ATFL_DIR}/include -I${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT"
-    -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed"
-    -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed"
-    -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed"
+    -DCMAKE_CXX_FLAGS="-stdlib++-isystem ${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT"
+    -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
+    -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
+    -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_SKIP_RPATH=No
     -DCMAKE_SKIP_INSTALL_RPATH=No
     -DLLVM_ENABLE_PROJECTS="llvm;clang;flang;lld"
-    -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;openmp"
+    -DLLVM_ENABLE_RUNTIMES="compiler-rt;flang-rt;libunwind;openmp"
     -DCLANG_ENABLE_LIBXML2=OFF
     -DCLANG_PLUGIN_SUPPORT=ON
     -DCLANG_ENABLE_STATIC_ANALYZER=ON
@@ -102,6 +100,8 @@ COMPILER_CMAKE_FLAGS=(
     -DCOMPILER_RT_USE_ATOMIC_LIBRARY=ON
     -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF
     -DCOMPILER_RT_LIBRARY_atomic_${ATFL_TARGET_TRIPLE}="-rtlib=compiler-rt"
+    -DFLANG_RT_ENABLE_SHARED=ON
+    -DFLANG_RT_ENABLE_STATIC=ON
     -DLIBOMP_COPY_EXPORTS=False
     -DLIBOMP_USE_HWLOC=False
     -DLIBOMP_OMPT_SUPPORT=ON
@@ -344,6 +344,7 @@ product_build() {
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
         -DBUILD_SHARED_LIBS=False \
         -DLIBOMP_ENABLE_SHARED=True \
+        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++;-DCMAKE_MODULE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++;-DCMAKE_SHARED_LINKER_FLAGS=-L${ATFL_DIR}/lib  -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++" \
         "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
         tee "${LOGS_DIR}/product.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/product.txt"
@@ -364,6 +365,7 @@ shared_lib_build() {
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
         -DBUILD_SHARED_LIBS=True \
         -DLIBOMP_ENABLE_SHARED=False \
+        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++;-DCMAKE_MODULE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++;-DCMAKE_SHARED_LINKER_FLAGS=-L${ATFL_DIR}/lib  -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++" \
         "${COMMON_CMAKE_FLAGS[@]}" -DLLVM_ENABLE_ZSTD=OFF "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" -DLIBOMP_OMPT_SUPPORT=OFF "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
         tee "${LOGS_DIR}/shared_lib.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
@@ -374,7 +376,7 @@ shared_lib_build() {
     mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
     cp "${ATFL_DIR}.libs/lib/${ATFL_TARGET_TRIPLE}/libomp.a" \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
-    cp -d ${ATFL_DIR}.libs/lib/libflang_rt* \
+    cp -d ${ATFL_DIR}.libs/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
@@ -402,8 +404,6 @@ package() {
       cp "${LIBRARIES_DIR}/libamath.so" \
           "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     fi
-    cp "${ATFL_DIR}/lib/libflang_rt.runtime.a" \
-      "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     cp ${ATFL_DIR}/include/flang/omp* "${ATFL_DIR}/include"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
     echo "export PS1=\"(ATfL ${ATFL_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
