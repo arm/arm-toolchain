@@ -208,13 +208,11 @@ static std::unique_ptr<BinaryDataStream>
 combined_prepare(InputObject &inobj, const std::vector<Segment> &segments_orig,
                  bool include_zi, std::optional<uint64_t> baseaddr) {
   // Sort the segments by base address, in case they weren't already.
-  struct {
-    bool operator()(const Segment &a, const Segment &b) {
-      return a.baseaddr < b.baseaddr;
-    }
-  } comparator;
   std::vector<Segment> sorted = segments_orig;
-  std::sort(sorted.begin(), sorted.end(), comparator);
+  std::stable_sort(sorted.begin(), sorted.end(),
+                   [](const Segment &a, const Segment &b) {
+                     return a.baseaddr < b.baseaddr;
+                   });
 
   // Spot and reject overlapping segments.
   //
