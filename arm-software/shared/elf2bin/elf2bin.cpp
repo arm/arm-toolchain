@@ -79,7 +79,8 @@ using llvm::object::ELFObjectFileBase;
 }
 
 // Format an output file name, according to the format string
-// description provided by the user and documented in the help above.
+// description provided by the user and documented in the help text in
+// Opts.td.
 //
 // (So, unlike sprintf, this function doesn't take an arbitrary
 // variadic argument list. Its input data consists of the details of
