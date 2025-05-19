@@ -87,7 +87,7 @@ using llvm::object::ELFObjectFileBase;
 // an output file that's about to be written, and the format
 // directives refer to particular pieces of data like 'input file
 // name' and 'bank number' rather than to data types.)
-std::string format_outfile(std::string pattern, std::string inpath,
+std::string format_outfile(StringRef pattern, StringRef inpath,
                            std::optional<uint64_t> baseaddr, uint64_t bank) {
   std::string infile;
   size_t slash = inpath.find_last_of("/"
