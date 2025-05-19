@@ -49,7 +49,7 @@ class ElfSegment : public BinaryDataStream {
   size_t position, remaining;
 
   StringRef read() override {
-    size_t readlen = std::min<size_t>(remaining, CHUNKSIZE);
+    size_t readlen = std::min(remaining, CHUNKSIZE);
     size_t readpos = position;
     position += readlen;
     remaining -= readlen;
@@ -69,7 +69,7 @@ class Padding : public BinaryDataStream {
   char buffer[CHUNKSIZE];
 
   StringRef read() override {
-    size_t readlen = std::min<size_t>(remaining, CHUNKSIZE);
+    size_t readlen = std::min(remaining, CHUNKSIZE);
     remaining -= readlen;
     return StringRef(buffer, readlen);
   }
