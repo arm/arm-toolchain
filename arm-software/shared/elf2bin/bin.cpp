@@ -23,13 +23,11 @@ using namespace llvm;
 // For classes below that process input data in manageably-sized chunks
 constexpr size_t CHUNKSIZE = 65536;
 
-/*
- * Abstraction that provides a means of getting binary data from
- * somewhere. In the simple case this will involve reading data from a
- * segment in an ELF file. In more complex cases there might also be
- * zero-byte padding, or one of these stream objects filtering out the
- * even-index bytes of another.
- */
+// Abstraction that provides a means of getting binary data from
+// somewhere. In the simple case this will involve reading data from a
+// segment in an ELF file. In more complex cases there might also be
+// zero-byte padding, or one of these stream objects filtering out the
+// even-index bytes of another.
 class BinaryDataStream {
 public:
   // Returns a string of data, in whatever size is convenient. (But
@@ -41,9 +39,7 @@ public:
   virtual ~BinaryDataStream() = default;
 };
 
-/*
- * BinaryDataStream implementation that reads data from an ELF image.
- */
+// BinaryDataStream implementation that reads data from an ELF image.
 class ElfSegment : public BinaryDataStream {
   InputObject &inobj;
   size_t position, remaining;
@@ -61,9 +57,7 @@ public:
       : inobj(inobj), position(offset), remaining(size) {}
 };
 
-/*
- * BinaryDataStream implementation that generates zero padding.
- */
+// BinaryDataStream implementation that generates zero padding.
 class Padding : public BinaryDataStream {
   size_t remaining;
   char buffer[CHUNKSIZE];
@@ -78,10 +72,8 @@ public:
   Padding(size_t size) : remaining(size) { memset(buffer, 0, sizeof(buffer)); }
 };
 
-/*
- * BinaryDataStream implementation that chains other BinaryDataStreams
- * together.
- */
+// BinaryDataStream implementation that chains other BinaryDataStreams
+// together.
 class Chain : public BinaryDataStream {
   std::queue<std::unique_ptr<BinaryDataStream>> queue;
 
@@ -105,17 +97,15 @@ public:
   }
 };
 
-/*
- * BinaryDataStream implementation that filters the output of another
- * BinaryDataStream so as to return only a subset of the bytes,
- * defined by a modulus and a range of residues. Specifically, a range
- * of 'nres' consecutive bytes from the underlying stream is passed
- * on, beginning at each byte whose index is congruent to 'firstres'
- * mod 'modulus' (regarding the first byte of the underlying stream as
- * having index 0).
- *
- * 'modulus' has to be a power of 2.
- */
+// BinaryDataStream implementation that filters the output of another
+// BinaryDataStream so as to return only a subset of the bytes,
+// defined by a modulus and a range of residues. Specifically, a range
+// of 'nres' consecutive bytes from the underlying stream is passed
+// on, beginning at each byte whose index is congruent to 'firstres'
+// mod 'modulus' (regarding the first byte of the underlying stream as
+// having index 0).
+//
+// 'modulus' has to be a power of 2.
 class ModFilter : public BinaryDataStream {
   std::unique_ptr<BinaryDataStream> st;
   // Internal representation: 'mask' is the bitmask that reduces mod

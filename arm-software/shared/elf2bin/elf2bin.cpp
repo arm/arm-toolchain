@@ -78,16 +78,14 @@ using llvm::object::ELFObjectFileBase;
   fatal_common(std::nullopt, message, std::nullopt, true);
 }
 
-/*
- * Format an output file name, according to the format string
- * description provided by the user and documented in the help above.
- *
- * (So, unlike sprintf, this function doesn't take an arbitrary
- * variadic argument list. Its input data consists of the details of
- * an output file that's about to be written, and the format
- * directives refer to particular pieces of data like 'input file
- * name' and 'bank number' rather than to data types.)
- */
+// Format an output file name, according to the format string
+// description provided by the user and documented in the help above.
+//
+// (So, unlike sprintf, this function doesn't take an arbitrary
+// variadic argument list. Its input data consists of the details of
+// an output file that's about to be written, and the format
+// directives refer to particular pieces of data like 'input file
+// name' and 'bank number' rather than to data types.)
 std::string format_outfile(std::string pattern, std::string inpath,
                            std::optional<uint64_t> baseaddr, uint64_t bank) {
   std::string infile;
@@ -301,9 +299,7 @@ int main(int argc, char **argv) {
       (bankwidth != 1 || nbanks != 1))
     fatal("--banks only applies to binary and VHX output");
 
-  /*
-   * Open the input files.
-   */
+  // Open the input files.
   std::vector<InputObject> objects;
 
   for (const std::string &infile : infiles) {
@@ -330,10 +326,8 @@ int main(int argc, char **argv) {
     inobj.elf = std::move(elf);
   }
 
-  /*
-   * Helper function for listing the segments of a file, paying
-   * attention to the --segments option to restrict to a subset.
-   */
+  // Helper function for listing the segments of a file, paying
+  // attention to the --segments option to restrict to a subset.
   auto segments = [&](InputObject &inobj) {
     std::vector<Segment> allsegs = inobj.segments(physical);
     if (!segments_wanted)
@@ -347,9 +341,7 @@ int main(int argc, char **argv) {
     return segs;
   };
 
-  /*
-   * Make a list of all the conversions we want to do.
-   */
+  // Make a list of all the conversions we want to do.
 
   struct Conversion {
     InputObject *inobj;
@@ -374,10 +366,8 @@ int main(int argc, char **argv) {
     switch (format.value()) {
     case Format::BinMultifile:
     case Format::VhxMultifile:
-      /*
-       * Separate output file per segment and per bank, so go
-       * through this input file and list its segments.
-       */
+      // Separate output file per segment and per bank, so go
+      // through this input file and list its segments.
       for (auto seg : segments(inobj)) {
         for (uint64_t bank = 0; bank < nbanks; bank++) {
           Conversion conv;
@@ -395,10 +385,8 @@ int main(int argc, char **argv) {
       break;
     case Format::BinCombined:
     case Format::VhxCombined:
-      /*
-       * Separate output file per bank, but each one contains
-       * the whole input file.
-       */
+      // Separate output file per bank, but each one contains
+      // the whole input file.
       for (uint64_t bank = 0; bank < nbanks; bank++) {
         Conversion conv;
         conv.bank = bank;
@@ -406,9 +394,7 @@ int main(int argc, char **argv) {
       }
       break;
     default:
-      /*
-       * One output file per input file.
-       */
+      // One output file per input file.
       add_conv(Conversion{});
       break;
     }
