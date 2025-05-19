@@ -460,8 +460,8 @@ class bincombined(Base):
             )
             self.assertEqual(
                 err,
-                "elf2bin: input.elf: segments at addresses "
-                "0x1000 and 0x10ff overlap",
+                "elf2bin: input.elf: segments at address ranges "
+                "[0x1000,0x1100) and [0x10ff,0x11ff) overlap",
             )
 
     def testOverlapMemsz(self):
@@ -486,8 +486,8 @@ class bincombined(Base):
             )
             self.assertEqual(
                 err,
-                "elf2bin: input.elf: segments at addresses "
-                "0x1000 and 0x10ff overlap",
+                "elf2bin: input.elf: segments at address ranges "
+                "[0x1000,0x1100) and [0x10ff,0x11ff) overlap",
             )
 
     def testBaseAddr(self):

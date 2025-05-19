@@ -237,9 +237,11 @@ combined_prepare(InputObject &inobj, const std::vector<Segment> &segments_orig,
     for (; it != end; ++it) {
       const auto &prev = nonoverlapping.back(), curr = *it;
       if (curr.baseaddr - prev.baseaddr < prev.memsize)
-        fatal(inobj, Twine("segments at addresses 0x") +
-                         Twine::utohexstr(prev.baseaddr) + " and 0x" +
-                         Twine::utohexstr(curr.baseaddr) + " overlap");
+        fatal(inobj, Twine("segments at address ranges [0x") +
+                         Twine::utohexstr(prev.baseaddr) + ",0x" +
+                         Twine::utohexstr(prev.baseaddr + prev.memsize) + ") and [0x" +
+                         Twine::utohexstr(curr.baseaddr) + ",0x" +
+                         Twine::utohexstr(curr.baseaddr + curr.memsize) + ") overlap");
       nonoverlapping.push_back(curr);
     }
   }
