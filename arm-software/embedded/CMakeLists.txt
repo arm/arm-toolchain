@@ -887,13 +887,23 @@ add_custom_target(
     COMMAND "${CMAKE_COMMAND}" -E rm -rf unpack
     COMMAND "${CMAKE_COMMAND}" -E make_directory unpack
 )
-add_custom_target(
-    unpack-llvm-toolchain
-    COMMAND "${CMAKE_COMMAND}" -E tar x ${package_filepath}
-    DEPENDS ${package_filepath}
-    USES_TERMINAL
-    WORKING_DIRECTORY unpack
-)
+if(package_filename_extension STREQUAL ".dmg")
+    add_custom_target(
+        unpack-llvm-toolchain
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/extract_dmg.sh ${package_filepath} ${PACKAGE_FILE_NAME}
+        DEPENDS ${package_filepath}
+        USES_TERMINAL
+        WORKING_DIRECTORY unpack
+    )
+else()
+    add_custom_target(
+        unpack-llvm-toolchain
+        COMMAND "${CMAKE_COMMAND}" -E tar x ${package_filepath}
+        DEPENDS ${package_filepath}
+        USES_TERMINAL
+        WORKING_DIRECTORY unpack
+    )
+endif()
 add_dependencies(
     unpack-llvm-toolchain
     clear-unpack-directory
@@ -905,16 +915,7 @@ add_dependencies(check-llvm-toolchain check-${LLVM_TOOLCHAIN_C_LIBRARY})
 add_dependencies(check-llvm-toolchain check-compiler-rt)
 add_subdirectory(test)
 add_dependencies(check-llvm-toolchain check-llvm-toolchain-lit)
-
-# The package tests currently only support tar and zip, so don't
-# attempt to run them on other formats, such as dmg with macOS.
-# A dummy check-package-llvm-toolchain target is still
-# required for the test.sh script.
-if(package_filename_extension STREQUAL ".tar.xz" OR package_filename_extension STREQUAL ".zip")
-    add_subdirectory(packagetest)
-else()
-    add_custom_target(check-package-llvm-toolchain)
-endif()
+add_subdirectory(packagetest)
 
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
     find_program(MINGW_C_EXECUTABLE x86_64-w64-mingw32-gcc-posix REQUIRED)
