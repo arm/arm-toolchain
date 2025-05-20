@@ -40,6 +40,9 @@ public:
 };
 
 // BinaryDataStream implementation that reads data from an ELF image.
+//
+// This stores a reference to the InputObject you construct it with,
+// so it mustn't outlive that InputObject.
 class ElfSegment : public BinaryDataStream {
   InputObject &inobj;
   size_t position, remaining;
