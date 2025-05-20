@@ -13,8 +13,9 @@ using namespace llvm;
 using namespace llvm::object;
 
 template <typename ELFT>
-static std::vector<Segment>
-get_segments(InputObject &inobj, ELFObjectFile<ELFT> &elfobj, bool physical) {
+static std::vector<Segment> get_segments(const InputObject &inobj,
+                                         ELFObjectFile<ELFT> &elfobj,
+                                         bool physical) {
   std::vector<Segment> segments;
 
   Expected<ArrayRef<typename ELFT::Phdr>> phdrs_or_err =
@@ -40,11 +41,11 @@ get_segments(InputObject &inobj, ELFObjectFile<ELFT> &elfobj, bool physical) {
 }
 
 template <typename ELFT>
-static uint64_t get_entry_point(ELFObjectFile<ELFT> &obj) {
+static uint64_t get_entry_point(const ELFObjectFile<ELFT> &obj) {
   return obj.getELFFile().getHeader().e_entry;
 }
 
-std::vector<Segment> InputObject::segments(bool physical) {
+std::vector<Segment> InputObject::segments(bool physical) const {
   if (auto *specific = dyn_cast<ELF32LEObjectFile>(elf.get()))
     return get_segments(*this, *specific, physical);
   if (auto *specific = dyn_cast<ELF32BEObjectFile>(elf.get()))
@@ -56,7 +57,7 @@ std::vector<Segment> InputObject::segments(bool physical) {
   llvm_unreachable("unexpected subclass of ELFOBjectFileBase");
 }
 
-uint64_t InputObject::entry_point() {
+uint64_t InputObject::entry_point() const {
   if (auto *specific = dyn_cast<ELF32LEObjectFile>(elf.get()))
     return get_entry_point(*specific);
   if (auto *specific = dyn_cast<ELF32BEObjectFile>(elf.get()))

@@ -62,7 +62,7 @@ class IHex : public Hex {
     return hexstring;
   }
 
-  InputObject &inobj;
+  const InputObject &inobj;
   llvm::raw_ostream &os;
   uint64_t curr_offset = 0;
 
@@ -86,7 +86,7 @@ class IHex : public Hex {
 
 public:
   static constexpr uint64_t max_datalen = 0xFF;
-  IHex(InputObject &inobj, llvm::raw_ostream &os) : inobj(inobj), os(os) {}
+  IHex(const InputObject &inobj, llvm::raw_ostream &os) : inobj(inobj), os(os) {}
 };
 
 class SRec : public Hex {
@@ -115,7 +115,7 @@ class SRec : public Hex {
     return hexstring;
   }
 
-  InputObject &inobj;
+  const InputObject &inobj;
   llvm::raw_ostream &os;
 
   void data(uint64_t addr, const std::string &data) override {
@@ -142,10 +142,10 @@ public:
   // so we can have fewer data bytes in a record than 0xFF
   static constexpr uint64_t max_datalen = 0xFF - 5;
 
-  SRec(InputObject &inobj, llvm::raw_ostream &os) : inobj(inobj), os(os) {}
+  SRec(const InputObject &inobj, llvm::raw_ostream &os) : inobj(inobj), os(os) {}
 };
 
-static void hex_write(InputObject &inobj, Hex &hex,
+static void hex_write(const InputObject &inobj, Hex &hex,
                       const std::vector<Segment> &segments, bool include_zi,
                       uint64_t datareclen) {
   for (auto seg : segments) {
@@ -171,7 +171,7 @@ static void hex_write(InputObject &inobj, Hex &hex,
 }
 
 template <typename HexFormat>
-static void hex_write(InputObject &inobj, const std::string &outfile,
+static void hex_write(const InputObject &inobj, const std::string &outfile,
                       const std::vector<Segment> &segments, bool include_zi,
                       uint64_t datareclen) {
   if (datareclen > HexFormat::max_datalen)
@@ -190,13 +190,13 @@ static void hex_write(InputObject &inobj, const std::string &outfile,
   hex_write(inobj, hex, segments, include_zi, datareclen);
 }
 
-void ihex_write(InputObject &inobj, const std::string &outfile,
+void ihex_write(const InputObject &inobj, const std::string &outfile,
                 const std::vector<Segment> &segments, bool include_zi,
                 uint64_t datareclen) {
   hex_write<IHex>(inobj, outfile, segments, include_zi, datareclen);
 }
 
-void srec_write(InputObject &inobj, const std::string &outfile,
+void srec_write(const InputObject &inobj, const std::string &outfile,
                 const std::vector<Segment> &segments, bool include_zi,
                 uint64_t datareclen) {
   hex_write<SRec>(inobj, outfile, segments, include_zi, datareclen);

@@ -44,7 +44,7 @@ public:
 // This stores a reference to the InputObject you construct it with,
 // so it mustn't outlive that InputObject.
 class ElfSegment : public BinaryDataStream {
-  InputObject &inobj;
+  const InputObject &inobj;
   size_t position, remaining;
 
   StringRef read() override {
@@ -56,7 +56,7 @@ class ElfSegment : public BinaryDataStream {
   }
 
 public:
-  ElfSegment(InputObject &inobj, size_t offset, size_t size)
+  ElfSegment(const InputObject &inobj, size_t offset, size_t size)
       : inobj(inobj), position(offset), remaining(size) {}
 };
 
@@ -192,7 +192,7 @@ static void vhx_write(BinaryDataStream &st, const std::string &outfile) {
   }
 }
 
-static std::unique_ptr<BinaryDataStream> onesegment_prepare(InputObject &inobj,
+static std::unique_ptr<BinaryDataStream> onesegment_prepare(const InputObject &inobj,
                                                             uint64_t fileoffset,
                                                             uint64_t size,
                                                             uint64_t zi_size) {
@@ -208,7 +208,7 @@ static std::unique_ptr<BinaryDataStream> onesegment_prepare(InputObject &inobj,
 }
 
 static std::unique_ptr<BinaryDataStream>
-combined_prepare(InputObject &inobj, const std::vector<Segment> &segments_orig,
+combined_prepare(const InputObject &inobj, const std::vector<Segment> &segments_orig,
                  bool include_zi, std::optional<uint64_t> baseaddr) {
   // Sort the segments by base address, in case they weren't already.
   std::vector<Segment> sorted = segments_orig;
@@ -282,7 +282,7 @@ bank_prepare(std::unique_ptr<BinaryDataStream> stream, uint64_t bank_modulus,
                                      bank_firstres, bank_nres);
 }
 
-void bin_write(InputObject &inobj, const std::string &outfile,
+void bin_write(const InputObject &inobj, const std::string &outfile,
                uint64_t fileoffset, uint64_t size, uint64_t zi_size,
                uint64_t bank_modulus, uint64_t bank_firstres,
                uint64_t bank_nres) {
@@ -292,7 +292,7 @@ void bin_write(InputObject &inobj, const std::string &outfile,
   bin_write(*streamp, outfile);
 }
 
-void bincombined_write(InputObject &inobj, const std::string &outfile,
+void bincombined_write(const InputObject &inobj, const std::string &outfile,
                        const std::vector<Segment> &segments, bool include_zi,
                        std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
                        uint64_t bank_firstres, uint64_t bank_nres) {
@@ -302,7 +302,7 @@ void bincombined_write(InputObject &inobj, const std::string &outfile,
   bin_write(*streamp, outfile);
 }
 
-void vhx_write(InputObject &inobj, const std::string &outfile,
+void vhx_write(const InputObject &inobj, const std::string &outfile,
                uint64_t fileoffset, uint64_t size, uint64_t zi_size,
                uint64_t bank_modulus, uint64_t bank_firstres,
                uint64_t bank_nres) {
@@ -312,7 +312,7 @@ void vhx_write(InputObject &inobj, const std::string &outfile,
   vhx_write(*streamp, outfile);
 }
 
-void vhxcombined_write(InputObject &inobj, const std::string &outfile,
+void vhxcombined_write(const InputObject &inobj, const std::string &outfile,
                        const std::vector<Segment> &segments, bool include_zi,
                        std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
                        uint64_t bank_firstres, uint64_t bank_nres) {

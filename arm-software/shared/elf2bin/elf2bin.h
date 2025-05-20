@@ -44,9 +44,9 @@ struct InputObject {
   // i.e. the p_paddr field in its program header table entry. If it's
   // false, the virtual address will be used instead, i.e. the p_vaddr
   // field.
-  std::vector<Segment> segments(bool physical);
+  std::vector<Segment> segments(bool physical) const;
 
-  uint64_t entry_point();
+  uint64_t entry_point() const;
 };
 
 // Write a single binary or Verilog hex file. (A Verilog hex file is
@@ -81,11 +81,11 @@ struct InputObject {
 //
 // These functions will exit the entire program with an error message if
 // anything goes wrong. So callers need not handle the failure case.
-void bin_write(InputObject &inobj, const std::string &outfile,
+void bin_write(const InputObject &inobj, const std::string &outfile,
                uint64_t fileoffset, uint64_t size, uint64_t zi_size,
                uint64_t bank_modulus, uint64_t bank_firstres,
                uint64_t bank_nres);
-void vhx_write(InputObject &inobj, const std::string &outfile,
+void vhx_write(const InputObject &inobj, const std::string &outfile,
                uint64_t fileoffset, uint64_t size, uint64_t zi_size,
                uint64_t bank_modulus, uint64_t bank_firstres,
                uint64_t bank_nres);
@@ -116,11 +116,11 @@ void vhx_write(InputObject &inobj, const std::string &outfile,
 // pair of functions. So is 'outfile'.
 //
 // These functions too will exit with an error in case of failure.
-void bincombined_write(InputObject &inobj, const std::string &outfile,
+void bincombined_write(const InputObject &inobj, const std::string &outfile,
                        const std::vector<Segment> &segments, bool include_zi,
                        std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
                        uint64_t bank_firstres, uint64_t bank_nres);
-void vhxcombined_write(InputObject &inobj, const std::string &outfile,
+void vhxcombined_write(const InputObject &inobj, const std::string &outfile,
                        const std::vector<Segment> &segments, bool include_zi,
                        std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
                        uint64_t bank_firstres, uint64_t bank_nres);
@@ -140,10 +140,10 @@ void vhxcombined_write(InputObject &inobj, const std::string &outfile,
 //
 // These functions will exit the entire program with an error message if
 // anything goes wrong. So callers need not handle the failure case.
-void ihex_write(InputObject &inobj, const std::string &outfile,
+void ihex_write(const InputObject &inobj, const std::string &outfile,
                 const std::vector<Segment> &segments, bool include_zi,
                 uint64_t datareclen);
-void srec_write(InputObject &inobj, const std::string &outfile,
+void srec_write(const InputObject &inobj, const std::string &outfile,
                 const std::vector<Segment> &segments, bool include_zi,
                 uint64_t datareclen);
 
@@ -151,7 +151,7 @@ void srec_write(InputObject &inobj, const std::string &outfile,
 [[noreturn]] void fatal(llvm::StringRef filename, llvm::Twine message,
                         llvm::Error err);
 [[noreturn]] void fatal(llvm::StringRef filename, llvm::Twine message);
-[[noreturn]] void fatal(InputObject &inobj, llvm::Twine message,
+[[noreturn]] void fatal(const InputObject &inobj, llvm::Twine message,
                         llvm::Error err);
-[[noreturn]] void fatal(InputObject &inobj, llvm::Twine message);
+[[noreturn]] void fatal(const InputObject &inobj, llvm::Twine message);
 [[noreturn]] void fatal(llvm::Twine message);

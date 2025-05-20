@@ -58,10 +58,11 @@ using llvm::object::ELFObjectFileBase;
   exit(1);
 }
 
-[[noreturn]] void fatal(InputObject &inobj, Twine message, llvm::Error err) {
+[[noreturn]] void fatal(const InputObject &inobj, Twine message,
+                        llvm::Error err) {
   fatal_common(inobj.filename, message, std::move(err), false);
 }
-[[noreturn]] void fatal(InputObject &inobj, Twine message) {
+[[noreturn]] void fatal(const InputObject &inobj, Twine message) {
   fatal_common(inobj.filename, message, std::nullopt, false);
 }
 [[noreturn]] void fatal(StringRef filename, Twine message, llvm::Error err) {
