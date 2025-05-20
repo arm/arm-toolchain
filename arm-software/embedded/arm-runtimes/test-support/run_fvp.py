@@ -22,35 +22,49 @@ class FVP:
     cmdline_param: str
 
 
-# The location of files within the FVP install directory can differ
-# between the packages for different platforms.
-uname_machine = uname().machine.lower()
-if uname_machine == "x86_64":
-    platform_dir = "Linux64_GCC-9.3"
-elif uname_machine == "aarch64":
-    platform_dir = "Linux64_armv8l_GCC-9.3"
-else:
-    raise Exception(f"{uname_machine} is not a recognised uname machine")
-
 MODELS = {
-    "corstone-310": FVP(
-        f"Corstone-310/models/{platform_dir}/FVP_Corstone_SSE-310",
-        f"Corstone-310/plugins/{platform_dir}/TarmacTrace.so",
-        f"FastModelsPortfolio_11.27/plugins/{platform_dir}/Crypto.so",
-        "cpu0.semihosting-cmd_line",
-    ),
-    "aem-a": FVP(
-        f"Base_RevC_AEMvA_pkg/models/{platform_dir}/FVP_Base_RevC-2xAEMvA",
-        f"Base_RevC_AEMvA_pkg/plugins/{platform_dir}/TarmacTrace.so",
-        f"FastModelsPortfolio_11.27/plugins/{platform_dir}/Crypto.so",
-        "cluster0.cpu0.semihosting-cmd_line",
-    ),
-    "aem-r": FVP(
-        f"AEMv8R_base_pkg/models/{platform_dir}/FVP_BaseR_AEMv8R",
-        f"AEMv8R_base_pkg/plugins/{platform_dir}/TarmacTrace.so",
-        f"FastModelsPortfolio_11.27/plugins/{platform_dir}/Crypto.so",
-        "cluster0.cpu0.semihosting-cmd_line",
-    ),
+    "corstone-310": {
+        "x86": FVP(
+            "Corstone-310/models/Linux64_GCC-9.3/FVP_Corstone_SSE-310",
+            "Corstone-310/plugins/Linux64_GCC-9.3/TarmacTrace.so",
+            "FastModelsPortfolio_11.27/plugins/Linux64_GCC-9.3/Crypto.so",
+            "cpu0.semihosting-cmd_line",
+        ),
+        "aarch64": FVP(
+            "Corstone-310/models/Linux64_armv8l_GCC-9.3/FVP_Corstone_SSE-310",
+            "Corstone-310/plugins/Linux64_armv8l_GCC-9.3/TarmacTrace.so",
+            "FastModelsPortfolio_11.27/plugins/Linux64_armv8l_GCC-9.3/Crypto.so",
+            "cpu0.semihosting-cmd_line",
+        ),
+    },
+    "aem-a": {
+        "x86": FVP(
+            "Base_RevC_AEMvA_pkg/models/Linux64_GCC-9.3/FVP_Base_RevC-2xAEMvA",
+            "Base_RevC_AEMvA_pkg/plugins/Linux64_GCC-9.3/TarmacTrace.so",
+            "FastModelsPortfolio_11.27/plugins/Linux64_GCC-9.3/Crypto.so",
+            "cluster0.cpu0.semihosting-cmd_line",
+        ),
+        "aarch64": FVP(
+            "Base_RevC_AEMvA_pkg/models/Linux64_armv8l_GCC-9.3/FVP_Base_RevC-2xAEMvA",
+            "Base_RevC_AEMvA_pkg/plugins/Linux64_armv8l_GCC-9.3/TarmacTrace.so",
+            "FastModelsPortfolio_11.27/plugins/Linux64_armv8l_GCC-9.3/Crypto.so",
+            "cluster0.cpu0.semihosting-cmd_line",
+        ),
+    },
+    "aem-r": {
+        "x86": FVP(
+            "AEMv8R_base_pkg/models/Linux64_GCC-9.3/FVP_BaseR_AEMv8R",
+            "AEMv8R_base_pkg/plugins/Linux64_GCC-9.3/TarmacTrace.so",
+            "FastModelsPortfolio_11.27/plugins/Linux64_GCC-9.3/Crypto.so",
+            "cluster0.cpu0.semihosting-cmd_line",
+        ),
+        "aarch64": FVP(
+            "AEMv8R_base_pkg/models/Linux64_armv8l_GCC-9.3/FVP_BaseR_AEMv8R",
+            "AEMv8R_base_pkg/plugins/Linux64_armv8l_GCC-9.3/TarmacTrace.so",
+            "FastModelsPortfolio_11.27/plugins/Linux64_armv8l_GCC-9.3/Crypto.so",
+            "cluster0.cpu0.semihosting-cmd_line",
+        ),
+    },
 }
 
 
@@ -69,7 +83,17 @@ def run_fvp(
     """Execute the program using an FVP and return the subprocess return code."""
     if fvp_model not in MODELS:
         raise Exception(f"{fvp_model} is not a recognised model name")
-    model = MODELS[fvp_model]
+
+    # The location of files within the FVP install directory can differ
+    # between the packages for different platforms.
+    uname_machine = uname().machine.lower()
+    if uname_machine == "x86_64":
+        fvp_platform = "x86"
+    elif uname_machine == "aarch64":
+        fvp_platform = "aarch64"
+    else:
+        raise Exception(f"{uname_machine} is not a recognised uname machine")
+    model = MODELS[fvp_model][fvp_platform]
 
     env = environ.copy()
     if fvp_model == "corstone-310":
