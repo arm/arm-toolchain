@@ -192,10 +192,9 @@ static void vhx_write(BinaryDataStream &st, const std::string &outfile) {
   }
 }
 
-static std::unique_ptr<BinaryDataStream> onesegment_prepare(const InputObject &inobj,
-                                                            uint64_t fileoffset,
-                                                            uint64_t size,
-                                                            uint64_t zi_size) {
+static std::unique_ptr<BinaryDataStream>
+onesegment_prepare(const InputObject &inobj, uint64_t fileoffset, uint64_t size,
+                   uint64_t zi_size) {
   auto base_stream = std::make_unique<ElfSegment>(inobj, fileoffset, size);
 
   if (!zi_size)
@@ -208,8 +207,9 @@ static std::unique_ptr<BinaryDataStream> onesegment_prepare(const InputObject &i
 }
 
 static std::unique_ptr<BinaryDataStream>
-combined_prepare(const InputObject &inobj, const std::vector<Segment> &segments_orig,
-                 bool include_zi, std::optional<uint64_t> baseaddr) {
+combined_prepare(const InputObject &inobj,
+                 const std::vector<Segment> &segments_orig, bool include_zi,
+                 std::optional<uint64_t> baseaddr) {
   // Sort the segments by base address, in case they weren't already.
   std::vector<Segment> sorted = segments_orig;
   std::stable_sort(sorted.begin(), sorted.end(),
@@ -242,9 +242,10 @@ combined_prepare(const InputObject &inobj, const std::vector<Segment> &segments_
       if (curr.baseaddr - prev.baseaddr < prev.memsize)
         fatal(inobj, Twine("segments at address ranges [0x") +
                          Twine::utohexstr(prev.baseaddr) + ",0x" +
-                         Twine::utohexstr(prev.baseaddr + prev.memsize) + ") and [0x" +
-                         Twine::utohexstr(curr.baseaddr) + ",0x" +
-                         Twine::utohexstr(curr.baseaddr + curr.memsize) + ") overlap");
+                         Twine::utohexstr(prev.baseaddr + prev.memsize) +
+                         ") and [0x" + Twine::utohexstr(curr.baseaddr) + ",0x" +
+                         Twine::utohexstr(curr.baseaddr + curr.memsize) +
+                         ") overlap");
       nonoverlapping.push_back(curr);
     }
   }

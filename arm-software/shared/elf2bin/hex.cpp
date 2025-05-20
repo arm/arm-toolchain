@@ -86,7 +86,8 @@ class IHex : public Hex {
 
 public:
   static constexpr uint64_t max_datalen = 0xFF;
-  IHex(const InputObject &inobj, llvm::raw_ostream &os) : inobj(inobj), os(os) {}
+  IHex(const InputObject &inobj, llvm::raw_ostream &os)
+      : inobj(inobj), os(os) {}
 };
 
 class SRec : public Hex {
@@ -142,7 +143,8 @@ public:
   // so we can have fewer data bytes in a record than 0xFF
   static constexpr uint64_t max_datalen = 0xFF - 5;
 
-  SRec(const InputObject &inobj, llvm::raw_ostream &os) : inobj(inobj), os(os) {}
+  SRec(const InputObject &inobj, llvm::raw_ostream &os)
+      : inobj(inobj), os(os) {}
 };
 
 static void hex_write(const InputObject &inobj, Hex &hex,
