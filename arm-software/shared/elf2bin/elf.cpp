@@ -26,7 +26,15 @@ static std::vector<Segment> get_segments(const InputObject &inobj,
     return segments;
   }
 
-  for (const typename ELFT::Phdr &phdr : *phdrs_or_err) {
+  auto &phdrs = *phdrs_or_err;
+  if (phdrs.empty()) {
+    fatal(inobj,
+          "no program header table found (elf2bin only works on ELF "
+          "executables or shared libraries, not relocatable object files)");
+    return segments;
+  }
+
+  for (const typename ELFT::Phdr &phdr : phdrs) {
     if (phdr.p_type != llvm::ELF::PT_LOAD)
       continue;
     Segment seg;
