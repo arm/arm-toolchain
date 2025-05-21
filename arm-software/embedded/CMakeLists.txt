@@ -204,6 +204,7 @@ set(LLVM_DISTRIBUTION_COMPONENTS
     clang-resource-headers
     clang
     dsymutil
+    elf2bin
     lld
     llvm-ar
     llvm-config
@@ -349,12 +350,15 @@ set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
 set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
 include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 
+# Include elf2bin
+set(LLVM_EXTERNAL_PROJECTS elf2bin)
+set(LLVM_EXTERNAL_ELF2BIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin)
+
 set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 add_subdirectory(
     ${llvmproject_src_dir}/llvm llvm
 )
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin elf2bin)
 add_dependencies(check-all check-elf2bin)
 
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)

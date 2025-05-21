@@ -7,13 +7,6 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
-set(CMAKE_MODULE_PATH
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../../llvm/cmake/modules ${CMAKE_MODULE_PATH})
-include(DetermineGCCCompatible)
-
-# Tell add_llvm_tool where to find tablegen to process Opts.td
-set(LLVM_TABLEGEN_EXE ${CMAKE_BINARY_DIR}/llvm/bin/llvm-tblgen)
-
 # Specify which LLVM libraries we want to link with
 set(LLVM_LINK_COMPONENTS
   Object
@@ -43,6 +36,10 @@ endif()
 set(LLVM_TARGET_DEFINITIONS Opts.td)
 tablegen(LLVM Opts.inc -gen-opt-parser-defs)
 add_public_tablegen_target(Elf2BinOptsTableGen)
+
+# Append elf2bin to LLVM_TOOLCHAIN_TOOLS, which will cause
+# add_llvm_tool to set it as an installable target.
+list(APPEND LLVM_TOOLCHAIN_TOOLS elf2bin)
 
 # Build the elf2bin binary itself.
 add_llvm_tool(elf2bin
