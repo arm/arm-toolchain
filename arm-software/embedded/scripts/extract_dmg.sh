@@ -28,7 +28,8 @@ DST_DIR="${3:-"."}"
 if command -v hdiutil > /dev/null; then
     ATTACH_OUTPUT=$( hdiutil attach -nobrowse -readonly "${DMG_PATH}" )
     # The output of `hdiutil attach` includes a description of the mounted
-    # volumes with their corresponding mount path. E.g.:
+    # volumes that correspond to the specified .dmg file, where one of them
+    # maps to a path in `/Volumes/`. E.g.:
     # /dev/disk4     GUID_partition_scheme
     # /dev/disk4s1   EFI
     # /dev/disk4s2   Apple_HFS              /Volumes/ATfE-21.0.0-pre-Darwin-universal
