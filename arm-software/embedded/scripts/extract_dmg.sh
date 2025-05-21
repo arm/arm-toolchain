@@ -27,13 +27,19 @@ DST_DIR="${3:-"."}"
 
 if command -v hdiutil > /dev/null; then
     ATTACH_OUTPUT=$( hdiutil attach -nobrowse -readonly "${DMG_PATH}" )
-    MOUNT_PATH=$( echo "${ATTACH_OUTPUT}" | grep '/Volumes/' | sed -r 's/.*(\/Volumes\/.*)/\1/' )
+    # The output of `hdiutil attach` includes a description of the mounted
+    # volumes with their corresponding mount path. E.g.:
+    # /dev/disk4     GUID_partition_scheme
+    # /dev/disk4s1   EFI
+    # /dev/disk4s2   Apple_HFS              /Volumes/ATfE-21.0.0-pre-Darwin-universal
+    MOUNT_PATH=$( echo "${ATTACH_OUTPUT}" | grep '/Volumes/' | sed -r 's!.*(/Volumes/.*)!\1!' )
     if [[ -z "${MOUNT_PATH}" ]]; then
         >&2 echo "ERROR: Path to mounted volume not found."
         exit 1
     fi
     cp -R "${MOUNT_PATH}"/${PATTERN_TO_EXTRACT} .
-    hdiutil detach "${MOUNT_PATH}"
+    EXITCODE=$?
+    hdiutil detach "${MOUNT_PATH}" && exit $EXITCODE
 else
     >&2 echo "ERROR: No application capable of extracting .dmg contents found."
     exit 1

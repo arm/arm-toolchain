@@ -888,6 +888,8 @@ add_custom_target(
     COMMAND "${CMAKE_COMMAND}" -E make_directory unpack
 )
 if(package_filename_extension STREQUAL ".dmg")
+    # Extract only the toolchain directory from the .dmg file in ${package_filepath},
+    # as the image also includes a symlink to the "Applications" directory.
     add_custom_target(
         unpack-llvm-toolchain
         COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/extract_dmg.sh ${package_filepath} ${PACKAGE_FILE_NAME}
