@@ -7,6 +7,10 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
+set(CMAKE_MODULE_PATH
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../../llvm/cmake/modules ${CMAKE_MODULE_PATH})
+include(DetermineGCCCompatible)
+
 # Tell add_llvm_tool where to find tablegen to process Opts.td
 set(LLVM_TABLEGEN_EXE ${CMAKE_BINARY_DIR}/llvm/bin/llvm-tblgen)
 
@@ -29,7 +33,7 @@ include_directories(
 # Turn off RTTI: the LLVM libraries are compiled without it, so we
 # must compile without it too, or we'll get a link error trying to
 # find the RTTI for LLVM types such as llvm::opt::OptTable.
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(LLVM_COMPILER_IS_GCC_COMPATIBLE)
   list(APPEND LLVM_COMPILE_FLAGS "-fno-rtti")
 elseif(MSVC)
   list(APPEND LLVM_COMPILE_FLAGS "/GR-")
