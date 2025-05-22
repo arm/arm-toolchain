@@ -77,10 +77,6 @@ jobs:
       - name: Install Dependencies
         run: ./arm-software/embedded/scripts/${{ matrix.install_script }}
 
-      - name: Install Windows Dependencies
-        if: runner.os == 'Windows'
-        run: powershell ./arm-software/embedded/scripts/install_dependencies.ps1
-
       - name: Add ~/.local/bin to PATH
         if: runner.os != 'Windows'
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
@@ -101,6 +97,7 @@ jobs:
         run: ./arm-software/embedded/scripts/${{ matrix.build_script }}
 
       - name: Test ${{ matrix.test_script }}
+        if: matrix.test_script != ''
         run: ./arm-software/embedded/scripts/${{ matrix.test_script }}
 
       - name: Upload test results
