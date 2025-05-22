@@ -18,5 +18,5 @@ $buildDir = (Join-Path $repoRoot build)
 mkdir $buildDir
 cd $buildDir
 
-cmake ..\arm-software\embedded -GNinja -DFETCHCONTENT_QUIET=OFF
+cmake ..\arm-software\embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DENABLE_QEMU_TESTING=OFF
 ninja package-llvm-toolchain

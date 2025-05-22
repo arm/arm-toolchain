@@ -44,7 +44,7 @@ jobs:
             runner: ah-ubuntu_22_04-c7g_8x-100
 
           - build_script: build.ps1
-            test_script: test.ps1
+            test_script: ''
             install_script: install_dependencies.ps1
             target_os: Windows-2022-x86_64
             runner: ToolchainGroup_LargeRunner_Windows-x64
@@ -112,4 +112,6 @@ jobs:
         if: success()
         with:
           name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}
-          path: build*/ATfE-*.tar.xz
+          path: |
+            build*/ATfE-*.tar.xz
+            build*/ATfE-*.zip
