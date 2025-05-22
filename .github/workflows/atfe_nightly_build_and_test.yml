@@ -30,37 +30,43 @@ jobs:
       fail-fast: false  # Prevents one job failure from cancelling all
       matrix:
         include:
-          # build.sh
+          # Complete Toolchain Build & Test
           - build_script: build.sh
             test_script: test.sh
+            install_script: install_dependencies.sh
             target_os: Ubuntu-22.04-x86_64
             runner: ToolchainGroup_LargeRunner_Linux-x64
 
           - build_script: build.sh
             test_script: test.sh
+            install_script: install_dependencies.sh
             target_os: Ubuntu-22.04-arm64
             runner: ah-ubuntu_22_04-c7g_8x-100
 
           - build_script: build.ps1
             test_script: test.ps1
+            install_script: install_dependencies.ps1
             target_os: Windows-2022-x86_64
             runner: ToolchainGroup_LargeRunner_Windows-x64
 
-          # build_llvmlibc_overlay.sh
+          # LLVM-libc Overlay Package Build
           - build_script: build_llvmlibc_overlay.sh
             test_script: ''
+            install_script: install_dependencies.sh
             target_os: Ubuntu-22.04-arm64
             runner: ah-ubuntu_22_04-c7g_8x-100
 
-          # build_newlib_nano_overlay.sh
+          # Newlib nano Overlay Package Build
           - build_script: build_newlib_nano_overlay.sh
             test_script: ''
+            install_script: install_dependencies.sh
             target_os: Ubuntu-22.04-arm64
             runner: ah-ubuntu_22_04-c7g_8x-100
 
-          # build_newlib_overlay.sh
+          # Newlib Overlay Package Build
           - build_script: build_newlib_overlay.sh
             test_script: ''
+            install_script: install_dependencies.sh
             target_os: Ubuntu-22.04-arm64
             runner: ah-ubuntu_22_04-c7g_8x-100
 
@@ -68,9 +74,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Linux Ubuntu Dependencies
-        if: runner.os == 'Linux'
-        run: bash ./arm-software/embedded/scripts/install_dependencies.sh
+      - name: Install Dependencies
+        run: ./arm-software/embedded/scripts/${{ matrix.install_script }}
 
       - name: Install Windows Dependencies
         if: runner.os == 'Windows'
@@ -93,23 +98,10 @@ jobs:
             arm-software/embedded/patches/llvm-project-perf
 
       - name: Build ${{ matrix.build_script }}
-        run: |
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            powershell ./arm-software/embedded/scripts/${{ matrix.build_script }}
-          else
-            bash ./arm-software/embedded/scripts/${{ matrix.build_script }}
-          fi
-        shell: bash
+        run: ./arm-software/embedded/scripts/${{ matrix.build_script }}
 
       - name: Test ${{ matrix.test_script }}
-        if: matrix.test_script != ''
-        run: |
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            powershell ./arm-software/embedded/scripts/${{ matrix.test_script }}
-          else
-            bash ./arm-software/embedded/scripts/${{ matrix.test_script }}
-          fi
-        shell: bash
+        run: ./arm-software/embedded/scripts/${{ matrix.test_script }}
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
