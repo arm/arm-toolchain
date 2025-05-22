@@ -82,16 +82,10 @@ jobs:
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Apply llvm-project patches
-        run: |
-          python3 arm-software/embedded/cmake/patch_repo.py \
-            --method apply \
-            arm-software/embedded/patches/llvm-project
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project
 
       - name: Apply llvm-project-perf patches
-        run: |
-          python3 arm-software/embedded/cmake/patch_repo.py \
-            --method apply \
-            arm-software/embedded/patches/llvm-project-perf
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
 
       - name: Build ${{ matrix.build_script }}
         run: ./arm-software/embedded/scripts/${{ matrix.build_script }}
