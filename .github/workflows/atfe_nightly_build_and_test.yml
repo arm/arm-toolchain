@@ -106,4 +106,6 @@ jobs:
         if: success()
         with:
           name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}
-          path: build*/ATfE-*.tar.xz
+          path: |
+            build*/ATfE-*.tar.xz
+            build*/ATfE-*.zip
