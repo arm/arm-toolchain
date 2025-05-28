@@ -489,8 +489,7 @@ if(C_LIBRARY MATCHES "^newlib")
     endif()
 
     if(C_LIBRARY STREQUAL newlib-nano)
-        set(newlib_optim_flags
-            "-g -Oz")
+        set(newlib_optim_flags "-Oz")
         if(TARGET_ARCH MATCHES "^aarch64")
             # When trying to build newlib-nano on AArch64, fall back to regular newlib
             # See https://gitlab.arm.com/tooling/gnu-devtools-for-arm/-/blob/9e3db8c042400c9c59686dec8eda2e8c44e5fb5d/build-baremetal-toolchain.sh#L625
@@ -533,8 +532,6 @@ if(C_LIBRARY MATCHES "^newlib")
             --enable-lite-exit
             --disable-multilib
             --enable-newlib-retargetable-locking)
-        set(newlib_optim_flags
-            "-g -O2")
     endif()
 
     include(${TOOLCHAIN_SOURCE_DIR}/cmake/fetch_newlib.cmake)
@@ -772,7 +769,7 @@ if(ENABLE_CXX_LIBS)
         )
 
         if(C_LIBRARY STREQUAL newlib-nano)
-            set(lib_compile_flags "${lib_compile_flags} -g -Oz")
+            set(lib_compile_flags "${lib_compile_flags} -Oz")
         endif()
 
         if(C_LIBRARY STREQUAL newlib-nano AND NOT TARGET_ARCH MATCHES "^aarch64")
