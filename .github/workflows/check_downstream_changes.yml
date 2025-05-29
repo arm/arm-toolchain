@@ -1,3 +1,16 @@
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow runs the check_downstream_changes.py script in order to check
+# whether a pull request makes a downstream change, and if so contains the
+# appropriate tracking in the text. The script only requires the pull request
+# number, and should be triggered whenever a pull request is editted or
+# synchronized, since both the files changed and the text of the pull request
+# itself are part of the check.
+# The script requires the GitHub CLI to be available, and authentiated.
+
 name: check-downstream-changes
 
 on:
@@ -13,8 +26,6 @@ on:
     branches:
       - arm-software
       - release/arm-software/**
-
-  workflow_dispatch: ~
 
 jobs:
   check-downstream-changes:

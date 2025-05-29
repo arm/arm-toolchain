@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
 """
 A script to check that a pull request adheres to the downstream patch policy.
 If the pull request modifies file outside the arm-software build directory
@@ -104,14 +109,10 @@ def is_valid_issue_num(issue_num: str, repo: str) -> bool:
         f"Response from server for issue {issue_num}:\n{json.dumps(j, indent=4)}"
     )
     if len(j) > 0:
-        logger.info(
-            f"Issue found matching number #{issue_num}"
-        )
+        logger.info(f"Issue found matching number #{issue_num}")
         return True
     else:
-        logger.info(
-            f"No issue found matching number #{issue_num}"
-        )
+        logger.info(f"No issue found matching number #{issue_num}")
         return False
 
 
