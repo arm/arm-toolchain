@@ -9,7 +9,7 @@
 # number, and should be triggered whenever a pull request is editted or
 # synchronized, since both the files changed and the text of the pull request
 # itself are part of the check.
-# The script requires the GitHub CLI to be available, and authentiated.
+# The script requires the GitHub CLI to be available, and authenticated.
 
 name: check-downstream-changes
 
