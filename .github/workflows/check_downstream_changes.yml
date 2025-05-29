@@ -1,0 +1,40 @@
+name: check-downstream-changes
+
+on:
+  # Trigger whenever a pull request is opened or changed.
+  # Use pull_request_target since we don't want to checkout the version of
+  # the script in the pull request, which may have been modified.
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+    branches:
+      - arm-software
+      - release/arm-software/**
+
+  workflow_dispatch: ~
+
+jobs:
+  check-downstream-changes:
+    runs-on: ubuntu-24.04-arm
+
+    if: github.repository == 'arm/arm-toolchain'
+
+    steps:
+      # Generate a token for gh tool
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Check Script
+        run: python3 arm-software/ci/check_downstream_changes.py --repo ${{ github.repository }} --pr ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
