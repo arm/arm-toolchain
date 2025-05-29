@@ -101,16 +101,16 @@ jobs:
           name: test-results-${{ matrix.build_script }}-${{ matrix.target_os }}
           path: build/**/*.junit.xml
 
-      - name: Upload built packages (Linux)
+      - name: Upload .tar.xz packages
         uses: actions/upload-artifact@v4
-        if: success() && runner.os == 'Linux'
+        if: success()
         with:
-          name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}
+          name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}-tarball
           path: build*/ATfE-*.tar.xz
 
-      - name: Upload built packages (Windows)
+      - name: Upload .zip packages
         uses: actions/upload-artifact@v4
-        if: success() && runner.os == 'Windows'
+        if: success()
         with:
-          name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}
+          name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}-zip
           path: build*/ATfE-*.zip
