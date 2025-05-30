@@ -15,6 +15,7 @@ The following packages need to be installed (using `apt`):
 
 - `binutils-dev`
 - `build-essential`
+- `graphviz`
 - `cmake`
 - `git`
 - `libzstd-dev`
@@ -36,6 +37,7 @@ The following packages need to be installed (using `apt`):
 - `patch`
 - `binutils`
 - `binutils-devel`
+- `graphviz`
 - `make`
 - `cmake`
 - `git`
