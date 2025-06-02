@@ -6,7 +6,7 @@
 # This workflow runs the check_downstream_changes.py script in order to check
 # whether a pull request makes a downstream change, and if so contains the
 # appropriate tracking in the text. The script only requires the pull request
-# number, and should be triggered whenever a pull request is editted or
+# number, and should be triggered whenever a pull request is edited or
 # synchronized, since both the files changed and the text of the pull request
 # itself are part of the check.
 # The script requires the GitHub CLI to be available, and authenticated.
