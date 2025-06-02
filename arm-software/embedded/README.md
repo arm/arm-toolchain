@@ -85,8 +85,11 @@ are provided for major LLVM releases for Linux and Windows.
 ## Getting started
 
 Download a release of the toolchain for your platform from [GitHub
-releases](https://github.com/arm/arm-toolchain/releases)
-and extract the archive into an arbitrary directory.
+releases](https://github.com/arm/arm-toolchain/releases), or use a
+[Dev Drop](docs/atfe-dev-drop-builds.md)
+build for early access to the latest features.
+
+After downloading, extract the archive into an arbitrary directory.
 
 ### Pre-requisite for using toolchain on Windows
 
