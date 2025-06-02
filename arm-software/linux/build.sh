@@ -415,7 +415,7 @@ package() {
     sed -i "s/CLANG/ARMCLANG/g" "${ATFL_DIR}/share/man/man1/armclang.1"
     sed -i "s/\"Clang\"/\"Armclang\"/g" "${ATFL_DIR}/share/man/man1/armclang.1"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
-    echo 'export MANPATH="$(dirname `realpath $BASH_SOURCE`)/share/man:$MANPATH"' >"${ATFL_DIR}/env.bash"
+    echo 'export MANPATH="$(dirname `realpath $BASH_SOURCE`)/share/man:$MANPATH"' >>"${ATFL_DIR}/env.bash"
     echo "export PS1=\"(ATfL ${ATFL_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
     cd "${ATFL_DIR}/bin"
     ln -sf clang armclang
