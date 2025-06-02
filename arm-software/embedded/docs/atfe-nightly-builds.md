@@ -1,37 +1,40 @@
-# ATfE Dev Drops Builds
+# ATfE Nightly Builds
 
 ## Overview
 
-ATfE Dev Drop builds provide the community with early access to upcoming
+The ATfE Nightly builds provide the community with early access to upcoming
 versions of the product ahead of official releases.
 These builds are made available to support testing and early validation of new
 features.
-Please note that Dev Drop builds may be unstable, and could contain bugs. They
+
+> [!WARNING]
+> Please note that Nightly builds may be unstable, and could contain bugs. They
 are intended for evaluation and integration purposes only, and not recommended
 for production use.
 
 ## Release Cycle
 
-Dev Drop builds are automatically generated nightly as part of the ATfE Nightly
+ATfE nightly builds are automatically generated as part of the ATfE Nightly
 Build and Test workflow on GitHub Actions.
 Once all CI and CD stages complete successfully, a set of build artifacts is
 produced and uploaded.
 
-## Accessing Dev Drop Build Artifacts
+## Accessing Nightly Build Artifacts
 
-Dev Drop build artifacts are available through the GitHub Actions section of
-the repository **arm-toolchain**. To locate them:
+Nightly build artifacts are available through the GitHub Actions section of
+this repository. To locate them:
 
-1. Navigate to the Actions tab on GitHub
-2. Select the workflow titled [“ATfE Nightly Build and Test”](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml)
+1. Navigate to the [“ATfE Nightly Build and Test”](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml) Workflow in the Github Actions tab
 3. Choose a specific workflow run e.g., the latest successful run
 4. Scroll to the bottom of the run page to find the list of generated build
 artifacts
 
-## Downloading Dev Drop Build Artifacts
+## Downloading Nightly Build Artifacts
 
-You can download the artifacts directly from the GitHub web interface. Please
-note that each artifact is downloaded as a zip file.
+You can download the artifacts directly from the GitHub web interface.
+Each artifact is provided as a zip file by GitHub. Inside this zip file, you
+will find the actual ATfE package, which is distributed as either a .zip or
+.tar.xz archive depending on the target platform.
 
 Alternatively, you can use the GitHub CLI to download artifacts. The CLI
 automatically extracts the contents into the specified download directory.
