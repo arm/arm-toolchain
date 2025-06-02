@@ -14,7 +14,7 @@ for production use.
 
 ## Release Cycle
 
-ATfE nightly builds are automatically generated as part of the ATfE Nightly
+ATfE Nightly builds are automatically generated as part of the ATfE Nightly
 Build and Test workflow on GitHub Actions.
 Once all CI and CD stages complete successfully, a set of build artifacts is
 produced and uploaded.
