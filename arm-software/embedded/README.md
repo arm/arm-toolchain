@@ -1,5 +1,7 @@
 # Arm Toolchain for Embedded
 
+[![ATfE Nightly Build and Test](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml/badge.svg)](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml)
+
 This repository contains build scripts and auxiliary material for building a
 bare-metal LLVM based toolchain targeting Arm® architecture based on:
 * clang + llvm
