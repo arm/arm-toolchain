@@ -1,5 +1,7 @@
 # Arm Toolchain
 
+[![ATfE Nightly Build and Test](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml/badge.svg)](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml)
+
 Welcome to the Arm Toolchain project!
 
 This repository contains the source code for the Arm Toolchain
