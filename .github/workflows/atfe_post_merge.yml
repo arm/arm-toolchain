@@ -1,0 +1,64 @@
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow is triggered automatically after a pull request is merged into:
+#   - the `arm-toolchain` branch
+#   - any `release/arm-software/**` branch
+#
+# It builds and tests the Arm Toolchain for Embedded (ATfE) to validate that the
+# merged changes do not introduce regressions and that the build remains stable.
+
+name: ATfE Post-Merge
+
+on:
+  # Trigger only when a PR is merged against specific branches
+  push:
+    branches:
+      - arm-toolchain
+      - release/arm-software/**
+
+jobs:
+  build-and-test:
+    name: Post-Merge - Branch ${{ github.ref_name }} SHA ${{ github.sha }}
+    # Ensure the workflow only runs on the arm-toolchain repository and not on forks
+    if: github.repository == 'arm/arm-toolchain'
+    # Arm64 runner
+    runs-on: ah-ubuntu_22_04-c7g_8x-100
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: ./arm-software/embedded/scripts/install_dependencies.sh
+
+      - name: Add ~/.local/bin to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Apply llvm-project patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project
+
+      - name: Apply llvm-project-perf patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
+
+      - name: Build
+        run: ./arm-software/embedded/scripts/build.sh
+
+      - name: Test
+        run: ./arm-software/embedded/scripts/test.sh
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: build/**/*.junit.xml
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ATfE-packages
+          path: build*/ATfE-*.tar.xz
