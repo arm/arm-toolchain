@@ -82,7 +82,6 @@ COMPILER_CMAKE_FLAGS=(
     -DCMAKE_SKIP_RPATH=No
     -DCMAKE_SKIP_INSTALL_RPATH=No
     -DLLVM_BUILD_DOCS=ON
-    -DFLANG_INCLUDE_DOCS=OFF
     -DLLVM_ENABLE_SPHINX=ON
     -DSPHINX_WARNINGS_AS_ERRORS=OFF
     -DLLVM_ENABLE_PROJECTS="llvm;clang;flang;lld"
@@ -414,6 +413,11 @@ package() {
     sed -i "s/Bclang/Barmclang/g" "${ATFL_DIR}/share/man/man1/armclang.1"
     sed -i "s/CLANG/ARMCLANG/g" "${ATFL_DIR}/share/man/man1/armclang.1"
     sed -i "s/\"Clang\"/\"Armclang\"/g" "${ATFL_DIR}/share/man/man1/armclang.1"
+    cp "${ATFL_DIR}/share/man/man1/flang.1" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/^flang\ /armflang\ /g" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/\ flang\ /\ armflang\ /g" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/FLANG/ARMFLANG/g" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/\"Flang\"/\"Armflang\"/g" "${ATFL_DIR}/share/man/man1/armflang.1"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
     echo 'export MANPATH="$(dirname `realpath $BASH_SOURCE`)/share/man:$MANPATH"' >>"${ATFL_DIR}/env.bash"
     echo "export PS1=\"(ATfL ${ATFL_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
