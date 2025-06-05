@@ -5,7 +5,7 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-# A bash script to build the Arm Toolchain for Embedded
+# A bash script to build the Arm Toolchain for Embedded, with address sanitizer enabled.
 
 # The script creates a build of the toolchain in the 'build' directory, inside
 # the repository tree.

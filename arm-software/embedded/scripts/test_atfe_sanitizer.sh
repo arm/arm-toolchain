@@ -5,7 +5,8 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-# A bash script to run the tests from the Arm Toolchain for Embedded.
+# A bash script to run the tests from the Arm Toolchain for Embedded, when sanitizers
+# are enabled.
 
 # The script assumes a successful build of the toolchain exists in the 'build'
 # directory inside the repository tree.
