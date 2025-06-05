@@ -212,4 +212,4 @@ def run_fvp(
         result_stdout = result.stdout
 
     sys.stdout.buffer.write(result_stdout)
-    return result.returncode
+    return result.returncode, result.stdout.decode(), result.stderr.decode() if result.stderr != None else ""

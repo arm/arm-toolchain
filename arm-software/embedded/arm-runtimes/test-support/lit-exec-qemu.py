@@ -69,7 +69,7 @@ def main():
         help="optional arguments for the image",
     )
     args = parser.parse_args()
-    ret_code = run_qemu(
+    ret_code, data, err = run_qemu(
         args.qemu_command,
         args.qemu_machine,
         args.qemu_cpu,

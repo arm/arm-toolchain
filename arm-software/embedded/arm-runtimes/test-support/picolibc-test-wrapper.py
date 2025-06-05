@@ -142,7 +142,7 @@ def main():
         help="optional arguments for the image",
     )
     args = parser.parse_args()
-    ret_code = run(args)
+    ret_code, data, err = run(args)
     sys.exit(ret_code)
 
 

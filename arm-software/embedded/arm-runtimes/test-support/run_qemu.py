@@ -58,4 +58,4 @@ def run_qemu(
         check=False,
     )
     sys.stdout.buffer.write(result.stdout)
-    return result.returncode
+    return result.returncode, result.stdout.decode(), result.stderr.decode() if result.stderr != None else ""
