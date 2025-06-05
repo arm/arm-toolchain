@@ -3,14 +3,12 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-# This workflow runs all build scripts in parallel for multiple operating
-# systems and architectures.
-# It is intended to be triggered as part of a **nightly build** to
-# validate all build configurations and test them automatically.
+# This workflow runs build script for address sanitizer for
+# Linux x86-64 architecture.
+# It is intended to be triggered as part of a **once a week build** to
+# validate build configurations and test them automatically.
 #
-# Each build script is paired with a corresponding test script using
-# a matrix strategy. Each build+test pair runs as a separate job,
-# allowing for concurrency and clear traceability of failures.
+# Build script is paired with a test script.
 
 name: ATfE Address Sanitizer Build and Test
 
@@ -20,7 +18,7 @@ on:
     - cron: '0 18 * * 0'  # Every Sunday at 6:00pm UTC
 
 jobs:
-  build-and-test-toolchain:
+  atfe-address-sanitizer-build-and-test-toolchain:
     name: Build ${{ matrix.build_script }} for ${{ matrix.target_os }} on ${{ matrix.runner }}
     runs-on: ${{ matrix.runner }}
     # Ensure the workflow only runs on the arm-toolchain repository and not on forks
@@ -35,7 +33,7 @@ jobs:
             test_script: test_atfe_sanitizer.sh
             install_script: install_dependencies.sh
             target_os: Ubuntu-22.04-x86_64
-            runner: ToolchainGroup_LargeRunner_Linux-x64
+            runner: ubuntu-22.04  
 
     steps:
       - name: Checkout
