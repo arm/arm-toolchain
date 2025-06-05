@@ -4,8 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 # This workflow is triggered automatically after a pull request is merged into:
-#   - the `arm-toolchain` branch
-#   - any `release/arm-software/**` branch
+#   - arm-toolchain branch
+#   - any release/arm-software/** branch
+#
+# It also runs after the completion of the Automerge workflow.
 #
 # It builds and tests the Arm Toolchain for Embedded (ATfE) to validate that the
 # merged changes do not introduce regressions and that the build remains stable.
@@ -13,17 +15,24 @@
 name: ATfE Post-Merge
 
 on:
-  # Trigger only when a PR is merged against specific branches
-  push:
+  # Trigger when a pull request is closed
+  pull_request:
+    types: [closed]
     branches:
       - arm-toolchain
       - release/arm-software/**
 
+  # Trigger after the Automerge workflow completes
+  workflow_run:
+    workflows: [Automerge]
+    types: [completed]
+
 jobs:
   build-and-test:
     name: Post-Merge - Branch ${{ github.ref_name }} SHA ${{ github.sha }}
-    # Ensure the workflow only runs on the arm-toolchain repository and not on forks
-    if: github.repository == 'arm/arm-toolchain'
+    # Ensure the workflow only runs on the arm-toolchain repository and not on forks,
+    # and only when a PR was merged or Automerge has completed
+    if: github.repository == 'arm/arm-toolchain' && (github.event_name == 'workflow_run' || github.event.pull_request.merged == true)
     # Arm64 runner
     runs-on: ah-ubuntu_22_04-c7g_8x-100
 
@@ -48,17 +57,3 @@ jobs:
 
       - name: Test
         run: ./arm-software/embedded/scripts/test.sh
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: build/**/*.junit.xml
-
-      - name: Upload built packages
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: ATfE-packages
-          path: build*/ATfE-*.tar.xz
