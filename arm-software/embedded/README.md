@@ -186,6 +186,9 @@ to find out more. Users are also encouraged to create their own configs and tune
 flag parameters.
 Information on Arm Toolchain for Embedded specific optimization flags is available in [Optimization Flags](docs/optimization-flags.md)
 
+To optimize for code size, use `Osize.cfg` or a relevant subset of flags
+provided there.
+
 Binary releases of the Arm Toolchain for Embedded are based on release
 branches of the upstream LLVM Project, thus can safely be used with all tools
 provided by LLVM [releases](https://github.com/llvm/llvm-project/releases)
