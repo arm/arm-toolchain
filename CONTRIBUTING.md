@@ -46,6 +46,9 @@ If the issue is in Arm Toolchain itself, or if you are not sure, please create a
 * [Arm Toolchain issue tracker](https://github.com/arm/arm-toolchain/issues)
 * Please add the `ATfE` label for Arm Toolchain for Embedded issues, or `ATfL` for Arm Toolchain for Linux.
 
+Please attach any support files to the issue itself,
+see [Attaching files](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files).
+
 ### Submit a fix
 
 For a small change, please create a Pull Request as described in
