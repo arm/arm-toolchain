@@ -23,6 +23,9 @@ clang --version
 export CC=clang
 export CXX=clang++
 
+# Get processor count, to execute job in parallel threads
+PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
+
 # Disable memory leaks detection of LeakSanitizer
 export ASAN_OPTIONS=detect_leaks=0
 
@@ -35,4 +38,4 @@ cd "${REPO_ROOT}"/build
 
 cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCMAKE_BUILD_TYPE=Release -DLLVM_USE_SANITIZER="Address" -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS}
 
-ninja package-llvm-toolchain
+ninja -j$PROCESSOR_COUNT package-llvm-toolchain

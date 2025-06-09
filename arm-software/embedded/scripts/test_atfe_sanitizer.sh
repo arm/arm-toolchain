@@ -16,10 +16,13 @@ set -ex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
+# Get processor count, to execute job in parallel threads
+PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
+
 cd "${REPO_ROOT}"/build
 
 # The llvm-toolchain targets already set --xunit-xml-output so
 # only the --ignore-fail option is needed.
 # The picolibc tests do not use lit so do not support this option.
 export LIT_OPTS="--ignore-fail"
-ninja check-llvm-toolchain check-cxxabi check-unwind check-package-llvm-toolchain
+ninja -j$PROCESSOR_COUNT check-llvm-toolchain check-cxxabi check-unwind check-package-llvm-toolchain
