@@ -72,9 +72,11 @@ PRODUCT_CMAKE_FLAGS=(
     -DCMAKE_CXX_COMPILER="${BUILD_DIR}/bootstrap_compiler/bin/clang++"
     -DCMAKE_INSTALL_PREFIX="${ATFL_DIR}"
     -DLLVM_ENABLE_LLD=ON
+    -DLLVM_ENABLE_LIBCXX=ON
 )
 COMPILER_CMAKE_FLAGS=(
-    -DCMAKE_CXX_FLAGS="-stdlib++-isystem ${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT"
+    -DCMAKE_C_FLAGS="-fPIC"
+    -DCMAKE_CXX_FLAGS="-fPIC -stdlib++-isystem ${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT"
     -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
     -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
     -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
