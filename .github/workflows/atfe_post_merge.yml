@@ -56,4 +56,4 @@ jobs:
         run: ./arm-software/embedded/scripts/build.sh
 
       - name: Test
-        run: ./arm-software/embedded/scripts/test.sh
+        run: ./arm-software/embedded/scripts/test_post-merge.sh
