@@ -3,7 +3,7 @@
         "common": {
             "TARGET_ARCH": "aarch64a",
             "VARIANT": "aarch64a_exn_rtti",
-            "COMPILE_FLAGS": "-march=armv8-a -mno-unaligned-access",
+            "COMPILE_FLAGS": "-march=armv8-a -mno-unaligned-access -fPIC",
             "ENABLE_EXCEPTIONS": "ON",
             "ENABLE_RTTI": "ON",
             "TEST_EXECUTOR": "fvp",

@@ -3,7 +3,7 @@
         "common": {
             "TARGET_ARCH": "aarch64a",
             "VARIANT": "aarch64a_exn_rtti_unaligned",
-            "COMPILE_FLAGS": "-march=armv8-a",
+            "COMPILE_FLAGS": "-march=armv8-a -fPIC",
             "ENABLE_EXCEPTIONS": "ON",
             "ENABLE_RTTI": "ON",
             "TEST_EXECUTOR": "qemu",

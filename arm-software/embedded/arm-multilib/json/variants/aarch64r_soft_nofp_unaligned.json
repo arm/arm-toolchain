@@ -3,7 +3,7 @@
         "common": {
             "TARGET_ARCH": "aarch64r",
             "VARIANT": "aarch64r_soft_nofp_unaligned",
-            "COMPILE_FLAGS": "-march=armv8-r+nofp+nosimd -mabi=aapcs-soft",
+            "COMPILE_FLAGS": "-march=armv8-r+nofp+nosimd -mabi=aapcs-soft -fPIC",
             "ENABLE_EXCEPTIONS": "OFF",
             "ENABLE_RTTI": "OFF",
             "TEST_EXECUTOR": "fvp",
