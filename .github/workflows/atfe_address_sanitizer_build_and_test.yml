@@ -32,8 +32,8 @@ jobs:
           - build_script: build_atfe_address_sanitizer.sh
             test_script: test_atfe_sanitizer.sh
             install_script: install_dependencies.sh
-            target_os: Ubuntu-22.04-x86_64
-            runner: ubuntu-22.04  
+            target_os: Ubuntu-22.04-arm64
+            runner: ah-ubuntu_22_04-c7g_8x-100
 
     steps:
       - name: Checkout
