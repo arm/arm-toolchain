@@ -25,4 +25,12 @@ cd "${REPO_ROOT}"/build
 # only the --ignore-fail option is needed.
 # The picolibc tests do not use lit so do not support this option.
 export LIT_OPTS="--ignore-fail"
-ninja -j$PROCESSOR_COUNT check-llvm-toolchain check-cxxabi check-unwind check-package-llvm-toolchain
+ninja -j$PROCESSOR_COUNT check-all \
+    check-picolibc-aarch64a_exn_rtti_unaligned \
+    check-compiler-rt-aarch64a_exn_rtti_unaligned \
+    check-cxxabi-aarch64a_exn_rtti_unaligned \
+    check-unwind-aarch64a_exn_rtti_unaligned \
+    check-picolibc-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti \
+    check-compiler-rt-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti \
+    check-cxxabi-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti \
+    check-unwind-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti
