@@ -166,16 +166,17 @@ requirements below:
   links to any previous attempts to upstream.
 
 * The commit message for a new downstream patch must include
-  Downstream issue:#<issue number> where #<issue number> is an issue
-  that contains the reason for the downstream patch.
+  `Downstream issue:#<issue number>` where `#<issue number>` is an issue
+  that contains the reason for the downstream patch,
+  for example `Downstream issue:#123`. A space is allowed before the `#<issue number>`.
 
 * The source change should be annotated with a comment including the
-  #<issue number>, if there are multiple lines changed a single
+  `#<issue number>`, if there are multiple lines changed a single
   comment for the block can be used.
 
 * The commit message that removes an existing downstream patch, such
-  as when the upstream equivalent lands, must include Removes
-  downstream issue:#<issue number>.
+  as when the upstream equivalent lands, must include `Removes
+  downstream issue:#<issue number>`.
 
 * New files in the *arm-toolchain* repository must include the LLVM
   license, with the standard header comment and SPDX identifier.
