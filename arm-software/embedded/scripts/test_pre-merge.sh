@@ -5,7 +5,7 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
-# A bash script to run post-merge tests for the Arm Toolchain for Embedded.
+# A bash script to run pre-merge tests for the Arm Toolchain for Embedded.
 #
 # It assumes that a successful build of the toolchain already exists
 # in the 'build' directory within the repository tree.
