@@ -10,9 +10,10 @@
 set -e
 
 sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    clang=1:14.0-55~exp2 \
+    ccache \
     cmake=3.22.1-1ubuntu1.22.04.2 \
     ninja-build=1.10.1-1 \
-    clang=1:14.0-55~exp2 \
     python3-pip \
     python3-setuptools \
     qemu-system-arm=1:6.2+dfsg-2ubuntu6.26
