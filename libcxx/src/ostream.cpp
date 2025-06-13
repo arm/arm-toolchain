@@ -7,9 +7,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <__config>
-#if _LIBCPP_HAS_FILESYSTEM
+
+// Downstream issue: #375 (Enable fstream independently of filesystem)
+//#if _LIBCPP_HAS_FILESYSTEM
 #  include <fstream>
-#endif
+// Downstream issue: #375 (Enable fstream independently of filesystem)
+//#endif
 #include <ostream>
 
 #include "std_stream.h"
