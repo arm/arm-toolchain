@@ -26,11 +26,13 @@ cd "${REPO_ROOT}"/build
 # The picolibc tests do not use lit so do not support this option.
 export LIT_OPTS="--ignore-fail"
 ninja -j$PROCESSOR_COUNT check-all \
-    check-picolibc-aarch64a_exn_rtti_unaligned \
-    check-compiler-rt-aarch64a_exn_rtti_unaligned \
-    check-cxxabi-aarch64a_exn_rtti_unaligned \
-    check-unwind-aarch64a_exn_rtti_unaligned \
-    check-picolibc-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti \
-    check-compiler-rt-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti \
-    check-cxxabi-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti \
-    check-unwind-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti
+    check-compiler-rt-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-picolibc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-cxx-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-cxxabi-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
+    check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
+    check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
+    check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
+    check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned
