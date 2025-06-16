@@ -24,3 +24,7 @@ target_include_directories(crt0-semihost PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
+
+add_library(crt0-none STATIC
+  crt0-none.c
+)
