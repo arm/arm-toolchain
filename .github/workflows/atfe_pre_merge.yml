@@ -18,7 +18,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
-      - arm-toolchain
+      - arm-software
       - release/arm-software/**
 
 jobs:
@@ -28,6 +28,9 @@ jobs:
     if: github.repository == 'arm/arm-toolchain'
     # Arm64 runner
     runs-on: ah-ubuntu_22_04-c7g_8x-100
+    # Set the environment to development for pre-merge builds
+    # External Arm contributor need permission to run this workflow
+    environment: development
 
     steps:
       - name: Checkout
