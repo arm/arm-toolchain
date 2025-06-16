@@ -28,16 +28,13 @@ jobs:
     if: github.repository == 'arm/arm-toolchain'
     # Arm64 runner
     runs-on: ah-ubuntu_22_04-c7g_8x-100
-    # Set the environment to development for pre-merge builds
-    # External Arm contributor need permission to run this workflow
-    environment: development
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Check out the PR source branch
-          ref: ${{ github.head_ref }}
+          # Checks out the merge commit for the PR
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
 
       # Restore ccache cache from previous runs
       - name: Restore ccache cache
