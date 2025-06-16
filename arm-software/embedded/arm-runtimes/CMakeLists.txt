@@ -253,14 +253,17 @@ endif()
 
 if(ENABLE_COMPILER_RT_TESTS)
     set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
-    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --xunit-xml-output=results.junit.xml")
+    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --xunit-xml-output=results.junit.xml")
+    set(external_lit_path "${LLVM_BINARY_DIR}/bin/llvm-lit")
     set(
         compiler_rt_test_cmake_args
         -DCOMPILER_RT_INCLUDE_TESTS=ON
         -DCOMPILER_RT_EMULATOR=${lit_test_executor}
         -DCOMPILER_RT_TEST_COMPILER=${LLVM_BINARY_DIR}/bin/clang
         -DCOMPILER_RT_TEST_COMPILER_CFLAGS=${compiler_rt_test_flags}
+        -DLLVM_INCLUDE_TESTS=ON
         -DLLVM_LIT_ARGS=${compiler_rt_lit_args}
+        -DLLVM_EXTERNAL_LIT=${external_lit_path}
     )
 endif()
 
@@ -272,11 +275,11 @@ endif()
 
 ExternalProject_Add(
     compiler_rt
-    SOURCE_DIR ${llvmproject_src_dir}/compiler-rt
     STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
     BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
     DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
     TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
+    SOURCE_DIR ${llvmproject_src_dir}/runtimes
     INSTALL_DIR compiler-rt/install
     CMAKE_ARGS
     ${compiler_launcher_cmake_args}
@@ -303,7 +306,8 @@ ExternalProject_Add(
     -DCOMPILER_RT_BUILD_SANITIZERS=OFF
     -DCOMPILER_RT_BUILD_XRAY=OFF
     -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON
-    -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}
+    -DLLVM_ENABLE_RUNTIMES=compiler-rt
+    -DRUNTIME_VARIANT_NAME=${VARIANT}
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
     ${compiler_rt_test_cmake_args}
     STEP_TARGETS configure build install

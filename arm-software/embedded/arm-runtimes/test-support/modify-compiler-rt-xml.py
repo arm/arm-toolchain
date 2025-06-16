@@ -29,7 +29,7 @@ def main():
     # Variants such as armv8m.main need to be renamed.
     variant_name = args.variant.replace(".", "_")
 
-    xml_file = os.path.join(args.dir, "test", "results.junit.xml")
+    xml_file = os.path.join(args.dir, "compiler-rt", "test", "results.junit.xml")
 
     tree = ElementTree.parse(xml_file)
     root = tree.getroot()
