@@ -34,6 +34,7 @@ embedded and realtime operating systems.
 - AArch32 Armv8-R
 - AArch64 Armv8-A
 - AArch64 Armv8-R
+- AArch64 Armv9-A
 
 ## C++ support
 
