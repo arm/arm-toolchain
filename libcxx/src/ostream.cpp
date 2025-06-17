@@ -9,10 +9,9 @@
 #include <__config>
 
 // Downstream issue: #375 (Enable fstream independently of filesystem)
-//#if _LIBCPP_HAS_FILESYSTEM
+#if _LIBCPP_HAS_FILESYSTEM || defined(_NEWLIB_VERSION)
 #  include <fstream>
-// Downstream issue: #375 (Enable fstream independently of filesystem)
-//#endif
+#endif
 #include <ostream>
 
 #include "std_stream.h"
