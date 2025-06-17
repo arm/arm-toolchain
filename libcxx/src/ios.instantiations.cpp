@@ -38,12 +38,11 @@ template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_ostringstream<char
 template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_istringstream<char>;
 
 // Downstream issue: #375 (Enable fstream independently of filesystem)
-//#if _LIBCPP_HAS_FILESYSTEM
+#if _LIBCPP_HAS_FILESYSTEM || defined(_NEWLIB_VERSION)
 template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_ifstream<char>;
 template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_ofstream<char>;
 template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS basic_filebuf<char>;
-// Downstream issue: #375 (Enable fstream independently of filesystem)
-//#endif
+#endif
 
 // Add more here if needed...
 
