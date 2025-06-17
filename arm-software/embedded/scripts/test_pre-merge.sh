@@ -15,6 +15,9 @@ set -ex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
+# Get processor count, to execute job in parallel threads
+PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
+
 cd "${REPO_ROOT}"/build
 
 # If a test fails, lit will ordinarily return a non-zero result,
