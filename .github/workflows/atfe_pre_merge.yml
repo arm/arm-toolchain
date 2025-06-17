@@ -29,6 +29,11 @@ jobs:
     # Arm64 runner
     runs-on: ah-ubuntu_22_04-c7g_8x-100
 
+    # Set environment variables for ccache
+    env:
+      CCACHE_BASEDIR: ${{ env.GITHUB_WORKSPACE }}
+      CCACHE_DIR: ${{ env.GITHUB_WORKSPACE }}/ccache
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +45,7 @@ jobs:
       - name: Restore ccache cache
         uses: actions/cache@v4
         with:
-          path: ~/.ccache
+          path: ${{ env.CCACHE_DIR }}
           # key for a cache entry
           key: ccache-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
           restore-keys: |
