@@ -31,8 +31,8 @@ jobs:
 
     # Set environment variables for ccache
     env:
-      CCACHE_BASEDIR: ${{ env.GITHUB_WORKSPACE }}
-      CCACHE_DIR: ${{ env.GITHUB_WORKSPACE }}/ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_DIR: ${{ github.workspace }}/ccache
 
     steps:
       - name: Checkout
