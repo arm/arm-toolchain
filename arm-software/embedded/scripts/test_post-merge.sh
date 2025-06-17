@@ -15,6 +15,9 @@ set -ex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
+# Get processor count, to execute job in parallel threads
+PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
+
 cd "${REPO_ROOT}"/build
 
 # If a test fails, lit will ordinarily return a non-zero result,
@@ -32,7 +35,18 @@ ninja check-all
 # only the --ignore-fail option is needed.
 # The picolibc tests do not use lit so do not support this option.
 export LIT_OPTS="--ignore-fail"
-ninja check-picolibc-aarch64a_unaligned \
-      check-compiler-rt-aarch64a_unaligned \
-      check-cxxabi-aarch64a_unaligned \
-      check-unwind-aarch64a_unaligned
+
+# Run all relevant test targets using Ninja in parallel
+ninja -j$PROCESSOR_COUNT \
+    check-all \
+    check-compiler-rt-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
+    check-cxx-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
+    check-cxxabi-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
+    check-picolibc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
+    check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+
