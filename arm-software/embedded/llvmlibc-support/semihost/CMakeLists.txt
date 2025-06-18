@@ -6,10 +6,7 @@
 #
 
 add_library(semihost STATIC
-  init.c
-  exit.c
-  stdio_read.c
-  stdio_write.c
+  semihost.cpp
 )
 
 target_include_directories(semihost PRIVATE

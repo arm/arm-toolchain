@@ -20,7 +20,7 @@
 # libcrt0.a might still be useful.
 
 cmake_minimum_required(VERSION 3.20.0)
-project(llvmlibc-support LANGUAGES C ASM)
+project(llvmlibc-support LANGUAGES C CXX ASM)
 
 add_subdirectory(crt0) # crt0, crt0-none and crt0-semihost
 add_subdirectory(semihost)

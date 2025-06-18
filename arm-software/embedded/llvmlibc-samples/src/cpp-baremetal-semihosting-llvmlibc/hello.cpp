@@ -7,14 +7,6 @@
 #include <cstdio> // iostream is not supported yet
 #include <vector>
 
-// Implementation of errno
-extern "C" {
-  int *__llvm_libc_errno() {
-    static int internal_err;
-    return &internal_err;
-  }
-}
-
 int test_exceptions(int i)
 {
   if (i == 0) {
