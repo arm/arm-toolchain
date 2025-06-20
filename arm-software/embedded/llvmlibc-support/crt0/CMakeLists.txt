@@ -6,7 +6,7 @@
 #
 
 add_library(crt0 STATIC
-  crt0.c
+  bootcode.cpp
 )
 
 target_include_directories(crt0 PRIVATE
@@ -17,7 +17,7 @@ target_include_directories(crt0 PRIVATE
 # This is the exact same implementation, kept for backwards compatibility with
 # picolibc in testing.
 add_library(crt0-semihost STATIC
-  crt0.c
+  bootcode.cpp
 )
 
 target_include_directories(crt0-semihost PRIVATE
