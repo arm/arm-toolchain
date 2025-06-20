@@ -523,6 +523,7 @@ if(C_LIBRARY MATCHES "^newlib")
                 --enable-newlib-global-atexit)
         endif()
     else()
+        set(newlib_optim_flags "-Os")
         set(newlib_flags
             --enable-newlib-io-long-long
             --enable-newlib-register-fini
