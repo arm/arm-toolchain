@@ -22,6 +22,7 @@
 #include "system_registers_m.h"
 #else
 // ARMv4T
+// TODO: fill in stub functions once we can start testing LLVM-libc
 namespace bootcode {
 namespace exceptions {
 void setup() noexcept {}
