@@ -1118,14 +1118,8 @@ private:
       return PI.setAborted(&LI);
 
     TypeSize Size = DL.getTypeStoreSize(LI.getType());
-    if (Size.isScalable()) {
-      Attribute Attr = LI.getFunction()->getFnAttribute(Attribute::VScaleRange);
-      unsigned VScale = Attr.isValid() ? Attr.getVScaleValue() : 0;
-      if (!VScale)
-        return PI.setAborted(&LI);
-
-      Size = TypeSize::getFixed(Size.getKnownMinValue() * VScale);
-    }
+    if (Size.isScalable())
+      return PI.setAborted(&LI);
 
     return handleLoadOrStore(LI.getType(), LI, Offset, Size.getFixedValue(),
                              LI.isVolatile());
@@ -1139,14 +1133,8 @@ private:
       return PI.setAborted(&SI);
 
     TypeSize StoreSize = DL.getTypeStoreSize(ValOp->getType());
-    if (StoreSize.isScalable()) {
-      Attribute Attr = SI.getFunction()->getFnAttribute(Attribute::VScaleRange);
-      unsigned VScale = Attr.isValid() ? Attr.getVScaleValue() : 0;
-      if (!VScale)
-        return PI.setAborted(&SI);
-
-      StoreSize = TypeSize::getFixed(StoreSize.getKnownMinValue() * VScale);
-    }
+    if (StoreSize.isScalable())
+      return PI.setAborted(&SI);
 
     uint64_t Size = StoreSize.getFixedValue();
 
@@ -1937,8 +1925,7 @@ static Align getAdjustedAlignment(Instruction *I, uint64_t Offset) {
 /// ensure that we only try to convert viable values. The strategy is that we
 /// will peel off single element struct and array wrappings to get to an
 /// underlying value, and convert that value.
-static bool canConvertValue(const DataLayout &DL, Type *OldTy, Type *NewTy,
-                            unsigned VScale = 0) {
+static bool canConvertValue(const DataLayout &DL, Type *OldTy, Type *NewTy) {
   if (OldTy == NewTy)
     return true;
 
@@ -1952,24 +1939,8 @@ static bool canConvertValue(const DataLayout &DL, Type *OldTy, Type *NewTy,
     return false;
   }
 
-  TypeSize NewSize = DL.getTypeSizeInBits(NewTy);
-  TypeSize OldSize = DL.getTypeSizeInBits(OldTy);
-
-  if (isa<ScalableVectorType>(NewTy) && isa<FixedVectorType>(OldTy)) {
-    if (!VScale || NewTy->isPtrOrPtrVectorTy() || OldTy->isPtrOrPtrVectorTy() ||
-        !VectorType::getWithSizeAndScalar(cast<VectorType>(NewTy), OldTy))
-      return false;
-
-    NewSize = TypeSize::getFixed(NewSize.getKnownMinValue() * VScale);
-  } else if (isa<ScalableVectorType>(OldTy) && isa<FixedVectorType>(NewTy)) {
-    if (!VScale || NewTy->isPtrOrPtrVectorTy() || OldTy->isPtrOrPtrVectorTy() ||
-        !VectorType::getWithSizeAndScalar(cast<VectorType>(OldTy), NewTy))
-      return false;
-
-    OldSize = TypeSize::getFixed(OldSize.getKnownMinValue() * VScale);
-  }
-
-  if (NewSize != OldSize)
+  if (DL.getTypeSizeInBits(NewTy).getFixedValue() !=
+      DL.getTypeSizeInBits(OldTy).getFixedValue())
     return false;
   if (!NewTy->isSingleValueType() || !OldTy->isSingleValueType())
     return false;
@@ -2019,15 +1990,7 @@ static bool canConvertValue(const DataLayout &DL, Type *OldTy, Type *NewTy,
 static Value *convertValue(const DataLayout &DL, IRBuilderTy &IRB, Value *V,
                            Type *NewTy) {
   Type *OldTy = V->getType();
-
-#ifndef NDEBUG
-  BasicBlock *BB = IRB.GetInsertBlock();
-  assert(BB && BB->getParent() && "VScale unknown!");
-  Attribute Attr = BB->getParent()->getFnAttribute(Attribute::VScaleRange);
-  unsigned VScale = Attr.isValid() ? Attr.getVScaleValue() : 0;
-  assert(canConvertValue(DL, OldTy, NewTy, VScale) &&
-         "Value not convertable to type");
-#endif
+  assert(canConvertValue(DL, OldTy, NewTy) && "Value not convertable to type");
 
   if (OldTy == NewTy)
     return V;
@@ -2071,18 +2034,6 @@ static Value *convertValue(const DataLayout &DL, IRBuilderTy &IRB, Value *V,
     }
   }
 
-  if (isa<ScalableVectorType>(NewTy) && isa<FixedVectorType>(OldTy)) {
-    auto *Ty = VectorType::getWithSizeAndScalar(cast<VectorType>(NewTy), OldTy);
-    V = IRB.CreateInsertVector(Ty, PoisonValue::get(Ty), V, IRB.getInt64(0));
-    return IRB.CreateBitCast(V, NewTy);
-  }
-
-  if (isa<FixedVectorType>(NewTy) && isa<ScalableVectorType>(OldTy)) {
-    auto *Ty = VectorType::getWithSizeAndScalar(cast<VectorType>(OldTy), NewTy);
-    V = IRB.CreateBitCast(V, Ty);
-    return IRB.CreateExtractVector(NewTy, V, IRB.getInt64(0));
-  }
-
   return IRB.CreateBitCast(V, NewTy);
 }
 
@@ -2093,8 +2044,7 @@ static Value *convertValue(const DataLayout &DL, IRBuilderTy &IRB, Value *V,
 static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
                                             VectorType *Ty,
                                             uint64_t ElementSize,
-                                            const DataLayout &DL,
-                                            unsigned VScale) {
+                                            const DataLayout &DL) {
   // First validate the slice offsets.
   uint64_t BeginOffset =
       std::max(S.beginOffset(), P.beginOffset()) - P.beginOffset();
@@ -2138,7 +2088,7 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
       assert(LTy->isIntegerTy());
       LTy = SplitIntTy;
     }
-    if (!canConvertValue(DL, SliceTy, LTy, VScale))
+    if (!canConvertValue(DL, SliceTy, LTy))
       return false;
   } else if (StoreInst *SI = dyn_cast<StoreInst>(U->getUser())) {
     if (SI->isVolatile())
@@ -2151,7 +2101,7 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
       assert(STy->isIntegerTy());
       STy = SplitIntTy;
     }
-    if (!canConvertValue(DL, STy, SliceTy, VScale))
+    if (!canConvertValue(DL, STy, SliceTy))
       return false;
   } else {
     return false;
@@ -2166,7 +2116,7 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
 /// (and thus isVectorPromotionViable) over all slices of the alloca for the
 /// given VectorType.
 static bool checkVectorTypeForPromotion(Partition &P, VectorType *VTy,
-                                        const DataLayout &DL, unsigned VScale) {
+                                        const DataLayout &DL) {
   uint64_t ElementSize =
       DL.getTypeSizeInBits(VTy->getElementType()).getFixedValue();
 
@@ -2179,11 +2129,11 @@ static bool checkVectorTypeForPromotion(Partition &P, VectorType *VTy,
   ElementSize /= 8;
 
   for (const Slice &S : P)
-    if (!isVectorPromotionViableForSlice(P, S, VTy, ElementSize, DL, VScale))
+    if (!isVectorPromotionViableForSlice(P, S, VTy, ElementSize, DL))
       return false;
 
   for (const Slice *S : P.splitSliceTails())
-    if (!isVectorPromotionViableForSlice(P, *S, VTy, ElementSize, DL, VScale))
+    if (!isVectorPromotionViableForSlice(P, *S, VTy, ElementSize, DL))
       return false;
 
   return true;
@@ -2198,7 +2148,7 @@ checkVectorTypesForPromotion(Partition &P, const DataLayout &DL,
                              SmallVectorImpl<VectorType *> &CandidateTys,
                              bool HaveCommonEltTy, Type *CommonEltTy,
                              bool HaveVecPtrTy, bool HaveCommonVecPtrTy,
-                             VectorType *CommonVecPtrTy, unsigned VScale) {
+                             VectorType *CommonVecPtrTy) {
   // If we didn't find a vector type, nothing to do here.
   if (CandidateTys.empty())
     return nullptr;
@@ -2274,7 +2224,7 @@ checkVectorTypesForPromotion(Partition &P, const DataLayout &DL,
   });
 
   for (VectorType *VTy : CandidateTys)
-    if (checkVectorTypeForPromotion(P, VTy, DL, VScale))
+    if (checkVectorTypeForPromotion(P, VTy, DL))
       return VTy;
 
   return nullptr;
@@ -2285,7 +2235,7 @@ static VectorType *createAndCheckVectorTypesForPromotion(
     function_ref<void(Type *)> CheckCandidateType, Partition &P,
     const DataLayout &DL, SmallVectorImpl<VectorType *> &CandidateTys,
     bool &HaveCommonEltTy, Type *&CommonEltTy, bool &HaveVecPtrTy,
-    bool &HaveCommonVecPtrTy, VectorType *&CommonVecPtrTy, unsigned VScale) {
+    bool &HaveCommonVecPtrTy, VectorType *&CommonVecPtrTy) {
   [[maybe_unused]] VectorType *OriginalElt =
       CandidateTysCopy.size() ? CandidateTysCopy[0] : nullptr;
   // Consider additional vector types where the element type size is a
@@ -2310,9 +2260,9 @@ static VectorType *createAndCheckVectorTypesForPromotion(
     }
   }
 
-  return checkVectorTypesForPromotion(
-      P, DL, CandidateTys, HaveCommonEltTy, CommonEltTy, HaveVecPtrTy,
-      HaveCommonVecPtrTy, CommonVecPtrTy, VScale);
+  return checkVectorTypesForPromotion(P, DL, CandidateTys, HaveCommonEltTy,
+                                      CommonEltTy, HaveVecPtrTy,
+                                      HaveCommonVecPtrTy, CommonVecPtrTy);
 }
 
 /// Test whether the given alloca partitioning and range of slices can be
@@ -2324,8 +2274,7 @@ static VectorType *createAndCheckVectorTypesForPromotion(
 /// SSA value. We only can ensure this for a limited set of operations, and we
 /// don't want to do the rewrites unless we are confident that the result will
 /// be promotable, so we have an early test here.
-static VectorType *isVectorPromotionViable(Partition &P, const DataLayout &DL,
-                                           unsigned VScale) {
+static VectorType *isVectorPromotionViable(Partition &P, const DataLayout &DL) {
   // Collect the candidate types for vector-based promotion. Also track whether
   // we have different element types.
   SmallVector<VectorType *, 4> CandidateTys;
@@ -2337,7 +2286,7 @@ static VectorType *isVectorPromotionViable(Partition &P, const DataLayout &DL,
   bool HaveCommonEltTy = true;
   bool HaveCommonVecPtrTy = true;
   auto CheckCandidateType = [&](Type *Ty) {
-    if (auto *VTy = dyn_cast<FixedVectorType>(Ty)) {
+    if (auto *VTy = dyn_cast<VectorType>(Ty)) {
       // Return if bitcast to vectors is different for total size in bits.
       if (!CandidateTys.empty()) {
         VectorType *V = CandidateTys[0];
@@ -2392,14 +2341,14 @@ static VectorType *isVectorPromotionViable(Partition &P, const DataLayout &DL,
   if (auto *VTy = createAndCheckVectorTypesForPromotion(
           LoadStoreTys, CandidateTysCopy, CheckCandidateType, P, DL,
           CandidateTys, HaveCommonEltTy, CommonEltTy, HaveVecPtrTy,
-          HaveCommonVecPtrTy, CommonVecPtrTy, VScale))
+          HaveCommonVecPtrTy, CommonVecPtrTy))
     return VTy;
 
   CandidateTys.clear();
   return createAndCheckVectorTypesForPromotion(
       DeferredTys, CandidateTysCopy, CheckCandidateType, P, DL, CandidateTys,
       HaveCommonEltTy, CommonEltTy, HaveVecPtrTy, HaveCommonVecPtrTy,
-      CommonVecPtrTy, VScale);
+      CommonVecPtrTy);
 }
 
 /// Test whether a slice of an alloca is valid for integer widening.
@@ -2436,8 +2385,7 @@ static bool isIntegerWideningViableForSlice(const Slice &S,
     if (LI->isVolatile())
       return false;
     // We can't handle loads that extend past the allocated memory.
-    TypeSize LoadSize = DL.getTypeStoreSize(LI->getType());
-    if (!LoadSize.isFixed() || LoadSize.getFixedValue() > Size)
+    if (DL.getTypeStoreSize(LI->getType()).getFixedValue() > Size)
       return false;
     // So far, AllocaSliceRewriter does not support widening split slice tails
     // in rewriteIntegerLoad.
@@ -2462,8 +2410,7 @@ static bool isIntegerWideningViableForSlice(const Slice &S,
     if (SI->isVolatile())
       return false;
     // We can't handle stores that extend past the allocated memory.
-    TypeSize StoreSize = DL.getTypeStoreSize(ValueTy);
-    if (!StoreSize.isFixed() || StoreSize.getFixedValue() > Size)
+    if (DL.getTypeStoreSize(ValueTy).getFixedValue() > Size)
       return false;
     // So far, AllocaSliceRewriter does not support widening split slice tails
     // in rewriteIntegerStore.
@@ -2936,6 +2883,8 @@ private:
 
     Type *TargetTy = IsSplit ? Type::getIntNTy(LI.getContext(), SliceSize * 8)
                              : LI.getType();
+    const bool IsLoadPastEnd =
+        DL.getTypeStoreSize(TargetTy).getFixedValue() > SliceSize;
     bool IsPtrAdjusted = false;
     Value *V;
     if (VecTy) {
@@ -2945,9 +2894,8 @@ private:
     } else if (NewBeginOffset == NewAllocaBeginOffset &&
                NewEndOffset == NewAllocaEndOffset &&
                (canConvertValue(DL, NewAllocaTy, TargetTy) ||
-                (NewAllocaTy->isIntegerTy() && TargetTy->isIntegerTy() &&
-                 DL.getTypeStoreSize(TargetTy).getFixedValue() > SliceSize &&
-                 !LI.isVolatile()))) {
+                (IsLoadPastEnd && NewAllocaTy->isIntegerTy() &&
+                 TargetTy->isIntegerTy() && !LI.isVolatile()))) {
       Value *NewPtr =
           getPtrToNewAI(LI.getPointerAddressSpace(), LI.isVolatile());
       LoadInst *NewLI = IRB.CreateAlignedLoad(NewAI.getAllocatedType(), NewPtr,
@@ -3120,8 +3068,7 @@ private:
       if (AllocaInst *AI = dyn_cast<AllocaInst>(V->stripInBoundsOffsets()))
         Pass.PostPromotionWorklist.insert(AI);
 
-    TypeSize StoreSize = DL.getTypeStoreSize(V->getType());
-    if (StoreSize.isFixed() && SliceSize < StoreSize.getFixedValue()) {
+    if (SliceSize < DL.getTypeStoreSize(V->getType()).getFixedValue()) {
       assert(!SI.isVolatile());
       assert(V->getType()->isIntegerTy() &&
              "Only integer type loads and stores are split");
@@ -4897,19 +4844,14 @@ AllocaInst *SROA::rewritePartition(AllocaInst &AI, AllocaSlices &AS,
   Type *SliceTy = nullptr;
   VectorType *SliceVecTy = nullptr;
   const DataLayout &DL = AI.getDataLayout();
-  Attribute Attr = AI.getFunction()->getFnAttribute(Attribute::VScaleRange);
-  unsigned VScale = Attr.isValid() ? Attr.getVScaleValue() : 0;
-
   std::pair<Type *, IntegerType *> CommonUseTy =
       findCommonType(P.begin(), P.end(), P.endOffset());
   // Do all uses operate on the same type?
-  if (CommonUseTy.first) {
-    TypeSize CommonUseSize = DL.getTypeAllocSize(CommonUseTy.first);
-    if (CommonUseSize.isFixed() && CommonUseSize.getFixedValue() >= P.size()) {
+  if (CommonUseTy.first)
+    if (DL.getTypeAllocSize(CommonUseTy.first).getFixedValue() >= P.size()) {
       SliceTy = CommonUseTy.first;
       SliceVecTy = dyn_cast<VectorType>(SliceTy);
     }
-  }
   // If not, can we find an appropriate subtype in the original allocated type?
   if (!SliceTy)
     if (Type *TypePartitionTy = getTypePartition(DL, AI.getAllocatedType(),
@@ -4930,12 +4872,12 @@ AllocaInst *SROA::rewritePartition(AllocaInst &AI, AllocaSlices &AS,
 
   // If the common use types are not viable for promotion then attempt to find
   // another type that is viable.
-  if (SliceVecTy && !checkVectorTypeForPromotion(P, SliceVecTy, DL, VScale))
+  if (SliceVecTy && !checkVectorTypeForPromotion(P, SliceVecTy, DL))
     if (Type *TypePartitionTy = getTypePartition(DL, AI.getAllocatedType(),
                                                  P.beginOffset(), P.size())) {
       VectorType *TypePartitionVecTy = dyn_cast<VectorType>(TypePartitionTy);
       if (TypePartitionVecTy &&
-          checkVectorTypeForPromotion(P, TypePartitionVecTy, DL, VScale))
+          checkVectorTypeForPromotion(P, TypePartitionVecTy, DL))
         SliceTy = TypePartitionTy;
     }
 
@@ -4946,7 +4888,7 @@ AllocaInst *SROA::rewritePartition(AllocaInst &AI, AllocaSlices &AS,
   bool IsIntegerPromotable = isIntegerWideningViable(P, SliceTy, DL);
 
   VectorType *VecTy =
-      IsIntegerPromotable ? nullptr : isVectorPromotionViable(P, DL, VScale);
+      IsIntegerPromotable ? nullptr : isVectorPromotionViable(P, DL);
   if (VecTy)
     SliceTy = VecTy;
 

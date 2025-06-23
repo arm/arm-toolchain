@@ -80,9 +80,7 @@ fixed_bool32_t from_vbool32_t(vbool32_t type) {
 //
 // CHECK-128-LABEL: @to_vbool32_t(
 // CHECK-128-NEXT:  entry:
-// CHECK-128-NEXT:    [[SAVED_VALUE:%.*]] = alloca <1 x i8>, align 1
-// CHECK-128-NEXT:    [[SAVED_VALUE_0_SAVED_VALUE_0_SAVED_VALUE_0_SAVED_VALUE_0_:%.*]] = load <vscale x 2 x i1>, ptr [[SAVED_VALUE]], align 1, !tbaa [[TBAA10]]
-// CHECK-128-NEXT:    ret <vscale x 2 x i1> [[SAVED_VALUE_0_SAVED_VALUE_0_SAVED_VALUE_0_SAVED_VALUE_0_]]
+// CHECK-128-NEXT:    ret <vscale x 2 x i1> [[TYPE_COERCE:%.*]]
 //
 vbool32_t to_vbool32_t(fixed_bool32_t type) {
   return type;
@@ -118,9 +116,7 @@ fixed_bool64_t from_vbool64_t(vbool64_t type) {
 //
 // CHECK-128-LABEL: @to_vbool64_t(
 // CHECK-128-NEXT:  entry:
-// CHECK-128-NEXT:    [[SAVED_VALUE:%.*]] = alloca <1 x i8>, align 1
-// CHECK-128-NEXT:    [[SAVED_VALUE_0_SAVED_VALUE_0_SAVED_VALUE_0_SAVED_VALUE_0_:%.*]] = load <vscale x 1 x i1>, ptr [[SAVED_VALUE]], align 1, !tbaa [[TBAA10]]
-// CHECK-128-NEXT:    ret <vscale x 1 x i1> [[SAVED_VALUE_0_SAVED_VALUE_0_SAVED_VALUE_0_SAVED_VALUE_0_]]
+// CHECK-128-NEXT:    ret <vscale x 1 x i1> [[TYPE_COERCE:%.*]]
 //
 vbool64_t to_vbool64_t(fixed_bool64_t type) {
   return type;
