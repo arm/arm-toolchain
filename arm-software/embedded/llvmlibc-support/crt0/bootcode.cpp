@@ -7,6 +7,8 @@
 //
 
 #include <stdint.h>
+#include <stdlib.h> // for exit()
+#include <string.h> // for memcpy(), memset()
 
 #if __ARM_ARCH_PROFILE == 'A' || __ARM_ARCH_PROFILE == 'R'
 #include "exceptions_a.h"
@@ -18,6 +20,23 @@
 #include "memory_m.h"
 #include "misc_m.h"
 #include "system_registers_m.h"
+#else
+// ARMv4T
+namespace bootcode {
+namespace exceptions {
+void setup() noexcept {}
+} // namespace exceptions
+
+namespace memory {
+void enable_cache() noexcept {}
+void setup() noexcept {}
+} // namespace memory
+
+namespace misc {
+void setup() noexcept {}
+} // namespace misc
+
+} // namespace bootcode
 #endif
 
 using namespace bootcode;
@@ -35,6 +54,7 @@ extern char __data_start[];
 extern char __data_size[];
 extern char __bss_start[];
 extern char __bss_size[];
+extern char __stack __attribute__((weak));
 
 #ifdef __ARM_FEATURE_PAUTH
 // Disable pointer authentication, as it isn't enabled until misc::setup meaning
