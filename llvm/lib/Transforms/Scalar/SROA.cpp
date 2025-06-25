@@ -1119,8 +1119,7 @@ private:
 
     TypeSize Size = DL.getTypeStoreSize(LI.getType());
     if (Size.isScalable()) {
-      Attribute Attr = LI.getFunction()->getFnAttribute(Attribute::VScaleRange);
-      unsigned VScale = Attr.isValid() ? Attr.getVScaleValue() : 0;
+      unsigned VScale = LI.getFunction()->getVScaleValue();
       if (!VScale)
         return PI.setAborted(&LI);
 
@@ -1140,8 +1139,7 @@ private:
 
     TypeSize StoreSize = DL.getTypeStoreSize(ValOp->getType());
     if (StoreSize.isScalable()) {
-      Attribute Attr = SI.getFunction()->getFnAttribute(Attribute::VScaleRange);
-      unsigned VScale = Attr.isValid() ? Attr.getVScaleValue() : 0;
+      unsigned VScale = SI.getFunction()->getVScaleValue();
       if (!VScale)
         return PI.setAborted(&SI);
 
@@ -1955,18 +1953,29 @@ static bool canConvertValue(const DataLayout &DL, Type *OldTy, Type *NewTy,
   TypeSize NewSize = DL.getTypeSizeInBits(NewTy);
   TypeSize OldSize = DL.getTypeSizeInBits(OldTy);
 
-  if (isa<ScalableVectorType>(NewTy) && isa<FixedVectorType>(OldTy)) {
-    if (!VScale || NewTy->isPtrOrPtrVectorTy() || OldTy->isPtrOrPtrVectorTy() ||
-        !VectorType::getWithSizeAndScalar(cast<VectorType>(NewTy), OldTy))
+  if ((isa<ScalableVectorType>(NewTy) && isa<FixedVectorType>(OldTy)) ||
+      (isa<ScalableVectorType>(OldTy) && isa<FixedVectorType>(NewTy))) {
+    // Conversion is only possible when the size of scalable vectors is known.
+    if (!VScale)
       return false;
 
-    NewSize = TypeSize::getFixed(NewSize.getKnownMinValue() * VScale);
-  } else if (isa<ScalableVectorType>(OldTy) && isa<FixedVectorType>(NewTy)) {
-    if (!VScale || NewTy->isPtrOrPtrVectorTy() || OldTy->isPtrOrPtrVectorTy() ||
-        !VectorType::getWithSizeAndScalar(cast<VectorType>(OldTy), NewTy))
-      return false;
+    // For ptr-to-int and int-to-ptr casts, the pointer side is resolved within
+    // a single domain (either fixed or scalable). Any additional conversion
+    // between fixed and scalable types is handled through integer types.
+    auto OldVTy = OldTy->isPtrOrPtrVectorTy() ? DL.getIntPtrType(OldTy) : OldTy;
+    auto NewVTy = NewTy->isPtrOrPtrVectorTy() ? DL.getIntPtrType(NewTy) : NewTy;
 
-    OldSize = TypeSize::getFixed(OldSize.getKnownMinValue() * VScale);
+    if (isa<ScalableVectorType>(NewTy)) {
+      if (!VectorType::getWithSizeAndScalar(cast<VectorType>(NewVTy), OldVTy))
+        return false;
+
+      NewSize = TypeSize::getFixed(NewSize.getKnownMinValue() * VScale);
+    } else {
+      if (!VectorType::getWithSizeAndScalar(cast<VectorType>(OldVTy), NewVTy))
+        return false;
+
+      OldSize = TypeSize::getFixed(OldSize.getKnownMinValue() * VScale);
+    }
   }
 
   if (NewSize != OldSize)
@@ -2023,8 +2032,7 @@ static Value *convertValue(const DataLayout &DL, IRBuilderTy &IRB, Value *V,
 #ifndef NDEBUG
   BasicBlock *BB = IRB.GetInsertBlock();
   assert(BB && BB->getParent() && "VScale unknown!");
-  Attribute Attr = BB->getParent()->getFnAttribute(Attribute::VScaleRange);
-  unsigned VScale = Attr.isValid() ? Attr.getVScaleValue() : 0;
+  unsigned VScale = BB->getParent()->getVScaleValue();
   assert(canConvertValue(DL, OldTy, NewTy, VScale) &&
          "Value not convertable to type");
 #endif
@@ -2035,13 +2043,41 @@ static Value *convertValue(const DataLayout &DL, IRBuilderTy &IRB, Value *V,
   assert(!(isa<IntegerType>(OldTy) && isa<IntegerType>(NewTy)) &&
          "Integer types must be the exact same to convert.");
 
+  // A variant of bitcast that supports a mixture of fixed and scalable types
+  // that are know to have the same size.
+  auto CreateBitCastLike = [&IRB](Value *In, Type *Ty) -> Value * {
+    Type *InTy = In->getType();
+    if (InTy == Ty)
+      return In;
+
+    if (isa<FixedVectorType>(InTy) && isa<ScalableVectorType>(Ty)) {
+      // For vscale_range(2) expand <4 x i32> to <vscale x 4 x i16> -->
+      //   <4 x i32> to <vscale x 2 x i32> to <vscale x 4 x i16>
+      auto *VTy = VectorType::getWithSizeAndScalar(cast<VectorType>(Ty), InTy);
+      return IRB.CreateBitCast(IRB.CreateInsertVector(VTy,
+                                                      PoisonValue::get(VTy), In,
+                                                      IRB.getInt64(0)),
+                               Ty);
+    }
+
+    if (isa<ScalableVectorType>(InTy) && isa<FixedVectorType>(Ty)) {
+      // For vscale_range(2) expand <vscale x 4 x i16> to <4 x i32> -->
+      //   <vscale x 4 x i16> to <vscale x 2 x i32> to <4 x i32>
+      auto *VTy = VectorType::getWithSizeAndScalar(cast<VectorType>(InTy), Ty);
+      return IRB.CreateExtractVector(Ty, IRB.CreateBitCast(In, VTy),
+                                     IRB.getInt64(0));
+    }
+
+    return IRB.CreateBitCast(In, Ty);
+  };
+
   // See if we need inttoptr for this type pair. May require additional bitcast.
   if (OldTy->isIntOrIntVectorTy() && NewTy->isPtrOrPtrVectorTy()) {
     // Expand <2 x i32> to i8* --> <2 x i32> to i64 to i8*
     // Expand i128 to <2 x i8*> --> i128 to <2 x i64> to <2 x i8*>
     // Expand <4 x i32> to <2 x i8*> --> <4 x i32> to <2 x i64> to <2 x i8*>
     // Directly handle i64 to i8*
-    return IRB.CreateIntToPtr(IRB.CreateBitCast(V, DL.getIntPtrType(NewTy)),
+    return IRB.CreateIntToPtr(CreateBitCastLike(V, DL.getIntPtrType(NewTy)),
                               NewTy);
   }
 
@@ -2051,7 +2087,7 @@ static Value *convertValue(const DataLayout &DL, IRBuilderTy &IRB, Value *V,
     // Expand i8* to <2 x i32> --> i8* to i64 to <2 x i32>
     // Expand <2 x i8*> to <4 x i32> --> <2 x i8*> to <2 x i64> to <4 x i32>
     // Expand i8* to i64 --> i8* to i64 to i64
-    return IRB.CreateBitCast(IRB.CreatePtrToInt(V, DL.getIntPtrType(OldTy)),
+    return CreateBitCastLike(IRB.CreatePtrToInt(V, DL.getIntPtrType(OldTy)),
                              NewTy);
   }
 
@@ -2066,24 +2102,14 @@ static Value *convertValue(const DataLayout &DL, IRBuilderTy &IRB, Value *V,
     // size.
     if (OldAS != NewAS) {
       assert(DL.getPointerSize(OldAS) == DL.getPointerSize(NewAS));
-      return IRB.CreateIntToPtr(IRB.CreatePtrToInt(V, DL.getIntPtrType(OldTy)),
-                                NewTy);
+      return IRB.CreateIntToPtr(
+          CreateBitCastLike(IRB.CreatePtrToInt(V, DL.getIntPtrType(OldTy)),
+                            DL.getIntPtrType(NewTy)),
+          NewTy);
     }
   }
 
-  if (isa<ScalableVectorType>(NewTy) && isa<FixedVectorType>(OldTy)) {
-    auto *Ty = VectorType::getWithSizeAndScalar(cast<VectorType>(NewTy), OldTy);
-    V = IRB.CreateInsertVector(Ty, PoisonValue::get(Ty), V, IRB.getInt64(0));
-    return IRB.CreateBitCast(V, NewTy);
-  }
-
-  if (isa<FixedVectorType>(NewTy) && isa<ScalableVectorType>(OldTy)) {
-    auto *Ty = VectorType::getWithSizeAndScalar(cast<VectorType>(OldTy), NewTy);
-    V = IRB.CreateBitCast(V, Ty);
-    return IRB.CreateExtractVector(NewTy, V, IRB.getInt64(0));
-  }
-
-  return IRB.CreateBitCast(V, NewTy);
+  return CreateBitCastLike(V, NewTy);
 }
 
 /// Test whether the given slice use can be promoted to a vector.
@@ -4897,8 +4923,7 @@ AllocaInst *SROA::rewritePartition(AllocaInst &AI, AllocaSlices &AS,
   Type *SliceTy = nullptr;
   VectorType *SliceVecTy = nullptr;
   const DataLayout &DL = AI.getDataLayout();
-  Attribute Attr = AI.getFunction()->getFnAttribute(Attribute::VScaleRange);
-  unsigned VScale = Attr.isValid() ? Attr.getVScaleValue() : 0;
+  unsigned VScale = AI.getFunction()->getVScaleValue();
 
   std::pair<Type *, IntegerType *> CommonUseTy =
       findCommonType(P.begin(), P.end(), P.endOffset());
