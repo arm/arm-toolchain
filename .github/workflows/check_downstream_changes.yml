@@ -1,0 +1,51 @@
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow runs the check_downstream_changes.py script in order to check
+# whether a pull request makes a downstream change, and if so contains the
+# appropriate tracking in the text. The script only requires the pull request
+# number, and should be triggered whenever a pull request is edited or
+# synchronized, since both the files changed and the text of the pull request
+# itself are part of the check.
+# The script requires the GitHub CLI to be available, and authenticated.
+
+name: check-downstream-changes
+
+on:
+  # Trigger whenever a pull request is opened or changed.
+  # Use pull_request_target since we don't want to checkout the version of
+  # the script in the pull request, which may have been modified.
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+    branches:
+      - arm-software
+      - release/arm-software/**
+
+jobs:
+  check-downstream-changes:
+    runs-on: ubuntu-24.04-arm
+
+    if: github.repository == 'arm/arm-toolchain'
+
+    steps:
+      # Generate a token for gh tool
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.SYNC_APP_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Check Script
+        run: python3 arm-software/ci/check_downstream_changes.py --repo ${{ github.repository }} --pr ${{ github.event.pull_request.number }}
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
