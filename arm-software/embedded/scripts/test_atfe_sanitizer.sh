@@ -11,7 +11,7 @@
 # The script assumes a successful build of the toolchain exists in the 'build'
 # directory inside the repository tree.
 
-set -ex
+set -vx
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
@@ -36,8 +36,8 @@ ninja -j$PROCESSOR_COUNT check-all
 # only the --ignore-fail option is needed.
 # The picolibc tests do not use lit so do not support this option.
 export LIT_OPTS="--ignore-fail"
-ninja -j$PROCESSOR_COUNT check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
-    check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
-    check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
-    check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned \
-    check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja -j$PROCESSOR_COUNT check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja -j$PROCESSOR_COUNT check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja -j$PROCESSOR_COUNT check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja -j$PROCESSOR_COUNT check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja -j$PROCESSOR_COUNT check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned
