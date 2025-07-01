@@ -10,10 +10,19 @@
 #
 # Installation: Kindly refer https://github.com/spdx/tools-python for pre-requisite installation.
 #
-# Usage: python generate_ATfE-SBOM.py
+# Sample usage:
+# python generate_ATfE-SBOM.py all
+# python generate_ATfE-SBOM.py main
+# python generate_ATfE-SBOM.py llvmlibc
+# python generate_ATfE-SBOM.py newlib
 #
-# Output file generated: ATfE-SBOM.spdx.json
+# Output file generated: either one or all of these:
+# ATfE-SBOM.spdx.json
+# ATfE-SBOM-llvmlibc-overlay.spdx.json
+# ATfE-SBOM-newlib-overlay.spdx.json
 #
+import argparse
+import sys
 import logging
 import uuid
 from datetime import datetime
@@ -33,24 +42,205 @@ from spdx_tools.spdx.validation.document_validator import validate_full_spdx_doc
 from spdx_tools.spdx.validation.validation_message import ValidationMessage
 from spdx_tools.spdx.writer.write_anything import write_file
 
-# This example shows how to use the spdx-tools to create an SPDX document from scratch,
-# validate it and write it to a file.
+# Define the constants used in the script
+URL_ATFE = (
+    "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded"
+)
+URL_LLVM_PROJECT = "https://github.com/llvm/llvm-project"
+URL_CLANG = "https://github.com/llvm/llvm-project/tree/main/clang"
+URL_LLD = "https://github.com/llvm/llvm-project/tree/main/lld"
+URL_COMPILER_RT = "https://github.com/llvm/llvm-project/tree/main/compiler-rt"
+URL_LIBCXX = "https://github.com/llvm/llvm-project/tree/main/libcxx"
+URL_LIBCXXABI = "https://github.com/llvm/llvm-project/tree/main/libcxxabi"
+URL_LIBUNWIND = "https://github.com/llvm/llvm-project/tree/main/libunwind"
+URL_LIBC = "https://github.com/llvm/llvm-project/tree/main/libc"
+
+URL_PICOLIBC = "https://github.com/picolibc/picolibc"
+URL_COPYING_PICOLIBC = "https://github.com/picolibc/picolibc/blob/main/COPYING.picolibc"
+URL_KEITH_PACKARD = "https://github.com/keith-packard"
+
+URL_NEWLIB = "https://sourceware.org/newlib/"
+URL_NEWLIB_COPYING_NEWLIB = (
+    "https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.NEWLIB;hb=HEAD"
+)
+URL_NEWLIB_COPYING_LIBGLOSS = (
+    "https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.LIBGLOSS;hb=HEAD"
+)
+
+EMAIL_ID_ARM_OSO = "open-source-office@arm.com"
+EMAIL_ID_LLVM_PROJECT = "info@llvm.org"
+EMAIL_ID_NEWLIB = "newlib@sourceware.org"
+
+SPDX_VERSION = "SPDX-2.3"
+STRING_SPDX_ID = "SPDXRef-DOCUMENT"
+STRING_SPDX_PACKAGE = "SPDXRef-Package-"
+
+# Name of SBOM file for main, llvmlibc and newlib
+SBOM_JSON_FILENAME_ATFE = "ATfE-SBOM.spdx.json"
+SBOM_JSON_FILENAME_LLVM_LIBC_OVERLAY = "ATfE-SBOM-llvmlibc-overlay.spdx.json"
+SBOM_JSON_FILENAME_NEWLIB_OVERLAY = "ATfE-SBOM-newlib-overlay.spdx.json"
+
+# Define the string names for SBOM title
+STRING_ATFE = "Arm Toolchain for Embedded"
+STRING_LLVM_LIBC_OVERLAY = "Arm Toolchain for Embedded LLVM libc overlay"
+STRING_NEWLIB_OVERLAY = "Arm Toolchain for Embedded newlib overlay"
+
+STRING_LLVM_FOUNDATION = "LLVM Foundation"
+STRING_ARM_LIMITED = "Arm Limited"
+APACHE20_WITH_LLVM_EXCEPTION = "Apache-2.0 WITH LLVM-exception"
+
+# List to indicate choices for the arguments to the script
+ARGUMENT_CHOICES = ["all", "main", "llvmlibc", "newlib"]
+
+# Dict with details to define the contents of package
+# Update the name, SBOM file name and contents of SBOM as appropriate.
+dict_details_SBOM = {
+    STRING_ATFE: {
+        "sbom_filename": SBOM_JSON_FILENAME_ATFE,
+        "sources": [
+            STRING_ATFE,
+            "llvm-project",
+            "clang",
+            "lld",
+            "compiler-rt",
+            "libcxx",
+            "libcxxabi",
+            "libunwind",
+            "picolibc",
+        ],
+    },
+    STRING_LLVM_LIBC_OVERLAY: {
+        "sbom_filename": SBOM_JSON_FILENAME_LLVM_LIBC_OVERLAY,
+        "sources": [STRING_ATFE, "compiler-rt", "libc"],
+    },
+    STRING_NEWLIB_OVERLAY: {
+        "sbom_filename": SBOM_JSON_FILENAME_NEWLIB_OVERLAY,
+        "sources": [
+            STRING_ATFE,
+            "compiler-rt",
+            "libcxx",
+            "libcxxabi",
+            "libunwind",
+            "newlib",
+        ],
+    },
+}
+
+# Dict to define the details of each source
+# Store the details in "value" field as list.
+# Syntax is name of source : list of details
+dict_source_details = {
+    STRING_ATFE: [
+        URL_ATFE,
+        ActorType.ORGANIZATION,
+        STRING_ARM_LIMITED,
+        EMAIL_ID_ARM_OSO,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "llvm-project": [
+        URL_LLVM_PROJECT,
+        ActorType.ORGANIZATION,
+        STRING_LLVM_FOUNDATION,
+        EMAIL_ID_LLVM_PROJECT,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "clang": [
+        URL_CLANG,
+        ActorType.ORGANIZATION,
+        STRING_LLVM_FOUNDATION,
+        EMAIL_ID_LLVM_PROJECT,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "lld": [
+        URL_LLD,
+        ActorType.ORGANIZATION,
+        STRING_LLVM_FOUNDATION,
+        EMAIL_ID_LLVM_PROJECT,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "compiler-rt": [
+        URL_COMPILER_RT,
+        ActorType.ORGANIZATION,
+        STRING_LLVM_FOUNDATION,
+        EMAIL_ID_LLVM_PROJECT,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "libcxx": [
+        URL_LIBCXX,
+        ActorType.ORGANIZATION,
+        STRING_LLVM_FOUNDATION,
+        EMAIL_ID_LLVM_PROJECT,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "libcxxabi": [
+        URL_LIBCXXABI,
+        ActorType.ORGANIZATION,
+        STRING_LLVM_FOUNDATION,
+        EMAIL_ID_LLVM_PROJECT,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "libunwind": [
+        URL_LIBUNWIND,
+        ActorType.ORGANIZATION,
+        STRING_LLVM_FOUNDATION,
+        EMAIL_ID_LLVM_PROJECT,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "libc": [
+        URL_LIBC,
+        ActorType.ORGANIZATION,
+        STRING_LLVM_FOUNDATION,
+        EMAIL_ID_LLVM_PROJECT,
+        APACHE20_WITH_LLVM_EXCEPTION,
+        "",
+    ],
+    "picolibc": [
+        URL_PICOLIBC,
+        ActorType.PERSON,
+        "Keith Packard",
+        URL_KEITH_PACKARD,
+        "",
+        "Detailed list of licenses is at: " + URL_COPYING_PICOLIBC,
+    ],
+    "newlib": [
+        URL_NEWLIB,
+        ActorType.ORGANIZATION,
+        URL_NEWLIB,
+        EMAIL_ID_NEWLIB,
+        "",
+        "Detailed list of licenses is at: "
+        + URL_NEWLIB_COPYING_NEWLIB
+        + " and "
+        + URL_NEWLIB_COPYING_LIBGLOSS,
+    ],
+}
 
 
+# Creates the package from the given details, such as name and URL string
+# Returns the package and UUID
 def create_Package(
     name,
-    uuid,
-    download_location,
+    URL_string,
     actorType,
     personName,
     personEmail,
     license,
     licenseComment,
 ):
+    package_uuid = get_UUID(URL_string)
+
     package = Package(
         name=name,
-        spdx_id=uuid,
-        download_location=download_location,
+        spdx_id=package_uuid,
+        download_location=URL_string,
         supplier=Actor(actorType, personName, personEmail),
         originator=Actor(actorType, personName, personEmail),
         files_analyzed=False,
@@ -59,232 +249,141 @@ def create_Package(
         license_comment=licenseComment,
     )
 
-    return package
+    return package, package_uuid
 
 
-# First up, we need general information about the creation of the document, summarised by the CreationInfo class.
-creation_info = CreationInfo(
-    spdx_version="SPDX-2.3",
-    spdx_id="SPDXRef-DOCUMENT",
-    name="Arm Toolchain for Embedded",
-    data_license="CC0-1.0",
-    document_namespace="https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
-    creators=[
-        Actor(ActorType.ORGANIZATION, "Arm Limited", "open-source-office@arm.com")
-    ],
-    created=datetime.now(),
-)
+# Creates the UUID from the given URL
+def get_UUID(URL_string):
+    return STRING_SPDX_PACKAGE + str(uuid.uuid5(uuid.NAMESPACE_URL, URL_string))
 
-# creation_info is the only required property of the Document class (have a look there!), the rest are optional lists.
-document = Document(creation_info)
 
-# The document currently does not describe anything. Let's create a package that we can add to it.
-package_url = (
-    "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded"
-)
-package_uuid_atfe = "SPDXRef-Package-" + str(
-    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
-)
-package_atfe = create_Package(
-    "Arm Toolchain for Embedded",
-    package_uuid_atfe,
-    package_url,
-    ActorType.ORGANIZATION,
-    "Arm Limited",
-    "open-source-office@arm.com",
-    "Apache-2.0 WITH LLVM-exception",
-    "",
-)
+def getCreationInfo(name):
+    # First up, we need general information about the creation of the document, summarised by the CreationInfo class.
+    creation_info = CreationInfo(
+        spdx_version=SPDX_VERSION,
+        spdx_id=STRING_SPDX_ID,
+        name=name,
+        data_license="CC0-1.0",
+        document_namespace=URL_ATFE,
+        creators=[Actor(ActorType.ORGANIZATION, STRING_ARM_LIMITED, EMAIL_ID_ARM_OSO)],
+        created=datetime.now(),
+    )
+    return creation_info
 
-package_url = "https://github.com/llvm/llvm-project"
-package_uuid_llvm = "SPDXRef-Package-" + str(
-    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
-)
-package_llvm = create_Package(
-    "llvm-project",
-    package_uuid_llvm,
-    package_url,
-    ActorType.ORGANIZATION,
-    "LLVM Foundation",
-    "info@llvm.org",
-    "Apache-2.0 WITH LLVM-exception",
-    "",
-)
 
-package_url = "https://github.com/llvm/llvm-project/tree/main/clang"
-package_uuid_clang = "SPDXRef-Package-" + str(
-    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
-)
-package_clang = create_Package(
-    "clang",
-    package_uuid_clang,
-    package_url,
-    ActorType.ORGANIZATION,
-    "LLVM Foundation",
-    "info@llvm.org",
-    "Apache-2.0 WITH LLVM-exception",
-    "",
-)
+def describe_Relationship(package_UUID):
+    return Relationship(STRING_SPDX_ID, RelationshipType.DESCRIBES, package_UUID)
 
-package_url = "https://github.com/llvm/llvm-project/tree/main/lld"
-package_uuid_lld = "SPDXRef-Package-" + str(uuid.uuid5(uuid.NAMESPACE_URL, package_url))
-package_lld = create_Package(
-    "lld",
-    package_uuid_lld,
-    package_url,
-    ActorType.ORGANIZATION,
-    "LLVM Foundation",
-    "info@llvm.org",
-    "Apache-2.0 WITH LLVM-exception",
-    "",
-)
 
-package_url = "https://github.com/llvm/llvm-project/tree/main/compiler-rt"
-package_uuid_compiler_rt = "SPDXRef-Package-" + str(
-    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
-)
-package_compiler_rt = create_Package(
-    "compiler-rt",
-    package_uuid_compiler_rt,
-    package_url,
-    ActorType.ORGANIZATION,
-    "LLVM Foundation",
-    "info@llvm.org",
-    "Apache-2.0 WITH LLVM-exception",
-    "",
-)
+def validate_document(document):
+    # This library provides comprehensive validation against the SPDX specification.
+    validation_messages: List[ValidationMessage] = validate_full_spdx_document(document)
 
-package_url = "https://github.com/llvm/llvm-project/tree/main/libcxx"
-package_uuid_libcxx = "SPDXRef-Package-" + str(
-    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
-)
-package_libcxx = create_Package(
-    "libcxx",
-    package_uuid_libcxx,
-    package_url,
-    ActorType.ORGANIZATION,
-    "LLVM Foundation",
-    "info@llvm.org",
-    "Apache-2.0 WITH LLVM-exception",
-    "",
-)
+    for message in validation_messages:
+        logging.warning(message.validation_message)
+        logging.warning(message.context)
 
-package_url = "https://github.com/llvm/llvm-project/tree/main/libcxxabi"
-package_uuid_libcxxabi = "SPDXRef-Package-" + str(
-    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
-)
-package_libcxxabi = create_Package(
-    "libcxxabi",
-    package_uuid_libcxxabi,
-    package_url,
-    ActorType.ORGANIZATION,
-    "LLVM Foundation",
-    "info@llvm.org",
-    "Apache-2.0 WITH LLVM-exception",
-    "",
-)
+    # If the document is valid, validation_messages will be empty.
+    assert validation_messages == []
 
-package_url = "https://github.com/llvm/llvm-project/tree/main/libunwind"
-package_uuid_libunwind = "SPDXRef-Package-" + str(
-    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
-)
-package_libunwind = create_Package(
-    "libunwind",
-    package_uuid_libunwind,
-    package_url,
-    ActorType.ORGANIZATION,
-    "LLVM Foundation",
-    "info@llvm.org",
-    "Apache-2.0 WITH LLVM-exception",
-    "",
-)
 
-package_url = "https://github.com/picolibc/picolibc"
-package_uuid_picolibc = "SPDXRef-Package-" + str(
-    uuid.uuid5(uuid.NAMESPACE_URL, package_url)
-)
-package_picolibc = create_Package(
-    "picolibc",
-    package_uuid_picolibc,
-    package_url,
-    ActorType.PERSON,
-    "Keith Packard",
-    "https://github.com/keith-packard",
-    "",
-    "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.picolibc",
-)
+def generateSBOMFromDetails(string_name):
+    if string_name not in dict_details_SBOM.keys():
+        print(
+            "Error: Exiting script, since name does not exist in dict_details_SBOM: "
+            + string_name
+        )
+        sys.exit(1)
 
-# Now that we have a package defined, we can add it to the document's package property.
-document.packages = [
-    package_atfe,
-    package_llvm,
-    package_clang,
-    package_lld,
-    package_compiler_rt,
-    package_libcxx,
-    package_libcxxabi,
-    package_libunwind,
-    package_picolibc,
-]
+    # Extract the content of dict
+    sbom_filename = dict_details_SBOM[string_name]["sbom_filename"]
+    list_sources = dict_details_SBOM[string_name]["sources"]
 
-# A DESCRIBES relationship asserts that the document indeed describes the package.
-describes_relationship_atfe = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_atfe
-)
+    creation_info_name = getCreationInfo(string_name)
 
-describes_relationship_llvm = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_llvm
-)
+    # creation_info is the only required property of the Document class.
+    document_name = Document(creation_info_name)
 
-describes_relationship_clang = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_clang
-)
+    # Initialize the list of packages for the document
+    document_name.packages = []
 
-describes_relationship_lld = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_lld
-)
+    # Initialize the list of relationships for the document
+    document_name.relationships = []
 
-describes_relationship_compiler_rt = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_compiler_rt
-)
+    for source_name in list_sources:
+        if source_name not in dict_source_details.keys():
+            print(
+                "Error: Exiting script, since name does not exist in dict_source_details: "
+                + source_name
+            )
+            sys.exit(1)
 
-describes_relationship_libcxx = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libcxx
-)
+        # Unpack the list contents
+        (
+            URL_string,
+            actorType,
+            personName,
+            personEmail,
+            license,
+            licenseComment,
+        ) = dict_source_details[source_name]
 
-describes_relationship_libcxxabi = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libcxxabi
-)
+        # Let's create a package that we can add to it.
+        package_name, uuid_name = create_Package(
+            source_name,
+            URL_string,
+            actorType,
+            personName,
+            personEmail,
+            license,
+            licenseComment,
+        )
+        describes_relationship_field = describe_Relationship(uuid_name)
 
-describes_relationship_libunwind = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_libunwind
-)
+        document_name.packages.append(package_name)
+        document_name.relationships.append(describes_relationship_field)
 
-describes_relationship_picolibc = Relationship(
-    "SPDXRef-DOCUMENT", RelationshipType.DESCRIBES, package_uuid_picolibc
-)
+    validate_document(document_name)
 
-document.relationships = [
-    describes_relationship_atfe,
-    describes_relationship_llvm,
-    describes_relationship_clang,
-    describes_relationship_lld,
-    describes_relationship_compiler_rt,
-    describes_relationship_libcxx,
-    describes_relationship_libcxxabi,
-    describes_relationship_libunwind,
-    describes_relationship_picolibc,
-]
+    # Write to the JSON files
+    write_file(document_name, sbom_filename)
 
-# This library provides comprehensive validation against the SPDX specification.
-validation_messages: List[ValidationMessage] = validate_full_spdx_document(document)
+    print("Completed generating SBOM file.")
 
-for message in validation_messages:
-    logging.warning(message.validation_message)
-    logging.warning(message.context)
 
-# If the document is valid, validation_messages will be empty.
-assert validation_messages == []
+def main():
+    parser = argparse.ArgumentParser(
+        description="Process user input for different sources, for which SBOM needs to be generated."
+    )
+    parser.add_argument(
+        "source",
+        choices=ARGUMENT_CHOICES,
+        help="Specify the source: " + str(ARGUMENT_CHOICES),
+    )
 
-# Using the write_file() method from the write_anything module.
-write_file(document, "ATfE-SBOM.spdx.json")
+    args = parser.parse_args()
+
+    if args.source not in ARGUMENT_CHOICES:
+        print("Unknown option. Exiting script.")
+        sys.exit(1)
+
+    # ATfE
+    if args.source == "main" or args.source == "all":
+        print("Generating SBOM for main branch of ATfE.")
+        generateSBOMFromDetails(STRING_ATFE)
+
+    # llvm libc overlay
+    if args.source == "llvmlibc" or args.source == "all":
+        print("Generating SBOM for llvmlibc.")
+
+        generateSBOMFromDetails(STRING_LLVM_LIBC_OVERLAY)
+
+    # newlib overlay
+    if args.source == "newlib" or args.source == "all":
+        print("Generating SBOM for newlib.")
+
+        generateSBOMFromDetails(STRING_NEWLIB_OVERLAY)
+
+
+if __name__ == "__main__":
+    main()
