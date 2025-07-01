@@ -11,6 +11,8 @@
 # The script assumes a successful build of the toolchain exists in the 'build'
 # directory inside the repository tree.
 
+# Script does not exit, when the command in the script exits with a non-zero status.
+# Also, print the line of the script being executed.
 set -vx
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
@@ -35,6 +37,7 @@ ninja -j$PROCESSOR_COUNT check-all
 # The llvm-toolchain targets already set --xunit-xml-output so
 # only the --ignore-fail option is needed.
 # The picolibc tests do not use lit so do not support this option.
+# Command for each test is splitted across individual lines, to aid in debugging.
 export LIT_OPTS="--ignore-fail"
 ninja -j$PROCESSOR_COUNT check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned
 ninja -j$PROCESSOR_COUNT check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned
