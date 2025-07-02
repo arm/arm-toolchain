@@ -18,7 +18,7 @@
             "STACK_SIZE": "4K"
         },
         "picolibc": {
-            "PICOLIBC_BUILD_TYPE": "release",
+            "PICOLIBC_BUILD_TYPE": "minsize",
             "ENABLE_CXX_LIBS": "ON",
             "ENABLE_LIBC_TESTS": "ON",
             "ENABLE_COMPILER_RT_TESTS": "OFF",
