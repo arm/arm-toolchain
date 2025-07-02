@@ -9,7 +9,8 @@
 A script to check that a pull request adheres to the downstream patch policy.
 If the pull request modifies file outside the arm-software build directory
 (or any other files excluded from automerge) then the pull request needs to
-contain specific text to link to a downstream tracking issue.
+contain specific text to link to a downstream tracking issue, and requires
+additional reviews.
 
 Requires the GitHub CLI tool (gh) to query the repo.
 """
@@ -29,6 +30,8 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 MERGE_IGNORE_PATHSPEC_FILE = Path(__file__).parent / ".automerge_ignore"
+ARM_ORG_NAME = "arm"
+REQUIRED_TEAM_APPROVALS = {"arm-toolchain-embedded", "arm-toolchain-linux"}
 
 
 # Check gh is working before using it
@@ -55,7 +58,16 @@ def check_gh_status() -> None:
 
 # Use gh to get information about the pull request.
 def get_pr_json(pr_num: str, repo: str) -> dict:
-    args = ["gh", "pr", "view", pr_num, "--repo", repo, "--json", "body,files,title"]
+    args = [
+        "gh",
+        "pr",
+        "view",
+        pr_num,
+        "--repo",
+        repo,
+        "--json",
+        "body,files,reviews,title",
+    ]
     logger.debug(f"Running `{shlex.join(args)}`")
     try:
         p = subprocess.run(
@@ -74,6 +86,70 @@ def get_pr_json(pr_num: str, repo: str) -> dict:
         f"Response from server for pull request #{pr_num}:\n{json.dumps(j, indent=4)}"
     )
     return j
+
+
+# Use the api to get a list of members for a team.
+def get_team_members(org: str, team_name: str) -> set:
+    args = [
+        "gh",
+        "api",
+        "-H",
+        "Accept: application/vnd.github+json",
+        "-H",
+        "X-GitHub-Api-Version: 2022-11-28",
+        f"/orgs/{org}/teams/{team_name}/members",
+    ]
+    logger.debug(f"Running `{shlex.join(args)}`")
+    try:
+        p = subprocess.run(
+            args,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as error:
+        logger.error(
+            f"Check error. Failure fetching team members\ncmd:{shlex.join(error.cmd)}\ncode:{error.returncode}\nstdout:{error.stdout}\nstderr:{error.stderr}"
+        )
+        sys.exit(1)
+    j = json.loads(p.stdout)
+    logger.debug(
+        f"Response from server for team {team_name}:\n{json.dumps(j, indent=4)}"
+    )
+    return j
+
+
+# Check that a pull review has approving reviews from a set of teams.
+def has_required_reviews(input_json: dict, teams_required: set[str]) -> bool:
+    # Get the members of each time, and map to their logins.
+    login_lookup = dict()
+    for team_name in teams_required:
+        team_json = get_team_members(ARM_ORG_NAME, team_name)
+        for entry in team_json:
+            # This assumes a user can't belong to both teams.
+            login_lookup[entry["login"]] = team_name
+
+    # Get the corresponding team for each approved review.
+    teams_remaining = teams_required.copy()
+    for review in input_json["reviews"]:
+        if review["state"] == "APPROVED":
+            reviewer_login = review["author"]["login"]
+            if reviewer_login in login_lookup:
+                reviewer_team = login_lookup[reviewer_login]
+                logger.info(
+                    f"Pull request has been approved by {reviewer_login} from the {reviewer_team} team."
+                )
+                if reviewer_team in teams_remaining:
+                    teams_remaining.remove(reviewer_team)
+
+    if len(teams_remaining) == 0:
+        logger.info("Pull request has been reviewed by all required teams.")
+        return True
+    else:
+        logger.info(
+            f"Pull request has not been reviewed by all required teams, missing: {teams_remaining}."
+        )
+        return False
 
 
 # Check that a value matches a valid issue.
@@ -225,10 +301,16 @@ def main():
                 )
                 sys.exit(1)
             else:
-                logger.info(
-                    f"Check passed. Pull request #{args.pr} contains downstream changes, and a correctly formatted link to a downstream tracking issue."
-                )
-                sys.exit(0)
+                if has_required_reviews(pr_json, REQUIRED_TEAM_APPROVALS):
+                    logger.info(
+                        f"Check passed. Pull request #{args.pr} contains downstream changes, a correctly formatted link to a downstream tracking issue, and has been reviewed by both teams."
+                    )
+                    sys.exit(0)
+                else:
+                    logger.info(
+                        f"Check failed. Pull request #{args.pr} contains downstream changes, and a correctly formatted link to a downstream tracking issue, but has not been reviewed by both teams."
+                    )
+                    sys.exit(1)
     else:
         if issue_num is None:
             logger.info(
