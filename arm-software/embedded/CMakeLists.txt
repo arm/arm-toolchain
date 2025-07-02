@@ -742,6 +742,15 @@ install(
 )
 
 install(
+    FILES
+        ../docs/arm-toolchain-features.md
+        ../docs/arm-toolchain-for-embedded-features.md
+        ../docs/elf2bin.md
+    DESTINATION docs
+    COMPONENT llvm-toolchain-docs
+)
+
+install(
     DIRECTORY docs
     DESTINATION .
     COMPONENT llvm-toolchain-docs
