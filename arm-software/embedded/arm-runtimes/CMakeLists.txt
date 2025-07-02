@@ -86,8 +86,12 @@ set(STACK_SIZE ${STACK_SIZE_def} CACHE STRING "")
 set(ENABLE_EXCEPTIONS ${ENABLE_EXCEPTIONS_def} CACHE BOOL "Enable C++ exceptions.")
 set(ENABLE_RTTI ${ENABLE_RTTI_def} CACHE BOOL "Enable C++ exceptions.")
 
-set(PICOLIBC_BUILD_TYPE ${PICOLIBC_BUILD_TYPE_def} CACHE STRING "Picolibc configuration to use.")
-set_property(CACHE PICOLIBC_BUILD_TYPE PROPERTY STRINGS minsize release)
+set(SUPPORTED_LIBRARY_BUILD_TYPES minsize release)
+if(NOT LIBRARY_BUILD_TYPE_def IN_LIST SUPPORTED_LIBRARY_BUILD_TYPES)
+    message(FATAL_ERROR "Unsupported LIBRARY_BUILD_TYPE value. Supported values are: minsize, release.")
+endif()
+set(LIBRARY_BUILD_TYPE ${LIBRARY_BUILD_TYPE_def} CACHE STRING "Build type to use in library builds.")
+set_property(CACHE LIBRARY_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_LIBRARY_BUILD_TYPES})
 
 set(ENABLE_CXX_LIBS ${ENABLE_CXX_LIBS_def} CACHE BOOL "Build CXX libs")
 set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
@@ -220,6 +224,14 @@ add_custom_target(clib-configure)
 add_custom_target(clib-build)
 add_custom_target(clib-install)
 
+# At this point it's been asserted that LIBRARY_BUILD_TYPE value is valid.
+if(LIBRARY_BUILD_TYPE STREQUAL minsize)
+    set(LIBRARY_CMAKE_BUILD_TYPE MinSizeRel)
+elseif(LIBRARY_BUILD_TYPE STREQUAL release)
+    set(LIBRARY_CMAKE_BUILD_TYPE Release)
+endif()
+set(LIBRARY_MESON_BUILD_TYPE ${LIBRARY_BUILD_TYPE})
+
 ###############################################################################
 # compiler-rt
 ###############################################################################
@@ -286,7 +298,7 @@ ExternalProject_Add(
     -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
     -DCMAKE_ASM_COMPILER_TARGET=${target_triple}
     -DCMAKE_ASM_FLAGS=${lib_compile_flags}
-    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_BUILD_TYPE=${LIBRARY_CMAKE_BUILD_TYPE}
     -DCMAKE_CXX_COMPILER=${LLVM_BINARY_DIR}/bin/clang++${CMAKE_EXECUTABLE_SUFFIX}
     -DCMAKE_CXX_COMPILER_TARGET=${target_triple}
     -DCMAKE_CXX_FLAGS=${lib_compile_flags}
@@ -368,7 +380,7 @@ if(C_LIBRARY STREQUAL picolibc)
         set(MESON_INSTALL_QUIET "--quiet")
     endif()
 
-    if(PICOLIBC_BUILD_TYPE MATCHES "minsize")
+    if(LIBRARY_BUILD_TYPE MATCHES "minsize")
         set(newlib_nano_malloc "true")
     else()
         set(newlib_nano_malloc "false")
@@ -425,7 +437,7 @@ if(C_LIBRARY STREQUAL picolibc)
             -Dtests=false
             --prefix <INSTALL_DIR>
             --cross-file ${CMAKE_CURRENT_BINARY_DIR}/meson-cross-build.txt
-            --buildtype=${PICOLIBC_BUILD_TYPE}
+            --buildtype=${LIBRARY_MESON_BUILD_TYPE}
             <SOURCE_DIR>
         BUILD_COMMAND ${MESON_EXECUTABLE} compile
         INSTALL_COMMAND ${MESON_EXECUTABLE} install ${MESON_INSTALL_QUIET}
@@ -527,7 +539,11 @@ if(C_LIBRARY MATCHES "^newlib")
                 --enable-newlib-global-atexit)
         endif()
     else()
-        set(newlib_optim_flags "-Os")
+        if(LIBRARY_BUILD_TYPE STREQUAL minsize)
+            set(newlib_optim_flags "-Os")
+        elseif(LIBRARY_BUILD_TYPE STREQUAL release)
+            set(newlib_optim_flags "-O3")
+        endif()
         set(newlib_flags
             --enable-newlib-io-long-long
             --enable-newlib-register-fini
@@ -627,7 +643,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DCMAKE_ASM_COMPILER=${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_ASM_COMPILER_TARGET=${target_triple}
         -DCMAKE_ASM_FLAGS=${lib_compile_flags}
-        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_BUILD_TYPE=${LIBRARY_CMAKE_BUILD_TYPE}
         -DCMAKE_CXX_COMPILER=${LLVM_BINARY_DIR}/bin/clang++${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_CXX_COMPILER_TARGET=${target_triple}
         -DCMAKE_CXX_FLAGS=${lib_compile_flags}
@@ -804,7 +820,7 @@ if(ENABLE_CXX_LIBS)
         ${compiler_launcher_cmake_args}
         -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_ASM_FLAGS=${lib_compile_flags}
-        -DCMAKE_BUILD_TYPE=MinSizeRel
+        -DCMAKE_BUILD_TYPE=${LIBRARY_CMAKE_BUILD_TYPE}
         -DCMAKE_CXX_COMPILER=${LLVM_BINARY_DIR}/bin/clang++${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_CXX_COMPILER_TARGET=${target_triple}
         -DCMAKE_CXX_FLAGS=${lib_compile_flags}

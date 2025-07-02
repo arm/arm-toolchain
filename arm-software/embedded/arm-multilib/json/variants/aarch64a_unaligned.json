@@ -15,10 +15,10 @@
             "FLASH_SIZE": "0xfff000",
             "RAM_ADDRESS": "0x41000000",
             "RAM_SIZE": "0x1000000",
-            "STACK_SIZE": "8K"
+            "STACK_SIZE": "8K",
+            "LIBRARY_BUILD_TYPE": "release"
         },
         "picolibc": {
-            "PICOLIBC_BUILD_TYPE": "release",
             "ENABLE_CXX_LIBS": "ON",
             "ENABLE_LIBC_TESTS": "ON",
             "ENABLE_COMPILER_RT_TESTS": "ON",
