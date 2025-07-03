@@ -32,6 +32,9 @@ logger = logging.getLogger(__name__)
 MERGE_IGNORE_PATHSPEC_FILE = Path(__file__).parent / ".automerge_ignore"
 ARM_ORG_NAME = "arm"
 REQUIRED_TEAM_APPROVALS = {"arm-toolchain-embedded", "arm-toolchain-linux"}
+HELP_COMMENT_TEXT = """This pull review modifies files outside of the `arm-software` directory, so please ensure it follows the [Downstream Patch Policy](https://github.com/arm/arm-toolchain/blob/arm-software/CONTRIBUTING.md#downstream-patch-policy).
+An automated check will test if the tagging requirements have been met. In addition, approved reviews from both Arm Toolchain for Embedded and Arm Toolchain for Linux teams will be required before this check will pass."""
+DOWNSTREAM_CHANGE_LABEL = "downstream-change"
 
 
 # Check gh is working before using it
@@ -66,7 +69,7 @@ def get_pr_json(pr_num: str, repo: str) -> dict:
         "--repo",
         repo,
         "--json",
-        "body,files,reviews,title",
+        "body,comments,files,labels,reviews,title",
     ]
     logger.debug(f"Running `{shlex.join(args)}`")
     try:
@@ -256,6 +259,91 @@ def find_pr_issue(input_json: dict) -> str:
     return issue_num
 
 
+# Add a label to a pull request.
+def add_pr_label(pr_num: str, repo: str, input_json: dict) -> None:
+    # Check if the issue is already labelled.
+    for label_json in input_json["labels"]:
+        if label_json["name"] == DOWNSTREAM_CHANGE_LABEL:
+            return
+    args = [
+        "gh",
+        "pr",
+        "edit",
+        pr_num,
+        "--repo",
+        repo,
+        "--add-label",
+        DOWNSTREAM_CHANGE_LABEL,
+    ]
+    logger.debug(f"Running `{shlex.join(args)}`")
+    try:
+        p = subprocess.run(
+            args,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as error:
+        logger.error(
+            f"Check error. Failure adding pr label\ncmd:{shlex.join(error.cmd)}\ncode:{error.returncode}\nstdout:{error.stdout}\nstderr:{error.stderr}"
+        )
+        sys.exit(1)
+
+
+# Add a label to an issue.
+def add_issue_label(issue_num: str, repo: str, input_json: dict) -> None:
+    # Check if the issue is already labelled.
+    for label_json in input_json["labels"]:
+        if label_json["name"] == DOWNSTREAM_CHANGE_LABEL:
+            return
+    args = [
+        "gh",
+        "issue",
+        "edit",
+        issue_num,
+        "--repo",
+        repo,
+        "--add-label",
+        DOWNSTREAM_CHANGE_LABEL,
+    ]
+    logger.debug(f"Running `{shlex.join(args)}`")
+    try:
+        p = subprocess.run(
+            args,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as error:
+        logger.error(
+            f"Check error. Failure adding issue label\ncmd:{shlex.join(error.cmd)}\ncode:{error.returncode}\nstdout:{error.stdout}\nstderr:{error.stderr}"
+        )
+        sys.exit(1)
+
+
+# Add a comment explaining the additional requirements for downstream changes
+def add_help_comment(pr_num: str, repo: str, input_json: dict) -> None:
+    # Check if the comment has already been made first, so as to repost
+    # every time the script runs.
+    for comment_json in input_json["comments"]:
+        if comment_json["body"] == HELP_COMMENT_TEXT:
+            return
+    args = ["gh", "pr", "comment", pr_num, "--repo", repo, "--body", HELP_COMMENT_TEXT]
+    logger.debug(f"Running `{shlex.join(args)}`")
+    try:
+        p = subprocess.run(
+            args,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError as error:
+        logger.error(
+            f"Check error. Failure adding comment\ncmd:{shlex.join(error.cmd)}\ncode:{error.returncode}\nstdout:{error.stdout}\nstderr:{error.stderr}"
+        )
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -289,6 +377,8 @@ def main():
 
     link_text = "Please check https://github.com/arm/arm-toolchain/blob/arm-software/CONTRIBUTING.md#downstream-patch-policy for information on the downstream patch policy and how changes need to be tracked."
     if needs_tagging:
+        add_pr_label(args.pr, args.repo, pr_json)
+        add_help_comment(args.pr, args.repo, pr_json)
         if issue_num is None:
             logger.info(
                 f"Check failed. Pull request #{args.pr} contains downstream changes, but does not have a correctly formatted link to a downstream tracking issue. {link_text}"
@@ -301,6 +391,7 @@ def main():
                 )
                 sys.exit(1)
             else:
+                add_issue_label(args.pr, args.repo, pr_json)
                 if has_required_reviews(pr_json, REQUIRED_TEAM_APPROVALS):
                     logger.info(
                         f"Check passed. Pull request #{args.pr} contains downstream changes, a correctly formatted link to a downstream tracking issue, and has been reviewed by both teams."
