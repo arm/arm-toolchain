@@ -145,6 +145,8 @@ The `build.sh` script reads the following environment variables:
   (default: `arm-software/linux/mkmoduledirs.sh.var`)
 - `SOURCES_DIR` - The directory where all source code will be stored
   (default: the top level of the cloned git repository)
+- `BOLTTESTS_DIR` - The **optional** directory where the bolt-tests repo has been cloned
+  (default: `arm-software/linux/bolt-tests`)
 - `LIBRARIES_DIR` - The **optional** directory where the ArmPL veclibs will be stored
   (default: `arm-software/linux/lib`)
 - `PATCHES_DIR` - The **optional** directory where all patches will be stored
@@ -175,5 +177,5 @@ The `build.sh` script reads the following environment variables:
 Particular attention must be paid when doing a release build, the
 `RELEASE_FLAGS` and `ATFL_ASSERTIONS` variables must be set correctly.
 
-The optional directories (`PATCHES_DIR` and `LIBRARIES_DIR`) will not be used
-if not present.
+The optional directories (`PATCHES_DIR`, `BOLTTESTS_DIR`, `LIBRARIES_DIR`) will
+not be used if not present.

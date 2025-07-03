@@ -15,6 +15,7 @@ SBOM_FILE_PATH=${SBOM_FILE_PATH:-"${BASE_DIR}/SBOM_Files/ATfL-SBOM.spdx.json"}
 MKMODULEDIRS_PATH=${MKMODULEDIRS_PATH:-"${BASE_DIR}/mkmoduledirs.sh.var"}
 SOURCES_DIR=${SOURCES_DIR:-"$(git -C "${BASE_DIR}" rev-parse --show-toplevel)"}
 LIBRARIES_DIR=${LIBRARIES_DIR:-"${BASE_DIR}/lib"}
+BOLTTESTS_DIR=${BOLTTESTS_DIR:-"${BASE_DIR}/bolt-tests"}
 PATCHES_DIR=${PATCHES_DIR:-"${BASE_DIR}/patches"}
 DOCS_DIR=${DOCS_DIR:-"${BASE_DIR}/docs"}
 BUILD_DIR=${BUILD_DIR:-"${BASE_DIR}/build"}
@@ -190,6 +191,8 @@ Environment Variables:
                         (default: ${MKMODULEDIRS_PATH})
     SOURCES_DIR         The directory where all source code will be stored
                         (default: $SOURCES_DIR)
+    BOLTTESTS_DIR       The optional directory where the bolt-tests repo has been cloned
+                        (default: $BOLTTESTS_DIR)
     LIBRARIES_DIR       The optional directory where the ArmPL veclibs will be stored
                         (default: $LIBRARIES_DIR)
     PATCHES_DIR         The optional directory where all patches will be stored
@@ -223,6 +226,14 @@ EOF
 
 libraries_present() {
     if [ "$(ls -A "${LIBRARIES_DIR}")" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+bolttests_present() {
+    if [ "$(ls -A "${BOLTTESTS_DIR}")" ]; then
         return 0
     else
         return 1
@@ -340,10 +351,15 @@ libcpp_build() {
 
 product_build() {
     local extra_flags=""
-    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
-        extra_flags="-DLLVM_APPEND_VC_REV=OFF"
+    if ! bolttests_present; then
+        echo "Bolt tests not present, external Bolt tests will not be executed."
     else
-        extra_flags="-DLLVM_APPEND_VC_REV=ON"
+        extra_flags="${extra_flags} -DLLVM_EXTERNAL_PROJECTS=bolttests -DLLVM_EXTERNAL_BOLTTESTS_SOURCE_DIR=${BOLTTESTS_DIR}"
+    fi
+    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=OFF"
+    else
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=ON"
     fi
 
     mkdir -p "${BUILD_DIR}/stage/product_build"
@@ -361,10 +377,15 @@ product_build() {
 
 shared_lib_build() {
     local extra_flags=""
-    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
-        extra_flags="-DLLVM_APPEND_VC_REV=OFF"
+    if ! bolttests_present; then
+        echo "Bolt tests not present, external Bolt tests will not be executed."
     else
-        extra_flags="-DLLVM_APPEND_VC_REV=ON"
+        extra_flags="${extra_flags} -DLLVM_EXTERNAL_PROJECTS=bolttests -DLLVM_EXTERNAL_BOLTTESTS_SOURCE_DIR=${BOLTTESTS_DIR}"
+    fi
+    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=OFF"
+    else
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=ON"
     fi
 
     mkdir -p "${BUILD_DIR}/stage/shared_lib_build"
