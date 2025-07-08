@@ -729,6 +729,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            -DLIBCXX_LIBC=picolibc
         )
         if(ENABLE_LIBCXX_TESTS)
             set(cxxlibs_lit_args "${LLVM_LIT_ARGS} --xunit-xml-output=results.junit.xml")
@@ -759,6 +760,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            # -DLIBCXX_LIBC=llvm-libc # this breaks libcxxabi build below by adding -nostdlibinc in HandleLibC.cmake - needs a refactoring to enable
             )
             set(lib_compile_flags "${lib_compile_flags} -D_LIBCPP_PRINT=1")
     elseif(C_LIBRARY MATCHES "^newlib")
@@ -772,6 +774,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            -DLIBCXX_LIBC=newlib
         )
 
         if(C_LIBRARY STREQUAL newlib-nano)

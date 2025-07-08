@@ -17,6 +17,7 @@ if (LIBCXX_LIBC STREQUAL "system")
 
 # Link against the in-tree LLVM libc
 elseif (LIBCXX_LIBC STREQUAL "llvm-libc")
+  set(LIBCXX_LIBC_LLVMLIBC 1)
   add_library(libcxx-libc-headers INTERFACE)
   target_link_libraries(libcxx-libc-headers INTERFACE libc-headers)
   if(CXX_SUPPORTS_NOSTDLIBINC_FLAG)
@@ -36,4 +37,13 @@ elseif (LIBCXX_LIBC STREQUAL "llvm-libc")
 
   # TODO: There's no support for building LLVM libc as a shared library yet.
   add_library(libcxx-libc-shared INTERFACE)
+elseif (LIBCXX_LIBC STREQUAL "picolibc")
+  set(LIBCXX_LIBC_PICOLIBC 1)
+  # picolibc is derived from newlib and behaves the same in regards to libc++
+  # so setting both here:
+  # * LIBCXX_LIBC_NEWLIB is used now
+  # * LIBCXX_LIBC_PICOLIBC can be used for further customizations later
+  set(LIBCXX_LIBC_NEWLIB 1)
+elseif (LIBCXX_LIBC STREQUAL "newlib")
+  set(LIBCXX_LIBC_NEWLIB 1)
 endif()

@@ -42,18 +42,6 @@
 #  endif
 #endif
 
-// This is required in order for _NEWLIB_VERSION to be defined in places where we use it.
-// TODO: We shouldn't be including arbitrarily-named headers from libc++ since this can break valid
-//       user code. Move code paths that need _NEWLIB_VERSION to another customization mechanism.
-#if __has_include(<picolibc.h>)
-#  include <picolibc.h>
-#endif
-
-// Downstream issue: 378 (Include newlib.h to define _NEWLIB_VERSION)
-#if __has_include(<newlib.h>)
-#  include <newlib.h>
-#endif
-
 #ifndef __BYTE_ORDER__
 #  error                                                                                                               \
       "Your compiler doesn't seem to define __BYTE_ORDER__, which is required by libc++ to know the endianness of your target platform"
