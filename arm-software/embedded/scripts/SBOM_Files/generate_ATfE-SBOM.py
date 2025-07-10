@@ -67,9 +67,13 @@ URL_NEWLIB_COPYING_LIBGLOSS = (
     "https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.LIBGLOSS;hb=HEAD"
 )
 
+URL_ZLIB = "https://zlib.net"
+URL_ZLIB_LICENSE = "https://zlib.net/zlib_license.html"
+
 EMAIL_ID_ARM_OSO = "open-source-office@arm.com"
 EMAIL_ID_LLVM_PROJECT = "info@llvm.org"
 EMAIL_ID_NEWLIB = "newlib@sourceware.org"
+EMAIL_ID_ZLIB = "jloup@gzip.org;madler@alumni.caltech.edu"
 
 SPDX_VERSION = "SPDX-2.3"
 STRING_SPDX_ID = "SPDXRef-DOCUMENT"
@@ -107,6 +111,7 @@ dict_details_SBOM = {
             "libcxxabi",
             "libunwind",
             "picolibc",
+            "zlib",
         ],
     },
     STRING_LLVM_LIBC_OVERLAY: {
@@ -220,6 +225,14 @@ dict_source_details = {
         + URL_NEWLIB_COPYING_NEWLIB
         + " and "
         + URL_NEWLIB_COPYING_LIBGLOSS,
+    ],
+    "zlib": [
+        URL_ZLIB,
+        ActorType.PERSON,
+        "Jean-loup Gailly and Mark Adler",
+        EMAIL_ID_ZLIB,
+        "",
+        f"Detailed license at: {URL_ZLIB_LICENSE}",
     ],
 }
 
