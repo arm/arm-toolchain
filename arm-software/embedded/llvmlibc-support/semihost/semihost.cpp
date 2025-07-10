@@ -81,7 +81,7 @@ bool __llvm_libc_timespec_get_active(struct timespec *ts) {
 
 bool __llvm_libc_timespec_get_utc(struct timespec *ts) {
   long retval = semihosting_call(SYS_TIME, 0);
-
+  
   // Semihosting uses seconds
   ts->tv_sec = retval;
   ts->tv_nsec = 0;
