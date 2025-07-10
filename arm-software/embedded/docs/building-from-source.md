@@ -102,6 +102,10 @@ cmake .. -GNinja -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=../repos/picolibc
 ninja llvm-toolchain
 ```
 
+You can also use an external `llvm-project` repository checkout with
+`-DLLVMPROJECT_SOURCE_DIR=<path>`, however it might be incompatible with and/or
+miss features provided in the `arm-toolchain` project.
+
 ### Testing the toolchain
 
 ```

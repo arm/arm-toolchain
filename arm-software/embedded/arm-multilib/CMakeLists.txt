@@ -17,7 +17,7 @@ project(arm-multilib)
 # Root directory of the ATfE CMake scripts.
 set(TOOLCHAIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 # Root directory of the llvm-project source.
-set(llvmproject_src_dir ${TOOLCHAIN_SOURCE_DIR}/../..)
+set(llvmproject_src_dir ${LLVMPROJECT_SOURCE_DIR})
 
 # Cache variables to be set by user
 set(MULTILIB_JSON "" CACHE STRING "JSON file to load library definitions from.")
@@ -243,6 +243,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 -DC_LIBRARY=${C_LIBRARY}
                 -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                 -DPROJECT_PREFIX=${PROJECT_PREFIX}
+                -DLLVMPROJECT_SOURCE_DIR=${LLVMPROJECT_SOURCE_DIR}
                 STEP_TARGETS build install
                 USES_TERMINAL_CONFIGURE FALSE
                 USES_TERMINAL_BUILD TRUE
