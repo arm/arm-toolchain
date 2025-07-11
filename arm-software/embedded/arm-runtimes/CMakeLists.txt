@@ -640,7 +640,7 @@ endif()
 
 if(C_LIBRARY STREQUAL llvmlibc)
     if(ENABLE_LIBC_TESTS)
-        set(test_cmd "qemu-system-arm -M mps2-an500 -semihosting -nographic -device loader$<COMMA>file=@BINARY@")
+        set(test_cmd "qemu-system-arm -M ${QEMU_MACHINE} -semihosting -nographic -device loader$<COMMA>file=@BINARY@")
         set(
             llvm_libc_test_cmake_args
             -DLIBC_TEST_EXTRA_LINK_OPTIONS=${test_link_flags}
@@ -691,7 +691,6 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
         -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
         -DLLVM_ENABLE_RUNTIMES=libc
-        # -DLLVM_INCLUDE_TESTS=OFF # llvmlibc's tests require C++, so can't be built until llvmlibc can support libc++
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
         ${llvm_libc_test_cmake_args}
@@ -729,6 +728,13 @@ if(C_LIBRARY STREQUAL llvmlibc)
         CMAKE_ARGS
         ${compiler_launcher_cmake_args}
         ${common_llvmlibc_cmake_args}
+        -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
+        -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
+        -DFLASH_ADDRESS=${FLASH_ADDRESS}
+        -DFLASH_SIZE=${FLASH_SIZE}
+        -DRAM_ADDRESS=${RAM_ADDRESS}
+        -DRAM_SIZE=${RAM_SIZE}
+        -DSTACK_SIZE=${STACK_SIZE}
         STEP_TARGETS build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE

@@ -38,18 +38,18 @@
  * llvm-libc uses different linker defined symbols for heap placement.
  */
 
-/* Hard-coded for Cortex-M7 (mps2-an500) */
+/* TODO: could we just use the picolibc.ld.in file with the one modification? */
 MEMORY
 {
         boot_flash (rx!w) :
-                ORIGIN = 0x00000000,
-                LENGTH = 0x3000
+                ORIGIN = DEFINED(@PREFIX@__boot_flash) ? @PREFIX@__boot_flash : @BOOT_FLASH_ADDRESS@,
+		LENGTH = DEFINED(@PREFIX@__boot_flash_size) ? @PREFIX@__boot_flash_size : @BOOT_FLASH_SIZE@
         flash (rx!w) :
-                ORIGIN = 0x60000000,
-                LENGTH = 0x600000
+                ORIGIN = DEFINED(@PREFIX@__flash) ? @PREFIX@__flash : @FLASH_ADDRESS@,
+		LENGTH = DEFINED(@PREFIX@__flash_size) ? @PREFIX@__flash_size : @FLASH_SIZE@
         ram (w!rx) :
-                ORIGIN = 0x60600000,
-                LENGTH = 0xa00000
+		ORIGIN = DEFINED(@PREFIX@__ram) ? @PREFIX@__ram : @RAM_ADDRESS@,
+		LENGTH = DEFINED(@PREFIX@__ram_size) ? @PREFIX@__ram_size : @RAM_SIZE@
 }
 
 PHDRS
