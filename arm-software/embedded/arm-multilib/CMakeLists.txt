@@ -48,6 +48,7 @@ set(
     fvp/get_fvps.sh"
 )
 set(FVP_CONFIG_DIR "${TOOLCHAIN_SOURCE_DIR}/fvp/config" CACHE STRING "The directory in which the FVP models are installed.")
+option(ENABLE_MULTILIB_HEADER_OPTIMISATION "Enable multilib header optimisation phase" ON)
 option(
     ENABLE_PARALLEL_LIB_CONFIG
     "Run the library variant configuration steps in parallel."
@@ -185,10 +186,12 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 set(parent_dir_name arm-none-eabi)
             endif()
             set(destination_directory "${CMAKE_CURRENT_BINARY_DIR}/multilib/${parent_dir_name}/${variant}")
-            install(
-                DIRECTORY ${destination_directory}
-                DESTINATION ${parent_dir_name}
-            )
+            if(NOT ENABLE_MULTILIB_HEADER_OPTIMISATION)
+                install(
+                    DIRECTORY ${destination_directory}
+                    DESTINATION ${parent_dir_name}
+                )
+            endif()
             set(variant_json_file ${CMAKE_CURRENT_SOURCE_DIR}/json/variants/${variant_json})
 
             # Read info from the variant specific json.
@@ -250,6 +253,8 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 CONFIGURE_HANDLED_BY_BUILD TRUE
                 TEST_EXCLUDE_FROM_MAIN TRUE
             )
+
+            list(APPEND all_runtime_targets runtimes-${variant})
 
             if(ENABLE_PARALLEL_LIB_CONFIG OR ENABLE_PARALLEL_LIB_BUILD)
                 # Create additional steps to configure/build the subprojects.
@@ -337,6 +342,9 @@ foreach(lib_idx RANGE ${lib_count_dec})
             foreach(flag ${multilib_flags_list})
                 string(APPEND multilib_yaml_content "  - ${flag}\n")
             endforeach()
+            string(APPEND multilib_yaml_content "  IncludePath:\n")
+            string(APPEND multilib_yaml_content "  - ${parent_dir_name}/include\n")
+            string(APPEND multilib_yaml_content "  - ${parent_dir_name}/${variant}/include\n")
             string(APPEND multilib_yaml_content "  Group: stdlibs\n")
         else()
             # In place of a json, an error message is expected.
@@ -353,6 +361,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
     endif()
 
 endforeach()
+
 
 # Multilib file is generated in two parts.
 # 1. Template is filled with multilib flags from json
@@ -390,3 +399,19 @@ install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/multilib/multilib.yaml
     DESTINATION .
 )
+
+# Extract common header files which spans across multilib variant directories.
+if(ENABLE_MULTILIB_HEADER_OPTIMISATION)
+    add_custom_target(generate-multilib-common-headers ALL
+        COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/common-headers-generate.py"
+                "${CMAKE_CURRENT_BINARY_DIR}/multilib"
+                "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised"
+        COMMENT "Generating common headers"
+	DEPENDS ${all_runtime_targets}
+    )
+
+    install(
+                DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised/"
+                DESTINATION .
+    )
+endif()
