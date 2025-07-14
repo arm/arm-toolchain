@@ -1,0 +1,8 @@
+# RUN: %clang -print-multi-directory --target=arm-none-eabi -march=armv7a 2>%t | FileCheck --check-prefix=NORWPI --allow-empty %s
+# NORWPI: arm-none-eabi/armv7a_soft_vfpv3_d16_exn_rtti_unaligned{{$}}
+
+# RUN: not %clang -print-multi-directory --target=arm-none-eabi -march=armv7a -frwpi 2>%t | FileCheck --check-prefix=RWPI --allow-empty %s
+# RUN: FileCheck --check-prefix=RWPI_ERR %s < %t
+# RWPI-NOT: arm-none-eabi
+# RWPI_ERR: clang: error: multilib configuration error: Arm Toolchain for Embedded does not provide RWPI library variants
+
