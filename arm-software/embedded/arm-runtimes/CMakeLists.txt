@@ -161,7 +161,7 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
         set(test_link_flags "-nostartfiles -l${picocrt} -lsemihost -T picolibcpp.ld")
     elseif(C_LIBRARY STREQUAL "llvmlibc")
         if(TEST_EXECUTOR STREQUAL qemu)
-            set(test_link_flags "-nostartfiles -lcrt0-semihost -lsemihost -T llvmlibc.ld")
+            # Flags will be directly passed into LLVM-libc
         else()
             message(FATAL_ERROR "Using LLVM-libc and FVPs together is unsupported")
         endif()
@@ -639,16 +639,7 @@ endif()
 ###############################################################################
 
 if(C_LIBRARY STREQUAL llvmlibc)
-    if(ENABLE_LIBC_TESTS)
-        set(test_cmd "qemu-system-arm -M ${QEMU_MACHINE} -semihosting -nographic -device loader$<COMMA>file=@BINARY@")
-        set(
-            llvm_libc_test_cmake_args
-            -DLIBC_TEST_EXTRA_LINK_OPTIONS=${test_link_flags}
-            -DLIBC_TEST_CMD=${test_cmd}
-            -DLIBC_TEST_HERMETIC_ONLY=true
-        )
-    endif()
-
+    set(test_cmd "qemu-system-arm -M ${QEMU_MACHINE} -semihosting -nographic -device loader$<COMMA>file=@BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
 
     set(common_llvmlibc_cmake_args
@@ -693,7 +684,9 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_ENABLE_RUNTIMES=libc
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
-        ${llvm_libc_test_cmake_args}
+        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=-nostartfiles,-lcrt0-semihost,-lsemihost,-T,llvmlibc.ld
+        -DLIBC_TEST_CMD=${test_cmd}
+        -DLIBC_TEST_HERMETIC_ONLY=true
         STEP_TARGETS configure build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
