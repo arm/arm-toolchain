@@ -67,14 +67,14 @@ def extract_common_headers_for_targets(args):
             )
             continue
 
-        os.makedirs(output_include_dir, exist_ok=True)
-
         variant_includes = collect_variant_include_paths(input_target_dir)
         if len(variant_includes) < 2:
             print(
                 f"Skipping extracing the common headers for {target}: not enough variants to compare.At least two variants must be enabled for the multilib header optimisation phase to proceed."
             )
             return
+
+        os.makedirs(output_include_dir, exist_ok=True)
 
         # Step 1: compare first two variants and extract the common headers into the targets common include directory
         base_dir = list(variant_includes.values())[0]
