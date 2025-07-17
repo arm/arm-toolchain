@@ -134,7 +134,7 @@ def extract_common_headers_for_targets(args):
         if os.path.exists(src_yaml):
             shutil.copy2(src_yaml, dst_yaml)
         else:
-            print(f"Warning: {src_yaml} does not exist.")
+            raise FileNotFoundError(f"Source yaml '{src_yaml}' does not exist.")
 
 
 def main():

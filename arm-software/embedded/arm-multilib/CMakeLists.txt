@@ -362,7 +362,6 @@ foreach(lib_idx RANGE ${lib_count_dec})
 
 endforeach()
 
-
 # Multilib file is generated in two parts.
 # 1. Template is filled with multilib flags from json
 configure_file(
@@ -407,11 +406,11 @@ if(ENABLE_MULTILIB_HEADER_OPTIMISATION)
                 "${CMAKE_CURRENT_BINARY_DIR}/multilib"
                 "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised"
         COMMENT "Generating common headers"
-	DEPENDS ${all_runtime_targets}
+        DEPENDS ${all_runtime_targets} multilib-yaml
     )
 
     install(
-                DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised/"
-                DESTINATION .
+        DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised/"
+        DESTINATION .
     )
 endif()
