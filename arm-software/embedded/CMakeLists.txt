@@ -384,7 +384,7 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
 
     install(
       DIRECTORY
-      ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/src
+      ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/
       DESTINATION samples
       COMPONENT llvm-toolchain-llvmlibc-configs
     )
