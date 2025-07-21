@@ -323,7 +323,7 @@ def add_issue_label(issue_num: str, repo: str, input_json: dict) -> None:
 
 # Add a comment explaining the additional requirements for downstream changes
 def add_help_comment(pr_num: str, repo: str, input_json: dict) -> None:
-    # Check if the comment has already been made first, so as to repost
+    # Check if the comment has already been made first, so as not to repost
     # every time the script runs.
     for comment_json in input_json["comments"]:
         if comment_json["body"] == HELP_COMMENT_TEXT:

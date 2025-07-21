@@ -35,9 +35,7 @@ jobs:
   check-downstream-changes:
     runs-on: ubuntu-24.04-arm
 
-    if: github.repository == 'arm/arm-toolchain' &&
-      (github.event.pull_request.base.ref == 'arm-software' ||
-      startsWith(github.event.pull_request.base.ref, 'release/arm-software/')
+    if: github.repository == 'arm/arm-toolchain' && (github.event.pull_request.base.ref == 'arm-software' || startsWith(github.event.pull_request.base.ref, 'release/arm-software/'))
 
     steps:
       - name: Checkout
