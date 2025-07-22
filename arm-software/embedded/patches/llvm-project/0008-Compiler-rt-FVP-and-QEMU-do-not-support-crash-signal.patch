@@ -1,0 +1,26 @@
+From 8a5771253787cda5c8caa31b7e8a870840903084 Mon Sep 17 00:00:00 2001
+From: Simi Pallipurath <simi.pallipurath@arm.com>
+Date: Tue, 22 Jul 2025 15:08:45 +0100
+Subject: [Compiler-rt] FVP and QEMU do not support crash signal handling.
+
+---
+ compiler-rt/test/builtins/Unit/aarch64/emupac.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/compiler-rt/test/builtins/Unit/aarch64/emupac.c b/compiler-rt/test/builtins/Unit/aarch64/emupac.c
+index 2140944b0eec..f3b8bb234f38 100644
+--- a/compiler-rt/test/builtins/Unit/aarch64/emupac.c
++++ b/compiler-rt/test/builtins/Unit/aarch64/emupac.c
+@@ -2,6 +2,9 @@
+ // RUN: %clang_builtins %s %librt -o %t
+ // RUN: %run %t 1
+ // RUN: %run %t 2
++// Some test runners(FVP and QEMU) can not handle crash-related signals.
++// TODO: A new LIT feature is needed to identify and handle this scenario.
++// XFAIL: *
+ // RUN: %expect_crash %run %t 3
+ // RUN: %expect_crash %run %t 4
+ 
+-- 
+2.34.1
+

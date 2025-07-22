@@ -1,0 +1,38 @@
+From be2b0fe15e9717ddb4a75b0cd4e30b22ab614124 Mon Sep 17 00:00:00 2001
+From: Simi Pallipurath <simi.pallipurath@arm.com>
+Date: Tue, 22 Jul 2025 15:10:20 +0100
+Subject: [Clang] XFAIL tests with -frwpi as ATFE don't have an appropriate
+ supporting library.
+
+---
+ clang/test/Driver/ropi-rwpi.c                | 1 +
+ clang/test/Preprocessor/arm-pic-predefines.c | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/clang/test/Driver/ropi-rwpi.c b/clang/test/Driver/ropi-rwpi.c
+index c925346d4a02..dafef6d7b9ff 100644
+--- a/clang/test/Driver/ropi-rwpi.c
++++ b/clang/test/Driver/ropi-rwpi.c
+@@ -28,6 +28,7 @@
+ // RUN: %clang -target arm-none-eabi -march=armv8m.main -frwpi -mcmse -fallow-unsupported -### -c %s 2>&1 | FileCheck --check-prefix=RWPI-CMSE-ALLOW-UNSUPPORTED --check-prefix=ROPI-CMSE-ALLOW-UNSUPPORTED  %s
+ // RUN: %clang -target arm-none-eabi -march=armv8m.main -fropi -mcmse -fallow-unsupported -### -c %s 2>&1 | FileCheck --check-prefix=ROPI-CMSE-ALLOW-UNSUPPORTED  %s
+ // RUN: %clang -target arm-none-eabi -march=armv8m.main -frwpi -fropi -mcmse -fallow-unsupported -### -c %s 2>&1 | FileCheck --check-prefix=ROPI-CMSE-ALLOW-UNSUPPORTED --check-prefix=RWPI-CMSE-ALLOW-UNSUPPORTED %s
++// XFAIL: *
+ 
+ 
+ // STATIC: "-mrelocation-model" "static"
+diff --git a/clang/test/Preprocessor/arm-pic-predefines.c b/clang/test/Preprocessor/arm-pic-predefines.c
+index 9082d7948511..e79701417b52 100644
+--- a/clang/test/Preprocessor/arm-pic-predefines.c
++++ b/clang/test/Preprocessor/arm-pic-predefines.c
+@@ -4,6 +4,7 @@
+ // RUN: %clang -target armv8--none-eabi   -x c -E -dM %s -o - -fropi        | FileCheck %s --check-prefix=ROPI    --check-prefix=NO-RWPI
+ // RUN: %clang -target armv8--none-eabi   -x c -E -dM %s -o - -frwpi        | FileCheck %s --check-prefix=NO-ROPI --check-prefix=RWPI
+ // RUN: %clang -target armv8--none-eabi   -x c -E -dM %s -o - -fropi -frwpi | FileCheck %s --check-prefix=ROPI    --check-prefix=RWPI
++// XFAIL: *
+ 
+ // Pre-defined macros for position-independence modes
+ 
+-- 
+2.34.1
+
