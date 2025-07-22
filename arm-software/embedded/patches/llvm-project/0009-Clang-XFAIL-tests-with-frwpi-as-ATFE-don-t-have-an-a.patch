@@ -1,6 +1,6 @@
-From 6d9d37fa4be6eb71650ba09238477c8c13497ec5 Mon Sep 17 00:00:00 2001
+From be2b0fe15e9717ddb4a75b0cd4e30b22ab614124 Mon Sep 17 00:00:00 2001
 From: Simi Pallipurath <simi.pallipurath@arm.com>
-Date: Tue, 22 Jul 2025 13:24:53 +0100
+Date: Tue, 22 Jul 2025 15:10:20 +0100
 Subject: [Clang] XFAIL tests with -frwpi as ATFE don't have an appropriate
  supporting library.
 

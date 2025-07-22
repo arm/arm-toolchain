@@ -1,4 +1,4 @@
-From 803bd9c8c37c89798930100208d34aba0c111467 Mon Sep 17 00:00:00 2001
+From 739b8c34980fdb455d2aad417257b3d9584bb266 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Dominik=20W=C3=B3jt?= <dominik.wojt@arm.com>
 Date: Thu, 9 Nov 2023 15:25:14 +0100
 Subject: [libc++] tests with picolibc: XFAIL uses of atomics

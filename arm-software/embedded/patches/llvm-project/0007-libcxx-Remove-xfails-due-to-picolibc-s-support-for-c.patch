@@ -1,8 +1,8 @@
-From 111d7d73c48fbf3cf5b828a1908496425e8fd06e Mon Sep 17 00:00:00 2001
+From ecbccf529b7364027d800b0aa62c8f2e498a3906 Mon Sep 17 00:00:00 2001
 From: Victor Campos <victor.campos@arm.com>
 Date: Thu, 31 Oct 2024 14:03:58 +0000
-Subject: [libcxx] Remove xfails due to picolibc's support for
- char16_t and char32_t
+Subject: [libcxx] Remove xfails due to picolibc's support for char16_t and
+ char32_t
 
 picolibc recently
 ([link](https://github.com/picolibc/picolibc/commit/f6f68758fe2aa62854f49b90c3daeeb08242b512))

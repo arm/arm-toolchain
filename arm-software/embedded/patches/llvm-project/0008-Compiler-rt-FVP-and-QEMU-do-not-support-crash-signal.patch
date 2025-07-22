@@ -1,8 +1,7 @@
-From 9128ef66bf68b106185e375c87d6d9703c48c6c5 Mon Sep 17 00:00:00 2001
+From 8a5771253787cda5c8caa31b7e8a870840903084 Mon Sep 17 00:00:00 2001
 From: Simi Pallipurath <simi.pallipurath@arm.com>
-Date: Tue, 22 Jul 2025 13:23:07 +0100
-Subject: [Compiler-rt] FVP and QEMU do not support crash signal
- handling.
+Date: Tue, 22 Jul 2025 15:08:45 +0100
+Subject: [Compiler-rt] FVP and QEMU do not support crash signal handling.
 
 ---
  compiler-rt/test/builtins/Unit/aarch64/emupac.c | 3 +++
