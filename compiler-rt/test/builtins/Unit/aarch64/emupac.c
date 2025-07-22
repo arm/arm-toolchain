@@ -2,6 +2,9 @@
 // RUN: %clang_builtins %s %librt -o %t
 // RUN: %run %t 1
 // RUN: %run %t 2
+// Some test runners(FVP and QEMU) can not handle crash-related signals.
+// TODO: A new LIT feature is needed to identify and handle this scenario.
+// XFAIL: *
 // RUN: %expect_crash %run %t 3
 // RUN: %expect_crash %run %t 4
 
