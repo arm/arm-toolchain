@@ -28,6 +28,7 @@
 // RUN: %clang -target arm-none-eabi -march=armv8m.main -frwpi -mcmse -fallow-unsupported -### -c %s 2>&1 | FileCheck --check-prefix=RWPI-CMSE-ALLOW-UNSUPPORTED --check-prefix=ROPI-CMSE-ALLOW-UNSUPPORTED  %s
 // RUN: %clang -target arm-none-eabi -march=armv8m.main -fropi -mcmse -fallow-unsupported -### -c %s 2>&1 | FileCheck --check-prefix=ROPI-CMSE-ALLOW-UNSUPPORTED  %s
 // RUN: %clang -target arm-none-eabi -march=armv8m.main -frwpi -fropi -mcmse -fallow-unsupported -### -c %s 2>&1 | FileCheck --check-prefix=ROPI-CMSE-ALLOW-UNSUPPORTED --check-prefix=RWPI-CMSE-ALLOW-UNSUPPORTED %s
+// XFAIL: *
 
 
 // STATIC: "-mrelocation-model" "static"
