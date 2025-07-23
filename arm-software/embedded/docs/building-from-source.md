@@ -149,6 +149,23 @@ The same build directory can be used for both native and MinGW toolchains.
 ## Known limitations
 * Depending on the state of the sources, build errors may occur when
   the latest revisions of the llvm-project & picolibc repos are used.
+* Undefined `__aeabi_mem*` symbols with `-nostdlib`
+  When the `COMPILER_RT_EXCLUDE_LIBC_PROVIDED_ARM_AEABI_BUILTINS` flag is enabled,
+  the following ARM AEABI memory builtins are excluded from the ATFE `compiler-rt` build:
+  ```
+    __aeabi_memcmp
+    __aeabi_memset
+    __aeabi_memcpy
+    __aeabi_memmove
+  ```
+  This flag `COMPILER_RT_EXCLUDE_LIBC_PROVIDED_ARM_AEABI_BUILTINS` is enabled by default when
+  using picolibc and newlib as these functions are provided by the C library in both cases.
+  However, if the toolchain is used with `-nostdlib` and the C library is not linked in, users relying
+  solely on `compiler-rt` will have undefined symbol errors for these AEABI functions. To prevent the
+  generation of thse AEABI function calls by the compiler, pass the following option to the compiler:
+  ```
+  -meabi gnu
+  ```
 
 ## Divergences from upstream
 
