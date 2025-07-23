@@ -23,29 +23,25 @@ on:
       - reopened
       - edited
       - synchronize
-    branches:
-      - arm-software
-      - release/arm-software/**
+  # Trigger whenever a pull request is reviewed to check which
+  # teams have approved.
+  pull_request_review:
+    types:
+      - submitted
+      - edited
+      - dismissed
 
 jobs:
   check-downstream-changes:
     runs-on: ubuntu-24.04-arm
 
-    if: github.repository == 'arm/arm-toolchain'
+    if: github.repository == 'arm/arm-toolchain' && (github.event.pull_request.base.ref == 'arm-software' || startsWith(github.event.pull_request.base.ref, 'release/arm-software/'))
 
     steps:
-      # Generate a token for gh tool
-      - name: Configure Access Token
-        uses: actions/create-github-app-token@v1
-        id: generate-token
-        with:
-          app-id: ${{ secrets.SYNC_APP_ID }}
-          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
-
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Run Check Script
         run: python3 arm-software/ci/check_downstream_changes.py --repo ${{ github.repository }} --pr ${{ github.event.pull_request.number }}
         env:
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
