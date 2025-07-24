@@ -396,10 +396,12 @@ add_custom_command(
 )
 
 add_custom_target(multilib-yaml ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/multilib/multilib.yaml)
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/multilib/multilib.yaml
-    DESTINATION .
-)
+if(NOT ENABLE_MULTILIB_HEADER_OPTIMISATION)
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/multilib/multilib.yaml
+        DESTINATION .
+    )
+endif()
 
 # Extract common header files which spans across multilib variant directories.
 if(ENABLE_MULTILIB_HEADER_OPTIMISATION)

@@ -52,6 +52,9 @@ def collect_variant_include_paths(input_target_dir):
 
 
 def extract_common_headers_for_targets(args):
+    if os.path.exists(args.multilib_optimised_dir):
+        shutil.rmtree(args.multilib_optimised_dir)
+
     for target in MULTILIB_TARGET_DIRS:
         input_target_dir = os.path.join(
             os.path.abspath(args.multilib_non_optimised_dir), target
@@ -70,10 +73,16 @@ def extract_common_headers_for_targets(args):
         variant_includes = collect_variant_include_paths(input_target_dir)
         if len(variant_includes) < 2:
             print(
-                f"Skipping extracing the common headers for {target}: not enough variants to compare.At least two variants must be enabled for the multilib header optimisation phase to proceed."
+                f"Skipping extracting the common headers for {target}: not enough variants to compare.At least two variants must be enabled for the multilib header optimisation phase to proceed."
             )
+            # The script always creates the multilib-optimised folder, even when there's only one variant and no
+            # optimization is applied. In that case, multilib-optimised will just contain a copy of the
+            # single variant from the non-optimised multilib directory.
+            if os.path.exists(args.multilib_non_optimised_dir):
+                shutil.copytree(args.multilib_non_optimised_dir, args.multilib_optimised_dir)
             return
 
+        # Creating the common include headers for each target
         os.makedirs(output_include_dir, exist_ok=True)
 
         # Step 1: compare first two variants and extract the common headers into the targets common include directory
