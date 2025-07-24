@@ -8,8 +8,8 @@
   "repos": {
     "picolibc": {
       "url": "https://github.com/picolibc/picolibc.git",
-      "tagType": "branch",
-      "tag": "main"
+      "tagType": "commithash",
+      "tag": "c0902a4b372c969be10204a9945c2480a395681b"
     },
     "newlib": {
       "url": "https://github.com/bminor/newlib.git",
