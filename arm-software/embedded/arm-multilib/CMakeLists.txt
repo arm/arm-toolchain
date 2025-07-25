@@ -48,7 +48,7 @@ set(
     fvp/get_fvps.sh"
 )
 set(FVP_CONFIG_DIR "${TOOLCHAIN_SOURCE_DIR}/fvp/config" CACHE STRING "The directory in which the FVP models are installed.")
-option(ENABLE_MULTILIB_HEADER_OPTIMISATION "Enable multilib header optimisation phase" ON)
+option(ENABLE_MULTILIB_HEADER_OPTIMISATION "Enable multilib header optimisation phase" OFF)
 option(
     ENABLE_PARALLEL_LIB_CONFIG
     "Run the library variant configuration steps in parallel."

@@ -182,8 +182,11 @@ option(
 
 option(
     ENABLE_MULTILIB_HEADER_OPTIMISATION "Enable multilib header optimisation phase"
-    ON
+    OFF
 )
+if(ENABLE_MULTILIB_HEADER_OPTIMISATION)
+    message(WARNING "ENABLE_MULTILIB_HEADER_OPTIMISATION is not recommended to be enabled. This feature is not fully supported from the toolchain.")
+endif()
 
 # Previously, the LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL option was
 # called LLVM_TOOLCHAIN_NEWLIB_OVERLAY_INSTALL. Detect a setting of
