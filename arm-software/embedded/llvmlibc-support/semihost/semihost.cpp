@@ -10,6 +10,7 @@
 #include "platform.h"
 
 #include <stddef.h>
+#include <time.h>
 
 namespace {
 
@@ -23,12 +24,6 @@ void stdio_open(struct __llvm_libc_stdio_cookie *cookie, int mode) {
 } // namespace
 
 extern "C" {
-
-// LLVM-libc doesn't implement `errno`, assume single-threading
-int *__llvm_libc_errno() {
-  static int internal_err;
-  return &internal_err;
-}
 
 void __llvm_libc_exit(int status) {
 
@@ -72,6 +67,26 @@ ssize_t __llvm_libc_stdio_write(struct __llvm_libc_stdio_cookie *cookie,
 struct __llvm_libc_stdio_cookie __llvm_libc_stdin_cookie;
 struct __llvm_libc_stdio_cookie __llvm_libc_stdout_cookie;
 struct __llvm_libc_stdio_cookie __llvm_libc_stderr_cookie;
+
+bool __llvm_libc_timespec_get_active(struct timespec *ts) {
+  long retval = semihosting_call(SYS_CLOCK, 0);
+  if (retval == -1)
+    return false;
+
+  // Semihosting uses centiseconds
+  ts->tv_sec = (retval / 100);
+  ts->tv_nsec = (retval % 100) * (1'000'000'000 / 100);
+  return true;
+}
+
+bool __llvm_libc_timespec_get_utc(struct timespec *ts) {
+  long retval = semihosting_call(SYS_TIME, 0);
+
+  // Semihosting uses seconds
+  ts->tv_sec = retval;
+  ts->tv_nsec = 0;
+  return true;
+}
 
 // Entry point
 void _platform_init(void) {
