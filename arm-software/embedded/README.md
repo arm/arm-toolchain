@@ -100,7 +100,8 @@ Install appropriate latest supported Microsoft Visual C++ Redistributable packag
 
 ### Using the toolchain
 
-> *Note:* If you are using the toolchain in a shared environment with untrusted input,
+> [!CAUTION]
+> If you are using the toolchain in a shared environment with untrusted input,
 > make sure it is sufficiently sandboxed.
 
 To use the toolchain, on the command line you need to provide the following options:
@@ -200,7 +201,8 @@ and [Experimental newlib support](docs/newlib.md)
 for advice on using Arm Toolchain for Embedded with existing projects
 relying on the Arm GNU Toolchain.
 
-> *Note:* `picolibc` provides excellent
+> [!TIP]
+> `picolibc` provides excellent
 > [support for Arm GNU Toolchain](https://github.com/picolibc/picolibc/blob/main/doc/using.md),
 > so projects that require using both Arm GNU Toolchain and Arm Toolchain for Embedded
 > can choose either `picolibc` or `newlib`/`newlib-nano`.

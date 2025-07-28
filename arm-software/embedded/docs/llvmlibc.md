@@ -5,13 +5,14 @@ Arm Toolchain for Embedded uses
 library. For experimental and evaluation purposes, you can instead
 choose to use the LLVM project's own C library.
 
-> **NOTE:** `llvmlibc` support in Arm Toolchain for Embedded is
+> [!WARNING]
+> `llvmlibc` support in Arm Toolchain for Embedded is
 > an experimental technology preview, with significant limitations.
 
 ## Building the toolchain with LLVM libc
 
-> **NOTE:** Building the LLVM libc package is only supported on Linux
-> and macOS.
+> [!IMPORTANT]
+> Building the LLVM libc package is only supported on Linux and macOS.
 
 Configure the toolchain with the CMake setting
 `-DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc` to build a version of the

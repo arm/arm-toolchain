@@ -5,7 +5,8 @@ as the standard C library. For compatibility with existing projects using
 [`newlib`](https://sourceware.org/newlib/), a separate package of `newlib`-based
 library variants is provided.
 
-> **NOTE:**  `newlib` support in Arm Toolchain for Embedded is experimental
+> [!WARNING]
+> `newlib` support in Arm Toolchain for Embedded is experimental
 > and may change in following releases.
 
 ## Using pre-built `newlib` library package
@@ -34,7 +35,7 @@ $ clang --config=newlib.cfg --target=arm-none-eabi -march=armv7m -T redboot.ld -
 
 ## Building `newlib` library package
 
-> **NOTE:**  Building `newlib` package is only supported on Linux and macOS.
+> [!IMPORTANT] Building `newlib` package is only supported on Linux and macOS.
 
 Configure the toolchain with the CMake setting
 `-DLLVM_TOOLCHAIN_C_LIBRARY=newlib` to build a newlib-based version of
