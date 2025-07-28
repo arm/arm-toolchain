@@ -161,9 +161,19 @@ $ clang \
 -o example example.c
 ```
 
+> [!WARNING]
+> The naming convention for the library variant directories is an
+> implementation detail that can change between releases without notice,
+> thus it is best not to depend on specific library variant names in your
+> project build scripts.
+
 The FPU selection can be skipped, but it is not recommended to as the defaults
 are different to GCC ones.
 
+> [!WARNING]
+> The AArch64 no-FP library variants are intended for use in projects that
+> do not use floating-point calculations. They include software floating-point
+> functions to enable testing only - these are not designed for production use.
 
 The builds of the toolchain come packaged with two config files, Omax.cfg and OmaxLTO.cfg.
 When used, these config files enable several build optimisation flags to achieve highest performance on typical embedded benchmarks. OmaxLTO.cfg enables link-time optimisation (LTO) specific flags.
