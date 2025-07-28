@@ -145,6 +145,46 @@ else()
     set(cpu_family arm)
 endif()
 
+# Write test execution information.
+# This file does not become part of binaries package, and is available only 
+# during config stage.
+set(TEST_EXECUTION_INFO "${CMAKE_CURRENT_BINARY_DIR}/test_execution_info.json")
+file(WRITE "${TEST_EXECUTION_INFO}" "{\n")
+
+# Write Compile flags
+file(APPEND "${TEST_EXECUTION_INFO}" "  \"COMPILE_FLAGS\": \"--target ${target_triple} ${COMPILE_FLAGS}\",\n")
+
+# Build EXECUTION_FLAGS conditionally
+if("${TEST_EXECUTOR}" STREQUAL "fvp")
+    string(REPLACE " " ";" fvp_config_list ${FVP_CONFIG})
+    set (FVP_CONFIG_TEMP "")
+    foreach(cfg ${fvp_config_list})
+        string(APPEND FVP_CONFIG_TEMP " --fvp_config ${cfg}")
+    endforeach()
+    set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --fvp_model ${FVP_MODEL}${FVP_CONFIG_TEMP}")
+
+elseif("${TEST_EXECUTOR}" STREQUAL "qemu")
+    if(TARGET_ARCH MATCHES "^aarch64")
+        find_program(QEMU_EXECUTABLE qemu-system-aarch64 REQUIRED)
+    else()
+        find_program(QEMU_EXECUTABLE qemu-system-arm REQUIRED)
+    endif()
+
+    set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --qemu_command ${QEMU_EXECUTABLE} --qemu_machine ${QEMU_MACHINE} --qemu_cpu ${QEMU_CPU}")
+
+    # Append --qemu_params only if non-empty
+    if(NOT "${QEMU_PARAMS}" STREQUAL "")
+        string(REPLACE " " ":" QEMU_PARAMS ${QEMU_PARAMS})
+        string(APPEND EXECUTION_FLAGS " --qemu_params=${QEMU_PARAMS}")
+    endif()
+endif()
+
+# Write execution flags
+file(APPEND "${TEST_EXECUTION_INFO}" "  \"EXECUTION_FLAGS\": \"${EXECUTION_FLAGS}\"\n")
+
+# Close JSON
+file(APPEND "${TEST_EXECUTION_INFO}" "}\n")
+
 # Create a single target for all testing. If no testing is enabled, this
 # will simply do nothing.
 add_custom_target(check-all)
