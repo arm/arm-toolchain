@@ -1,0 +1,47 @@
+From 3f6191b21a48cab6093e94d0496fe9ac99048022 Mon Sep 17 00:00:00 2001
+From: Haowei <haowei@google.com>
+Date: Sun, 27 Jul 2025 18:57:04 -0700
+Subject: [libc] Add misssing inttypes dependencies (#150861)
+
+This is a follow up of 9e7999147de757107482d8a2cedab4155a0b6635. It
+attempts to fix the CI flakes we saw on fuchsia-linux-x64 builder.
+---
+ libc/src/stdio/baremetal/CMakeLists.txt  | 1 +
+ libc/src/stdio/scanf_core/CMakeLists.txt | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/libc/src/stdio/baremetal/CMakeLists.txt b/libc/src/stdio/baremetal/CMakeLists.txt
+index e879230a9d02..548938f885c9 100644
+--- a/libc/src/stdio/baremetal/CMakeLists.txt
++++ b/libc/src/stdio/baremetal/CMakeLists.txt
+@@ -72,6 +72,7 @@ add_entrypoint_object(
+     ../scanf.h
+   DEPENDS
+     .scanf_internal
++    libc.include.inttypes
+     libc.src.stdio.scanf_core.scanf_main
+     libc.src.__support.arg_list
+     libc.src.__support.OSUtil.osutil
+diff --git a/libc/src/stdio/scanf_core/CMakeLists.txt b/libc/src/stdio/scanf_core/CMakeLists.txt
+index dee125c234a1..561180c6100b 100644
+--- a/libc/src/stdio/scanf_core/CMakeLists.txt
++++ b/libc/src/stdio/scanf_core/CMakeLists.txt
+@@ -35,6 +35,7 @@ add_header_library(
+     core_structs.h
+   DEPENDS
+     .scanf_config
++    libc.include.inttypes
+     libc.src.__support.CPP.string_view
+     libc.src.__support.CPP.bitset
+     libc.src.__support.FPUtil.fp_bits
+@@ -97,6 +98,7 @@ add_header_library(
+   DEPENDS
+     .reader
+     .core_structs
++    libc.include.inttypes
+     libc.src.__support.common
+     libc.src.__support.ctype_utils
+     libc.src.__support.CPP.bitset
+-- 
+2.43.0
+

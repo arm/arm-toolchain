@@ -1,0 +1,4576 @@
+From 4c8e38d1426e24a9c123e797f0225632a810e095 Mon Sep 17 00:00:00 2001
+From: lntue <lntue@google.com>
+Date: Thu, 24 Jul 2025 00:19:52 +0000
+Subject: [libc][NFC] Add stdint.h proxy header to fix dependency issue with
+ <stdint.h> includes. (#150303)
+
+https://github.com/llvm/llvm-project/issues/149993
+---
+ libc/benchmarks/gpu/BenchmarkLogger.cpp        |  3 +--
+ libc/benchmarks/gpu/CMakeLists.txt             |  1 +
+ libc/benchmarks/gpu/LibcGpuBenchmark.h         |  3 +--
+ libc/benchmarks/gpu/src/math/CMakeLists.txt    |  2 ++
+ .../gpu/timing/amdgpu/CMakeLists.txt           |  1 +
+ libc/benchmarks/gpu/timing/amdgpu/timing.h     |  3 +--
+ .../benchmarks/gpu/timing/nvptx/CMakeLists.txt |  1 +
+ libc/benchmarks/gpu/timing/nvptx/timing.h      |  3 +--
+ libc/config/CMakeLists.txt                     |  1 +
+ libc/config/gpu/app.h                          |  3 +--
+ libc/config/linux/app.h                        |  3 +--
+ libc/config/uefi/app.h                         |  3 +--
+ libc/hdr/CMakeLists.txt                        |  9 +++++++++
+ libc/hdr/stdint_proxy.h                        | 18 ++++++++++++++++++
+ libc/hdr/types/CMakeLists.txt                  |  2 ++
+ libc/include/CMakeLists.txt                    | 17 +++++++++--------
+ libc/src/__support/CMakeLists.txt              | 12 ++++++++++++
+ libc/src/__support/CPP/CMakeLists.txt          |  3 +++
+ libc/src/__support/CPP/bit.h                   |  3 +--
+ libc/src/__support/CPP/functional.h            |  3 +--
+ libc/src/__support/FPUtil/CMakeLists.txt       |  5 +++++
+ libc/src/__support/FPUtil/FPBits.h             |  3 +--
+ libc/src/__support/FPUtil/NormalFloat.h        |  3 +--
+ libc/src/__support/FPUtil/aarch64/FEnvImpl.h   |  2 +-
+ .../FPUtil/aarch64/fenv_darwin_impl.h          |  2 +-
+ libc/src/__support/FPUtil/arm/FEnvImpl.h       |  2 +-
+ libc/src/__support/FPUtil/bfloat16.h           |  3 +--
+ libc/src/__support/FPUtil/riscv/FEnvImpl.h     |  3 +--
+ libc/src/__support/FPUtil/x86_64/FEnvImpl.h    |  3 +--
+ .../FPUtil/x86_64/NextAfterLongDouble.h        |  3 +--
+ libc/src/__support/File/CMakeLists.txt         |  7 ++++---
+ libc/src/__support/File/file.h                 |  2 +-
+ libc/src/__support/File/linux/CMakeLists.txt   |  9 +++++----
+ libc/src/__support/File/linux/lseekImpl.h      |  2 +-
+ libc/src/__support/GPU/CMakeLists.txt          |  1 +
+ libc/src/__support/GPU/allocator.h             |  2 +-
+ libc/src/__support/HashTable/CMakeLists.txt    |  2 ++
+ libc/src/__support/HashTable/bitmask.h         |  2 +-
+ libc/src/__support/HashTable/table.h           |  2 +-
+ libc/src/__support/arg_list.h                  |  2 +-
+ libc/src/__support/big_int.h                   |  2 +-
+ libc/src/__support/block.h                     |  3 +--
+ libc/src/__support/blockstore.h                |  2 +-
+ libc/src/__support/detailed_powers_of_ten.h    |  3 +--
+ libc/src/__support/endian_internal.h           |  5 ++---
+ libc/src/__support/fixed_point/CMakeLists.txt  |  1 +
+ libc/src/__support/fixed_point/fx_rep.h        |  3 +--
+ libc/src/__support/float_to_string.h           |  3 +--
+ libc/src/__support/hash.h                      |  2 +-
+ libc/src/__support/high_precision_decimal.h    |  2 +-
+ libc/src/__support/integer_literals.h          |  2 +-
+ libc/src/__support/integer_to_string.h         |  3 +--
+ .../__support/macros/properties/CMakeLists.txt |  1 +
+ libc/src/__support/macros/properties/types.h   |  5 ++---
+ libc/src/__support/ryu_constants.h             |  2 +-
+ libc/src/__support/ryu_long_double_constants.h |  2 +-
+ libc/src/__support/str_to_float.h              |  3 +--
+ libc/src/__support/threads/CMakeLists.txt      |  2 ++
+ libc/src/__support/threads/CndVar.h            |  3 +--
+ .../src/__support/threads/linux/CMakeLists.txt |  3 +++
+ libc/src/__support/threads/linux/futex_word.h  |  2 +-
+ libc/src/__support/threads/linux/thread.cpp    |  2 +-
+ libc/src/__support/threads/thread.h            |  2 +-
+ libc/src/__support/wchar/CMakeLists.txt        |  3 ++-
+ libc/src/__support/wchar/mbstate.h             |  2 +-
+ libc/src/arpa/inet/CMakeLists.txt              |  4 ++++
+ libc/src/arpa/inet/htonl.h                     |  2 +-
+ libc/src/arpa/inet/htons.h                     |  2 +-
+ libc/src/arpa/inet/ntohl.h                     |  2 +-
+ libc/src/arpa/inet/ntohs.h                     |  2 +-
+ libc/src/compiler/generic/CMakeLists.txt       |  1 +
+ libc/src/compiler/generic/__stack_chk_fail.cpp |  2 +-
+ libc/src/inttypes/CMakeLists.txt               |  2 ++
+ libc/src/inttypes/strtoimax.h                  |  2 +-
+ libc/src/inttypes/strtoumax.h                  |  2 +-
+ libc/src/link/CMakeLists.txt                   |  2 ++
+ libc/src/math/generic/CMakeLists.txt           |  1 +
+ libc/src/math/generic/expxf16.h                |  3 +--
+ libc/src/pthread/CMakeLists.txt                |  1 +
+ libc/src/pthread/pthread_attr_setstack.cpp     |  2 +-
+ libc/src/sched/linux/CMakeLists.txt            |  1 +
+ libc/src/sched/linux/sched_getaffinity.cpp     |  2 +-
+ libc/src/spawn/CMakeLists.txt                  |  1 +
+ libc/src/spawn/file_actions.h                  |  2 +-
+ libc/src/stdio/gpu/CMakeLists.txt              |  1 +
+ libc/src/stdio/gpu/fgets.cpp                   |  3 +--
+ libc/src/stdlib/CMakeLists.txt                 |  9 +++++++--
+ libc/src/stdlib/a64l.cpp                       |  3 +--
+ libc/src/stdlib/bsearch.cpp                    |  2 +-
+ libc/src/stdlib/l64a.cpp                       |  3 +--
+ libc/src/stdlib/qsort.cpp                      |  3 +--
+ libc/src/stdlib/qsort_data.h                   |  3 +--
+ libc/src/stdlib/qsort_r.cpp                    |  3 +--
+ libc/src/stdlib/quick_sort.h                   |  3 +--
+ libc/src/string/CMakeLists.txt                 |  1 +
+ libc/src/string/memory_utils/CMakeLists.txt    |  1 +
+ libc/src/string/memory_utils/op_generic.h      |  3 +--
+ libc/src/string/memory_utils/utils.h           |  2 +-
+ .../string/memory_utils/x86_64/inline_memcpy.h |  2 +-
+ libc/src/string/string_utils.h                 |  1 +
+ libc/src/sys/stat/linux/CMakeLists.txt         |  1 +
+ libc/src/sys/stat/linux/kernel_statx.h         |  2 +-
+ libc/src/time/CMakeLists.txt                   |  4 +++-
+ libc/src/time/linux/CMakeLists.txt             |  1 +
+ libc/src/time/linux/nanosleep.cpp              |  2 +-
+ libc/src/time/strftime_core/CMakeLists.txt     |  1 +
+ libc/src/time/strftime_core/core_structs.h     |  3 +--
+ libc/src/time/time_constants.h                 |  2 +-
+ libc/src/time/time_utils.cpp                   |  3 +--
+ libc/src/time/time_utils.h                     |  3 +--
+ libc/src/unistd/linux/CMakeLists.txt           |  4 ++++
+ libc/src/unistd/linux/ftruncate.cpp            |  2 +-
+ libc/src/unistd/linux/pread.cpp                |  2 +-
+ libc/src/unistd/linux/pwrite.cpp               |  2 +-
+ libc/src/unistd/linux/truncate.cpp             |  2 +-
+ libc/startup/baremetal/CMakeLists.txt          |  6 ++++++
+ libc/startup/baremetal/fini.cpp                |  2 +-
+ libc/startup/baremetal/init.cpp                |  2 +-
+ libc/startup/linux/CMakeLists.txt              |  1 +
+ libc/startup/linux/do_start.cpp                |  2 +-
+ libc/test/IntegrationTest/CMakeLists.txt       |  1 +
+ libc/test/IntegrationTest/test.cpp             |  2 +-
+ libc/test/UnitTest/CMakeLists.txt              |  7 +++++++
+ libc/test/UnitTest/ExecuteFunction.h           |  2 +-
+ libc/test/UnitTest/HermeticTestUtils.cpp       |  2 +-
+ libc/test/UnitTest/PrintfMatcher.cpp           |  3 +--
+ libc/test/UnitTest/RoundingModeUtils.h         |  2 +-
+ libc/test/UnitTest/ScanfMatcher.cpp            |  3 +--
+ libc/test/UnitTest/TestLogger.cpp              |  7 +++----
+ .../integration/src/pthread/CMakeLists.txt     |  5 +++++
+ .../src/pthread/pthread_equal_test.cpp         |  3 +--
+ .../src/pthread/pthread_mutex_test.cpp         |  8 +++-----
+ .../src/pthread/pthread_name_test.cpp          |  3 +--
+ .../src/pthread/pthread_once_test.cpp          |  3 +--
+ .../integration/src/pthread/pthread_test.cpp   |  2 +-
+ libc/test/integration/src/spawn/CMakeLists.txt |  1 +
+ .../integration/src/spawn/posix_spawn_test.cpp |  2 +-
+ libc/test/src/CMakeLists.txt                   |  4 +++-
+ libc/test/src/__support/CMakeLists.txt         |  1 +
+ libc/test/src/__support/CPP/CMakeLists.txt     |  1 +
+ libc/test/src/__support/CPP/bit_test.cpp       |  3 +--
+ .../src/__support/HashTable/CMakeLists.txt     |  1 +
+ .../src/__support/HashTable/group_test.cpp     |  2 +-
+ .../__support/str_to_float_comparison_test.cpp |  2 +-
+ libc/test/src/fenv/feclearexcept_test.cpp      |  1 -
+ libc/test/src/math/LdExpTest.h                 |  2 +-
+ libc/test/src/math/acosf_test.cpp              |  3 +--
+ libc/test/src/math/acoshf16_test.cpp           |  2 +-
+ libc/test/src/math/acoshf_test.cpp             |  3 +--
+ libc/test/src/math/asinf_test.cpp              |  3 +--
+ libc/test/src/math/asinhf_test.cpp             |  3 +--
+ libc/test/src/math/atanf_test.cpp              |  3 +--
+ libc/test/src/math/atanhf16_test.cpp           |  2 +-
+ libc/test/src/math/atanhf_test.cpp             |  3 +--
+ libc/test/src/math/cosf_test.cpp               |  3 +--
+ libc/test/src/math/coshf_test.cpp              |  3 +--
+ libc/test/src/math/erff_test.cpp               |  2 +-
+ libc/test/src/math/exp10_test.cpp              |  2 +-
+ libc/test/src/math/exp10f_test.cpp             |  2 +-
+ libc/test/src/math/exp10m1f_test.cpp           |  2 +-
+ libc/test/src/math/exp2_test.cpp               |  2 +-
+ libc/test/src/math/exp2f_test.cpp              |  2 +-
+ libc/test/src/math/exp2m1f_test.cpp            |  2 +-
+ libc/test/src/math/exp_test.cpp                |  2 +-
+ libc/test/src/math/expf_test.cpp               |  2 +-
+ libc/test/src/math/expm1_test.cpp              |  2 +-
+ libc/test/src/math/expm1f_test.cpp             |  2 +-
+ .../test/src/math/in_float_range_test_helper.h |  2 +-
+ libc/test/src/math/log10_test.cpp              |  2 +-
+ libc/test/src/math/log10f_test.cpp             |  2 +-
+ libc/test/src/math/log1p_test.cpp              |  2 +-
+ libc/test/src/math/log1pf_test.cpp             |  2 +-
+ libc/test/src/math/log2_test.cpp               |  2 +-
+ libc/test/src/math/log2f_test.cpp              |  2 +-
+ libc/test/src/math/log_test.cpp                |  2 +-
+ libc/test/src/math/logf_test.cpp               |  2 +-
+ libc/test/src/math/performance_testing/Timer.h |  2 +-
+ .../math/performance_testing/fmodf16_perf.cpp  |  2 +-
+ libc/test/src/math/powf_test.cpp               |  2 +-
+ libc/test/src/math/sdcomp26094.h               |  3 +--
+ libc/test/src/math/sincosf_test.cpp            |  2 +-
+ libc/test/src/math/sinf_test.cpp               |  2 +-
+ libc/test/src/math/sinhf_test.cpp              |  2 +-
+ libc/test/src/math/sinpif_test.cpp             |  2 +-
+ libc/test/src/math/smoke/LdExpTest.h           |  3 +--
+ libc/test/src/math/smoke/acosf_test.cpp        |  2 +-
+ libc/test/src/math/smoke/acoshf_test.cpp       |  2 +-
+ libc/test/src/math/smoke/asinf_test.cpp        |  2 +-
+ libc/test/src/math/smoke/asinhf_test.cpp       |  2 +-
+ libc/test/src/math/smoke/atanf_test.cpp        |  2 +-
+ libc/test/src/math/smoke/atanhf_test.cpp       |  2 +-
+ libc/test/src/math/smoke/cosf_test.cpp         |  3 +--
+ libc/test/src/math/smoke/coshf_test.cpp        |  3 +--
+ libc/test/src/math/smoke/cospif_test.cpp       |  3 +--
+ libc/test/src/math/smoke/erff_test.cpp         |  3 +--
+ libc/test/src/math/smoke/exp10_test.cpp        |  3 +--
+ libc/test/src/math/smoke/exp10f_test.cpp       |  3 +--
+ libc/test/src/math/smoke/exp2_test.cpp         |  3 +--
+ libc/test/src/math/smoke/exp2f_test.cpp        |  3 +--
+ libc/test/src/math/smoke/exp_test.cpp          |  3 +--
+ libc/test/src/math/smoke/expf_test.cpp         |  3 +--
+ libc/test/src/math/smoke/expm1_test.cpp        |  3 +--
+ libc/test/src/math/smoke/expm1f_test.cpp       |  3 +--
+ libc/test/src/math/smoke/log10_test.cpp        |  3 +--
+ libc/test/src/math/smoke/log10f_test.cpp       |  3 +--
+ libc/test/src/math/smoke/log1pf_test.cpp       |  3 +--
+ libc/test/src/math/smoke/log2_test.cpp         |  3 +--
+ libc/test/src/math/smoke/log2f_test.cpp        |  3 +--
+ libc/test/src/math/smoke/log_test.cpp          |  3 +--
+ libc/test/src/math/smoke/logf_test.cpp         |  3 +--
+ libc/test/src/math/smoke/powf_test.cpp         |  3 +--
+ libc/test/src/math/smoke/sincosf_test.cpp      |  3 +--
+ libc/test/src/math/smoke/sinf_test.cpp         |  3 +--
+ libc/test/src/math/smoke/sinhf_test.cpp        |  3 +--
+ libc/test/src/math/smoke/sinpif_test.cpp       |  3 +--
+ libc/test/src/math/smoke/tanf_test.cpp         |  3 +--
+ libc/test/src/math/smoke/tanhf_test.cpp        |  3 +--
+ libc/test/src/math/tanf_test.cpp               |  2 +-
+ libc/test/src/math/tanhf_test.cpp              |  2 +-
+ libc/test/src/signal/CMakeLists.txt            |  1 +
+ libc/test/src/signal/sigaltstack_test.cpp      |  2 +-
+ libc/test/src/spawn/CMakeLists.txt             |  1 +
+ .../spawn/posix_spawn_file_actions_test.cpp    |  2 +-
+ libc/test/src/stdlib/CMakeLists.txt            |  3 +++
+ libc/test/src/stdlib/memalignment_test.cpp     |  3 +--
+ libc/test/src/stdlib/strtoint32_test.cpp       |  3 +--
+ libc/test/src/stdlib/strtoint64_test.cpp       |  3 +--
+ .../src/string/memory_utils/CMakeLists.txt     |  1 +
+ .../string/memory_utils/memory_check_utils.h   |  2 +-
+ .../src/string/memory_utils/protected_pages.h  |  2 +-
+ libc/utils/MPCWrapper/CMakeLists.txt           |  1 +
+ libc/utils/MPCWrapper/MPCUtils.cpp             |  3 +--
+ libc/utils/MPCWrapper/MPCUtils.h               |  3 +--
+ libc/utils/MPFRWrapper/CMakeLists.txt          |  2 ++
+ libc/utils/MPFRWrapper/MPCommon.h              |  3 +--
+ libc/utils/MPFRWrapper/MPFRUtils.h             |  3 +--
+ .../llvm-project-overlay/libc/BUILD.bazel      |  7 +++++++
+ .../libc/test/UnitTest/BUILD.bazel             |  4 ++++
+ .../libc/test/libc_test_rules.bzl              |  1 +
+ 239 files changed, 353 insertions(+), 295 deletions(-)
+ create mode 100644 libc/hdr/stdint_proxy.h
+
+diff --git a/libc/benchmarks/gpu/BenchmarkLogger.cpp b/libc/benchmarks/gpu/BenchmarkLogger.cpp
+index 0d644fa3c37b..d5996a74f6dd 100644
+--- a/libc/benchmarks/gpu/BenchmarkLogger.cpp
++++ b/libc/benchmarks/gpu/BenchmarkLogger.cpp
+@@ -1,4 +1,5 @@
+ #include "benchmarks/gpu/BenchmarkLogger.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/string.h"
+ #include "src/__support/CPP/string_view.h"
+ #include "src/__support/OSUtil/io.h"               // write_to_stderr
+@@ -7,8 +8,6 @@
+ #include "src/__support/macros/properties/types.h" // LIBC_TYPES_HAS_INT128
+ #include "src/__support/uint128.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace benchmarks {
+ 
+diff --git a/libc/benchmarks/gpu/CMakeLists.txt b/libc/benchmarks/gpu/CMakeLists.txt
+index b58f4fd8b1a4..6ec64bf270b5 100644
+--- a/libc/benchmarks/gpu/CMakeLists.txt
++++ b/libc/benchmarks/gpu/CMakeLists.txt
+@@ -45,6 +45,7 @@ add_unittest_framework_library(
+     LibcGpuBenchmark.h
+     BenchmarkLogger.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.big_int
+     libc.src.__support.c_string
+     libc.src.__support.CPP.string
+diff --git a/libc/benchmarks/gpu/LibcGpuBenchmark.h b/libc/benchmarks/gpu/LibcGpuBenchmark.h
+index f2cfbfbfdcdf..a6cf62dd30ce 100644
+--- a/libc/benchmarks/gpu/LibcGpuBenchmark.h
++++ b/libc/benchmarks/gpu/LibcGpuBenchmark.h
+@@ -3,6 +3,7 @@
+ 
+ #include "benchmarks/gpu/BenchmarkLogger.h"
+ #include "benchmarks/gpu/timing/timing.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/functional.h"
+ #include "src/__support/CPP/limits.h"
+@@ -13,8 +14,6 @@
+ #include "src/stdlib/rand.h"
+ #include "src/time/clock.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ namespace benchmarks {
+diff --git a/libc/benchmarks/gpu/src/math/CMakeLists.txt b/libc/benchmarks/gpu/src/math/CMakeLists.txt
+index 6870c0244901..7a12ce4e61c9 100644
+--- a/libc/benchmarks/gpu/src/math/CMakeLists.txt
++++ b/libc/benchmarks/gpu/src/math/CMakeLists.txt
+@@ -31,6 +31,7 @@ add_benchmark(
+   SRCS
+     sin_benchmark.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.math.sin
+     libc.src.math.sinf
+     libc.src.stdlib.srand
+@@ -51,6 +52,7 @@ add_benchmark(
+   SRCS
+     atan2_benchmark.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.math.atan2
+     libc.src.stdlib.srand
+     libc.src.stdlib.rand
+diff --git a/libc/benchmarks/gpu/timing/amdgpu/CMakeLists.txt b/libc/benchmarks/gpu/timing/amdgpu/CMakeLists.txt
+index aa5dcd33bee9..dd7c2d342f70 100644
+--- a/libc/benchmarks/gpu/timing/amdgpu/CMakeLists.txt
++++ b/libc/benchmarks/gpu/timing/amdgpu/CMakeLists.txt
+@@ -3,6 +3,7 @@ add_header_library(
+   HDRS
+     timing.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.macros.config
+     libc.src.__support.macros.attributes
+diff --git a/libc/benchmarks/gpu/timing/amdgpu/timing.h b/libc/benchmarks/gpu/timing/amdgpu/timing.h
+index 4cf7e9838add..1eb711ba951e 100644
+--- a/libc/benchmarks/gpu/timing/amdgpu/timing.h
++++ b/libc/benchmarks/gpu/timing/amdgpu/timing.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_UTILS_GPU_TIMING_AMDGPU
+ #define LLVM_LIBC_UTILS_GPU_TIMING_AMDGPU
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/GPU/utils.h"
+@@ -16,8 +17,6 @@
+ #include "src/__support/macros/attributes.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ // Returns the overhead associated with calling the profiling region. This
+diff --git a/libc/benchmarks/gpu/timing/nvptx/CMakeLists.txt b/libc/benchmarks/gpu/timing/nvptx/CMakeLists.txt
+index 2723c8940814..a19c16ee4e44 100644
+--- a/libc/benchmarks/gpu/timing/nvptx/CMakeLists.txt
++++ b/libc/benchmarks/gpu/timing/nvptx/CMakeLists.txt
+@@ -3,6 +3,7 @@ add_header_library(
+   HDRS
+     timing.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.macros.config
+     libc.src.__support.macros.attributes
+diff --git a/libc/benchmarks/gpu/timing/nvptx/timing.h b/libc/benchmarks/gpu/timing/nvptx/timing.h
+index ece7d9a6c539..e5e98b3ca087 100644
+--- a/libc/benchmarks/gpu/timing/nvptx/timing.h
++++ b/libc/benchmarks/gpu/timing/nvptx/timing.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_UTILS_GPU_TIMING_NVPTX
+ #define LLVM_LIBC_UTILS_GPU_TIMING_NVPTX
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/GPU/utils.h"
+@@ -16,8 +17,6 @@
+ #include "src/__support/macros/attributes.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ // Returns the overhead associated with calling the profiling region. This
+diff --git a/libc/config/CMakeLists.txt b/libc/config/CMakeLists.txt
+index cf38ae3eed72..4758276469f6 100644
+--- a/libc/config/CMakeLists.txt
++++ b/libc/config/CMakeLists.txt
+@@ -3,5 +3,6 @@ add_header_library(
+   HDRS
+     app.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+ )
+diff --git a/libc/config/gpu/app.h b/libc/config/gpu/app.h
+index 148c51b70220..17ef3ae7b1ce 100644
+--- a/libc/config/gpu/app.h
++++ b/libc/config/gpu/app.h
+@@ -9,11 +9,10 @@
+ #ifndef LLVM_LIBC_CONFIG_GPU_APP_H
+ #define LLVM_LIBC_CONFIG_GPU_APP_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/properties/architectures.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ // TODO: Move other global values here and export them to the host.
+diff --git a/libc/config/linux/app.h b/libc/config/linux/app.h
+index 188d34816454..f3d11da9fc14 100644
+--- a/libc/config/linux/app.h
++++ b/libc/config/linux/app.h
+@@ -9,11 +9,10 @@
+ #ifndef LLVM_LIBC_CONFIG_LINUX_APP_H
+ #define LLVM_LIBC_CONFIG_LINUX_APP_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/properties/architectures.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ // Data structure to capture properties of the linux/ELF TLS image.
+diff --git a/libc/config/uefi/app.h b/libc/config/uefi/app.h
+index 0374a47ba340..1f181ed5f9f1 100644
+--- a/libc/config/uefi/app.h
++++ b/libc/config/uefi/app.h
+@@ -9,13 +9,12 @@
+ #ifndef LLVM_LIBC_CONFIG_UEFI_APP_H
+ #define LLVM_LIBC_CONFIG_UEFI_APP_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "include/llvm-libc-types/EFI_HANDLE.h"
+ #include "include/llvm-libc-types/EFI_SYSTEM_TABLE.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/properties/architectures.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ // Data structure which captures properties of a UEFI application.
+diff --git a/libc/hdr/CMakeLists.txt b/libc/hdr/CMakeLists.txt
+index 052a773a4fce..5fc25d0ca568 100644
+--- a/libc/hdr/CMakeLists.txt
++++ b/libc/hdr/CMakeLists.txt
+@@ -243,5 +243,14 @@ add_proxy_header_library(
+     libc.include.llvm-libc-macros.offsetof_macro
+ )
+ 
++# stdint.h header.
++add_proxy_header_library(
++  stdint_proxy
++  HDRS
++    stdint_proxy.h
++  FULL_BUILD_DEPENDS
++    libc.include.stdint
++)
++
+ add_subdirectory(types)
+ add_subdirectory(func)
+diff --git a/libc/hdr/stdint_proxy.h b/libc/hdr/stdint_proxy.h
+new file mode 100644
+index 000000000000..8e815679a4e2
+--- /dev/null
++++ b/libc/hdr/stdint_proxy.h
+@@ -0,0 +1,18 @@
++//===-- stdint.h ----------------------------------------------------------===//
++//
++// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
++// See https://llvm.org/LICENSE.txt for license information.
++// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
++//
++//===----------------------------------------------------------------------===//
++
++#ifndef LLVM_LIBC_HDR_STDINT_PROXY_H
++#define LLVM_LIBC_HDR_STDINT_PROXY_H
++
++// This target is to make sure we have correct build order in full build mode,
++// that is `libc.include.stdint` is added to the dependency of all targets
++// that use <stdint.h> header.
++
++#include <stdint.h>
++
++#endif // LLVM_LIBC_HDR_STDINT_PROXY_H
+diff --git a/libc/hdr/types/CMakeLists.txt b/libc/hdr/types/CMakeLists.txt
+index e4b3cb0faa82..2dc71f9791e1 100644
+--- a/libc/hdr/types/CMakeLists.txt
++++ b/libc/hdr/types/CMakeLists.txt
+@@ -92,6 +92,7 @@ add_proxy_header_library(
+   DEPENDS
+     libc.hdr.fcntl_overlay
+   FULL_BUILD_DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.llvm-libc-types.struct_flock
+ )
+ 
+@@ -102,6 +103,7 @@ add_proxy_header_library(
+   DEPENDS
+     libc.hdr.fcntl_overlay
+   FULL_BUILD_DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.llvm-libc-types.struct_flock64
+ )
+ 
+diff --git a/libc/include/CMakeLists.txt b/libc/include/CMakeLists.txt
+index 55268d19529c..ce811d17784a 100644
+--- a/libc/include/CMakeLists.txt
++++ b/libc/include/CMakeLists.txt
+@@ -102,6 +102,14 @@ add_header_macro(
+     .llvm-libc-types.fexcept_t
+ )
+ 
++add_header_macro(
++  stdint
++  ../libc/include/stdint.yaml
++  stdint.h
++  DEPENDS
++    .llvm-libc-macros.stdint_macros
++)
++
+ add_header_macro(
+   inttypes
+   ../libc/include/inttypes.yaml
+@@ -110,6 +118,7 @@ add_header_macro(
+     .llvm_libc_common_h
+     .llvm-libc-types.imaxdiv_t
+     .llvm-libc-macros.inttypes_macros
++    .stdint
+ )
+ 
+ add_header_macro(
+@@ -120,14 +129,6 @@ add_header_macro(
+     .llvm-libc-macros.float_macros
+ )
+ 
+-add_header_macro(
+-  stdint
+-  ../libc/include/stdint.yaml
+-  stdint.h
+-  DEPENDS
+-    .llvm-libc-macros.stdint_macros
+-)
+-
+ add_header_macro(
+   limits
+   ../libc/include/limits.yaml
+diff --git a/libc/src/__support/CMakeLists.txt b/libc/src/__support/CMakeLists.txt
+index 37a27cc9b700..2196d9e23bba 100644
+--- a/libc/src/__support/CMakeLists.txt
++++ b/libc/src/__support/CMakeLists.txt
+@@ -15,6 +15,7 @@ add_header_library(
+   HDRS
+     block.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.algorithm
+     libc.src.__support.CPP.limits
+     libc.src.__support.CPP.new
+@@ -86,6 +87,7 @@ add_header_library(
+     blockstore.h
+   DEPENDS
+     .libc_assert
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.new
+ )
+ 
+@@ -97,6 +99,8 @@ add_header_library(
+     macros/properties/architectures.h
+     macros/attributes.h
+     macros/config.h
++  DEPENDS
++    libc.hdr.stdint_proxy
+ )
+ 
+ add_header_library(
+@@ -199,6 +203,7 @@ add_header_library(
+     integer_to_string.h
+   DEPENDS
+     .big_int
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.CPP.algorithm
+     libc.src.__support.CPP.limits
+@@ -215,6 +220,7 @@ add_header_library(
+     ryu_long_double_constants.h
+   DEPENDS
+     .libc_assert
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.type_traits
+     libc.src.__support.FPUtil.fp_bits
+     libc.src.__support.common
+@@ -226,6 +232,7 @@ add_header_library(
+     high_precision_decimal.h
+   DEPENDS
+     .str_to_integer
++    libc.hdr.stdint_proxy
+ )
+ 
+ add_header_library(
+@@ -240,6 +247,7 @@ add_header_library(
+     .str_to_num_result
+     .uint128
+     libc.hdr.errno_macros
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.CPP.bit
+     libc.src.__support.CPP.limits
+@@ -257,6 +265,7 @@ add_header_library(
+     integer_literals.h
+   DEPENDS
+     .uint128
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.limits
+ )
+ 
+@@ -290,6 +299,7 @@ add_header_library(
+   HDRS
+     arg_list.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+ )
+ 
+@@ -329,6 +339,7 @@ add_header_library(
+   DEPENDS
+     .math_extras
+     .number_pair
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.array
+     libc.src.__support.CPP.bit
+     libc.src.__support.CPP.type_traits
+@@ -361,6 +372,7 @@ add_header_library(
+     hash.h
+   DEPENDS
+     .uint128
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.bit
+     libc.src.__support.CPP.limits
+     libc.src.__support.macros.attributes
+diff --git a/libc/src/__support/CPP/CMakeLists.txt b/libc/src/__support/CPP/CMakeLists.txt
+index d2ba00a5384d..8b65a8839ab2 100644
+--- a/libc/src/__support/CPP/CMakeLists.txt
++++ b/libc/src/__support/CPP/CMakeLists.txt
+@@ -17,6 +17,7 @@ add_header_library(
+   DEPENDS
+     .limits
+     .type_traits
++    libc.hdr.stdint_proxy
+     libc.src.__support.macros.attributes
+     libc.src.__support.macros.sanitizer
+ )
+@@ -39,6 +40,8 @@ add_header_library(
+   functional
+   HDRS
+     functional.h
++  DEPENDS
++    libc.hdr.stdint_proxy
+ )
+ 
+ add_header_library(
+diff --git a/libc/src/__support/CPP/bit.h b/libc/src/__support/CPP/bit.h
+index e491f3e03266..df1b177ecb10 100644
+--- a/libc/src/__support/CPP/bit.h
++++ b/libc/src/__support/CPP/bit.h
+@@ -11,14 +11,13 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_CPP_BIT_H
+ #define LLVM_LIBC_SRC___SUPPORT_CPP_BIT_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/limits.h" // numeric_limits
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/macros/attributes.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/sanitizer.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace cpp {
+ 
+diff --git a/libc/src/__support/CPP/functional.h b/libc/src/__support/CPP/functional.h
+index 50cfa256b668..5c43d2236971 100644
+--- a/libc/src/__support/CPP/functional.h
++++ b/libc/src/__support/CPP/functional.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_CPP_FUNCTIONAL_H
+ #define LLVM_LIBC_SRC___SUPPORT_CPP_FUNCTIONAL_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/type_traits/enable_if.h"
+ #include "src/__support/CPP/type_traits/is_convertible.h"
+ #include "src/__support/CPP/type_traits/is_same.h"
+@@ -19,8 +20,6 @@
+ #include "src/__support/macros/attributes.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace cpp {
+ 
+diff --git a/libc/src/__support/FPUtil/CMakeLists.txt b/libc/src/__support/FPUtil/CMakeLists.txt
+index cc941f23135a..ffa0e075e383 100644
+--- a/libc/src/__support/FPUtil/CMakeLists.txt
++++ b/libc/src/__support/FPUtil/CMakeLists.txt
+@@ -6,6 +6,7 @@ add_header_library(
+     libc.hdr.types.fenv_t
+     libc.hdr.fenv_macros
+     libc.hdr.math_macros
++    libc.hdr.stdint_proxy
+     libc.src.__support.macros.attributes
+     libc.src.errno.errno
+ )
+@@ -27,6 +28,7 @@ add_header_library(
+   HDRS
+     FPBits.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.CPP.bit
+     libc.src.__support.CPP.type_traits
+@@ -71,6 +73,7 @@ add_header_library(
+     NormalFloat.h
+   DEPENDS
+     .fp_bits
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.type_traits
+     libc.src.__support.common
+ )
+@@ -236,6 +239,7 @@ add_header_library(
+     .nearest_integer_operations
+     .normal_float
+     libc.hdr.math_macros
++    libc.hdr.stdint_proxy
+     libc.src.errno.errno
+     libc.src.__support.common
+     libc.src.__support.CPP.bit
+@@ -264,6 +268,7 @@ add_header_library(
+   DEPENDS
+     .cast
+     .dyadic_float
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.bit
+     libc.src.__support.CPP.type_traits
+     libc.src.__support.macros.config
+diff --git a/libc/src/__support/FPUtil/FPBits.h b/libc/src/__support/FPUtil/FPBits.h
+index 9e21136558a0..2f695c158375 100644
+--- a/libc/src/__support/FPUtil/FPBits.h
++++ b/libc/src/__support/FPUtil/FPBits.h
+@@ -15,6 +15,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_FPUTIL_FPBITS_H
+ #define LLVM_LIBC_SRC___SUPPORT_FPUTIL_FPBITS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/common.h"
+@@ -26,8 +27,6 @@
+ #include "src/__support/sign.h"                    // Sign
+ #include "src/__support/uint128.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace fputil {
+ 
+diff --git a/libc/src/__support/FPUtil/NormalFloat.h b/libc/src/__support/FPUtil/NormalFloat.h
+index a2f285fc6fb9..b30e36fd03e9 100644
+--- a/libc/src/__support/FPUtil/NormalFloat.h
++++ b/libc/src/__support/FPUtil/NormalFloat.h
+@@ -11,12 +11,11 @@
+ 
+ #include "FPBits.h"
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace fputil {
+ 
+diff --git a/libc/src/__support/FPUtil/aarch64/FEnvImpl.h b/libc/src/__support/FPUtil/aarch64/FEnvImpl.h
+index 914155a01631..18182ed977cc 100644
+--- a/libc/src/__support/FPUtil/aarch64/FEnvImpl.h
++++ b/libc/src/__support/FPUtil/aarch64/FEnvImpl.h
+@@ -18,9 +18,9 @@
+ #endif
+ 
+ #include <arm_acle.h>
+-#include <stdint.h>
+ 
+ #include "hdr/fenv_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/fenv_t.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ 
+diff --git a/libc/src/__support/FPUtil/aarch64/fenv_darwin_impl.h b/libc/src/__support/FPUtil/aarch64/fenv_darwin_impl.h
+index dcce76b6116b..a2066d1025f6 100644
+--- a/libc/src/__support/FPUtil/aarch64/fenv_darwin_impl.h
++++ b/libc/src/__support/FPUtil/aarch64/fenv_darwin_impl.h
+@@ -18,9 +18,9 @@
+ #endif
+ 
+ #include <arm_acle.h>
+-#include <stdint.h>
+ 
+ #include "hdr/fenv_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/fenv_t.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ 
+diff --git a/libc/src/__support/FPUtil/arm/FEnvImpl.h b/libc/src/__support/FPUtil/arm/FEnvImpl.h
+index aaf37c0a045a..64ab4a9189b7 100644
+--- a/libc/src/__support/FPUtil/arm/FEnvImpl.h
++++ b/libc/src/__support/FPUtil/arm/FEnvImpl.h
+@@ -10,11 +10,11 @@
+ #define LLVM_LIBC_SRC___SUPPORT_FPUTIL_ARM_FENVIMPL_H
+ 
+ #include "hdr/fenv_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/fenv_t.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/macros/attributes.h" // For LIBC_INLINE
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace fputil {
+diff --git a/libc/src/__support/FPUtil/bfloat16.h b/libc/src/__support/FPUtil/bfloat16.h
+index bc0b8b23896f..627f4759f9d1 100644
+--- a/libc/src/__support/FPUtil/bfloat16.h
++++ b/libc/src/__support/FPUtil/bfloat16.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_FPUTIL_BFLOAT16_H
+ #define LLVM_LIBC_SRC___SUPPORT_FPUTIL_BFLOAT16_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/FPUtil/cast.h"
+@@ -16,8 +17,6 @@
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/properties/types.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace fputil {
+ 
+diff --git a/libc/src/__support/FPUtil/riscv/FEnvImpl.h b/libc/src/__support/FPUtil/riscv/FEnvImpl.h
+index 2f525eb5dac5..cb2d2d59fb86 100644
+--- a/libc/src/__support/FPUtil/riscv/FEnvImpl.h
++++ b/libc/src/__support/FPUtil/riscv/FEnvImpl.h
+@@ -10,13 +10,12 @@
+ #define LLVM_LIBC_SRC___SUPPORT_FPUTIL_RISCV_FENVIMPL_H
+ 
+ #include "hdr/fenv_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/fenv_t.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/macros/attributes.h" // For LIBC_INLINE_ASM
+ #include "src/__support/macros/config.h"     // For LIBC_INLINE
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace fputil {
+ 
+diff --git a/libc/src/__support/FPUtil/x86_64/FEnvImpl.h b/libc/src/__support/FPUtil/x86_64/FEnvImpl.h
+index 560727c22978..5da509796d84 100644
+--- a/libc/src/__support/FPUtil/x86_64/FEnvImpl.h
++++ b/libc/src/__support/FPUtil/x86_64/FEnvImpl.h
+@@ -17,8 +17,7 @@
+ #error "Invalid include"
+ #endif
+ 
+-#include <stdint.h>
+-
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/fenv_t.h"
+ #include "src/__support/macros/sanitizer.h"
+ 
+diff --git a/libc/src/__support/FPUtil/x86_64/NextAfterLongDouble.h b/libc/src/__support/FPUtil/x86_64/NextAfterLongDouble.h
+index 2e6b297ae934..74a991d40115 100644
+--- a/libc/src/__support/FPUtil/x86_64/NextAfterLongDouble.h
++++ b/libc/src/__support/FPUtil/x86_64/NextAfterLongDouble.h
+@@ -16,12 +16,11 @@
+ #error "Invalid include"
+ #endif
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/FPUtil/FEnvImpl.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace fputil {
+ 
+diff --git a/libc/src/__support/File/CMakeLists.txt b/libc/src/__support/File/CMakeLists.txt
+index 5a4af5e70e28..253243ff40de 100644
+--- a/libc/src/__support/File/CMakeLists.txt
++++ b/libc/src/__support/File/CMakeLists.txt
+@@ -12,13 +12,14 @@ add_object_library(
+   HDRS
+     file.h
+   DEPENDS
++    libc.hdr.stdio_macros
++    libc.hdr.stdint_proxy
++    libc.hdr.func.realloc
++    libc.hdr.types.off_t
+     libc.src.__support.CPP.new
+     libc.src.__support.CPP.span
+     libc.src.__support.threads.mutex
+     libc.src.__support.error_or
+-    libc.hdr.types.off_t
+-    libc.hdr.stdio_macros
+-    libc.hdr.func.realloc
+ )
+ 
+ add_object_library(
+diff --git a/libc/src/__support/File/file.h b/libc/src/__support/File/file.h
+index 5c97a9c6419f..3652e448c7f5 100644
+--- a/libc/src/__support/File/file.h
++++ b/libc/src/__support/File/file.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_FILE_FILE_H
+ #define LLVM_LIBC_SRC___SUPPORT_FILE_FILE_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "hdr/stdio_macros.h"
+ #include "hdr/types/off_t.h"
+ #include "src/__support/CPP/new.h"
+@@ -18,7 +19,6 @@
+ #include "src/__support/threads/mutex.h"
+ 
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/__support/File/linux/CMakeLists.txt b/libc/src/__support/File/linux/CMakeLists.txt
+index 84e3d5608361..7a7bd6cdb83a 100644
+--- a/libc/src/__support/File/linux/CMakeLists.txt
++++ b/libc/src/__support/File/linux/CMakeLists.txt
+@@ -8,16 +8,17 @@ add_object_library(
+     lseekImpl.h
+   DEPENDS
+     libc.hdr.fcntl_macros
++    libc.hdr.stdio_macros
++    libc.hdr.stdint_proxy
++    libc.hdr.types.off_t
++    libc.hdr.types.FILE
+     libc.include.sys_syscall
+     libc.include.sys_stat
+     libc.src.__support.CPP.new
+     libc.src.__support.OSUtil.osutil
+-    libc.src.errno.errno
+     libc.src.__support.error_or
+     libc.src.__support.File.file
+-    libc.hdr.types.off_t
+-    libc.hdr.types.FILE
+-    libc.hdr.stdio_macros
++    libc.src.errno.errno
+ )
+ 
+ add_object_library(
+diff --git a/libc/src/__support/File/linux/lseekImpl.h b/libc/src/__support/File/linux/lseekImpl.h
+index 300e5c5dd55b..c22a6c59b65f 100644
+--- a/libc/src/__support/File/linux/lseekImpl.h
++++ b/libc/src/__support/File/linux/lseekImpl.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_FILE_LINUX_LSEEKIMPL_H
+ #define LLVM_LIBC_SRC___SUPPORT_FILE_LINUX_LSEEKIMPL_H
+ 
++#include "hdr/stdint_proxy.h" // For uint64_t.
+ #include "hdr/types/off_t.h"
+ #include "src/__support/OSUtil/syscall.h" // For internal syscall function.
+ #include "src/__support/common.h"
+@@ -16,7 +17,6 @@
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>      // For uint64_t.
+ #include <sys/syscall.h> // For syscall numbers.
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/src/__support/GPU/CMakeLists.txt b/libc/src/__support/GPU/CMakeLists.txt
+index 4ffee011be96..f8fdfeb9da9d 100644
+--- a/libc/src/__support/GPU/CMakeLists.txt
++++ b/libc/src/__support/GPU/CMakeLists.txt
+@@ -16,6 +16,7 @@ add_object_library(
+   HDRS
+     allocator.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.RPC.rpc_client
+     libc.src.__support.CPP.atomic
+diff --git a/libc/src/__support/GPU/allocator.h b/libc/src/__support/GPU/allocator.h
+index a7cf8bceef27..67a7ff531fcd 100644
+--- a/libc/src/__support/GPU/allocator.h
++++ b/libc/src/__support/GPU/allocator.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_GPU_ALLOCATOR_H
+ #define LLVM_LIBC_SRC___SUPPORT_GPU_ALLOCATOR_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace gpu {
+diff --git a/libc/src/__support/HashTable/CMakeLists.txt b/libc/src/__support/HashTable/CMakeLists.txt
+index 698b8d0dfa68..d5861e7e825c 100644
+--- a/libc/src/__support/HashTable/CMakeLists.txt
++++ b/libc/src/__support/HashTable/CMakeLists.txt
+@@ -5,6 +5,7 @@ add_header_library(
+   FLAGS
+     EXPLICIT_SIMD_OPT
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.CPP.bit
+     libc.src.__support.macros.properties.cpu_features
+@@ -26,6 +27,7 @@ add_header_library(
+     table.h
+   DEPENDS
+     .bitmask
++    libc.hdr.stdint_proxy
+     libc.hdr.types.ENTRY
+     libc.src.__support.CPP.bit
+     libc.src.__support.CPP.new
+diff --git a/libc/src/__support/HashTable/bitmask.h b/libc/src/__support/HashTable/bitmask.h
+index 3cac481b8060..a4af496f83ee 100644
+--- a/libc/src/__support/HashTable/bitmask.h
++++ b/libc/src/__support/HashTable/bitmask.h
+@@ -9,11 +9,11 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_HASHTABLE_BITMASK_H
+ #define LLVM_LIBC_SRC___SUPPORT_HASHTABLE_BITMASK_H
+ 
++#include "hdr/stdint_proxy.h" // uint8_t, uint64_t
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/properties/cpu_features.h"
+ #include <stddef.h> // size_t
+-#include <stdint.h> // uint8_t, uint64_t
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+diff --git a/libc/src/__support/HashTable/table.h b/libc/src/__support/HashTable/table.h
+index 10dd9711afbf..966ee0fcaf0a 100644
+--- a/libc/src/__support/HashTable/table.h
++++ b/libc/src/__support/HashTable/table.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_HASHTABLE_TABLE_H
+ #define LLVM_LIBC_SRC___SUPPORT_HASHTABLE_TABLE_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/ENTRY.h"
+ #include "src/__support/CPP/bit.h" // bit_ceil
+ #include "src/__support/CPP/new.h"
+@@ -21,7 +22,6 @@
+ #include "src/string/memory_utils/inline_strcmp.h"
+ #include "src/string/string_utils.h"
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+diff --git a/libc/src/__support/arg_list.h b/libc/src/__support/arg_list.h
+index 66afa67e320b..1e26a5e8ef9c 100644
+--- a/libc/src/__support/arg_list.h
++++ b/libc/src/__support/arg_list.h
+@@ -9,12 +9,12 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_ARG_LIST_H
+ #define LLVM_LIBC_SRC___SUPPORT_ARG_LIST_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ 
+ #include <stdarg.h>
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+diff --git a/libc/src/__support/big_int.h b/libc/src/__support/big_int.h
+index 85db31d01399..10e35ef4fd24 100644
+--- a/libc/src/__support/big_int.h
++++ b/libc/src/__support/big_int.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_BIG_INT_H
+ #define LLVM_LIBC_SRC___SUPPORT_BIG_INT_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/bit.h" // countl_zero
+ #include "src/__support/CPP/limits.h"
+@@ -23,7 +24,6 @@
+ #include "src/__support/number_pair.h"
+ 
+ #include <stddef.h> // For size_t
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/__support/block.h b/libc/src/__support/block.h
+index a58c38bbb7ac..b0d657609324 100644
+--- a/libc/src/__support/block.h
++++ b/libc/src/__support/block.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_BLOCK_H
+ #define LLVM_LIBC_SRC___SUPPORT_BLOCK_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/algorithm.h"
+ #include "src/__support/CPP/cstddef.h"
+ #include "src/__support/CPP/limits.h"
+@@ -20,8 +21,6 @@
+ #include "src/__support/macros/config.h"
+ #include "src/__support/math_extras.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ /// Returns the value rounded down to the nearest multiple of alignment.
+diff --git a/libc/src/__support/blockstore.h b/libc/src/__support/blockstore.h
+index efe2234eace5..61ee0ee80a2b 100644
+--- a/libc/src/__support/blockstore.h
++++ b/libc/src/__support/blockstore.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_BLOCKSTORE_H
+ #define LLVM_LIBC_SRC___SUPPORT_BLOCKSTORE_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/new.h"
+ #include "src/__support/CPP/type_traits.h"
+@@ -16,7 +17,6 @@
+ #include "src/__support/macros/config.h"
+ 
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/__support/detailed_powers_of_ten.h b/libc/src/__support/detailed_powers_of_ten.h
+index 28741b8a3f56..ab6f2beb6735 100644
+--- a/libc/src/__support/detailed_powers_of_ten.h
++++ b/libc/src/__support/detailed_powers_of_ten.h
+@@ -9,11 +9,10 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_DETAILED_POWERS_OF_TEN_H
+ #define LLVM_LIBC_SRC___SUPPORT_DETAILED_POWERS_OF_TEN_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+ 
+diff --git a/libc/src/__support/endian_internal.h b/libc/src/__support/endian_internal.h
+index 77839ad75455..c78090ad85e0 100644
+--- a/libc/src/__support/endian_internal.h
++++ b/libc/src/__support/endian_internal.h
+@@ -9,11 +9,10 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_ENDIAN_INTERNAL_H
+ #define LLVM_LIBC_SRC___SUPPORT_ENDIAN_INTERNAL_H
+ 
+-#include "common.h"
++#include "hdr/stdint_proxy.h"
++#include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ // We rely on compiler preprocessor defines to allow for cross compilation.
+diff --git a/libc/src/__support/fixed_point/CMakeLists.txt b/libc/src/__support/fixed_point/CMakeLists.txt
+index 235c03048cfa..145eedb6ae8e 100644
+--- a/libc/src/__support/fixed_point/CMakeLists.txt
++++ b/libc/src/__support/fixed_point/CMakeLists.txt
+@@ -3,6 +3,7 @@ add_header_library(
+   HDRS
+     fx_rep.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.llvm-libc-macros.stdfix_macros
+     libc.src.__support.macros.attributes
+     libc.src.__support.CPP.type_traits
+diff --git a/libc/src/__support/fixed_point/fx_rep.h b/libc/src/__support/fixed_point/fx_rep.h
+index 7227fffa683a..e68be57dedf2 100644
+--- a/libc/src/__support/fixed_point/fx_rep.h
++++ b/libc/src/__support/fixed_point/fx_rep.h
+@@ -9,13 +9,12 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_FIXED_POINT_FX_REP_H
+ #define LLVM_LIBC_SRC___SUPPORT_FIXED_POINT_FX_REP_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "include/llvm-libc-macros/stdfix-macros.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/macros/attributes.h" // LIBC_INLINE, LIBC_INLINE_VAR
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ #ifdef LIBC_COMPILER_HAS_FIXED_POINT
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/src/__support/float_to_string.h b/libc/src/__support/float_to_string.h
+index d88bf844b15a..cab146a5b869 100644
+--- a/libc/src/__support/float_to_string.h
++++ b/libc/src/__support/float_to_string.h
+@@ -9,8 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_FLOAT_TO_STRING_H
+ #define LLVM_LIBC_SRC___SUPPORT_FLOAT_TO_STRING_H
+ 
+-#include <stdint.h>
+-
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/limits.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/FPUtil/FPBits.h"
+diff --git a/libc/src/__support/hash.h b/libc/src/__support/hash.h
+index 49138b1f43b9..6dfaadf08715 100644
+--- a/libc/src/__support/hash.h
++++ b/libc/src/__support/hash.h
+@@ -9,12 +9,12 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_HASH_H
+ #define LLVM_LIBC_SRC___SUPPORT_HASH_H
+ 
++#include "hdr/stdint_proxy.h"                // For uint64_t
+ #include "src/__support/CPP/bit.h"           // rotl
+ #include "src/__support/CPP/limits.h"        // numeric_limits
+ #include "src/__support/macros/attributes.h" // LIBC_INLINE
+ #include "src/__support/macros/config.h"
+ #include "src/__support/uint128.h" // UInt128
+-#include <stdint.h>                // For uint64_t
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+diff --git a/libc/src/__support/high_precision_decimal.h b/libc/src/__support/high_precision_decimal.h
+index cb4b50c31544..08af78602d2a 100644
+--- a/libc/src/__support/high_precision_decimal.h
++++ b/libc/src/__support/high_precision_decimal.h
+@@ -15,11 +15,11 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_HIGH_PRECISION_DECIMAL_H
+ #define LLVM_LIBC_SRC___SUPPORT_HIGH_PRECISION_DECIMAL_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/limits.h"
+ #include "src/__support/ctype_utils.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/str_to_integer.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+diff --git a/libc/src/__support/integer_literals.h b/libc/src/__support/integer_literals.h
+index f68b7ef12c87..67d241d93b28 100644
+--- a/libc/src/__support/integer_literals.h
++++ b/libc/src/__support/integer_literals.h
+@@ -13,13 +13,13 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_INTEGER_LITERALS_H
+ #define LLVM_LIBC_SRC___SUPPORT_INTEGER_LITERALS_H
+ 
++#include "hdr/stdint_proxy.h"         // uintxx_t
+ #include "src/__support/CPP/limits.h" // CHAR_BIT
+ #include "src/__support/ctype_utils.h"
+ #include "src/__support/macros/attributes.h" // LIBC_INLINE
+ #include "src/__support/macros/config.h"
+ #include "src/__support/uint128.h" // UInt128
+ #include <stddef.h>                // size_t
+-#include <stdint.h>                // uintxx_t
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/__support/integer_to_string.h b/libc/src/__support/integer_to_string.h
+index 65bdcf16b386..29449bd73973 100644
+--- a/libc/src/__support/integer_to_string.h
++++ b/libc/src/__support/integer_to_string.h
+@@ -57,8 +57,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_INTEGER_TO_STRING_H
+ #define LLVM_LIBC_SRC___SUPPORT_INTEGER_TO_STRING_H
+ 
+-#include <stdint.h>
+-
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/algorithm.h" // max
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/bit.h"
+diff --git a/libc/src/__support/macros/properties/CMakeLists.txt b/libc/src/__support/macros/properties/CMakeLists.txt
+index 80ed63a2fbcf..dfa2f9c57249 100644
+--- a/libc/src/__support/macros/properties/CMakeLists.txt
++++ b/libc/src/__support/macros/properties/CMakeLists.txt
+@@ -34,6 +34,7 @@ add_header_library(
+     .cpu_features
+     .os
+     libc.hdr.float_macros
++    libc.hdr.stdint_proxy
+     libc.include.llvm-libc-macros.float16_macros
+     libc.include.llvm-libc-types.float128
+ )
+diff --git a/libc/src/__support/macros/properties/types.h b/libc/src/__support/macros/properties/types.h
+index aec4a488c3cb..3259c8a6a1d1 100644
+--- a/libc/src/__support/macros/properties/types.h
++++ b/libc/src/__support/macros/properties/types.h
+@@ -10,7 +10,8 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_MACROS_PROPERTIES_TYPES_H
+ #define LLVM_LIBC_SRC___SUPPORT_MACROS_PROPERTIES_TYPES_H
+ 
+-#include "hdr/float_macros.h"                        // LDBL_MANT_DIG
++#include "hdr/float_macros.h" // LDBL_MANT_DIG
++#include "hdr/stdint_proxy.h" // UINT64_MAX, __SIZEOF_INT128__
+ #include "include/llvm-libc-macros/float16-macros.h" // LIBC_TYPES_HAS_FLOAT16
+ #include "include/llvm-libc-types/float128.h"        // float128
+ #include "src/__support/macros/config.h"             // LIBC_NAMESPACE_DECL
+@@ -19,8 +20,6 @@
+ #include "src/__support/macros/properties/cpu_features.h"
+ #include "src/__support/macros/properties/os.h"
+ 
+-#include <stdint.h> // UINT64_MAX, __SIZEOF_INT128__
+-
+ // 'long double' properties.
+ #if (LDBL_MANT_DIG == 53)
+ #define LIBC_TYPES_LONG_DOUBLE_IS_FLOAT64
+diff --git a/libc/src/__support/ryu_constants.h b/libc/src/__support/ryu_constants.h
+index 1ecb34e661ba..09bc2355ef30 100644
+--- a/libc/src/__support/ryu_constants.h
++++ b/libc/src/__support/ryu_constants.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_RYU_CONSTANTS_H
+ #define LLVM_LIBC_SRC___SUPPORT_RYU_CONSTANTS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ constexpr size_t TABLE_SHIFT_CONST = 120;
+ constexpr size_t IDX_SIZE = 16;
+diff --git a/libc/src/__support/ryu_long_double_constants.h b/libc/src/__support/ryu_long_double_constants.h
+index 8ebb29727789..487fd4a411f7 100644
+--- a/libc/src/__support/ryu_long_double_constants.h
++++ b/libc/src/__support/ryu_long_double_constants.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_RYU_LONG_DOUBLE_CONSTANTS_H
+ #define LLVM_LIBC_SRC___SUPPORT_RYU_LONG_DOUBLE_CONSTANTS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ constexpr size_t TABLE_SHIFT_CONST = 120;
+ constexpr size_t IDX_SIZE = 128;
+diff --git a/libc/src/__support/str_to_float.h b/libc/src/__support/str_to_float.h
+index a7dd7ce0ae25..3d35d8a30aff 100644
+--- a/libc/src/__support/str_to_float.h
++++ b/libc/src/__support/str_to_float.h
+@@ -16,6 +16,7 @@
+ #define LLVM_LIBC_SRC___SUPPORT_STR_TO_FLOAT_H
+ 
+ #include "hdr/errno_macros.h" // For ERANGE
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/CPP/limits.h"
+ #include "src/__support/CPP/optional.h"
+@@ -33,8 +34,6 @@
+ #include "src/__support/str_to_num_result.h"
+ #include "src/__support/uint128.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+ 
+diff --git a/libc/src/__support/threads/CMakeLists.txt b/libc/src/__support/threads/CMakeLists.txt
+index bd49bbb5ad2f..b0843463e532 100644
+--- a/libc/src/__support/threads/CMakeLists.txt
++++ b/libc/src/__support/threads/CMakeLists.txt
+@@ -49,6 +49,7 @@ add_header_library(
+   HDRS
+     thread.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.CPP.atomic
+     libc.src.__support.CPP.optional
+@@ -64,6 +65,7 @@ if(TARGET libc.src.__support.threads.${LIBC_TARGET_OS}.thread)
+     DEPENDS
+       .mutex
+       .${LIBC_TARGET_OS}.thread
++      libc.hdr.stdint_proxy
+       libc.src.__support.common
+       libc.src.__support.fixedvector
+       libc.src.__support.CPP.array
+diff --git a/libc/src/__support/threads/CndVar.h b/libc/src/__support/threads/CndVar.h
+index e42fa145faea..7b2a7126ca09 100644
+--- a/libc/src/__support/threads/CndVar.h
++++ b/libc/src/__support/threads/CndVar.h
+@@ -9,13 +9,12 @@
+ #ifndef LLVM_LIBC___SUPPORT_SRC_THREADS_LINUX_CNDVAR_H
+ #define LLVM_LIBC___SUPPORT_SRC_THREADS_LINUX_CNDVAR_H
+ 
++#include "hdr/stdint_proxy.h" // uint32_t
+ #include "src/__support/macros/config.h"
+ #include "src/__support/threads/linux/futex_utils.h" // Futex
+ #include "src/__support/threads/linux/raw_mutex.h"   // RawMutex
+ #include "src/__support/threads/mutex.h"             // Mutex
+ 
+-#include <stdint.h> // uint32_t
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ class CndVar {
+diff --git a/libc/src/__support/threads/linux/CMakeLists.txt b/libc/src/__support/threads/linux/CMakeLists.txt
+index 364e7e2b9058..cbb788645a13 100644
+--- a/libc/src/__support/threads/linux/CMakeLists.txt
++++ b/libc/src/__support/threads/linux/CMakeLists.txt
+@@ -2,6 +2,8 @@ add_header_library(
+   futex_word_type
+   HDRS
+     futex_word.h
++  DEPENDS
++    libc.hdr.stdint_proxy
+ )
+ 
+ if(NOT TARGET libc.src.__support.OSUtil.osutil)
+@@ -114,6 +116,7 @@ add_object_library(
+   HDRS
+     ../CndVar.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.sys_syscall
+     libc.src.__support.OSUtil.osutil
+     libc.src.__support.threads.linux.futex_word_type
+diff --git a/libc/src/__support/threads/linux/futex_word.h b/libc/src/__support/threads/linux/futex_word.h
+index a5a6a0c110ca..1cf7befea5c8 100644
+--- a/libc/src/__support/threads/linux/futex_word.h
++++ b/libc/src/__support/threads/linux/futex_word.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_THREADS_LINUX_FUTEX_WORD_H
+ #define LLVM_LIBC_SRC___SUPPORT_THREADS_LINUX_FUTEX_WORD_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ #include <sys/syscall.h>
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/__support/threads/linux/thread.cpp b/libc/src/__support/threads/linux/thread.cpp
+index baad26aed685..d9e479eefcae 100644
+--- a/libc/src/__support/threads/linux/thread.cpp
++++ b/libc/src/__support/threads/linux/thread.cpp
+@@ -23,10 +23,10 @@
+ #endif
+ 
+ #include "hdr/fcntl_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include <linux/param.h> // For EXEC_PAGESIZE.
+ #include <linux/prctl.h> // For PR_SET_NAME
+ #include <linux/sched.h> // For CLONE_* flags.
+-#include <stdint.h>
+ #include <sys/mman.h>    // For PROT_* and MAP_* definitions.
+ #include <sys/syscall.h> // For syscall numbers.
+ 
+diff --git a/libc/src/__support/threads/thread.h b/libc/src/__support/threads/thread.h
+index f2b1f6bbb253..114ab4932af7 100644
+--- a/libc/src/__support/threads/thread.h
++++ b/libc/src/__support/threads/thread.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_THREADS_THREAD_H
+ #define LLVM_LIBC_SRC___SUPPORT_THREADS_THREAD_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/atomic.h"
+ #include "src/__support/CPP/optional.h"
+ #include "src/__support/CPP/string_view.h"
+@@ -21,7 +22,6 @@
+ #include <linux/param.h> // for exec_pagesize.
+ 
+ #include <stddef.h> // For size_t
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/__support/wchar/CMakeLists.txt b/libc/src/__support/wchar/CMakeLists.txt
+index 802441d37fe9..cf3e641d2d2d 100644
+--- a/libc/src/__support/wchar/CMakeLists.txt
++++ b/libc/src/__support/wchar/CMakeLists.txt
+@@ -3,7 +3,8 @@ add_header_library(
+   HDRS
+     mbstate.h
+   DEPENDS
+-    libc.hdr.types.char32_t    
++    libc.hdr.stdint_proxy
++    libc.hdr.types.char32_t
+ )
+ 
+ add_header_library(
+diff --git a/libc/src/__support/wchar/mbstate.h b/libc/src/__support/wchar/mbstate.h
+index 32304a521524..96256cae14cb 100644
+--- a/libc/src/__support/wchar/mbstate.h
++++ b/libc/src/__support/wchar/mbstate.h
+@@ -9,9 +9,9 @@
+ #ifndef LLVM_LIBC_SRC___SUPPORT_MBSTATE_H
+ #define LLVM_LIBC_SRC___SUPPORT_MBSTATE_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/char32_t.h"
+ #include "src/__support/common.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+diff --git a/libc/src/arpa/inet/CMakeLists.txt b/libc/src/arpa/inet/CMakeLists.txt
+index cdd53e915034..1f39a076fde9 100644
+--- a/libc/src/arpa/inet/CMakeLists.txt
++++ b/libc/src/arpa/inet/CMakeLists.txt
+@@ -5,6 +5,7 @@ add_entrypoint_object(
+   HDRS
+     htonl.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.arpa_inet
+     libc.src.__support.common
+ )
+@@ -16,6 +17,7 @@ add_entrypoint_object(
+   HDRS
+     htons.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.arpa_inet
+     libc.src.__support.common
+ )
+@@ -27,6 +29,7 @@ add_entrypoint_object(
+   HDRS
+     ntohl.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.arpa_inet
+     libc.src.__support.common
+ )
+@@ -38,6 +41,7 @@ add_entrypoint_object(
+   HDRS
+     ntohs.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.arpa_inet
+     libc.src.__support.common
+ )
+diff --git a/libc/src/arpa/inet/htonl.h b/libc/src/arpa/inet/htonl.h
+index e444972c771e..34f017df7334 100644
+--- a/libc/src/arpa/inet/htonl.h
++++ b/libc/src/arpa/inet/htonl.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC_ARPA_INET_HTONL_H
+ #define LLVM_LIBC_SRC_ARPA_INET_HTONL_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/arpa/inet/htons.h b/libc/src/arpa/inet/htons.h
+index 35c2acdcfae4..5e283cd49241 100644
+--- a/libc/src/arpa/inet/htons.h
++++ b/libc/src/arpa/inet/htons.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC_ARPA_INET_HTONS_H
+ #define LLVM_LIBC_SRC_ARPA_INET_HTONS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/arpa/inet/ntohl.h b/libc/src/arpa/inet/ntohl.h
+index 40079650d6fd..76ba02ba00dd 100644
+--- a/libc/src/arpa/inet/ntohl.h
++++ b/libc/src/arpa/inet/ntohl.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC_ARPA_INET_NTOHL_H
+ #define LLVM_LIBC_SRC_ARPA_INET_NTOHL_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/arpa/inet/ntohs.h b/libc/src/arpa/inet/ntohs.h
+index 5fe3ebcb6252..b98c85264923 100644
+--- a/libc/src/arpa/inet/ntohs.h
++++ b/libc/src/arpa/inet/ntohs.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC_ARPA_INET_NTOHS_H
+ #define LLVM_LIBC_SRC_ARPA_INET_NTOHS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/compiler/generic/CMakeLists.txt b/libc/src/compiler/generic/CMakeLists.txt
+index 2fc8f7f64c85..d9ad42e465e4 100644
+--- a/libc/src/compiler/generic/CMakeLists.txt
++++ b/libc/src/compiler/generic/CMakeLists.txt
+@@ -5,6 +5,7 @@ add_entrypoint_object(
+   HDRS
+     ../__stack_chk_fail.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.OSUtil.osutil
+     libc.src.stdlib.abort
+ )
+diff --git a/libc/src/compiler/generic/__stack_chk_fail.cpp b/libc/src/compiler/generic/__stack_chk_fail.cpp
+index 00e976ad8bc2..7edd16cf6a86 100644
+--- a/libc/src/compiler/generic/__stack_chk_fail.cpp
++++ b/libc/src/compiler/generic/__stack_chk_fail.cpp
+@@ -7,9 +7,9 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "src/compiler/__stack_chk_fail.h"
++#include "hdr/stdint_proxy.h" // For uintptr_t
+ #include "src/__support/OSUtil/io.h"
+ #include "src/stdlib/abort.h"
+-#include <stdint.h> // For uintptr_t
+ 
+ extern "C" {
+ 
+diff --git a/libc/src/inttypes/CMakeLists.txt b/libc/src/inttypes/CMakeLists.txt
+index c3111ed80ff8..3a48c9a1a8b9 100644
+--- a/libc/src/inttypes/CMakeLists.txt
++++ b/libc/src/inttypes/CMakeLists.txt
+@@ -5,6 +5,7 @@ add_entrypoint_object(
+   HDRS
+     strtoimax.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.str_to_integer
+     libc.src.errno.errno
+ )
+@@ -16,6 +17,7 @@ add_entrypoint_object(
+   HDRS
+     strtoumax.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.str_to_integer
+     libc.src.errno.errno
+ )
+diff --git a/libc/src/inttypes/strtoimax.h b/libc/src/inttypes/strtoimax.h
+index 804d07c219aa..fedc458bac1d 100644
+--- a/libc/src/inttypes/strtoimax.h
++++ b/libc/src/inttypes/strtoimax.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC_INTTYPES_STRTOIMAX_H
+ #define LLVM_LIBC_SRC_INTTYPES_STRTOIMAX_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/inttypes/strtoumax.h b/libc/src/inttypes/strtoumax.h
+index 4c53c0362b9e..d5b82afa3109 100644
+--- a/libc/src/inttypes/strtoumax.h
++++ b/libc/src/inttypes/strtoumax.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_SRC_INTTYPES_STRTOUMAX_H
+ #define LLVM_LIBC_SRC_INTTYPES_STRTOUMAX_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/link/CMakeLists.txt b/libc/src/link/CMakeLists.txt
+index f68950e625dc..55f5edfab7d9 100644
+--- a/libc/src/link/CMakeLists.txt
++++ b/libc/src/link/CMakeLists.txt
+@@ -4,4 +4,6 @@ add_entrypoint_object(
+     dl_iterate_phdr.cpp
+   HDRS
+     dl_iterate_phdr.h
++  DEPENDS
++    libc.hdr.stdint_proxy
+ )
+diff --git a/libc/src/math/generic/CMakeLists.txt b/libc/src/math/generic/CMakeLists.txt
+index a9237741788a..788e9ede4111 100644
+--- a/libc/src/math/generic/CMakeLists.txt
++++ b/libc/src/math/generic/CMakeLists.txt
+@@ -5075,6 +5075,7 @@ add_header_library(
+   HDRS
+     expxf16.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.FPUtil.cast
+     libc.src.__support.FPUtil.fp_bits
+     libc.src.__support.FPUtil.multiply_add
+diff --git a/libc/src/math/generic/expxf16.h b/libc/src/math/generic/expxf16.h
+index 05ac95d58682..5f25983bec9a 100644
+--- a/libc/src/math/generic/expxf16.h
++++ b/libc/src/math/generic/expxf16.h
+@@ -9,14 +9,13 @@
+ #ifndef LLVM_LIBC_SRC_MATH_GENERIC_EXPXF16_H
+ #define LLVM_LIBC_SRC_MATH_GENERIC_EXPXF16_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/FPUtil/cast.h"
+ #include "src/__support/FPUtil/multiply_add.h"
+ #include "src/__support/FPUtil/nearest_integer.h"
+ #include "src/__support/macros/attributes.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+-
+ #include "src/__support/math/expf16_utils.h"
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/src/pthread/CMakeLists.txt b/libc/src/pthread/CMakeLists.txt
+index c8c66805667f..c5db6fa910db 100644
+--- a/libc/src/pthread/CMakeLists.txt
++++ b/libc/src/pthread/CMakeLists.txt
+@@ -99,6 +99,7 @@ add_entrypoint_object(
+   HDRS
+     pthread_attr_setstack.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.pthread
+     libc.src.pthread.pthread_attr_setstacksize
+     libc.src.errno.errno
+diff --git a/libc/src/pthread/pthread_attr_setstack.cpp b/libc/src/pthread/pthread_attr_setstack.cpp
+index 767f959b1400..b66072cbcf05 100644
+--- a/libc/src/pthread/pthread_attr_setstack.cpp
++++ b/libc/src/pthread/pthread_attr_setstack.cpp
+@@ -9,13 +9,13 @@
+ #include "pthread_attr_setstack.h"
+ #include "pthread_attr_setstacksize.h"
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/common.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/threads/thread.h" // For STACK_ALIGNMENT
+ 
+ #include <pthread.h>
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/sched/linux/CMakeLists.txt b/libc/src/sched/linux/CMakeLists.txt
+index 4852c9053bea..e690e76fd748 100644
+--- a/libc/src/sched/linux/CMakeLists.txt
++++ b/libc/src/sched/linux/CMakeLists.txt
+@@ -5,6 +5,7 @@ add_entrypoint_object(
+   HDRS
+     ../sched_getaffinity.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.sched
+     libc.src.__support.OSUtil.osutil
+     libc.src.errno.errno
+diff --git a/libc/src/sched/linux/sched_getaffinity.cpp b/libc/src/sched/linux/sched_getaffinity.cpp
+index e005819e2a97..4a5e91af5de8 100644
+--- a/libc/src/sched/linux/sched_getaffinity.cpp
++++ b/libc/src/sched/linux/sched_getaffinity.cpp
+@@ -8,13 +8,13 @@
+ 
+ #include "src/sched/sched_getaffinity.h"
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/OSUtil/syscall.h" // For internal syscall function.
+ #include "src/__support/common.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+ 
+ #include <sched.h>
+-#include <stdint.h>
+ #include <sys/syscall.h> // For syscall numbers.
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/src/spawn/CMakeLists.txt b/libc/src/spawn/CMakeLists.txt
+index 11621da782ed..fe5f81effc3f 100644
+--- a/libc/src/spawn/CMakeLists.txt
++++ b/libc/src/spawn/CMakeLists.txt
+@@ -7,6 +7,7 @@ add_header_library(
+   HDRS
+     file_actions.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.spawn
+ )
+ 
+diff --git a/libc/src/spawn/file_actions.h b/libc/src/spawn/file_actions.h
+index 80b92959c6a4..c69640a3ddd0 100644
+--- a/libc/src/spawn/file_actions.h
++++ b/libc/src/spawn/file_actions.h
+@@ -9,9 +9,9 @@
+ #ifndef LLVM_LIBC_SRC_SPAWN_FILE_ACTIONS_H
+ #define LLVM_LIBC_SRC_SPAWN_FILE_ACTIONS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+ #include <spawn.h> // For mode_t
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/stdio/gpu/CMakeLists.txt b/libc/src/stdio/gpu/CMakeLists.txt
+index bea113409263..8412153bf580 100644
+--- a/libc/src/stdio/gpu/CMakeLists.txt
++++ b/libc/src/stdio/gpu/CMakeLists.txt
+@@ -259,6 +259,7 @@ add_entrypoint_object(
+   HDRS
+     ../fgets.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.hdr.types.FILE
+     .gpu_file
+ )
+diff --git a/libc/src/stdio/gpu/fgets.cpp b/libc/src/stdio/gpu/fgets.cpp
+index 5447e86d1c76..e1c6088b6008 100644
+--- a/libc/src/stdio/gpu/fgets.cpp
++++ b/libc/src/stdio/gpu/fgets.cpp
+@@ -9,12 +9,11 @@
+ #include "src/stdio/fgets.h"
+ 
+ #include "file.h"
++#include "hdr/stdint_proxy.h"
+ #include "hdr/stdio_macros.h" // for EOF.
+ #include "hdr/types/FILE.h"
+ #include "src/__support/common.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ LLVM_LIBC_FUNCTION(char *, fgets,
+diff --git a/libc/src/stdlib/CMakeLists.txt b/libc/src/stdlib/CMakeLists.txt
+index 74ae864f72e2..aa653c38a8c3 100644
+--- a/libc/src/stdlib/CMakeLists.txt
++++ b/libc/src/stdlib/CMakeLists.txt
+@@ -191,8 +191,9 @@ add_entrypoint_object(
+   HDRS
+     a64l.h
+   DEPENDS
+-    libc.src.__support.ctype_utils
++    libc.hdr.stdint_proxy
+     libc.hdr.types.size_t
++    libc.src.__support.ctype_utils
+ )
+ 
+ add_entrypoint_object(
+@@ -202,8 +203,9 @@ add_entrypoint_object(
+   HDRS
+     l64a.h
+   DEPENDS
+-    libc.src.__support.ctype_utils
++    libc.hdr.stdint_proxy
+     libc.hdr.types.size_t
++    libc.src.__support.ctype_utils
+ )
+ 
+ add_entrypoint_object(
+@@ -287,6 +289,7 @@ add_header_library(
+     heap_sort.h
+     quick_sort.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.stdlib
+     libc.src.__support.CPP.cstddef
+ )
+@@ -299,6 +302,7 @@ add_entrypoint_object(
+     qsort.h
+   DEPENDS
+     .qsort_util
++    libc.hdr.stdint_proxy
+     libc.hdr.types.size_t
+ )
+ 
+@@ -310,6 +314,7 @@ add_entrypoint_object(
+     qsort_r.h
+   DEPENDS
+     .qsort_util
++    libc.hdr.stdint_proxy
+     libc.hdr.types.size_t
+ )
+ 
+diff --git a/libc/src/stdlib/a64l.cpp b/libc/src/stdlib/a64l.cpp
+index 84be2d208f7d..690b70d65677 100644
+--- a/libc/src/stdlib/a64l.cpp
++++ b/libc/src/stdlib/a64l.cpp
+@@ -7,13 +7,12 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "src/stdlib/a64l.h"
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/size_t.h"
+ #include "src/__support/common.h"
+ #include "src/__support/ctype_utils.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ // I'm not sure this should go in ctype_utils since the specific ordering of
+diff --git a/libc/src/stdlib/bsearch.cpp b/libc/src/stdlib/bsearch.cpp
+index 69b3e749c03f..f0848051173e 100644
+--- a/libc/src/stdlib/bsearch.cpp
++++ b/libc/src/stdlib/bsearch.cpp
+@@ -10,7 +10,7 @@
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/stdlib/l64a.cpp b/libc/src/stdlib/l64a.cpp
+index b5506c3e40c3..d59e65e7dc4c 100644
+--- a/libc/src/stdlib/l64a.cpp
++++ b/libc/src/stdlib/l64a.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "src/stdlib/l64a.h"
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/size_t.h"
+ #include "src/__support/common.h"
+ #include "src/__support/ctype_utils.h"
+ #include "src/__support/libc_assert.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ // the standard says to only use up to 6 characters. Null terminator is
+diff --git a/libc/src/stdlib/qsort.cpp b/libc/src/stdlib/qsort.cpp
+index 0bf5fc798052..f66b686d4e54 100644
+--- a/libc/src/stdlib/qsort.cpp
++++ b/libc/src/stdlib/qsort.cpp
+@@ -7,12 +7,11 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "src/stdlib/qsort.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ #include "src/stdlib/qsort_util.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ LLVM_LIBC_FUNCTION(void, qsort,
+diff --git a/libc/src/stdlib/qsort_data.h b/libc/src/stdlib/qsort_data.h
+index aa6d9bbc123d..739fce88ab75 100644
+--- a/libc/src/stdlib/qsort_data.h
++++ b/libc/src/stdlib/qsort_data.h
+@@ -9,11 +9,10 @@
+ #ifndef LLVM_LIBC_SRC_STDLIB_QSORT_DATA_H
+ #define LLVM_LIBC_SRC_STDLIB_QSORT_DATA_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/cstddef.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+ 
+diff --git a/libc/src/stdlib/qsort_r.cpp b/libc/src/stdlib/qsort_r.cpp
+index 4e60998b6a6d..47448201eddb 100644
+--- a/libc/src/stdlib/qsort_r.cpp
++++ b/libc/src/stdlib/qsort_r.cpp
+@@ -7,12 +7,11 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "src/stdlib/qsort_r.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ #include "src/stdlib/qsort_util.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ 
+ LLVM_LIBC_FUNCTION(void, qsort_r,
+diff --git a/libc/src/stdlib/quick_sort.h b/libc/src/stdlib/quick_sort.h
+index 8ba0098854d1..00115bdfbae7 100644
+--- a/libc/src/stdlib/quick_sort.h
++++ b/libc/src/stdlib/quick_sort.h
+@@ -9,13 +9,12 @@
+ #ifndef LLVM_LIBC_SRC_STDLIB_QUICK_SORT_H
+ #define LLVM_LIBC_SRC_STDLIB_QUICK_SORT_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/CPP/cstddef.h"
+ #include "src/__support/macros/config.h"
+ #include "src/stdlib/qsort_pivot.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+ 
+diff --git a/libc/src/string/CMakeLists.txt b/libc/src/string/CMakeLists.txt
+index 8784bc3750cb..809decfbe5f0 100644
+--- a/libc/src/string/CMakeLists.txt
++++ b/libc/src/string/CMakeLists.txt
+@@ -17,6 +17,7 @@ add_header_library(
+   DEPENDS
+     libc.hdr.types.size_t
+     libc.hdr.limits_macros
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.bitset
+     libc.src.__support.CPP.type_traits
+     libc.src.__support.common
+diff --git a/libc/src/string/memory_utils/CMakeLists.txt b/libc/src/string/memory_utils/CMakeLists.txt
+index a967247db53f..4f3873b064d7 100644
+--- a/libc/src/string/memory_utils/CMakeLists.txt
++++ b/libc/src/string/memory_utils/CMakeLists.txt
+@@ -32,6 +32,7 @@ add_header_library(
+     x86_64/inline_memmove.h
+     x86_64/inline_memset.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.common
+     libc.src.__support.CPP.bit
+     libc.src.__support.CPP.cstddef
+diff --git a/libc/src/string/memory_utils/op_generic.h b/libc/src/string/memory_utils/op_generic.h
+index 9349cfdd1d02..37603410e3a5 100644
+--- a/libc/src/string/memory_utils/op_generic.h
++++ b/libc/src/string/memory_utils/op_generic.h
+@@ -23,6 +23,7 @@
+ #ifndef LLVM_LIBC_SRC_STRING_MEMORY_UTILS_OP_GENERIC_H
+ #define LLVM_LIBC_SRC_STRING_MEMORY_UTILS_OP_GENERIC_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/common.h"
+@@ -34,8 +35,6 @@
+ #include "src/string/memory_utils/op_builtin.h"
+ #include "src/string/memory_utils/utils.h"
+ 
+-#include <stdint.h>
+-
+ static_assert((UINTPTR_MAX == 4294967295U) ||
+                   (UINTPTR_MAX == 18446744073709551615UL),
+               "We currently only support 32- or 64-bit platforms");
+diff --git a/libc/src/string/memory_utils/utils.h b/libc/src/string/memory_utils/utils.h
+index c08608c87bb2..0f9c9e36a3dc 100644
+--- a/libc/src/string/memory_utils/utils.h
++++ b/libc/src/string/memory_utils/utils.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC_STRING_MEMORY_UTILS_UTILS_H
+ #define LLVM_LIBC_SRC_STRING_MEMORY_UTILS_UTILS_H
+ 
++#include "hdr/stdint_proxy.h" // intptr_t / uintptr_t / INT32_MAX / INT32_MIN
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/CPP/cstddef.h"
+ #include "src/__support/CPP/type_traits.h"
+@@ -18,7 +19,6 @@
+ #include "src/__support/macros/properties/architectures.h"
+ 
+ #include <stddef.h> // size_t
+-#include <stdint.h> // intptr_t / uintptr_t / INT32_MAX / INT32_MIN
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/src/string/memory_utils/x86_64/inline_memcpy.h b/libc/src/string/memory_utils/x86_64/inline_memcpy.h
+index 68f64fb1a502..bf3aa1f755ad 100644
+--- a/libc/src/string/memory_utils/x86_64/inline_memcpy.h
++++ b/libc/src/string/memory_utils/x86_64/inline_memcpy.h
+@@ -8,6 +8,7 @@
+ #ifndef LLVM_LIBC_SRC_STRING_MEMORY_UTILS_X86_64_INLINE_MEMCPY_H
+ #define LLVM_LIBC_SRC_STRING_MEMORY_UTILS_X86_64_INLINE_MEMCPY_H
+ 
++#include "hdr/stdint_proxy.h"                  // SIZE_MAX
+ #include "src/__support/macros/attributes.h"   // LIBC_INLINE_VAR
+ #include "src/__support/macros/optimization.h" // LIBC_UNLIKELY
+ #include "src/string/memory_utils/op_builtin.h"
+@@ -15,7 +16,6 @@
+ #include "src/string/memory_utils/utils.h"
+ 
+ #include <stddef.h> // size_t
+-#include <stdint.h> // SIZE_MAX
+ 
+ #ifdef LLVM_LIBC_MEMCPY_X86_USE_ONLY_REPMOVSB
+ #error LLVM_LIBC_MEMCPY_X86_USE_ONLY_REPMOVSB is deprecated use LIBC_COPT_MEMCPY_X86_USE_REPMOVSB_FROM_SIZE=0 instead.
+diff --git a/libc/src/string/string_utils.h b/libc/src/string/string_utils.h
+index 4f56263fce8e..80e5783c7890 100644
+--- a/libc/src/string/string_utils.h
++++ b/libc/src/string/string_utils.h
+@@ -15,6 +15,7 @@
+ #define LLVM_LIBC_SRC_STRING_STRING_UTILS_H
+ 
+ #include "hdr/limits_macros.h"
++#include "hdr/stdint_proxy.h" // uintptr_t
+ #include "hdr/types/size_t.h"
+ #include "src/__support/CPP/bitset.h"
+ #include "src/__support/CPP/type_traits.h" // cpp::is_same_v
+diff --git a/libc/src/sys/stat/linux/CMakeLists.txt b/libc/src/sys/stat/linux/CMakeLists.txt
+index 9aeb14636c2c..c99872c3ad09 100644
+--- a/libc/src/sys/stat/linux/CMakeLists.txt
++++ b/libc/src/sys/stat/linux/CMakeLists.txt
+@@ -73,6 +73,7 @@ add_header_library(
+   HDRS
+     kernel_statx.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.sys_stat
+     libc.include.sys_syscall
+     libc.src.__support.OSUtil.osutil
+diff --git a/libc/src/sys/stat/linux/kernel_statx.h b/libc/src/sys/stat/linux/kernel_statx.h
+index d0e223aec3e1..455ab17a2fb9 100644
+--- a/libc/src/sys/stat/linux/kernel_statx.h
++++ b/libc/src/sys/stat/linux/kernel_statx.h
+@@ -9,11 +9,11 @@
+ #ifndef LLVM_LIBC_SRC_SYS_STAT_LINUX_KERNEL_STATX_H
+ #define LLVM_LIBC_SRC_SYS_STAT_LINUX_KERNEL_STATX_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/OSUtil/syscall.h" // For internal syscall function.
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+ #include <sys/stat.h>
+ #include <sys/syscall.h> // For syscall numbers.
+ 
+diff --git a/libc/src/time/CMakeLists.txt b/libc/src/time/CMakeLists.txt
+index 3b951df81001..304b3f247a50 100644
+--- a/libc/src/time/CMakeLists.txt
++++ b/libc/src/time/CMakeLists.txt
+@@ -7,10 +7,11 @@ add_header_library(
+   HDRS
+     time_constants.h
+   DEPENDS
++    libc.hdr.stdint_proxy
++    libc.hdr.types.time_t
+     libc.include.time
+     libc.src.__support.CPP.array
+     libc.src.__support.CPP.string_view
+-    libc.hdr.types.time_t
+ )
+ 
+ add_object_library(
+@@ -29,6 +30,7 @@ add_object_library(
+     libc.hdr.types.time_t
+     libc.hdr.types.size_t
+     libc.hdr.types.struct_tm
++    libc.hdr.stdint_proxy
+ )
+ 
+ add_entrypoint_object(
+diff --git a/libc/src/time/linux/CMakeLists.txt b/libc/src/time/linux/CMakeLists.txt
+index 314623f9f425..a6ec7c7c0696 100644
+--- a/libc/src/time/linux/CMakeLists.txt
++++ b/libc/src/time/linux/CMakeLists.txt
+@@ -34,6 +34,7 @@ add_entrypoint_object(
+     ../nanosleep.h
+   DEPENDS
+     libc.hdr.types.struct_timespec
++    libc.hdr.stdint_proxy
+     libc.include.sys_syscall
+     libc.src.__support.OSUtil.osutil
+     libc.src.__support.CPP.limits
+diff --git a/libc/src/time/linux/nanosleep.cpp b/libc/src/time/linux/nanosleep.cpp
+index 6b9704126a0a..e5df1585df98 100644
+--- a/libc/src/time/linux/nanosleep.cpp
++++ b/libc/src/time/linux/nanosleep.cpp
+@@ -7,13 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "src/time/nanosleep.h"
++#include "hdr/stdint_proxy.h" // For int64_t.
+ #include "hdr/time_macros.h"
+ #include "src/__support/OSUtil/syscall.h" // For syscall functions.
+ #include "src/__support/common.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>      // For int64_t.
+ #include <sys/syscall.h> // For syscall numbers.
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/src/time/strftime_core/CMakeLists.txt b/libc/src/time/strftime_core/CMakeLists.txt
+index 5e40e662ac79..3ffd283ead7f 100644
+--- a/libc/src/time/strftime_core/CMakeLists.txt
++++ b/libc/src/time/strftime_core/CMakeLists.txt
+@@ -5,6 +5,7 @@ add_header_library(
+   DEPENDS
+     libc.src.__support.CPP.string_view
+     libc.hdr.types.struct_tm
++    libc.hdr.stdint_proxy
+ )
+ 
+ add_header_library(
+diff --git a/libc/src/time/strftime_core/core_structs.h b/libc/src/time/strftime_core/core_structs.h
+index 25bf5e616e0e..9da57aa11e6c 100644
+--- a/libc/src/time/strftime_core/core_structs.h
++++ b/libc/src/time/strftime_core/core_structs.h
+@@ -9,11 +9,10 @@
+ #ifndef LLVM_LIBC_SRC_STDIO_STRFTIME_CORE_CORE_STRUCTS_H
+ #define LLVM_LIBC_SRC_STDIO_STRFTIME_CORE_CORE_STRUCTS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/struct_tm.h"
+ #include "src/__support/CPP/string_view.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace strftime_core {
+ 
+diff --git a/libc/src/time/time_constants.h b/libc/src/time/time_constants.h
+index 0fcb7ffbf13b..32eb0a171f8d 100644
+--- a/libc/src/time/time_constants.h
++++ b/libc/src/time/time_constants.h
+@@ -9,10 +9,10 @@
+ #ifndef LLVM_LIBC_SRC_TIME_TIME_CONSTANTS_H
+ #define LLVM_LIBC_SRC_TIME_TIME_CONSTANTS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/time_t.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/string_view.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace time_constants {
+diff --git a/libc/src/time/time_utils.cpp b/libc/src/time/time_utils.cpp
+index 1c519c3ff8ae..1d0daea6b321 100644
+--- a/libc/src/time/time_utils.cpp
++++ b/libc/src/time/time_utils.cpp
+@@ -7,13 +7,12 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "src/time/time_utils.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/limits.h" // INT_MIN, INT_MAX
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ #include "src/time/time_constants.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace time_utils {
+ 
+diff --git a/libc/src/time/time_utils.h b/libc/src/time/time_utils.h
+index 0541c24ece82..84d412c1e846 100644
+--- a/libc/src/time/time_utils.h
++++ b/libc/src/time/time_utils.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_SRC_TIME_TIME_UTILS_H
+ #define LLVM_LIBC_SRC_TIME_TIME_UTILS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "hdr/types/size_t.h"
+ #include "hdr/types/struct_tm.h"
+ #include "hdr/types/time_t.h"
+@@ -19,8 +20,6 @@
+ #include "src/__support/macros/config.h"
+ #include "time_constants.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace time_utils {
+ 
+diff --git a/libc/src/unistd/linux/CMakeLists.txt b/libc/src/unistd/linux/CMakeLists.txt
+index 368593a3bb7b..382a61fea8b6 100644
+--- a/libc/src/unistd/linux/CMakeLists.txt
++++ b/libc/src/unistd/linux/CMakeLists.txt
+@@ -172,6 +172,7 @@ add_entrypoint_object(
+   DEPENDS
+     libc.hdr.types.off_t
+     libc.hdr.fcntl_macros
++    libc.hdr.stdint_proxy
+     libc.include.unistd
+     libc.include.sys_syscall
+     libc.src.__support.OSUtil.osutil
+@@ -385,6 +386,7 @@ add_entrypoint_object(
+     libc.hdr.types.size_t
+     libc.hdr.types.ssize_t
+     libc.hdr.fcntl_macros
++    libc.hdr.stdint_proxy
+     libc.include.unistd
+     libc.include.sys_syscall
+     libc.src.__support.OSUtil.osutil
+@@ -403,6 +405,7 @@ add_entrypoint_object(
+     libc.hdr.types.size_t
+     libc.hdr.types.ssize_t
+     libc.hdr.fcntl_macros
++    libc.hdr.stdint_proxy
+     libc.include.unistd
+     libc.include.sys_syscall
+     libc.src.__support.OSUtil.osutil
+@@ -546,6 +549,7 @@ add_entrypoint_object(
+   DEPENDS
+     libc.hdr.types.off_t
+     libc.hdr.fcntl_macros
++    libc.hdr.stdint_proxy
+     libc.include.unistd
+     libc.include.sys_syscall
+     libc.src.__support.OSUtil.osutil
+diff --git a/libc/src/unistd/linux/ftruncate.cpp b/libc/src/unistd/linux/ftruncate.cpp
+index f6aa6f8b48cc..b4729f8d50d7 100644
+--- a/libc/src/unistd/linux/ftruncate.cpp
++++ b/libc/src/unistd/linux/ftruncate.cpp
+@@ -11,10 +11,10 @@
+ #include "src/__support/OSUtil/syscall.h" // For internal syscall function.
+ #include "src/__support/common.h"
+ 
++#include "hdr/stdint_proxy.h" // For uint64_t.
+ #include "hdr/unistd_macros.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>      // For uint64_t.
+ #include <sys/syscall.h> // For syscall numbers.
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/src/unistd/linux/pread.cpp b/libc/src/unistd/linux/pread.cpp
+index 2f86e397feef..cf3152dbbad8 100644
+--- a/libc/src/unistd/linux/pread.cpp
++++ b/libc/src/unistd/linux/pread.cpp
+@@ -8,12 +8,12 @@
+ 
+ #include "src/unistd/pread.h"
+ 
++#include "hdr/stdint_proxy.h"             // For uint64_t.
+ #include "src/__support/OSUtil/syscall.h" // For internal syscall function.
+ #include "src/__support/common.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/sanitizer.h" // for MSAN_UNPOISON
+-#include <stdint.h>                         // For uint64_t.
+ #include <sys/syscall.h>                    // For syscall numbers.
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/src/unistd/linux/pwrite.cpp b/libc/src/unistd/linux/pwrite.cpp
+index f4cf8e16d766..7672063dcab9 100644
+--- a/libc/src/unistd/linux/pwrite.cpp
++++ b/libc/src/unistd/linux/pwrite.cpp
+@@ -11,9 +11,9 @@
+ #include "src/__support/OSUtil/syscall.h" // For internal syscall function.
+ #include "src/__support/common.h"
+ 
++#include "hdr/stdint_proxy.h" // For uint64_t.
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>      // For uint64_t.
+ #include <sys/syscall.h> // For syscall numbers.
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/src/unistd/linux/truncate.cpp b/libc/src/unistd/linux/truncate.cpp
+index 6103d4b51350..204b27f7308d 100644
+--- a/libc/src/unistd/linux/truncate.cpp
++++ b/libc/src/unistd/linux/truncate.cpp
+@@ -13,8 +13,8 @@
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+ 
++#include "hdr/stdint_proxy.h" // For uint64_t.
+ #include "hdr/unistd_macros.h"
+-#include <stdint.h>      // For uint64_t.
+ #include <sys/syscall.h> // For syscall numbers.
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/startup/baremetal/CMakeLists.txt b/libc/startup/baremetal/CMakeLists.txt
+index 4faced93fabe..276fe3387682 100644
+--- a/libc/startup/baremetal/CMakeLists.txt
++++ b/libc/startup/baremetal/CMakeLists.txt
+@@ -2,10 +2,16 @@ add_entrypoint_object(
+   init
+   SRCS
+     init.cpp
++  DEPENDS
++    libc.hdr.stdint_proxy
++    libc.src.__support.common
+ )
+ 
+ add_entrypoint_object(
+   fini
+   SRCS
+     fini.cpp
++  DEPENDS
++    libc.hdr.stdint_proxy
++    libc.src.__support.common
+ )
+diff --git a/libc/startup/baremetal/fini.cpp b/libc/startup/baremetal/fini.cpp
+index 263d7192cc60..64af842572ec 100644
+--- a/libc/startup/baremetal/fini.cpp
++++ b/libc/startup/baremetal/fini.cpp
+@@ -6,9 +6,9 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/startup/baremetal/init.cpp b/libc/startup/baremetal/init.cpp
+index ce387017c497..995609c1bf41 100644
+--- a/libc/startup/baremetal/init.cpp
++++ b/libc/startup/baremetal/init.cpp
+@@ -6,9 +6,9 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ 
+diff --git a/libc/startup/linux/CMakeLists.txt b/libc/startup/linux/CMakeLists.txt
+index eaa724e41f16..7af1819c57c1 100644
+--- a/libc/startup/linux/CMakeLists.txt
++++ b/libc/startup/linux/CMakeLists.txt
+@@ -96,6 +96,7 @@ add_object_library(
+     do_start.h
+   DEPENDS
+     libc.config.app_h
++    libc.hdr.stdint_proxy
+     libc.include.sys_mman
+     libc.include.sys_syscall
+     libc.include.llvm-libc-macros.link_macros
+diff --git a/libc/startup/linux/do_start.cpp b/libc/startup/linux/do_start.cpp
+index ff104c7f0d1d..94c4ec709286 100644
+--- a/libc/startup/linux/do_start.cpp
++++ b/libc/startup/linux/do_start.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ #include "startup/linux/do_start.h"
+ #include "config/linux/app.h"
++#include "hdr/stdint_proxy.h"
+ #include "include/llvm-libc-macros/link-macros.h"
+ #include "src/__support/OSUtil/syscall.h"
+ #include "src/__support/macros/config.h"
+@@ -17,7 +18,6 @@
+ 
+ #include <linux/auxvec.h>
+ #include <linux/elf.h>
+-#include <stdint.h>
+ #include <sys/mman.h>
+ #include <sys/syscall.h>
+ 
+diff --git a/libc/test/IntegrationTest/CMakeLists.txt b/libc/test/IntegrationTest/CMakeLists.txt
+index 4a999407d48d..3afe354eca98 100644
+--- a/libc/test/IntegrationTest/CMakeLists.txt
++++ b/libc/test/IntegrationTest/CMakeLists.txt
+@@ -11,6 +11,7 @@ add_object_library(
+   HDRS
+     test.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.OSUtil.osutil
+     ${arch_specific_deps}
+ )
+diff --git a/libc/test/IntegrationTest/test.cpp b/libc/test/IntegrationTest/test.cpp
+index 871bdf0dc562..8baf74637b30 100644
+--- a/libc/test/IntegrationTest/test.cpp
++++ b/libc/test/IntegrationTest/test.cpp
+@@ -6,10 +6,10 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ #ifdef LIBC_TARGET_ARCH_IS_AARCH64
+ #include "src/sys/auxv/getauxval.h"
+diff --git a/libc/test/UnitTest/CMakeLists.txt b/libc/test/UnitTest/CMakeLists.txt
+index c32809da577d..d92ab6feccb2 100644
+--- a/libc/test/UnitTest/CMakeLists.txt
++++ b/libc/test/UnitTest/CMakeLists.txt
+@@ -69,6 +69,7 @@ add_unittest_framework_library(
+     Test.h
+     TestLogger.h
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.big_int
+     libc.src.__support.c_string
+     libc.src.__support.CPP.string
+@@ -91,12 +92,16 @@ add_unittest_framework_library(
+     ${libc_death_test_srcs}
+   HDRS
+     ExecuteFunction.h
++  DEPENDS
++    libc.hdr.stdint_proxy
+ )
+ 
+ add_unittest_framework_library(
+   LibcHermeticTestSupport
+   SRCS
+     HermeticTestUtils.cpp
++  DEPENDS
++    libc.hdr.stdint_proxy
+ )
+ 
+ add_header_library(
+@@ -160,6 +165,7 @@ add_unittest_framework_library(
+     PrintfMatcher.h
+   DEPENDS
+     LibcTest
++    libc.hdr.stdint_proxy
+     libc.src.__support.FPUtil.fp_bits
+     libc.src.stdio.printf_core.core_structs
+     libc.test.UnitTest.string_utils
+@@ -173,6 +179,7 @@ add_unittest_framework_library(
+     ScanfMatcher.h
+   DEPENDS
+     LibcTest
++    libc.hdr.stdint_proxy
+     libc.src.__support.FPUtil.fp_bits
+     libc.src.stdio.scanf_core.core_structs
+     libc.test.UnitTest.string_utils
+diff --git a/libc/test/UnitTest/ExecuteFunction.h b/libc/test/UnitTest/ExecuteFunction.h
+index 93ab6e973380..5844fd55d4e2 100644
+--- a/libc/test/UnitTest/ExecuteFunction.h
++++ b/libc/test/UnitTest/ExecuteFunction.h
+@@ -9,9 +9,9 @@
+ #ifndef LLVM_LIBC_TEST_UNITTEST_EXECUTEFUNCTION_H
+ #define LLVM_LIBC_TEST_UNITTEST_EXECUTEFUNCTION_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/limits.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace testutils {
+diff --git a/libc/test/UnitTest/HermeticTestUtils.cpp b/libc/test/UnitTest/HermeticTestUtils.cpp
+index a9494af746d5..f34a73f3e680 100644
+--- a/libc/test/UnitTest/HermeticTestUtils.cpp
++++ b/libc/test/UnitTest/HermeticTestUtils.cpp
+@@ -6,10 +6,10 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/common.h"
+ #include "src/__support/macros/config.h"
+ #include <stddef.h>
+-#include <stdint.h>
+ 
+ #ifdef LIBC_TARGET_ARCH_IS_AARCH64
+ #include "src/sys/auxv/getauxval.h"
+diff --git a/libc/test/UnitTest/PrintfMatcher.cpp b/libc/test/UnitTest/PrintfMatcher.cpp
+index 4fdcbf1746d2..2ea1bbfcc636 100644
+--- a/libc/test/UnitTest/PrintfMatcher.cpp
++++ b/libc/test/UnitTest/PrintfMatcher.cpp
+@@ -8,6 +8,7 @@
+ 
+ #include "PrintfMatcher.h"
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/macros/config.h"
+ #include "src/stdio/printf_core/core_structs.h"
+@@ -15,8 +16,6 @@
+ #include "test/UnitTest/StringUtils.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace testing {
+ 
+diff --git a/libc/test/UnitTest/RoundingModeUtils.h b/libc/test/UnitTest/RoundingModeUtils.h
+index cdc3699d1565..5f23a8708fe6 100644
+--- a/libc/test/UnitTest/RoundingModeUtils.h
++++ b/libc/test/UnitTest/RoundingModeUtils.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_TEST_UNITTEST_ROUNDINGMODEUTILS_H
+ #define LLVM_LIBC_TEST_UNITTEST_ROUNDINGMODEUTILS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace fputil {
+diff --git a/libc/test/UnitTest/ScanfMatcher.cpp b/libc/test/UnitTest/ScanfMatcher.cpp
+index 3e9f2a5f941a..d47ad71a3b6f 100644
+--- a/libc/test/UnitTest/ScanfMatcher.cpp
++++ b/libc/test/UnitTest/ScanfMatcher.cpp
+@@ -8,6 +8,7 @@
+ 
+ #include "ScanfMatcher.h"
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/macros/config.h"
+ #include "src/stdio/scanf_core/core_structs.h"
+@@ -15,8 +16,6 @@
+ #include "test/UnitTest/StringUtils.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace testing {
+ 
+diff --git a/libc/test/UnitTest/TestLogger.cpp b/libc/test/UnitTest/TestLogger.cpp
+index e1df7987bcd8..3d95d48a5f5a 100644
+--- a/libc/test/UnitTest/TestLogger.cpp
++++ b/libc/test/UnitTest/TestLogger.cpp
+@@ -1,14 +1,13 @@
+ #include "test/UnitTest/TestLogger.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/string.h"
+ #include "src/__support/CPP/string_view.h"
+-#include "src/__support/OSUtil/io.h"               // write_to_stderr
+-#include "src/__support/big_int.h"                 // is_big_int
++#include "src/__support/OSUtil/io.h" // write_to_stderr
++#include "src/__support/big_int.h"   // is_big_int
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/properties/types.h" // LIBC_TYPES_HAS_INT128
+ #include "src/__support/uint128.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace testing {
+ 
+diff --git a/libc/test/integration/src/pthread/CMakeLists.txt b/libc/test/integration/src/pthread/CMakeLists.txt
+index 208ba3fd4350..0bdd99c253fe 100644
+--- a/libc/test/integration/src/pthread/CMakeLists.txt
++++ b/libc/test/integration/src/pthread/CMakeLists.txt
+@@ -7,6 +7,7 @@ add_integration_test(
+   SRCS
+     pthread_mutex_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.pthread
+     libc.src.errno.errno
+     libc.src.pthread.pthread_mutex_destroy
+@@ -84,6 +85,7 @@ add_integration_test(
+   SRCS
+     pthread_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.pthread
+     libc.src.pthread.pthread_create
+     libc.src.pthread.pthread_join
+@@ -96,6 +98,7 @@ add_integration_test(
+   SRCS
+     pthread_equal_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.pthread
+     libc.src.errno.errno
+     libc.src.pthread.pthread_mutex_destroy
+@@ -115,6 +118,7 @@ add_integration_test(
+   SRCS
+     pthread_name_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.pthread
+     libc.src.errno.errno
+     libc.src.pthread.pthread_create
+@@ -165,6 +169,7 @@ add_integration_test(
+   SRCS
+     pthread_once_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.pthread
+     libc.src.pthread.pthread_once
+     libc.src.pthread.pthread_mutex_destroy
+diff --git a/libc/test/integration/src/pthread/pthread_equal_test.cpp b/libc/test/integration/src/pthread/pthread_equal_test.cpp
+index 82f5a494e1bd..01569798537e 100644
+--- a/libc/test/integration/src/pthread/pthread_equal_test.cpp
++++ b/libc/test/integration/src/pthread/pthread_equal_test.cpp
+@@ -6,6 +6,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h" // uintptr_t
+ #include "src/pthread/pthread_create.h"
+ #include "src/pthread/pthread_equal.h"
+ #include "src/pthread/pthread_join.h"
+@@ -14,11 +15,9 @@
+ #include "src/pthread/pthread_mutex_lock.h"
+ #include "src/pthread/pthread_mutex_unlock.h"
+ #include "src/pthread/pthread_self.h"
+-
+ #include "test/IntegrationTest/test.h"
+ 
+ #include <pthread.h>
+-#include <stdint.h> // uintptr_t
+ 
+ pthread_t child_thread;
+ pthread_mutex_t mutex;
+diff --git a/libc/test/integration/src/pthread/pthread_mutex_test.cpp b/libc/test/integration/src/pthread/pthread_mutex_test.cpp
+index 137daed6bd28..d41ad6daf426 100644
+--- a/libc/test/integration/src/pthread/pthread_mutex_test.cpp
++++ b/libc/test/integration/src/pthread/pthread_mutex_test.cpp
+@@ -6,18 +6,16 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h" // uintptr_t
++#include "src/pthread/pthread_create.h"
++#include "src/pthread/pthread_join.h"
+ #include "src/pthread/pthread_mutex_destroy.h"
+ #include "src/pthread/pthread_mutex_init.h"
+ #include "src/pthread/pthread_mutex_lock.h"
+ #include "src/pthread/pthread_mutex_unlock.h"
+-
+-#include "src/pthread/pthread_create.h"
+-#include "src/pthread/pthread_join.h"
+-
+ #include "test/IntegrationTest/test.h"
+ 
+ #include <pthread.h>
+-#include <stdint.h> // uintptr_t
+ 
+ constexpr int START = 0;
+ constexpr int MAX = 10000;
+diff --git a/libc/test/integration/src/pthread/pthread_name_test.cpp b/libc/test/integration/src/pthread/pthread_name_test.cpp
+index 35dd3b165e0e..343a22356593 100644
+--- a/libc/test/integration/src/pthread/pthread_name_test.cpp
++++ b/libc/test/integration/src/pthread/pthread_name_test.cpp
+@@ -6,6 +6,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h" // uintptr_t
+ #include "src/__support/CPP/string_view.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/pthread/pthread_create.h"
+@@ -17,11 +18,9 @@
+ #include "src/pthread/pthread_mutex_unlock.h"
+ #include "src/pthread/pthread_self.h"
+ #include "src/pthread/pthread_setname_np.h"
+-
+ #include "test/IntegrationTest/test.h"
+ 
+ #include <pthread.h>
+-#include <stdint.h> // uintptr_t
+ 
+ using string_view = LIBC_NAMESPACE::cpp::string_view;
+ 
+diff --git a/libc/test/integration/src/pthread/pthread_once_test.cpp b/libc/test/integration/src/pthread/pthread_once_test.cpp
+index 8e0f234ee8c6..68aadf3bdc18 100644
+--- a/libc/test/integration/src/pthread/pthread_once_test.cpp
++++ b/libc/test/integration/src/pthread/pthread_once_test.cpp
+@@ -6,6 +6,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h" // uintptr_t
+ #include "src/__support/CPP/atomic.h"
+ #include "src/pthread/pthread_create.h"
+ #include "src/pthread/pthread_join.h"
+@@ -14,11 +15,9 @@
+ #include "src/pthread/pthread_mutex_lock.h"
+ #include "src/pthread/pthread_mutex_unlock.h"
+ #include "src/pthread/pthread_once.h"
+-
+ #include "test/IntegrationTest/test.h"
+ 
+ #include <pthread.h>
+-#include <stdint.h> // uintptr_t
+ 
+ static constexpr unsigned int NUM_THREADS = 5;
+ static LIBC_NAMESPACE::cpp::Atomic<unsigned int> thread_count;
+diff --git a/libc/test/integration/src/pthread/pthread_test.cpp b/libc/test/integration/src/pthread/pthread_test.cpp
+index 3565a7cb0868..4d635fd9a96d 100644
+--- a/libc/test/integration/src/pthread/pthread_test.cpp
++++ b/libc/test/integration/src/pthread/pthread_test.cpp
+@@ -6,12 +6,12 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h" // uintptr_t
+ #include "src/pthread/pthread_create.h"
+ #include "src/pthread/pthread_join.h"
+ #include "test/IntegrationTest/test.h"
+ 
+ #include <pthread.h>
+-#include <stdint.h> // uintptr_t
+ 
+ static constexpr int thread_count = 1000;
+ static int counter = 0;
+diff --git a/libc/test/integration/src/spawn/CMakeLists.txt b/libc/test/integration/src/spawn/CMakeLists.txt
+index caed59fc1b7a..f3a7327cc005 100644
+--- a/libc/test/integration/src/spawn/CMakeLists.txt
++++ b/libc/test/integration/src/spawn/CMakeLists.txt
+@@ -29,6 +29,7 @@ add_integration_test(
+   DEPENDS
+     libc_posix_spawn_test_binary
+     libc.test.integration.src.spawn.test_binary_properties
++    libc.hdr.stdint_proxy
+     libc.include.fcntl
+     libc.include.signal
+     libc.include.spawn
+diff --git a/libc/test/integration/src/spawn/posix_spawn_test.cpp b/libc/test/integration/src/spawn/posix_spawn_test.cpp
+index 104096c40c3a..3c8cc7317b53 100644
+--- a/libc/test/integration/src/spawn/posix_spawn_test.cpp
++++ b/libc/test/integration/src/spawn/posix_spawn_test.cpp
+@@ -8,6 +8,7 @@
+ 
+ #include "test_binary_properties.h"
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/spawn/posix_spawn.h"
+ #include "src/spawn/posix_spawn_file_actions_addopen.h"
+ #include "src/spawn/posix_spawn_file_actions_destroy.h"
+@@ -18,7 +19,6 @@
+ #include <fcntl.h>
+ #include <spawn.h>
+ #include <stddef.h>
+-#include <stdint.h>
+ #include <sys/wait.h>
+ 
+ char arg0[] = "libc_posix_spawn_test_binary";
+diff --git a/libc/test/src/CMakeLists.txt b/libc/test/src/CMakeLists.txt
+index 6dca47b5343e..b63092102fe5 100644
+--- a/libc/test/src/CMakeLists.txt
++++ b/libc/test/src/CMakeLists.txt
+@@ -51,7 +51,9 @@ function(add_fp_unittest name)
+     ${test_type}
+     LINK_LIBRARIES "${MATH_UNITTEST_LINK_LIBRARIES}"
+     "${MATH_UNITTEST_UNPARSED_ARGUMENTS}"
+-    DEPENDS "${deps}"
++    DEPENDS
++      libc.hdr.stdint_proxy
++      "${deps}"
+   )
+ endfunction(add_fp_unittest)
+ 
+diff --git a/libc/test/src/__support/CMakeLists.txt b/libc/test/src/__support/CMakeLists.txt
+index e54d7a5c9638..5d1d0e0e5316 100644
+--- a/libc/test/src/__support/CMakeLists.txt
++++ b/libc/test/src/__support/CMakeLists.txt
+@@ -265,6 +265,7 @@ add_libc_test(
+   SRCS
+     str_to_float_comparison_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.stdio.printf
+     libc.src.stdio.fopen
+     libc.src.stdio.fclose
+diff --git a/libc/test/src/__support/CPP/CMakeLists.txt b/libc/test/src/__support/CPP/CMakeLists.txt
+index 2b4d6107b767..3e1379d812c3 100644
+--- a/libc/test/src/__support/CPP/CMakeLists.txt
++++ b/libc/test/src/__support/CPP/CMakeLists.txt
+@@ -27,6 +27,7 @@ add_libc_test(
+   SRCS
+     bit_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.big_int
+     libc.src.__support.CPP.bit
+     libc.src.__support.macros.properties.types
+diff --git a/libc/test/src/__support/CPP/bit_test.cpp b/libc/test/src/__support/CPP/bit_test.cpp
+index 89e2a75e0680..891e693e0c95 100644
+--- a/libc/test/src/__support/CPP/bit_test.cpp
++++ b/libc/test/src/__support/CPP/bit_test.cpp
+@@ -6,14 +6,13 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/big_int.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/properties/types.h" // LIBC_TYPES_HAS_INT128
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace cpp {
+ 
+diff --git a/libc/test/src/__support/HashTable/CMakeLists.txt b/libc/test/src/__support/HashTable/CMakeLists.txt
+index f84835fe95c7..55e9864c792f 100644
+--- a/libc/test/src/__support/HashTable/CMakeLists.txt
++++ b/libc/test/src/__support/HashTable/CMakeLists.txt
+@@ -30,6 +30,7 @@ add_libc_test(
+   SRCS
+     group_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.HashTable.bitmask
+     libc.src.stdlib.rand
+     libc.src.search.hsearch
+diff --git a/libc/test/src/__support/HashTable/group_test.cpp b/libc/test/src/__support/HashTable/group_test.cpp
+index acdc58e20585..890ca001b0d3 100644
+--- a/libc/test/src/__support/HashTable/group_test.cpp
++++ b/libc/test/src/__support/HashTable/group_test.cpp
+@@ -8,11 +8,11 @@
+ 
+ #include "src/__support/HashTable/bitmask.h"
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/bit.h"
+ #include "src/__support/macros/config.h"
+ #include "src/stdlib/rand.h"
+ #include "test/UnitTest/Test.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace internal {
+diff --git a/libc/test/src/__support/str_to_float_comparison_test.cpp b/libc/test/src/__support/str_to_float_comparison_test.cpp
+index 6e89ce2aabf3..18be22af00d8 100644
+--- a/libc/test/src/__support/str_to_float_comparison_test.cpp
++++ b/libc/test/src/__support/str_to_float_comparison_test.cpp
+@@ -6,6 +6,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/bit.h"
+ #include "src/stdio/fclose.h"
+ #include "src/stdio/fgets.h"
+@@ -17,7 +18,6 @@
+ #include "src/string/strdup.h"
+ #include "src/string/strtok.h"
+ #include "test/UnitTest/Test.h"
+-#include <stdint.h>
+ 
+ // The intent of this test is to read in files in the format used in this test
+ // dataset: https://github.com/nigeltao/parse-number-fxx-test-data
+diff --git a/libc/test/src/fenv/feclearexcept_test.cpp b/libc/test/src/fenv/feclearexcept_test.cpp
+index 52adda46adf2..f39cf4eca05c 100644
+--- a/libc/test/src/fenv/feclearexcept_test.cpp
++++ b/libc/test/src/fenv/feclearexcept_test.cpp
+@@ -13,7 +13,6 @@
+ #include "test/UnitTest/Test.h"
+ 
+ #include "hdr/fenv_macros.h"
+-#include <stdint.h>
+ 
+ #include "excepts.h"
+ 
+diff --git a/libc/test/src/math/LdExpTest.h b/libc/test/src/math/LdExpTest.h
+index 08dce0d4d478..cff2aebcba48 100644
+--- a/libc/test/src/math/LdExpTest.h
++++ b/libc/test/src/math/LdExpTest.h
+@@ -17,7 +17,7 @@
+ #include "test/UnitTest/Test.h"
+ 
+ #include "hdr/math_macros.h"
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LIBC_NAMESPACE::Sign;
+ 
+diff --git a/libc/test/src/math/acosf_test.cpp b/libc/test/src/math/acosf_test.cpp
+index aa0128fee999..6e2bed75a7ff 100644
+--- a/libc/test/src/math/acosf_test.cpp
++++ b/libc/test/src/math/acosf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/acosf.h"
+@@ -14,8 +15,6 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
+-
+ namespace mpfr = LIBC_NAMESPACE::testing::mpfr;
+ 
+ using LlvmLibcAcosfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+diff --git a/libc/test/src/math/acoshf16_test.cpp b/libc/test/src/math/acoshf16_test.cpp
+index 2eb95215e4e8..d190cd1a5dcb 100644
+--- a/libc/test/src/math/acoshf16_test.cpp
++++ b/libc/test/src/math/acoshf16_test.cpp
+@@ -6,12 +6,12 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/acoshf16.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+-#include <stdint.h>
+ 
+ using LlvmLibcAcoshf16Test = LIBC_NAMESPACE::testing::FPTest<float16>;
+ namespace mpfr = LIBC_NAMESPACE::testing::mpfr;
+diff --git a/libc/test/src/math/acoshf_test.cpp b/libc/test/src/math/acoshf_test.cpp
+index 3d3b827411a4..3305445fb733 100644
+--- a/libc/test/src/math/acoshf_test.cpp
++++ b/libc/test/src/math/acoshf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/acoshf.h"
+@@ -14,8 +15,6 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcAcoshfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ namespace mpfr = LIBC_NAMESPACE::testing::mpfr;
+diff --git a/libc/test/src/math/asinf_test.cpp b/libc/test/src/math/asinf_test.cpp
+index 1eaa6b8a5135..f2963f25f40f 100644
+--- a/libc/test/src/math/asinf_test.cpp
++++ b/libc/test/src/math/asinf_test.cpp
+@@ -8,6 +8,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/asinf.h"
+@@ -15,8 +16,6 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcAsinfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ namespace mpfr = LIBC_NAMESPACE::testing::mpfr;
+diff --git a/libc/test/src/math/asinhf_test.cpp b/libc/test/src/math/asinhf_test.cpp
+index 8c78f939cabf..f9dfb0a2d521 100644
+--- a/libc/test/src/math/asinhf_test.cpp
++++ b/libc/test/src/math/asinhf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/asinhf.h"
+@@ -14,8 +15,6 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcAsinhfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ namespace mpfr = LIBC_NAMESPACE::testing::mpfr;
+diff --git a/libc/test/src/math/atanf_test.cpp b/libc/test/src/math/atanf_test.cpp
+index a4bdf1867c39..dc489fef9356 100644
+--- a/libc/test/src/math/atanf_test.cpp
++++ b/libc/test/src/math/atanf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/atanf.h"
+@@ -14,8 +15,6 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcAtanfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ namespace mpfr = LIBC_NAMESPACE::testing::mpfr;
+diff --git a/libc/test/src/math/atanhf16_test.cpp b/libc/test/src/math/atanhf16_test.cpp
+index e35cc775b060..4c3530480632 100644
+--- a/libc/test/src/math/atanhf16_test.cpp
++++ b/libc/test/src/math/atanhf16_test.cpp
+@@ -6,11 +6,11 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/math/atanhf16.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+-#include <stdint.h>
+ 
+ using LlvmLibcAtanhf16Test = LIBC_NAMESPACE::testing::FPTest<float16>;
+ namespace mpfr = LIBC_NAMESPACE::testing::mpfr;
+diff --git a/libc/test/src/math/atanhf_test.cpp b/libc/test/src/math/atanhf_test.cpp
+index 32272ef482ab..1ec7b6b9c525 100644
+--- a/libc/test/src/math/atanhf_test.cpp
++++ b/libc/test/src/math/atanhf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/atanhf.h"
+@@ -14,8 +15,6 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcAtanhfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ using LIBC_NAMESPACE::Sign;
+ 
+diff --git a/libc/test/src/math/cosf_test.cpp b/libc/test/src/math/cosf_test.cpp
+index 90dc8ff6a0ea..e2b444f87084 100644
+--- a/libc/test/src/math/cosf_test.cpp
++++ b/libc/test/src/math/cosf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/cosf.h"
+@@ -15,8 +16,6 @@
+ #include "test/src/math/sdcomp26094.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
+-
+ using LIBC_NAMESPACE::testing::SDCOMP26094_VALUES;
+ using LlvmLibcCosfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/coshf_test.cpp b/libc/test/src/math/coshf_test.cpp
+index bdaba50f1f14..98f9a82f4198 100644
+--- a/libc/test/src/math/coshf_test.cpp
++++ b/libc/test/src/math/coshf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+@@ -15,8 +16,6 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcCoshfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ namespace mpfr = LIBC_NAMESPACE::testing::mpfr;
+diff --git a/libc/test/src/math/erff_test.cpp b/libc/test/src/math/erff_test.cpp
+index f9b03377daa9..c40aacf852bc 100644
+--- a/libc/test/src/math/erff_test.cpp
++++ b/libc/test/src/math/erff_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcErffTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/exp10_test.cpp b/libc/test/src/math/exp10_test.cpp
+index 6126e5f211ff..ee8fe9b5fb28 100644
+--- a/libc/test/src/math/exp10_test.cpp
++++ b/libc/test/src/math/exp10_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExp10Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+diff --git a/libc/test/src/math/exp10f_test.cpp b/libc/test/src/math/exp10f_test.cpp
+index 89915961c9b9..e20214239112 100644
+--- a/libc/test/src/math/exp10f_test.cpp
++++ b/libc/test/src/math/exp10f_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExp10fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/exp10m1f_test.cpp b/libc/test/src/math/exp10m1f_test.cpp
+index 01802bd68f7e..613fdebab596 100644
+--- a/libc/test/src/math/exp10m1f_test.cpp
++++ b/libc/test/src/math/exp10m1f_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExp10m1fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/exp2_test.cpp b/libc/test/src/math/exp2_test.cpp
+index 4cd95dd5486e..7866037c9c54 100644
+--- a/libc/test/src/math/exp2_test.cpp
++++ b/libc/test/src/math/exp2_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExp2Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+diff --git a/libc/test/src/math/exp2f_test.cpp b/libc/test/src/math/exp2f_test.cpp
+index aeecb3e74b07..349a4c370418 100644
+--- a/libc/test/src/math/exp2f_test.cpp
++++ b/libc/test/src/math/exp2f_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExp2fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/exp2m1f_test.cpp b/libc/test/src/math/exp2m1f_test.cpp
+index 0c87657abc08..a323bdcb94cf 100644
+--- a/libc/test/src/math/exp2m1f_test.cpp
++++ b/libc/test/src/math/exp2m1f_test.cpp
+@@ -15,7 +15,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExp2m1fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/exp_test.cpp b/libc/test/src/math/exp_test.cpp
+index 83addaeb943d..d328d09cd869 100644
+--- a/libc/test/src/math/exp_test.cpp
++++ b/libc/test/src/math/exp_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExpTest = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+diff --git a/libc/test/src/math/expf_test.cpp b/libc/test/src/math/expf_test.cpp
+index 3c10812ff5bc..8329d7475741 100644
+--- a/libc/test/src/math/expf_test.cpp
++++ b/libc/test/src/math/expf_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExpfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/expm1_test.cpp b/libc/test/src/math/expm1_test.cpp
+index 0cf07e2e4973..5d546ded13df 100644
+--- a/libc/test/src/math/expm1_test.cpp
++++ b/libc/test/src/math/expm1_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExpm1Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+diff --git a/libc/test/src/math/expm1f_test.cpp b/libc/test/src/math/expm1f_test.cpp
+index cf3fe9c26ae1..d5c98be142fb 100644
+--- a/libc/test/src/math/expm1f_test.cpp
++++ b/libc/test/src/math/expm1f_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcExpm1fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/in_float_range_test_helper.h b/libc/test/src/math/in_float_range_test_helper.h
+index 35e039e74af5..21791822013f 100644
+--- a/libc/test/src/math/in_float_range_test_helper.h
++++ b/libc/test/src/math/in_float_range_test_helper.h
+@@ -5,7 +5,7 @@
+ #ifndef LLVM_LIBC_TEST_SRC_MATH_IN_FLOAT_RANGE_TEST_HELPER_H
+ #define LLVM_LIBC_TEST_SRC_MATH_IN_FLOAT_RANGE_TEST_HELPER_H
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ #define CHECK_DATA(start, stop, mfp_op, f, f_check, count, prec)               \
+   {                                                                            \
+diff --git a/libc/test/src/math/log10_test.cpp b/libc/test/src/math/log10_test.cpp
+index e9529d87c388..7d087d4eb9ed 100644
+--- a/libc/test/src/math/log10_test.cpp
++++ b/libc/test/src/math/log10_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcLog10Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+diff --git a/libc/test/src/math/log10f_test.cpp b/libc/test/src/math/log10f_test.cpp
+index b2c1c283e08e..c554948f7e64 100644
+--- a/libc/test/src/math/log10f_test.cpp
++++ b/libc/test/src/math/log10f_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcLog10fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/log1p_test.cpp b/libc/test/src/math/log1p_test.cpp
+index e5747b7e5ec0..4d1efe701430 100644
+--- a/libc/test/src/math/log1p_test.cpp
++++ b/libc/test/src/math/log1p_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcLog1pTest = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+diff --git a/libc/test/src/math/log1pf_test.cpp b/libc/test/src/math/log1pf_test.cpp
+index ffe2dd2c33dd..0badbeb5ae28 100644
+--- a/libc/test/src/math/log1pf_test.cpp
++++ b/libc/test/src/math/log1pf_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcLog1pfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/log2_test.cpp b/libc/test/src/math/log2_test.cpp
+index fc440c09b42b..dd55bd8b9764 100644
+--- a/libc/test/src/math/log2_test.cpp
++++ b/libc/test/src/math/log2_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcLog2Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+diff --git a/libc/test/src/math/log2f_test.cpp b/libc/test/src/math/log2f_test.cpp
+index 92226c763f45..78544893c520 100644
+--- a/libc/test/src/math/log2f_test.cpp
++++ b/libc/test/src/math/log2f_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcLog2fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/log_test.cpp b/libc/test/src/math/log_test.cpp
+index 54afaa33d135..be156fe5987c 100644
+--- a/libc/test/src/math/log_test.cpp
++++ b/libc/test/src/math/log_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcLogTest = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+diff --git a/libc/test/src/math/logf_test.cpp b/libc/test/src/math/logf_test.cpp
+index 79d8275856b6..7658075c1738 100644
+--- a/libc/test/src/math/logf_test.cpp
++++ b/libc/test/src/math/logf_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcLogfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/performance_testing/Timer.h b/libc/test/src/math/performance_testing/Timer.h
+index 32578ade4888..f75c1f0285e4 100644
+--- a/libc/test/src/math/performance_testing/Timer.h
++++ b/libc/test/src/math/performance_testing/Timer.h
+@@ -9,8 +9,8 @@
+ #ifndef LLVM_LIBC_TEST_SRC_MATH_PERFORMACE_TESTING_TIMER_H
+ #define LLVM_LIBC_TEST_SRC_MATH_PERFORMACE_TESTING_TIMER_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/macros/config.h"
+-#include <stdint.h>
+ 
+ namespace LIBC_NAMESPACE_DECL {
+ namespace testing {
+diff --git a/libc/test/src/math/performance_testing/fmodf16_perf.cpp b/libc/test/src/math/performance_testing/fmodf16_perf.cpp
+index f7c492cb7779..407ed7cb6009 100644
+--- a/libc/test/src/math/performance_testing/fmodf16_perf.cpp
++++ b/libc/test/src/math/performance_testing/fmodf16_perf.cpp
+@@ -11,7 +11,7 @@
+ #include "src/__support/FPUtil/generic/FMod.h"
+ #include "src/__support/macros/properties/types.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ #define FMOD_FUNC(U) (LIBC_NAMESPACE::fputil::generic::FMod<float16, U>::eval)
+ 
+diff --git a/libc/test/src/math/powf_test.cpp b/libc/test/src/math/powf_test.cpp
+index 4d189d813e58..1d7072463e0b 100644
+--- a/libc/test/src/math/powf_test.cpp
++++ b/libc/test/src/math/powf_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcPowfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ using LIBC_NAMESPACE::testing::tlog;
+diff --git a/libc/test/src/math/sdcomp26094.h b/libc/test/src/math/sdcomp26094.h
+index bb2b9f1efb90..b08cfd2936c6 100644
+--- a/libc/test/src/math/sdcomp26094.h
++++ b/libc/test/src/math/sdcomp26094.h
+@@ -9,11 +9,10 @@
+ #ifndef LLVM_LIBC_TEST_SRC_MATH_SDCOMP26094_H
+ #define LLVM_LIBC_TEST_SRC_MATH_SDCOMP26094_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/macros/config.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace testing {
+ 
+diff --git a/libc/test/src/math/sincosf_test.cpp b/libc/test/src/math/sincosf_test.cpp
+index ad2155f329cd..c4dde4b5365f 100644
+--- a/libc/test/src/math/sincosf_test.cpp
++++ b/libc/test/src/math/sincosf_test.cpp
+@@ -15,7 +15,7 @@
+ #include "test/src/math/sdcomp26094.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcSinCosfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/sinf_test.cpp b/libc/test/src/math/sinf_test.cpp
+index e0357e6157fd..c4676d9bb539 100644
+--- a/libc/test/src/math/sinf_test.cpp
++++ b/libc/test/src/math/sinf_test.cpp
+@@ -15,7 +15,7 @@
+ #include "test/src/math/sdcomp26094.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcSinfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/sinhf_test.cpp b/libc/test/src/math/sinhf_test.cpp
+index 74f906ebaa98..a66401056bd4 100644
+--- a/libc/test/src/math/sinhf_test.cpp
++++ b/libc/test/src/math/sinhf_test.cpp
+@@ -15,7 +15,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcSinhfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/sinpif_test.cpp b/libc/test/src/math/sinpif_test.cpp
+index 986c676761f0..18bc40118182 100644
+--- a/libc/test/src/math/sinpif_test.cpp
++++ b/libc/test/src/math/sinpif_test.cpp
+@@ -12,7 +12,7 @@
+ #include "test/src/math/sdcomp26094.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcSinpifTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/smoke/LdExpTest.h b/libc/test/src/math/smoke/LdExpTest.h
+index 094cc7e4e9e7..8de70ad161ad 100644
+--- a/libc/test/src/math/smoke/LdExpTest.h
++++ b/libc/test/src/math/smoke/LdExpTest.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_TEST_SRC_MATH_LDEXPTEST_H
+ #define LLVM_LIBC_TEST_SRC_MATH_LDEXPTEST_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/limits.h" // INT_MAX
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/FPUtil/NormalFloat.h"
+@@ -16,8 +17,6 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LIBC_NAMESPACE::Sign;
+ 
+ template <typename T, typename U = int>
+diff --git a/libc/test/src/math/smoke/acosf_test.cpp b/libc/test/src/math/smoke/acosf_test.cpp
+index 257c6a3d1d22..733610a03937 100644
+--- a/libc/test/src/math/smoke/acosf_test.cpp
++++ b/libc/test/src/math/smoke/acosf_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcAcosfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/smoke/acoshf_test.cpp b/libc/test/src/math/smoke/acoshf_test.cpp
+index b6abfab99929..19556b27e542 100644
+--- a/libc/test/src/math/smoke/acoshf_test.cpp
++++ b/libc/test/src/math/smoke/acoshf_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcAcoshfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/smoke/asinf_test.cpp b/libc/test/src/math/smoke/asinf_test.cpp
+index 2615a8ddd16b..6195a1126694 100644
+--- a/libc/test/src/math/smoke/asinf_test.cpp
++++ b/libc/test/src/math/smoke/asinf_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcAsinfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/smoke/asinhf_test.cpp b/libc/test/src/math/smoke/asinhf_test.cpp
+index d812a2dffe8a..e6326c116023 100644
+--- a/libc/test/src/math/smoke/asinhf_test.cpp
++++ b/libc/test/src/math/smoke/asinhf_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcAsinhfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/smoke/atanf_test.cpp b/libc/test/src/math/smoke/atanf_test.cpp
+index b56b9d0162b9..7d2dfee7edf3 100644
+--- a/libc/test/src/math/smoke/atanf_test.cpp
++++ b/libc/test/src/math/smoke/atanf_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcAtanfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/smoke/atanhf_test.cpp b/libc/test/src/math/smoke/atanhf_test.cpp
+index 038cb30d89a4..5588ae00dece 100644
+--- a/libc/test/src/math/smoke/atanhf_test.cpp
++++ b/libc/test/src/math/smoke/atanhf_test.cpp
+@@ -13,7 +13,7 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LIBC_NAMESPACE::Sign;
+ 
+diff --git a/libc/test/src/math/smoke/cosf_test.cpp b/libc/test/src/math/smoke/cosf_test.cpp
+index 470a876c63a7..837fee9aadfa 100644
+--- a/libc/test/src/math/smoke/cosf_test.cpp
++++ b/libc/test/src/math/smoke/cosf_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/cosf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcCosfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcCosfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/coshf_test.cpp b/libc/test/src/math/smoke/coshf_test.cpp
+index ee8f0199df3b..81096faaf815 100644
+--- a/libc/test/src/math/smoke/coshf_test.cpp
++++ b/libc/test/src/math/smoke/coshf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+@@ -14,8 +15,6 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcCoshfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcCoshfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/cospif_test.cpp b/libc/test/src/math/smoke/cospif_test.cpp
+index 3d48909cca93..6f1bb24b4ec3 100644
+--- a/libc/test/src/math/smoke/cospif_test.cpp
++++ b/libc/test/src/math/smoke/cospif_test.cpp
+@@ -6,12 +6,11 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/cospif.h"
+ #include "test/UnitTest/FPMatcher.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcCospifTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcCospifTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/erff_test.cpp b/libc/test/src/math/smoke/erff_test.cpp
+index a9f4994d77bb..133b4b823673 100644
+--- a/libc/test/src/math/smoke/erff_test.cpp
++++ b/libc/test/src/math/smoke/erff_test.cpp
+@@ -7,13 +7,12 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/math/erff.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcErffTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcErffTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/exp10_test.cpp b/libc/test/src/math/smoke/exp10_test.cpp
+index 50d3de0c7fe7..76e6c7844c12 100644
+--- a/libc/test/src/math/smoke/exp10_test.cpp
++++ b/libc/test/src/math/smoke/exp10_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/exp10.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcExp10Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+ TEST_F(LlvmLibcExp10Test, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/exp10f_test.cpp b/libc/test/src/math/smoke/exp10f_test.cpp
+index fcd334bb9e36..cf2f976958e2 100644
+--- a/libc/test/src/math/smoke/exp10f_test.cpp
++++ b/libc/test/src/math/smoke/exp10f_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/exp10f.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcExp10fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcExp10fTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/exp2_test.cpp b/libc/test/src/math/smoke/exp2_test.cpp
+index aebf80835072..3d26df1ee710 100644
+--- a/libc/test/src/math/smoke/exp2_test.cpp
++++ b/libc/test/src/math/smoke/exp2_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/exp2.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcExp2Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+ TEST_F(LlvmLibcExp2Test, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/exp2f_test.cpp b/libc/test/src/math/smoke/exp2f_test.cpp
+index c5243273d9ed..12bcbec78430 100644
+--- a/libc/test/src/math/smoke/exp2f_test.cpp
++++ b/libc/test/src/math/smoke/exp2f_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/exp2f.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcExp2fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcExp2fTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/exp_test.cpp b/libc/test/src/math/smoke/exp_test.cpp
+index c3b2ae70e1d9..4ce322736534 100644
+--- a/libc/test/src/math/smoke/exp_test.cpp
++++ b/libc/test/src/math/smoke/exp_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/exp.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcExpTest = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+ TEST_F(LlvmLibcExpTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/expf_test.cpp b/libc/test/src/math/smoke/expf_test.cpp
+index d34151735afa..a0e785f80a1d 100644
+--- a/libc/test/src/math/smoke/expf_test.cpp
++++ b/libc/test/src/math/smoke/expf_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/expf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcExpfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcExpfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/expm1_test.cpp b/libc/test/src/math/smoke/expm1_test.cpp
+index c842fe3c45fe..db7149dc7ae5 100644
+--- a/libc/test/src/math/smoke/expm1_test.cpp
++++ b/libc/test/src/math/smoke/expm1_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/expm1.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcExpm1Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+ TEST_F(LlvmLibcExpm1Test, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/expm1f_test.cpp b/libc/test/src/math/smoke/expm1f_test.cpp
+index 214bfe8abd4d..9482bf6fd4b0 100644
+--- a/libc/test/src/math/smoke/expm1f_test.cpp
++++ b/libc/test/src/math/smoke/expm1f_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/expm1f.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcExpm1fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcExpm1fTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/log10_test.cpp b/libc/test/src/math/smoke/log10_test.cpp
+index 49cfda85111a..3af27d47437a 100644
+--- a/libc/test/src/math/smoke/log10_test.cpp
++++ b/libc/test/src/math/smoke/log10_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/log10.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcLog10Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+ TEST_F(LlvmLibcLog10Test, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/log10f_test.cpp b/libc/test/src/math/smoke/log10f_test.cpp
+index a63822140e9b..f15da755c17e 100644
+--- a/libc/test/src/math/smoke/log10f_test.cpp
++++ b/libc/test/src/math/smoke/log10f_test.cpp
+@@ -7,13 +7,12 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/math/log10f.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcLog10fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcLog10fTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/log1pf_test.cpp b/libc/test/src/math/smoke/log1pf_test.cpp
+index dc3489fddf99..82c2f9465f4f 100644
+--- a/libc/test/src/math/smoke/log1pf_test.cpp
++++ b/libc/test/src/math/smoke/log1pf_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/log1pf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcLog1pfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcLog1pfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/log2_test.cpp b/libc/test/src/math/smoke/log2_test.cpp
+index 0534d00b1f40..6bf1ce3249a6 100644
+--- a/libc/test/src/math/smoke/log2_test.cpp
++++ b/libc/test/src/math/smoke/log2_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/log2.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcLog2Test = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+ TEST_F(LlvmLibcLog2Test, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/log2f_test.cpp b/libc/test/src/math/smoke/log2f_test.cpp
+index 53d54ac36763..80e13a2374ad 100644
+--- a/libc/test/src/math/smoke/log2f_test.cpp
++++ b/libc/test/src/math/smoke/log2f_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/log2f.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcLog2fTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcLog2fTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/log_test.cpp b/libc/test/src/math/smoke/log_test.cpp
+index 09e9ab0a9a4d..1d7761a56803 100644
+--- a/libc/test/src/math/smoke/log_test.cpp
++++ b/libc/test/src/math/smoke/log_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/log.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcLogTest = LIBC_NAMESPACE::testing::FPTest<double>;
+ 
+ TEST_F(LlvmLibcLogTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/logf_test.cpp b/libc/test/src/math/smoke/logf_test.cpp
+index faba50e9b240..f58209e26f05 100644
+--- a/libc/test/src/math/smoke/logf_test.cpp
++++ b/libc/test/src/math/smoke/logf_test.cpp
+@@ -7,13 +7,12 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/math/logf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcLogfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcLogfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/powf_test.cpp b/libc/test/src/math/smoke/powf_test.cpp
+index 0d1a650385fb..76e8e8cee7a9 100644
+--- a/libc/test/src/math/smoke/powf_test.cpp
++++ b/libc/test/src/math/smoke/powf_test.cpp
+@@ -7,13 +7,12 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/math/powf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcPowfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ using LIBC_NAMESPACE::fputil::testing::ForceRoundingMode;
+ using LIBC_NAMESPACE::fputil::testing::RoundingMode;
+diff --git a/libc/test/src/math/smoke/sincosf_test.cpp b/libc/test/src/math/smoke/sincosf_test.cpp
+index 8ba0d04347bb..7ff0ba7cdefc 100644
+--- a/libc/test/src/math/smoke/sincosf_test.cpp
++++ b/libc/test/src/math/smoke/sincosf_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/sincosf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcSinCosfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcSinCosfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/sinf_test.cpp b/libc/test/src/math/smoke/sinf_test.cpp
+index 8173969fb256..8ba66ed4a807 100644
+--- a/libc/test/src/math/smoke/sinf_test.cpp
++++ b/libc/test/src/math/smoke/sinf_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/sinf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcSinfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcSinfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/sinhf_test.cpp b/libc/test/src/math/smoke/sinhf_test.cpp
+index ea6a4474a780..5976a1f16944 100644
+--- a/libc/test/src/math/smoke/sinhf_test.cpp
++++ b/libc/test/src/math/smoke/sinhf_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+@@ -14,8 +15,6 @@
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcSinhfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcSinhfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/sinpif_test.cpp b/libc/test/src/math/smoke/sinpif_test.cpp
+index b840f3980eda..4a725e02ffec 100644
+--- a/libc/test/src/math/smoke/sinpif_test.cpp
++++ b/libc/test/src/math/smoke/sinpif_test.cpp
+@@ -6,12 +6,11 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/sinpif.h"
+ #include "test/UnitTest/FPMatcher.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcSinpifTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcSinpifTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/tanf_test.cpp b/libc/test/src/math/smoke/tanf_test.cpp
+index 12deca5cf941..c85907c835f0 100644
+--- a/libc/test/src/math/smoke/tanf_test.cpp
++++ b/libc/test/src/math/smoke/tanf_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/tanf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcTanfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcTanfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/smoke/tanhf_test.cpp b/libc/test/src/math/smoke/tanhf_test.cpp
+index b12a331b3190..57c05735c543 100644
+--- a/libc/test/src/math/smoke/tanhf_test.cpp
++++ b/libc/test/src/math/smoke/tanhf_test.cpp
+@@ -7,14 +7,13 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/math_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/FPUtil/FPBits.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/math/tanhf.h"
+ #include "test/UnitTest/FPMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ using LlvmLibcTanhfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+ TEST_F(LlvmLibcTanhfTest, SpecialNumbers) {
+diff --git a/libc/test/src/math/tanf_test.cpp b/libc/test/src/math/tanf_test.cpp
+index ecc70194b649..27949eb5ec90 100644
+--- a/libc/test/src/math/tanf_test.cpp
++++ b/libc/test/src/math/tanf_test.cpp
+@@ -15,7 +15,7 @@
+ #include "test/src/math/sdcomp26094.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcTanfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/math/tanhf_test.cpp b/libc/test/src/math/tanhf_test.cpp
+index 966ce649e2b3..27a6cbcb8013 100644
+--- a/libc/test/src/math/tanhf_test.cpp
++++ b/libc/test/src/math/tanhf_test.cpp
+@@ -14,7 +14,7 @@
+ #include "test/UnitTest/Test.h"
+ #include "utils/MPFRWrapper/MPFRUtils.h"
+ 
+-#include <stdint.h>
++#include "hdr/stdint_proxy.h"
+ 
+ using LlvmLibcTanhfTest = LIBC_NAMESPACE::testing::FPTest<float>;
+ 
+diff --git a/libc/test/src/signal/CMakeLists.txt b/libc/test/src/signal/CMakeLists.txt
+index f86ce2ae9685..6b5041d1dedd 100644
+--- a/libc/test/src/signal/CMakeLists.txt
++++ b/libc/test/src/signal/CMakeLists.txt
+@@ -119,6 +119,7 @@ add_libc_unittest(
+     sigaltstack_test.cpp
+   DEPENDS
+     libc.hdr.signal_macros
++    libc.hdr.stdint_proxy
+     libc.src.errno.errno
+     libc.src.signal.raise
+     libc.src.signal.sigaltstack
+diff --git a/libc/test/src/signal/sigaltstack_test.cpp b/libc/test/src/signal/sigaltstack_test.cpp
+index ce4dfddae248..a9c5cd939581 100644
+--- a/libc/test/src/signal/sigaltstack_test.cpp
++++ b/libc/test/src/signal/sigaltstack_test.cpp
+@@ -7,6 +7,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "hdr/signal_macros.h"
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/OSUtil/syscall.h" // For internal syscall function.
+ #include "src/__support/libc_errno.h"
+ #include "src/signal/linux/signal_utils.h"
+@@ -16,7 +17,6 @@
+ #include "test/UnitTest/ErrnoSetterMatcher.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+ #include <sys/syscall.h>
+ 
+ constexpr int LOCAL_VAR_SIZE = 512;
+diff --git a/libc/test/src/spawn/CMakeLists.txt b/libc/test/src/spawn/CMakeLists.txt
+index ce246d4a1b77..04814db46dca 100644
+--- a/libc/test/src/spawn/CMakeLists.txt
++++ b/libc/test/src/spawn/CMakeLists.txt
+@@ -7,6 +7,7 @@ add_libc_unittest(
+   SRCS
+     posix_spawn_file_actions_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.spawn
+     libc.src.spawn.file_actions
+     libc.src.spawn.posix_spawn_file_actions_addclose
+diff --git a/libc/test/src/spawn/posix_spawn_file_actions_test.cpp b/libc/test/src/spawn/posix_spawn_file_actions_test.cpp
+index 01ccb8218ee2..935a3540d9a5 100644
+--- a/libc/test/src/spawn/posix_spawn_file_actions_test.cpp
++++ b/libc/test/src/spawn/posix_spawn_file_actions_test.cpp
+@@ -6,6 +6,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/spawn/file_actions.h"
+ #include "src/spawn/posix_spawn_file_actions_addclose.h"
+@@ -16,7 +17,6 @@
+ #include "test/UnitTest/Test.h"
+ 
+ #include <spawn.h>
+-#include <stdint.h>
+ 
+ TEST(LlvmLibcPosixSpawnFileActionsTest, AddActions) {
+   posix_spawn_file_actions_t actions;
+diff --git a/libc/test/src/stdlib/CMakeLists.txt b/libc/test/src/stdlib/CMakeLists.txt
+index 45fd49b6d352..0eb373c3fa06 100644
+--- a/libc/test/src/stdlib/CMakeLists.txt
++++ b/libc/test/src/stdlib/CMakeLists.txt
+@@ -99,6 +99,7 @@ add_libc_test(
+   SRCS
+     strtoint32_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.str_to_integer
+     libc.src.errno.errno
+     .strtol_test_support
+@@ -111,6 +112,7 @@ add_libc_test(
+   SRCS
+     strtoint64_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.str_to_integer
+     libc.src.errno.errno
+     .strtol_test_support
+@@ -380,6 +382,7 @@ add_libc_test(
+   SRCS
+     memalignment_test.cpp
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.include.stdlib
+     libc.src.stdlib.memalignment
+ )
+diff --git a/libc/test/src/stdlib/memalignment_test.cpp b/libc/test/src/stdlib/memalignment_test.cpp
+index 2ca1b79e69e3..f1640e996e26 100644
+--- a/libc/test/src/stdlib/memalignment_test.cpp
++++ b/libc/test/src/stdlib/memalignment_test.cpp
+@@ -6,11 +6,10 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/stdlib/memalignment.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ TEST(LlvmLibcMemAlignmentTest, NullPointer) {
+   void *ptr = nullptr;
+   EXPECT_EQ(LIBC_NAMESPACE::memalignment(ptr), static_cast<size_t>(0));
+diff --git a/libc/test/src/stdlib/strtoint32_test.cpp b/libc/test/src/stdlib/strtoint32_test.cpp
+index e6da692714d2..1bf199412e58 100644
+--- a/libc/test/src/stdlib/strtoint32_test.cpp
++++ b/libc/test/src/stdlib/strtoint32_test.cpp
+@@ -6,8 +6,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-#include <stdint.h>
+-
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/str_to_integer.h"
+diff --git a/libc/test/src/stdlib/strtoint64_test.cpp b/libc/test/src/stdlib/strtoint64_test.cpp
+index 2c5d948f5fae..2b009d7cea69 100644
+--- a/libc/test/src/stdlib/strtoint64_test.cpp
++++ b/libc/test/src/stdlib/strtoint64_test.cpp
+@@ -6,8 +6,7 @@
+ //
+ //===----------------------------------------------------------------------===//
+ 
+-#include <stdint.h>
+-
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/libc_errno.h"
+ #include "src/__support/macros/config.h"
+ #include "src/__support/str_to_integer.h"
+diff --git a/libc/test/src/string/memory_utils/CMakeLists.txt b/libc/test/src/string/memory_utils/CMakeLists.txt
+index 8374be4a1d01..d6d6d09fc100 100644
+--- a/libc/test/src/string/memory_utils/CMakeLists.txt
++++ b/libc/test/src/string/memory_utils/CMakeLists.txt
+@@ -9,6 +9,7 @@ add_libc_test(
+   COMPILE_OPTIONS
+     ${LIBC_COMPILE_OPTIONS_NATIVE}
+   DEPENDS
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.array
+     libc.src.__support.CPP.cstddef
+     libc.src.__support.CPP.span
+diff --git a/libc/test/src/string/memory_utils/memory_check_utils.h b/libc/test/src/string/memory_utils/memory_check_utils.h
+index db9cfda672b2..c38039ebd3dd 100644
+--- a/libc/test/src/string/memory_utils/memory_check_utils.h
++++ b/libc/test/src/string/memory_utils/memory_check_utils.h
+@@ -9,13 +9,13 @@
+ #ifndef LIBC_TEST_SRC_STRING_MEMORY_UTILS_MEMORY_CHECK_UTILS_H
+ #define LIBC_TEST_SRC_STRING_MEMORY_UTILS_MEMORY_CHECK_UTILS_H
+ 
++#include "hdr/stdint_proxy.h" // uintxx_t
+ #include "src/__support/CPP/span.h"
+ #include "src/__support/libc_assert.h" // LIBC_ASSERT
+ #include "src/__support/macros/config.h"
+ #include "src/__support/macros/sanitizer.h"
+ #include "src/string/memory_utils/utils.h"
+ #include <stddef.h> // size_t
+-#include <stdint.h> // uintxx_t
+ #include <stdlib.h> // malloc/free
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/test/src/string/memory_utils/protected_pages.h b/libc/test/src/string/memory_utils/protected_pages.h
+index 50cfbaa37937..65578d106ce5 100644
+--- a/libc/test/src/string/memory_utils/protected_pages.h
++++ b/libc/test/src/string/memory_utils/protected_pages.h
+@@ -18,9 +18,9 @@
+ #error "Protected pages requires mmap and cannot be used in full build mode."
+ #endif // defined(LIBC_FULL_BUILD) || !defined(LIBC_TARGET_OS_IS_LINUX)
+ 
++#include "hdr/stdint_proxy.h"                // uint8_t
+ #include "src/__support/macros/attributes.h" // LIBC_INLINE
+ #include <stddef.h>                          // size_t
+-#include <stdint.h>                          // uint8_t
+ #include <sys/mman.h>                        // mmap, munmap
+ #include <unistd.h>                          // sysconf, _SC_PAGESIZE
+ 
+diff --git a/libc/utils/MPCWrapper/CMakeLists.txt b/libc/utils/MPCWrapper/CMakeLists.txt
+index 7120eaf18e65..2df8cfa349be 100644
+--- a/libc/utils/MPCWrapper/CMakeLists.txt
++++ b/libc/utils/MPCWrapper/CMakeLists.txt
+@@ -10,6 +10,7 @@ if(LIBC_TESTS_CAN_USE_MPC)
+   add_dependencies(
+     libcMPCWrapper
+     libcMPCommon
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.array
+     libc.src.__support.CPP.string
+     libc.src.__support.CPP.stringstream
+diff --git a/libc/utils/MPCWrapper/MPCUtils.cpp b/libc/utils/MPCWrapper/MPCUtils.cpp
+index 7c7821d8d423..11e93ec5cb89 100644
+--- a/libc/utils/MPCWrapper/MPCUtils.cpp
++++ b/libc/utils/MPCWrapper/MPCUtils.cpp
+@@ -8,13 +8,12 @@
+ 
+ #include "MPCUtils.h"
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/array.h"
+ #include "src/__support/CPP/stringstream.h"
+ #include "utils/MPCWrapper/mpc_inc.h"
+ #include "utils/MPFRWrapper/MPCommon.h"
+ 
+-#include <stdint.h>
+-
+ template <typename T> using FPBits = LIBC_NAMESPACE::fputil::FPBits<T>;
+ 
+ namespace LIBC_NAMESPACE_DECL {
+diff --git a/libc/utils/MPCWrapper/MPCUtils.h b/libc/utils/MPCWrapper/MPCUtils.h
+index d4c57240c751..d4ab672bcddb 100644
+--- a/libc/utils/MPCWrapper/MPCUtils.h
++++ b/libc/utils/MPCWrapper/MPCUtils.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_UTILS_MPCWRAPPER_MPCUTILS_H
+ #define LLVM_LIBC_UTILS_MPCWRAPPER_MPCUTILS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/complex_type.h"
+ #include "src/__support/macros/config.h"
+@@ -17,8 +18,6 @@
+ #include "test/UnitTest/RoundingModeUtils.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace testing {
+ namespace mpc {
+diff --git a/libc/utils/MPFRWrapper/CMakeLists.txt b/libc/utils/MPFRWrapper/CMakeLists.txt
+index bac43474a9c7..2669b23ba43f 100644
+--- a/libc/utils/MPFRWrapper/CMakeLists.txt
++++ b/libc/utils/MPFRWrapper/CMakeLists.txt
+@@ -10,6 +10,7 @@ if(LIBC_TESTS_CAN_USE_MPFR OR LIBC_TESTS_CAN_USE_MPC)
+   target_compile_options(libcMPCommon PRIVATE -O3 ${compile_options})
+   add_dependencies(
+     libcMPCommon
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.string
+     libc.src.__support.CPP.string_view
+     libc.src.__support.CPP.type_traits
+@@ -39,6 +40,7 @@ if(LIBC_TESTS_CAN_USE_MPFR)
+   add_dependencies(
+     libcMPFRWrapper
+     libcMPCommon
++    libc.hdr.stdint_proxy
+     libc.src.__support.CPP.array
+     libc.src.__support.CPP.stringstream
+     libc.src.__support.FPUtil.fp_bits
+diff --git a/libc/utils/MPFRWrapper/MPCommon.h b/libc/utils/MPFRWrapper/MPCommon.h
+index af03ff054e1a..8bcc69c247a3 100644
+--- a/libc/utils/MPFRWrapper/MPCommon.h
++++ b/libc/utils/MPFRWrapper/MPCommon.h
+@@ -9,6 +9,7 @@
+ #ifndef LLVM_LIBC_UTILS_MPFRWRAPPER_MPCOMMON_H
+ #define LLVM_LIBC_UTILS_MPFRWRAPPER_MPCOMMON_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/string.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/FPUtil/FPBits.h"
+@@ -16,8 +17,6 @@
+ #include "src/__support/macros/properties/types.h"
+ #include "test/UnitTest/RoundingModeUtils.h"
+ 
+-#include <stdint.h>
+-
+ #include "mpfr_inc.h"
+ 
+ #ifdef LIBC_TYPES_FLOAT128_IS_NOT_LONG_DOUBLE
+diff --git a/libc/utils/MPFRWrapper/MPFRUtils.h b/libc/utils/MPFRWrapper/MPFRUtils.h
+index c77a6aa3adea..45468c6cb19a 100644
+--- a/libc/utils/MPFRWrapper/MPFRUtils.h
++++ b/libc/utils/MPFRWrapper/MPFRUtils.h
+@@ -9,13 +9,12 @@
+ #ifndef LLVM_LIBC_UTILS_MPFRWRAPPER_MPFRUTILS_H
+ #define LLVM_LIBC_UTILS_MPFRWRAPPER_MPFRUTILS_H
+ 
++#include "hdr/stdint_proxy.h"
+ #include "src/__support/CPP/type_traits.h"
+ #include "src/__support/macros/config.h"
+ #include "test/UnitTest/RoundingModeUtils.h"
+ #include "test/UnitTest/Test.h"
+ 
+-#include <stdint.h>
+-
+ namespace LIBC_NAMESPACE_DECL {
+ namespace testing {
+ namespace mpfr {
+diff --git a/utils/bazel/llvm-project-overlay/libc/BUILD.bazel b/utils/bazel/llvm-project-overlay/libc/BUILD.bazel
+index cd608a1352a7..31de58049d2f 100644
+--- a/utils/bazel/llvm-project-overlay/libc/BUILD.bazel
++++ b/utils/bazel/llvm-project-overlay/libc/BUILD.bazel
+@@ -281,6 +281,12 @@ libc_support_library(
+     hdrs = ["hdr/wchar_overlay.h"],
+ )
+ 
++libc_support_library(
++    name = "hdr_stdint_proxy",
++    hdrs = ["hdr/stdint_proxy.h"],
++)
++
++
+ ############################ Type Proxy Header Files ###########################
+ 
+ libc_support_library(
+@@ -557,6 +563,7 @@ libc_support_library(
+         ":__support_macros_attributes",
+         ":__support_macros_config",
+         ":__support_macros_properties_architectures",
++        ":hdr_stdint_proxy",
+     ],
+ )
+ 
+diff --git a/utils/bazel/llvm-project-overlay/libc/test/UnitTest/BUILD.bazel b/utils/bazel/llvm-project-overlay/libc/test/UnitTest/BUILD.bazel
+index 090bd1b1ba7a..156515309d8c 100644
+--- a/utils/bazel/llvm-project-overlay/libc/test/UnitTest/BUILD.bazel
++++ b/utils/bazel/llvm-project-overlay/libc/test/UnitTest/BUILD.bazel
+@@ -22,6 +22,7 @@ libc_test_library(
+         "//libc:__support_macros_properties_types",
+         "//libc:__support_osutil_io",
+         "//libc:__support_uint128",
++        "//libc:hdr_stdint_proxy",
+         "//libc:func_aligned_alloc",
+         "//libc:func_free",
+         "//libc:func_malloc",
+@@ -64,6 +65,7 @@ libc_test_library(
+         "//libc:__support_macros_properties_types",
+         "//libc:__support_stringutil",
+         "//libc:__support_uint128",
++        "//libc:hdr_stdint_proxy",
+         "//libc:errno",
+         "//libc:func_aligned_alloc",
+         "//libc:func_free",
+@@ -121,6 +123,7 @@ libc_test_library(
+         "//libc:__support_macros_properties_architectures",
+         "//libc:hdr_fenv_macros",
+         "//libc:hdr_math_macros",
++        "//libc:hdr_stdint_proxy",
+         "//libc:types_fenv_t",
+     ],
+ )
+@@ -157,6 +160,7 @@ libc_test_library(
+         ":string_utils",
+         "//libc:__support_fputil_fp_bits",
+         "//libc:__support_macros_config",
++        "//libc:hdr_stdint_proxy",
+         "//libc:printf_core_structs",
+     ],
+ )
+diff --git a/utils/bazel/llvm-project-overlay/libc/test/libc_test_rules.bzl b/utils/bazel/llvm-project-overlay/libc/test/libc_test_rules.bzl
+index 41a706d2d92f..8cb7821d71e2 100644
+--- a/utils/bazel/llvm-project-overlay/libc/test/libc_test_rules.bzl
++++ b/utils/bazel/llvm-project-overlay/libc/test/libc_test_rules.bzl
+@@ -44,6 +44,7 @@ def libc_test(
+       **kwargs: Attributes relevant for a cc_test.
+     """
+     deps = deps + [
++        "//libc:hdr_stdint_proxy",
+         "//libc:__support_macros_config",
+         "//libc:__support_libc_errno",
+         "//libc:errno",
+-- 
+2.43.0
+
