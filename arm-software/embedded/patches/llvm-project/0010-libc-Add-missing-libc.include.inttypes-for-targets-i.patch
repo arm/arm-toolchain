@@ -1,0 +1,46 @@
+From 577b913a170345070e47bcd311763495f6718dab Mon Sep 17 00:00:00 2001
+From: lntue <lntue@google.com>
+Date: Thu, 24 Jul 2025 04:39:33 +0000
+Subject: [libc] Add missing libc.include.inttypes for targets including
+ <inttypes.h>. (#150345)
+
+---
+ libc/include/CMakeLists.txt               | 1 +
+ libc/src/stdio/printf_core/CMakeLists.txt | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/libc/include/CMakeLists.txt b/libc/include/CMakeLists.txt
+index ce811d17784a..b31e1237bec7 100644
+--- a/libc/include/CMakeLists.txt
++++ b/libc/include/CMakeLists.txt
+@@ -188,6 +188,7 @@ add_header_macro(
+   arpa/inet.h
+   DEPENDS
+     .llvm_libc_common_h
++    .inttypes
+ )
+ 
+ add_header_macro(
+diff --git a/libc/src/stdio/printf_core/CMakeLists.txt b/libc/src/stdio/printf_core/CMakeLists.txt
+index c22f9858f3b1..76eb0a2fdaaa 100644
+--- a/libc/src/stdio/printf_core/CMakeLists.txt
++++ b/libc/src/stdio/printf_core/CMakeLists.txt
+@@ -44,6 +44,7 @@ add_header_library(
+   HDRS
+     core_structs.h
+   DEPENDS
++    libc.include.inttypes
+     libc.src.__support.CPP.string_view
+     libc.src.__support.FPUtil.fp_bits
+ )
+@@ -97,6 +98,7 @@ add_header_library(
+     .core_structs
+     .printf_config
+     .writer
++    libc.include.inttypes
+     libc.src.__support.big_int
+     libc.src.__support.common
+     libc.src.__support.CPP.limits
+-- 
+2.43.0
+
