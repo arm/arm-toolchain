@@ -1,0 +1,290 @@
+From 9e875497e4830d2532ebedc47c5817fc3260fe25 Mon Sep 17 00:00:00 2001
+From: Simi Pallipurath <simi.pallipurath@arm.com>
+Date: Mon, 28 Jul 2025 19:58:58 +0100
+Subject: [Multilib] Extend the Multilib system to support an
+ IncludeDirs field.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This patch extends the Multilib Yaml format to allow
+specifying an IncludeDirs for the header path/s per
+multilib variant. The goal is to enable fine-grained
+control over header search paths for each multilib variant.
+This feature is especially useful in setups where header
+paths deviate from the default bare-metal assumptions.
+For example, when headers are shared across target triples,
+it becomes necessary to organize them under target-triple-specific
+directories to ensure correct resolution.
+
+In the Clang driver, GCCSuffix, OSSuffix and IncludeSuffix
+are path suffixes that help the compiler locate the correct
+set of headers and libraries for the selected target.
+Clang’s multilib infrastructure uses the Multilib class
+to encapsulate these suffixes. Currently, in the bare-metal
+Clang driver, all of these suffixes — GCCSuffix, OSSuffix,
+and IncludeSuffix are effectively mapped to the Dir field
+specified in the multilib.yaml configuration.
+
+This patch allows it to be configured independently of Dir,
+enabling finer-grained control over header search directories
+for each multilib variant.
+
+Key Changes:
+
+New Field: IncludeDirs in multilib.yaml (header directory or
+list of header directories, strings, optional).
+
+When present, this path is passed to the Multilib constructor
+and appended to the sysroot during header path resolution. If
+omitted, behaviour defaults to preserving current behaviour.
+
+For example,
+
+Dir: aarch64-none-elf/aarch64a_exn_rtti_unaligned
+Flags:
+    --target=aarch64-unknown-none-elf
+IncludeDirs:
+    include
+    include-libunwind
+    aarch64-none-elf/include
+    aarch64-none-elf/aarch64a_exn_rtti_unaligned/include
+
+Implementation Notes:
+
+1. Extend the YAML parser to read the IncludeDirs key.
+2. Update the Multilib constructor to store the content from this field.
+3. Ensure the driver logic reads and applies IncludeDirs correctly.
+---
+ clang/include/clang/Driver/Multilib.h         |  7 ++++
+ clang/lib/Driver/Multilib.cpp                 | 15 +++++++--
+ clang/lib/Driver/ToolChains/BareMetal.cpp     | 28 +++++++++++++---
+ .../baremetal-multilib-includedirs-error.yaml | 29 +++++++++++++++++
+ .../baremetal-multilib-includedirs.yaml       | 32 +++++++++++++++++++
+ 5 files changed, 104 insertions(+), 7 deletions(-)
+ create mode 100644 clang/test/Driver/baremetal-multilib-includedirs-error.yaml
+ create mode 100644 clang/test/Driver/baremetal-multilib-includedirs.yaml
+
+diff --git a/clang/include/clang/Driver/Multilib.h b/clang/include/clang/Driver/Multilib.h
+index fc071ef48ca0..7c643b996d9c 100644
+--- a/clang/include/clang/Driver/Multilib.h
++++ b/clang/include/clang/Driver/Multilib.h
+@@ -35,12 +35,14 @@ class Driver;
+ class Multilib {
+ public:
+   using flags_list = std::vector<std::string>;
++  using includedirs_list = std::vector<std::string>;
+ 
+ private:
+   std::string GCCSuffix;
+   std::string OSSuffix;
+   std::string IncludeSuffix;
+   flags_list Flags;
++  includedirs_list IncludeDirs;
+ 
+   // Optionally, a multilib can be assigned a string tag indicating that it's
+   // part of a group of mutually exclusive possibilities. If two or more
+@@ -62,6 +64,7 @@ public:
+   /// This is enforced with an assert in the constructor.
+   Multilib(StringRef GCCSuffix = {}, StringRef OSSuffix = {},
+            StringRef IncludeSuffix = {}, const flags_list &Flags = flags_list(),
++           const includedirs_list &IncludeDirs = includedirs_list(),
+            StringRef ExclusiveGroup = {},
+            std::optional<StringRef> Error = std::nullopt);
+ 
+@@ -81,6 +84,10 @@ public:
+   /// All elements begin with either '-' or '!'
+   const flags_list &flags() const { return Flags; }
+ 
++  /// Get the include directories specified in multilib.yaml under the
++  /// 'IncludeDirs' field
++  const includedirs_list &includeDirs() const { return IncludeDirs; }
++
+   /// Get the exclusive group label.
+   const std::string &exclusiveGroup() const { return ExclusiveGroup; }
+ 
+diff --git a/clang/lib/Driver/Multilib.cpp b/clang/lib/Driver/Multilib.cpp
+index 87fa1af54a8e..05ab26fb402b 100644
+--- a/clang/lib/Driver/Multilib.cpp
++++ b/clang/lib/Driver/Multilib.cpp
+@@ -29,9 +29,11 @@ using namespace llvm::sys;
+ 
+ Multilib::Multilib(StringRef GCCSuffix, StringRef OSSuffix,
+                    StringRef IncludeSuffix, const flags_list &Flags,
++                   const includedirs_list &IncludeDirs,
+                    StringRef ExclusiveGroup, std::optional<StringRef> Error)
+     : GCCSuffix(GCCSuffix), OSSuffix(OSSuffix), IncludeSuffix(IncludeSuffix),
+-      Flags(Flags), ExclusiveGroup(ExclusiveGroup), Error(Error) {
++      Flags(Flags), IncludeDirs(IncludeDirs), ExclusiveGroup(ExclusiveGroup),
++      Error(Error) {
+   assert(GCCSuffix.empty() ||
+          (StringRef(GCCSuffix).front() == '/' && GCCSuffix.size() > 1));
+   assert(OSSuffix.empty() ||
+@@ -299,6 +301,7 @@ struct MultilibSerialization {
+   std::string Dir;        // if this record successfully selects a library dir
+   std::string Error;      // if this record reports a fatal error message
+   std::vector<std::string> Flags;
++  std::vector<std::string> IncludeDirs;
+   std::string Group;
+ };
+ 
+@@ -350,6 +353,7 @@ template <> struct llvm::yaml::MappingTraits<MultilibSerialization> {
+     io.mapOptional("Dir", V.Dir);
+     io.mapOptional("Error", V.Error);
+     io.mapRequired("Flags", V.Flags);
++    io.mapOptional("IncludeDirs", V.IncludeDirs);
+     io.mapOptional("Group", V.Group);
+   }
+   static std::string validate(IO &io, MultilibSerialization &V) {
+@@ -359,6 +363,10 @@ template <> struct llvm::yaml::MappingTraits<MultilibSerialization> {
+       return "the 'Dir' and 'Error' keys may not both be specified";
+     if (StringRef(V.Dir).starts_with("/"))
+       return "paths must be relative but \"" + V.Dir + "\" starts with \"/\"";
++    for (const auto &Path : V.IncludeDirs) {
++      if (StringRef(Path).starts_with("/"))
++        return "paths must be relative but \"" + Path + "\" starts with \"/\"";
++    }
+     return std::string{};
+   }
+ };
+@@ -489,7 +497,8 @@ MultilibSet::parseYaml(llvm::MemoryBufferRef Input,
+   Multilibs.reserve(MS.Multilibs.size());
+   for (const auto &M : MS.Multilibs) {
+     if (!M.Error.empty()) {
+-      Multilibs.emplace_back("", "", "", M.Flags, M.Group, M.Error);
++      Multilibs.emplace_back("", "", "", M.Flags, M.IncludeDirs, M.Group,
++                             M.Error);
+     } else {
+       std::string Dir;
+       if (M.Dir != ".")
+@@ -498,7 +507,7 @@ MultilibSet::parseYaml(llvm::MemoryBufferRef Input,
+       // Multilib constructor. If we later support more than one type of group,
+       // we'll have to look up the group name in MS.Groups, check its type, and
+       // decide what to do here.
+-      Multilibs.emplace_back(Dir, Dir, Dir, M.Flags, M.Group);
++      Multilibs.emplace_back(Dir, Dir, Dir, M.Flags, M.IncludeDirs, M.Group);
+     }
+   }
+ 
+diff --git a/clang/lib/Driver/ToolChains/BareMetal.cpp b/clang/lib/Driver/ToolChains/BareMetal.cpp
+index 497f3330237b..aee28ee1bbc3 100644
+--- a/clang/lib/Driver/ToolChains/BareMetal.cpp
++++ b/clang/lib/Driver/ToolChains/BareMetal.cpp
+@@ -427,10 +427,20 @@ void BareMetal::AddClangSystemIncludeArgs(const ArgList &DriverArgs,
+   const SmallString<128> SysRootDir(computeSysRoot());
+   if (!SysRootDir.empty()) {
+     for (const Multilib &M : getOrderedMultilibs()) {
+-      SmallString<128> Dir(SysRootDir);
+-      llvm::sys::path::append(Dir, M.includeSuffix());
+-      llvm::sys::path::append(Dir, "include");
+-      addSystemInclude(DriverArgs, CC1Args, Dir.str());
++      if (!M.includeDirs().empty()) {
++        // Add include directories specified in multilib.yaml under the
++        // 'IncludeDirs' field
++        for (const std::string &Path : M.includeDirs()) {
++          SmallString<128> Dir(SysRoot);
++          llvm::sys::path::append(Dir, Path);
++          addSystemInclude(DriverArgs, CC1Args, Dir.str());
++        }
++      } else {
++        SmallString<128> Dir(SysRootDir);
++        llvm::sys::path::append(Dir, M.includeSuffix());
++        llvm::sys::path::append(Dir, "include");
++        addSystemInclude(DriverArgs, CC1Args, Dir.str());
++      }
+     }
+   }
+ }
+@@ -511,6 +521,16 @@ void BareMetal::AddClangCXXStdlibIncludeArgs(const ArgList &DriverArgs,
+         addSystemInclude(DriverArgs, CC1Args, TargetDir.str());
+         break;
+       }
++      if (!M.includeDirs().empty()) {
++        // Add include directories specified in multilib.yaml under the
++        // 'IncludeDirs' field
++        for (const std::string &Path : M.includeDirs()) {
++          Dir = SysRoot;
++          llvm::sys::path::append(Dir, Path, "c++", "v1");
++          addSystemInclude(DriverArgs, CC1Args, Dir.str());
++        }
++        break;
++      }
+       // Add generic path if nothing else succeeded so far.
+       llvm::sys::path::append(Dir, "include", "c++", "v1");
+       addSystemInclude(DriverArgs, CC1Args, Dir.str());
+diff --git a/clang/test/Driver/baremetal-multilib-includedirs-error.yaml b/clang/test/Driver/baremetal-multilib-includedirs-error.yaml
+new file mode 100644
+index 000000000000..f6360135f8c8
+--- /dev/null
++++ b/clang/test/Driver/baremetal-multilib-includedirs-error.yaml
+@@ -0,0 +1,29 @@
++# REQUIRES: shell
++# UNSUPPORTED: system-windows
++
++# This test demonstrates the new "IncludeDirs" field.
++# This field allows specifying include directories through
++# multilib.yaml configuration using relative paths.
++# Absolute paths should be rejected by the driver
++# with an appropriate diagnostic message.
++#
++# This test verifies that passing an absolute path
++# (/include) to IncludeDirs triggers the expected
++# error.
++
++# RUN: not %clang --target=aarch64-none-elf --multi-lib-config=%s %s -o /dev/null 2>&1 \
++# RUN: | FileCheck %s --check-prefix=CHECK-ERROR
++# CHECK-ERROR: error: paths must be relative but "/include" starts with "/"
++
++---
++MultilibVersion: 1.0
++Variants:
++- Dir: aarch64-none-elf/aarch64a_exn_rtti_unaligned
++  Flags:
++  - --target=aarch64-unknown-none-elf
++  - -munaligned-access
++  IncludeDirs:
++  - /include
++  - aarch64-none-elf/include
++
++...
+diff --git a/clang/test/Driver/baremetal-multilib-includedirs.yaml b/clang/test/Driver/baremetal-multilib-includedirs.yaml
+new file mode 100644
+index 000000000000..2c5a4bc622c4
+--- /dev/null
++++ b/clang/test/Driver/baremetal-multilib-includedirs.yaml
+@@ -0,0 +1,32 @@
++# REQUIRES: shell
++# UNSUPPORTED: system-windows
++
++# This test demonstrates the new "IncludeDirs" field.
++# This field allows specifying include directories through
++# multilib.yaml configuration. When this field is present
++# it is appended to the sysroot during header path
++# resolution ignoring the default bare-metal assumptions.
++
++# RUN: %clang --multi-lib-config=%s -no-canonical-prefixes -x c++ %s -### -o %t.out 2>&1 \
++# RUN:     --target=thumbv7m-none-eabi -mfloat-abi=soft --sysroot= \
++# RUN:   | FileCheck %s
++# CHECK:      "-cc1" "-triple" "thumbv7m-unknown-none-eabi"
++# CHECK-SAME: "-internal-isystem" "[[SYSROOT:[^"]*]]/bin/../lib/clang-runtimes/include/c++/v1"
++# CHECK-SAME: "-internal-isystem" "[[SYSROOT]]/bin/../lib/clang-runtimes/include-libunwind/c++/v1"
++# CHECK-SAME: "-internal-isystem" "[[SYSROOT]]/bin/../lib/clang-runtimes/soft/include/c++/v1"
++# CHECK-SAME: "-internal-isystem" "[[SYSROOT]]/bin/../lib/clang-runtimes/include"
++# CHECK-SAME: "-internal-isystem" "[[SYSROOT]]/bin/../lib/clang-runtimes/include-libunwind"
++# CHECK-SAME: "-internal-isystem" "[[SYSROOT]]/bin/../lib/clang-runtimes/soft/include"
++
++---
++MultilibVersion: 1.0
++Variants:
++- Dir: soft
++  Flags:
++    - -mfloat-abi=soft
++  IncludeDirs:
++    - include
++    - include-libunwind
++    - soft/include
++
++...
+-- 
+2.34.1
+
