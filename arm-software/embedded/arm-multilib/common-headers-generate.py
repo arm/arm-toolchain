@@ -23,6 +23,7 @@ Arguments:
 This is useful to reduce duplication in the toolchain by centralising common headers
 that are shared across architecture variants.
 """
+
 import argparse
 import os
 import filecmp
@@ -73,13 +74,18 @@ def extract_common_headers_for_targets(args):
         variant_includes = collect_variant_include_paths(input_target_dir)
         if len(variant_includes) < 2:
             print(
-                f"Skipping extracting the common headers for {target}: not enough variants to compare.At least two variants must be enabled for the multilib header optimisation phase to proceed."
+                f"Skipping extracting the common headers for {target}: not enough variants to compare. "
+                "At least two variants must be enabled for the multilib header optimisation phase to proceed."
             )
             # The script always creates the multilib-optimised folder, even when there's only one variant and no
             # optimization is applied. In that case, multilib-optimised will just contain a copy of the
             # single variant from the non-optimised multilib directory.
             if os.path.exists(args.multilib_non_optimised_dir):
-                shutil.copytree(args.multilib_non_optimised_dir, args.multilib_optimised_dir)
+                shutil.copytree(
+                    args.multilib_non_optimised_dir,
+                    args.multilib_optimised_dir,
+                    dirs_exist_ok=True,
+                )
             return
 
         # Creating the common include headers for each target
