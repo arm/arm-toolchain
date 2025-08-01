@@ -171,7 +171,7 @@ def has_downstream_changes(input_json: dict) -> bool:
 def find_pr_issue(input_json: dict) -> str:
     logger.debug("body text: %s", input_json["body"])
     matches = re.findall(
-        "^((?:removes )?downstream issue: *#([0-9]+))",
+        r"^\s*((?:removes )?downstream issue: *#([0-9]+))",
         input_json["body"],
         flags=re.I | re.M,
     )
@@ -294,6 +294,11 @@ def main():
         action="store_true",
         help="Print verbose log messages",
     )
+    parser.add_argument(
+        "--dryrun",
+        action="store_true",
+        help="Don't make modifications such as comments or labels",
+    )
 
     args = parser.parse_args()
 
@@ -310,8 +315,9 @@ def main():
 
     link_text = "Please check https://github.com/arm/arm-toolchain/blob/arm-software/CONTRIBUTING.md#downstream-patch-policy for information on the downstream patch policy and how changes need to be tracked."
     if needs_tagging:
-        add_pr_label(args.pr, args.repo, pr_json)
-        add_help_comment(args.pr, args.repo, pr_json)
+        if not args.dryrun:
+            add_pr_label(args.pr, args.repo, pr_json)
+            add_help_comment(args.pr, args.repo, pr_json)
         if issue_num is None:
             logger.info(
                 f"Check failed. Pull request #{args.pr} contains downstream changes, but does not have a correctly formatted link to a downstream tracking issue. {link_text}"
@@ -324,7 +330,8 @@ def main():
                 )
                 sys.exit(1)
             else:
-                add_issue_label(args.pr, args.repo, pr_json)
+                if not args.dryrun:
+                    add_issue_label(args.pr, args.repo, pr_json)
                 logger.info(
                     f"Check passed. Pull request #{args.pr} contains downstream changes, and a correctly formatted link to a downstream tracking issue."
                 )
