@@ -143,17 +143,10 @@ To display the directory selected by the multilib system, add the flag
 To display all available multilibs run `clang` with the flag `-print-multi-lib`
 and a target triple like `--target=aarch64-none-elf` or `--target=arm-none-eabi`.
 
-Multilib headers are distributed across both `target level` and `variant level` directories.
-As a result, using a single `--sysroot` path to override multilib selection is no longer viable.
-Headers have to be pulled from multiple locations including both target and variant specific
-directories which the multilib system handles automatically. Therefore, specifying `--sysroot`
-to bypass multilibs can cause problems with header resolution, and is not recommended in this setup.
-
 > [!WARNING]
-> The naming convention for the library variant directories is an
-> implementation detail that can change between releases without notice,
-> thus it is best not to depend on specific library variant names in your
-> project build scripts.
+> --sysroot is not a substitute for multilib selection
+> The --sysroot option cannot be used to override multilib logic
+> or manually select an arbitrary variant.
 
 The FPU selection can be skipped, but it is not recommended to as the defaults
 are different to GCC ones.
