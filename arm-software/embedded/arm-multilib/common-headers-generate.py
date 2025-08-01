@@ -56,6 +56,16 @@ def extract_common_headers_for_targets(args):
     if os.path.exists(args.multilib_optimised_dir):
         shutil.rmtree(args.multilib_optimised_dir)
 
+    if os.path.isdir(args.multilib_non_optimised_dir):
+        if not os.listdir(args.multilib_non_optimised_dir):
+            raise Exception(
+                f"Error: Expected contents in '{args.multilib_non_optimised_dir}', but folder is empty."
+            )
+    else:
+        raise FileNotFoundError(
+            f"Error: Expected folder '{args.multilib_non_optimised_dir}' does not exist"
+        )
+
     for target in MULTILIB_TARGET_DIRS:
         input_target_dir = os.path.join(
             os.path.abspath(args.multilib_non_optimised_dir), target
@@ -80,16 +90,15 @@ def extract_common_headers_for_targets(args):
             # The script always creates the multilib-optimised folder, even when there's only one variant and no
             # optimization is applied. In that case, multilib-optimised will just contain a copy of the
             # single variant from the non-optimised multilib directory.
-            if os.path.exists(args.multilib_non_optimised_dir):
+            if os.path.exists(input_target_dir):
                 shutil.copytree(
-                    args.multilib_non_optimised_dir,
-                    args.multilib_optimised_dir,
-                    dirs_exist_ok=True,
+                    input_target_dir,
+                    output_target_dir,
                 )
-            return
+            continue
 
         # Creating the common include headers for each target
-        os.makedirs(output_include_dir, exist_ok=True)
+        os.makedirs(output_include_dir)
 
         # Step 1: compare first two variants and extract the common headers into the targets common include directory
         base_dir = list(variant_includes.values())[0]
@@ -143,13 +152,14 @@ def extract_common_headers_for_targets(args):
                 else:
                     print(f"Warning: {src_dir} does not exist and will be skipped.")
 
-        # Step4: Copy multilib.yaml file as it is from the non-optimised multilib directoy.
-        src_yaml = os.path.join(args.multilib_non_optimised_dir, "multilib.yaml")
-        dst_yaml = os.path.join(args.multilib_optimised_dir, "multilib.yaml")
-        if os.path.exists(src_yaml):
-            shutil.copy2(src_yaml, dst_yaml)
-        else:
-            raise FileNotFoundError(f"Source yaml '{src_yaml}' does not exist.")
+    # Step4: Copy multilib.yaml file as it is from the non-optimised multilib directoy.
+    src_yaml = os.path.join(args.multilib_non_optimised_dir, "multilib.yaml")
+    dst_yaml = os.path.join(args.multilib_optimised_dir, "multilib.yaml")
+    if os.path.exists(src_yaml):
+        os.makedirs(args.multilib_optimised_dir, exist_ok=True)
+        shutil.copy2(src_yaml, dst_yaml)
+    else:
+        raise FileNotFoundError(f"Source yaml '{src_yaml}' does not exist.")
 
 
 def main():
