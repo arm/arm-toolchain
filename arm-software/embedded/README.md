@@ -144,9 +144,9 @@ To display all available multilibs run `clang` with the flag `-print-multi-lib`
 and a target triple like `--target=aarch64-none-elf` or `--target=arm-none-eabi`.
 
 Multilib headers are distributed across both `target level` and `variant level` directories.
-As a result, using a single --sysroot path to override multilib selection is no longer viable.
+As a result, using a single `--sysroot` path to override multilib selection is no longer viable.
 Headers have to be pulled from multiple locations including both target and variant specific
-directories which the multilib system handles automatically. Therefore, specifying --sysroot
+directories which the multilib system handles automatically. Therefore, specifying `--sysroot`
 to bypass multilibs can cause problems with header resolution, and is not recommended in this setup.
 
 > [!WARNING]
