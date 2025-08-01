@@ -142,24 +142,10 @@ To display the directory selected by the multilib system, add the flag
 To display all available multilibs run `clang` with the flag `-print-multi-lib`
 and a target triple like `--target=aarch64-none-elf` or `--target=arm-none-eabi`.
 
-It's possible that `clang` will choose a set of libraries that are not the ones
-you want to use. In this case you can bypass the multilib system by providing a
-`--sysroot` option specifying the directory containing the `include` and `lib`
-directories of the libraries you want to use. For example:
-
-```
-$ clang \
---sysroot=<install-dir>/ATfE-<revision>/lib/clang-runtimes/arm-none-eabi/armv6m_soft_nofp \
---target=armv6m-none-eabi \
--mfpu=none \
--fno-exceptions \
--fno-rtti \
--nostartfiles \
--lcrt0-semihost \
--lsemihost \
--T picolibc.ld \
--o example example.c
-```
+> [!WARNING]
+> `--sysroot` is not a substitute for multilib selection.
+> The `--sysroot` option cannot be used to override multilib logic
+> or manually select an arbitrary library variant.
 
 The FPU selection can be skipped, but it is not recommended to as the defaults
 are different to GCC ones.
