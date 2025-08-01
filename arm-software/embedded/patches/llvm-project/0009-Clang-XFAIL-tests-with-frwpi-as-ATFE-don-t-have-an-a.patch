@@ -1,4 +1,4 @@
-From be2b0fe15e9717ddb4a75b0cd4e30b22ab614124 Mon Sep 17 00:00:00 2001
+From a891d66394a8008c8ae10b60fcf4ceded4879006 Mon Sep 17 00:00:00 2001
 From: Simi Pallipurath <simi.pallipurath@arm.com>
 Date: Tue, 22 Jul 2025 15:10:20 +0100
 Subject: [Clang] XFAIL tests with -frwpi as ATFE don't have an appropriate
@@ -34,5 +34,5 @@ index 9082d7948511..e79701417b52 100644
  // Pre-defined macros for position-independence modes
  
 -- 
-2.34.1
+2.43.0
 

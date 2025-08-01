@@ -1,4 +1,4 @@
-From 0f8dc80a7642430c8d02c36283766aeb5a59a331 Mon Sep 17 00:00:00 2001
+From ee5ef45fe87bfbd514806f59682858c7f6bd84fb Mon Sep 17 00:00:00 2001
 From: Piotr Przybyla <piotr.przybyla@arm.com>
 Date: Wed, 15 Nov 2023 16:04:24 +0000
 Subject: Disable failing compiler-rt test
@@ -8,7 +8,7 @@ Subject: Disable failing compiler-rt test
  1 file changed, 2 insertions(+)
 
 diff --git a/compiler-rt/test/builtins/Unit/arm/aeabi_uldivmod_test.c b/compiler-rt/test/builtins/Unit/arm/aeabi_uldivmod_test.c
-index 2ff65a8b9ec3..98611a75e85f 100644
+index 02cfa2f38713..2c04061a2ef6 100644
 --- a/compiler-rt/test/builtins/Unit/arm/aeabi_uldivmod_test.c
 +++ b/compiler-rt/test/builtins/Unit/arm/aeabi_uldivmod_test.c
 @@ -1,3 +1,5 @@
@@ -18,5 +18,5 @@ index 2ff65a8b9ec3..98611a75e85f 100644
  // RUN: %clang_builtins %s %librt -o %t && %run %t
  
 -- 
-2.39.5 (Apple Git-154)
+2.43.0
 

@@ -1,4 +1,4 @@
-From 9011c0e821d5b1563dc2dc6370f29c529e55f41f Mon Sep 17 00:00:00 2001
+From d63976dd43f5ae010e9860ccf14feb9c280fcdd0 Mon Sep 17 00:00:00 2001
 From: Victor Campos <victor.campos@arm.com>
 Date: Thu, 31 Oct 2024 09:58:34 +0000
 Subject: Define _LIBCPP_HAS_C8RTOMB_MBRTOC8
@@ -23,10 +23,10 @@ govern picolibc version are in `picolibc.h`.
  1 file changed, 2 insertions(+), 15 deletions(-)
 
 diff --git a/libcxx/include/__config b/libcxx/include/__config
-index 1cf80a46686a..615433869a4e 100644
+index 77a71b6cf1ca..0ce4caa11814 100644
 --- a/libcxx/include/__config
 +++ b/libcxx/include/__config
-@@ -1021,21 +1021,8 @@ typedef __char32_t char32_t;
+@@ -1015,21 +1015,8 @@ typedef __char32_t char32_t;
  // functions is gradually being added to existing C libraries. The conditions
  // below check for known C library versions and conditions under which these
  // functions are declared by the C library.
