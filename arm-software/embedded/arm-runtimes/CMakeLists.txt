@@ -159,12 +159,8 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
             set(picocrt "crt0-semihost-fvp")
         endif()
         set(test_link_flags "-nostartfiles -l${picocrt} -lsemihost -T picolibcpp.ld")
-    elseif(C_LIBRARY STREQUAL "llvmlibc")
-        if(TEST_EXECUTOR STREQUAL qemu)
-            # Flags will be directly passed into LLVM-libc
-        else()
-            message(FATAL_ERROR "Using LLVM-libc and FVPs together is unsupported")
-        endif()
+    elseif(C_LIBRARY STREQUAL llvmlibc)
+        # QEMU logic handled later
     else()
         message(FATAL_ERROR "Tests can only be enabled using picolibc or llvmlibc.")
     endif()
@@ -639,6 +635,9 @@ endif()
 ###############################################################################
 
 if(C_LIBRARY STREQUAL llvmlibc)
+    if(NOT(TEST_EXECUTOR STREQUAL qemu))
+        message(FATAL_ERROR "Using LLVM-libc and FVPs together is unsupported")
+    endif()
     set(test_cmd "qemu-system-arm -M ${QEMU_MACHINE} -semihosting -nographic -device loader$<COMMA>file=@BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
 
