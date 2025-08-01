@@ -146,7 +146,7 @@ and a target triple like `--target=aarch64-none-elf` or `--target=arm-none-eabi`
 > [!WARNING]
 > `--sysroot` is not a substitute for multilib selection
 > The `--sysroot` option cannot be used to override multilib logic
-> or manually select an arbitrary variant.
+> or manually select an arbitrary library variant.
 
 The FPU selection can be skipped, but it is not recommended to as the defaults
 are different to GCC ones.
