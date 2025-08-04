@@ -7,6 +7,9 @@
 
 # A bash script to build the Arm Toolchain for Embedded, with address sanitizer enabled.
 
+# Script implements 2-stage pipeline: first clang is built using arm-toolchain sources.
+# Then this clang is used to build ATfE sanitizer build.
+#
 # The script creates a build of the toolchain in the 'build' directory, inside
 # the repository tree.
 
@@ -26,8 +29,33 @@ export CXX=clang++
 # Get processor count, to execute job in parallel threads
 PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
 
+# Stage 1: Compile clang
+echo "stage 1: REPO_ROOT: $REPO_ROOT"
+echo "stage 1: PROCESSOR_COUNT: $PROCESSOR_COUNT"
+
+mkdir -p -p "${REPO_ROOT}"/build_llvm
+cd -p "${REPO_ROOT}"/build_llvm
+
+cmake ../llvm -G Ninja \
+    -DLLVM_ENABLE_PROJECTS="clang-tools-extra;clang;llvm;lld" \
+    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCLANG_DEFAULT_LINKER="lld"
+
+ninja -v -v -j$PROCESSOR_COUNT
+
+ls -l "${REPO_ROOT}"/build_llvm/
+ls -l "${REPO_ROOT}"/build_llvm/bin/
+ls -l "${REPO_ROOT}"/build_llvm/bin/clang
+ls -l "${REPO_ROOT}"/build_llvm/bin/clang++
+
+echo "==> Stage 1: Completed clang build"
+
+# Stage 2: Compile ATfE with sanitizer
 # Disable memory leaks detection of LeakSanitizer
 export ASAN_OPTIONS=detect_leaks=0
+export CC="${REPO_ROOT}/build_llvm/bin/clang"
+export CXX="${REPO_ROOT}/build_llvm/bin/clang++"
 
 if [[ ! -z "${FVP_INSTALL_DIR}" ]]; then
     EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DENABLE_FVP_TESTING=ON -DFVP_INSTALL_DIR=${FVP_INSTALL_DIR}"
@@ -36,6 +64,8 @@ fi
 mkdir -p "${REPO_ROOT}"/build
 cd "${REPO_ROOT}"/build
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCMAKE_BUILD_TYPE=Release -DLLVM_USE_SANITIZER="Address" -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS}
+cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=Release -DLLVM_USE_SANITIZER="Address" -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS}
 
 ninja -j$PROCESSOR_COUNT package-llvm-toolchain
+
+echo "==> Stage 2: Completed sanitizer build"
