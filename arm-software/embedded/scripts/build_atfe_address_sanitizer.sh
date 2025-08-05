@@ -26,13 +26,7 @@ clang --version
 export CC=clang
 export CXX=clang++
 
-# Get processor count, to execute job in parallel threads
-PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
-
 # Stage 1: Compile clang
-echo "stage 1: REPO_ROOT: $REPO_ROOT"
-echo "stage 1: PROCESSOR_COUNT: $PROCESSOR_COUNT"
-
 mkdir -p "${REPO_ROOT}"/build_llvm
 cd "${REPO_ROOT}"/build_llvm
 
@@ -42,18 +36,9 @@ cmake ../llvm -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCLANG_DEFAULT_LINKER="lld"
 
-ninja -j$PROCESSOR_COUNT
-
-ls -l "${REPO_ROOT}"/build_llvm/
-ls -l "${REPO_ROOT}"/build_llvm/bin/
-ls -l "${REPO_ROOT}"/build_llvm/bin/clang
-ls -l "${REPO_ROOT}"/build_llvm/bin/clang++
-
 echo "==> Stage 1: Completed clang build"
 
 # Stage 2: Compile ATfE with sanitizer
-# Disable memory leaks detection of LeakSanitizer
-export ASAN_OPTIONS=detect_leaks=0
 export CC="${REPO_ROOT}/build_llvm/bin/clang"
 export CXX="${REPO_ROOT}/build_llvm/bin/clang++"
 
@@ -64,8 +49,11 @@ fi
 mkdir -p "${REPO_ROOT}"/build
 cd "${REPO_ROOT}"/build
 
+# Disable memory leaks detection of LeakSanitizer
+export ASAN_OPTIONS=detect_leaks=0
+
 cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=Release -DLLVM_USE_SANITIZER="Address" -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS}
 
-ninja -j$PROCESSOR_COUNT package-llvm-toolchain
+ninja package-llvm-toolchain
 
 echo "==> Stage 2: Completed sanitizer build"

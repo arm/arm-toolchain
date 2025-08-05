@@ -18,9 +18,6 @@ set -vx
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
-# Get processor count, to execute job in parallel threads
-PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
-
 cd "${REPO_ROOT}"/build
 
 # If a test fails, lit will ordinarily return a non-zero result,
@@ -32,15 +29,15 @@ cd "${REPO_ROOT}"/build
 # Additionally setting the --xunit-xml-output option store the
 # results.
 export LIT_OPTS="--ignore-fail --xunit-xml-output=results.xml"
-ninja -j$PROCESSOR_COUNT check-all
+ninja check-all
 
 # The llvm-toolchain targets already set --xunit-xml-output so
 # only the --ignore-fail option is needed.
 # The picolibc tests do not use lit so do not support this option.
 # Command for each test is splitted across individual lines, to aid in debugging.
 export LIT_OPTS="--ignore-fail"
-ninja -j$PROCESSOR_COUNT check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned
-ninja -j$PROCESSOR_COUNT check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned
-ninja -j$PROCESSOR_COUNT check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned
-ninja -j$PROCESSOR_COUNT check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned
-ninja -j$PROCESSOR_COUNT check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned
