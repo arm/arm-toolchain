@@ -33,8 +33,8 @@ PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
 echo "stage 1: REPO_ROOT: $REPO_ROOT"
 echo "stage 1: PROCESSOR_COUNT: $PROCESSOR_COUNT"
 
-mkdir -p -p "${REPO_ROOT}"/build_llvm
-cd -p "${REPO_ROOT}"/build_llvm
+mkdir -p "${REPO_ROOT}"/build_llvm
+cd "${REPO_ROOT}"/build_llvm
 
 cmake ../llvm -G Ninja \
     -DLLVM_ENABLE_PROJECTS="clang-tools-extra;clang;llvm;lld" \
@@ -42,7 +42,7 @@ cmake ../llvm -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCLANG_DEFAULT_LINKER="lld"
 
-ninja -v -v -j$PROCESSOR_COUNT
+ninja -j$PROCESSOR_COUNT
 
 ls -l "${REPO_ROOT}"/build_llvm/
 ls -l "${REPO_ROOT}"/build_llvm/bin/
