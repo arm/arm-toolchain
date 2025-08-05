@@ -36,6 +36,8 @@ cmake ../llvm -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCLANG_DEFAULT_LINKER="lld"
 
+ninja
+
 echo "==> Stage 1: Completed clang build"
 
 # Stage 2: Compile ATfE with sanitizer
