@@ -735,7 +735,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
     if(ENABLE_LIBC_TESTS)
         if(NOT(TEST_EXECUTOR STREQUAL qemu))
-            message(FATAL_ERROR "Using LLVM-libc and FVPs together is unsupported")
+            message(FATAL_ERROR "LLVM-libc tests are only able to run on QEMU.")
         endif()
 
         add_custom_target(check-llvmlibc)
