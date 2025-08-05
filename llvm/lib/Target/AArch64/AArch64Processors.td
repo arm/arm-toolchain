@@ -21,7 +21,11 @@ def TuneA320 : SubtargetFeature<"a320", "ARMProcFamily", "CortexA320",
                                    "Cortex-A320 ARM processors", [
                                    FeatureFuseAES,
                                    FeatureFuseAdrpAdd,
-                                   FeaturePostRAScheduler]>;
+                                   FeaturePostRAScheduler,
+                                   // Downstream issue: #482 (Use
+                                   // FeatureUseFixedOverScalableIfEqualCost
+                                   // for A320)
+                                   FeatureUseFixedOverScalableIfEqualCost]>;
 
 def TuneA53     : SubtargetFeature<"a53", "ARMProcFamily", "CortexA53",
                                    "Cortex-A53 ARM processors", [
@@ -41,14 +45,22 @@ def TuneA510    : SubtargetFeature<"a510", "ARMProcFamily", "CortexA510",
                                    "Cortex-A510 ARM processors", [
                                    FeatureFuseAES,
                                    FeatureFuseAdrpAdd,
-                                   FeaturePostRAScheduler
+                                   FeaturePostRAScheduler,
+                                   // Downstream issue: #482 (Use
+                                   // FeatureUseFixedOverScalableIfEqualCost
+                                   // for A320)
+                                   FeatureUseFixedOverScalableIfEqualCost
                                    ]>;
 
 def TuneA520    : SubtargetFeature<"a520", "ARMProcFamily", "CortexA520",
                                    "Cortex-A520 ARM processors", [
                                    FeatureFuseAES,
                                    FeatureFuseAdrpAdd,
-                                   FeaturePostRAScheduler]>;
+                                   FeaturePostRAScheduler,
+                                   // Downstream issue: #482 (Use
+                                   // FeatureUseFixedOverScalableIfEqualCost
+                                   // for A320)
+                                   FeatureUseFixedOverScalableIfEqualCost]>;
 
 def TuneA520AE  : SubtargetFeature<"a520ae", "ARMProcFamily", "CortexA520",
                                    "Cortex-A520AE ARM processors", [
@@ -750,7 +762,8 @@ def ProcessorFeatures {
                                  FeatureSB, FeaturePAuth, FeatureSSBS, FeatureSVE, FeatureSVE2,
                                  FeatureComplxNum, FeatureCRC, FeatureDotProd,
                                  FeatureFPARMv8,FeatureFullFP16, FeatureJS, FeatureLSE,
-                                 FeatureUseFixedOverScalableIfEqualCost,
+                                 // Downstream issue: #482 (Use
+                                 // FeatureUseFixedOverScalableIfEqualCost for A320)
                                  FeatureRAS, FeatureRCPC, FeatureRDM, FeatureFPAC];
   list<SubtargetFeature> A520 = [HasV9_2aOps, FeaturePerfMon, FeatureAM,
                                  FeatureMTE, FeatureETE, FeatureSVEBitPerm,
@@ -760,7 +773,8 @@ def ProcessorFeatures {
                                  FeatureSVE, FeatureSVE2, FeatureBF16, FeatureComplxNum, FeatureCRC,
                                  FeatureFPARMv8, FeatureFullFP16, FeatureMatMulInt8, FeatureJS,
                                  FeatureNEON, FeatureLSE, FeatureRAS, FeatureRCPC, FeatureRDM,
-                                 FeatureUseFixedOverScalableIfEqualCost,
+                                 // Downstream issue: #482 (Use
+                                 // FeatureUseFixedOverScalableIfEqualCost for A320)
                                  FeatureDotProd, FeatureFPAC];
   list<SubtargetFeature> A520AE = [HasV9_2aOps, FeaturePerfMon, FeatureAM,
                                  FeatureMTE, FeatureETE, FeatureSVEBitPerm,
