@@ -635,9 +635,6 @@ endif()
 ###############################################################################
 
 if(C_LIBRARY STREQUAL llvmlibc)
-    if(NOT(TEST_EXECUTOR STREQUAL qemu))
-        message(FATAL_ERROR "Using LLVM-libc and FVPs together is unsupported")
-    endif()
     set(test_cmd "qemu-system-arm -M ${QEMU_MACHINE} -semihosting -nographic -device loader$<COMMA>file=@BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
 
@@ -737,6 +734,10 @@ if(C_LIBRARY STREQUAL llvmlibc)
     )
 
     if(ENABLE_LIBC_TESTS)
+        if(NOT(TEST_EXECUTOR STREQUAL qemu))
+            message(FATAL_ERROR "Using LLVM-libc and FVPs together is unsupported")
+        endif()
+
         add_custom_target(check-llvmlibc)
         add_dependencies(check-all check-llvmlibc)
 
