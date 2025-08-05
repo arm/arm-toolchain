@@ -173,6 +173,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
     endif()
 
     if(variant IN_LIST ENABLE_VARIANTS OR ENABLE_VARIANTS STREQUAL "all")
+        list(APPEND enabled_variants ${variant})
         string(JSON variant_multilib_flags GET ${lib_def} "flags")
         # Placeholder libraries won't have a json, so store the error in
         # a variable so a fatal error isn't generated.
@@ -363,6 +364,16 @@ foreach(lib_idx RANGE ${lib_count_dec})
     endif()
 
 endforeach()
+
+# Check that all variants that were configured to be enabled
+# were actually enabled.
+if(NOT ENABLE_VARIANTS STREQUAL "all")
+    foreach(expected_variant ${ENABLE_VARIANTS})
+        if(NOT expected_variant IN_LIST enabled_variants)
+            message(FATAL_ERROR "Variant name ${expected_variant} not found in ${MULTILIB_JSON}")
+        endif()
+    endforeach()
+endif()
 
 # Multilib file is generated in two parts.
 # 1. Template is filled with multilib flags from json
