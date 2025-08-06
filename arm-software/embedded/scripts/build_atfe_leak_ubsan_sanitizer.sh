@@ -8,7 +8,7 @@
 # A bash script to build the Arm Toolchain for Embedded, with address sanitizer enabled.
 
 # Script implements 2-stage pipeline: first clang is built using arm-toolchain sources.
-# Then this clang is used to build ATfE sanitizer build.
+# Then this clang is used to compile ATfE sanitizer build.
 #
 # The script creates a build of the toolchain in the 'build' directory, inside
 # the repository tree.
@@ -51,7 +51,7 @@ fi
 mkdir -p "${REPO_ROOT}"/build
 cd "${REPO_ROOT}"/build
 
-# Enable below flag to disable memory leaks detection of LeakSanitizer
+# Enable below flag to disable memory leaks detection of LeakSanitizer.
 # export ASAN_OPTIONS=detect_leaks=0
 
 cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=Release -DLLVM_USE_SANITIZER="Address;Undefined" -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS}
