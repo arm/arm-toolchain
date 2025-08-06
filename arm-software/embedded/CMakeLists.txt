@@ -353,7 +353,6 @@ install(
 # Generate a toolchain ID.
 # Product code 'E' for Embedded.
 set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
-set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
 include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 
 # Include elf2bin
