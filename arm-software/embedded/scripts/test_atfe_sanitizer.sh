@@ -36,8 +36,8 @@ ninja check-all
 # The picolibc tests do not use lit so do not support this option.
 # Command for each test is splitted across individual lines, to aid in debugging.
 export LIT_OPTS="--ignore-fail"
-ninja check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned
-ninja check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned
-ninja check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned
-ninja check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned
-ninja check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned
+ninja check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
