@@ -25,4 +25,11 @@ project(llvmlibc-support LANGUAGES C CXX ASM)
 add_subdirectory(crt0) # crt0, crt0-none and crt0-semihost
 add_subdirectory(semihost)
 
-install(TARGETS crt0 crt0-none crt0-semihost semihost)
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc.ld.in
+    ${CMAKE_CURRENT_BINARY_DIR}/llvmlibc.ld
+    @ONLY
+)
+
+install(TARGETS crt0 crt0-none crt0-semihost semihost DESTINATION lib)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/llvmlibc.ld DESTINATION lib)

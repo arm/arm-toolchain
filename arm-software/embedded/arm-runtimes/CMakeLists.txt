@@ -159,8 +159,10 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
             set(picocrt "crt0-semihost-fvp")
         endif()
         set(test_link_flags "-nostartfiles -l${picocrt} -lsemihost -T picolibcpp.ld")
+    elseif(C_LIBRARY STREQUAL llvmlibc)
+        # QEMU logic handled later
     else()
-        message(FATAL_ERROR "Tests can only be enabled using picolibc.")
+        message(FATAL_ERROR "Tests can only be enabled using picolibc or llvmlibc.")
     endif()
 
     if(TEST_EXECUTOR STREQUAL qemu)
@@ -633,10 +635,7 @@ endif()
 ###############################################################################
 
 if(C_LIBRARY STREQUAL llvmlibc)
-    if(ENABLE_LIBC_TESTS)
-        message(FATAL_ERROR "Tests cannot yet be enabled using llvm libc.")
-    endif()
-
+    set(test_cmd "qemu-system-arm -M ${QEMU_MACHINE} -semihosting -nographic -device loader$<COMMA>file=@BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
 
     set(common_llvmlibc_cmake_args
@@ -679,9 +678,11 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
         -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
         -DLLVM_ENABLE_RUNTIMES=libc
-        -DLLVM_INCLUDE_TESTS=OFF # llvmlibc's tests require C++, so can't be built until llvmlibc can support libc++
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
+        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=-nostartfiles,-lcrt0-semihost,-lsemihost,-T,llvmlibc.ld
+        -DLIBC_TEST_CMD=${test_cmd}
+        -DLIBC_TEST_HERMETIC_ONLY=true
         STEP_TARGETS configure build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
@@ -716,6 +717,13 @@ if(C_LIBRARY STREQUAL llvmlibc)
         CMAKE_ARGS
         ${compiler_launcher_cmake_args}
         ${common_llvmlibc_cmake_args}
+        -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
+        -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
+        -DFLASH_ADDRESS=${FLASH_ADDRESS}
+        -DFLASH_SIZE=${FLASH_SIZE}
+        -DRAM_ADDRESS=${RAM_ADDRESS}
+        -DRAM_SIZE=${RAM_SIZE}
+        -DSTACK_SIZE=${STACK_SIZE}
         STEP_TARGETS build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
@@ -724,6 +732,37 @@ if(C_LIBRARY STREQUAL llvmlibc)
         LIST_SEPARATOR ,
         CONFIGURE_HANDLED_BY_BUILD TRUE
     )
+
+    if(ENABLE_LIBC_TESTS)
+        if(NOT(TEST_EXECUTOR STREQUAL qemu))
+            message(FATAL_ERROR "LLVM-libc tests are only able to run on QEMU.")
+        endif()
+
+        add_custom_target(check-llvmlibc)
+        add_dependencies(check-all check-llvmlibc)
+
+        ExternalProject_Add_Step(
+            llvmlibc
+            check
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target libc-hermetic-tests
+            DEPENDEES install
+            USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
+            ALWAYS TRUE
+        )
+
+        ExternalProject_Add_StepTargets(llvmlibc check)
+        ExternalProject_Add_StepDependencies(
+            llvmlibc
+            check
+            llvmlibc-build
+            llvmlibc-support-build
+            compiler_rt-install
+            cxxlibs-install
+        )
+        
+        add_dependencies(check-llvmlibc llvmlibc-check)
+    endif()
 endif()
 
 add_dependencies(clib-configure ${C_LIBRARY}-configure)

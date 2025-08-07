@@ -180,6 +180,11 @@ option(
     OFF
 )
 
+option(
+    ENABLE_MULTILIB_HEADER_OPTIMISATION "Enable multilib header optimisation phase"
+    ON
+)
+
 # Previously, the LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL option was
 # called LLVM_TOOLCHAIN_NEWLIB_OVERLAY_INSTALL. Detect a setting of
 # that name, in case it's in an existing CMakeCache.txt or command
@@ -379,7 +384,7 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
 
     install(
       DIRECTORY
-      ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/src
+      ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/
       DESTINATION samples
       COMPONENT llvm-toolchain-llvmlibc-configs
     )
@@ -646,6 +651,7 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         -DLLVM_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/llvm
         -DMULTILIB_JSON=${LLVM_TOOLCHAIN_MULTILIB_JSON}
         -DENABLE_VARIANTS=${ENABLE_VARIANTS_PASSTHROUGH}
+	-DENABLE_MULTILIB_HEADER_OPTIMISATION=${ENABLE_MULTILIB_HEADER_OPTIMISATION}
         -DENABLE_PARALLEL_LIB_CONFIG=${ENABLE_PARALLEL_LIB_CONFIG}
         -DENABLE_PARALLEL_LIB_BUILD=${ENABLE_PARALLEL_LIB_BUILD}
         -DPARALLEL_LIB_BUILD_LEVELS=${PARALLEL_LIB_BUILD_LEVELS}

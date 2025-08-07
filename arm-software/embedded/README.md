@@ -100,7 +100,8 @@ Install appropriate latest supported Microsoft Visual C++ Redistributable packag
 
 ### Using the toolchain
 
-> *Note:* If you are using the toolchain in a shared environment with untrusted input,
+> [!CAUTION]
+> If you are using the toolchain in a shared environment with untrusted input,
 > make sure it is sufficiently sandboxed.
 
 To use the toolchain, on the command line you need to provide the following options:
@@ -142,28 +143,18 @@ To display the directory selected by the multilib system, add the flag
 To display all available multilibs run `clang` with the flag `-print-multi-lib`
 and a target triple like `--target=aarch64-none-elf` or `--target=arm-none-eabi`.
 
-It's possible that `clang` will choose a set of libraries that are not the ones
-you want to use. In this case you can bypass the multilib system by providing a
-`--sysroot` option specifying the directory containing the `include` and `lib`
-directories of the libraries you want to use. For example:
-
-```
-$ clang \
---sysroot=<install-dir>/ATfE-<revision>/lib/clang-runtimes/arm-none-eabi/armv6m_soft_nofp \
---target=armv6m-none-eabi \
--mfpu=none \
--fno-exceptions \
--fno-rtti \
--nostartfiles \
--lcrt0-semihost \
--lsemihost \
--T picolibc.ld \
--o example example.c
-```
+> [!WARNING]
+> `--sysroot` is not a substitute for multilib selection
+> The `--sysroot` option cannot be used to override multilib logic
+> or manually select an arbitrary library variant.
 
 The FPU selection can be skipped, but it is not recommended to as the defaults
 are different to GCC ones.
 
+> [!WARNING]
+> The AArch64 no-FP library variants are intended for use in projects that
+> do not use floating-point calculations. They include software floating-point
+> functions to enable testing only - these are not designed for production use.
 
 The builds of the toolchain come packaged with two config files, Omax.cfg and OmaxLTO.cfg.
 When used, these config files enable several build optimisation flags to achieve highest performance on typical embedded benchmarks. OmaxLTO.cfg enables link-time optimisation (LTO) specific flags.
@@ -200,7 +191,8 @@ and [Experimental newlib support](docs/newlib.md)
 for advice on using Arm Toolchain for Embedded with existing projects
 relying on the Arm GNU Toolchain.
 
-> *Note:* `picolibc` provides excellent
+> [!TIP]
+> `picolibc` provides excellent
 > [support for Arm GNU Toolchain](https://github.com/picolibc/picolibc/blob/main/doc/using.md),
 > so projects that require using both Arm GNU Toolchain and Arm Toolchain for Embedded
 > can choose either `picolibc` or `newlib`/`newlib-nano`.

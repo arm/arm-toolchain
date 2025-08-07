@@ -12,6 +12,7 @@
 #include "clang/Driver/CommonArgs.h"
 #include "clang/Driver/InputInfo.h"
 
+#include "Arch/AArch64.h"
 #include "Arch/ARM.h"
 #include "Arch/RISCV.h"
 #include "clang/Driver/Compilation.h"
@@ -30,21 +31,6 @@ using namespace clang;
 using namespace clang::driver;
 using namespace clang::driver::tools;
 using namespace clang::driver::toolchains;
-
-/// Is the triple {aarch64.aarch64_be}-none-elf?
-static bool isAArch64BareMetal(const llvm::Triple &Triple) {
-  if (Triple.getArch() != llvm::Triple::aarch64 &&
-      Triple.getArch() != llvm::Triple::aarch64_be)
-    return false;
-
-  if (Triple.getVendor() != llvm::Triple::UnknownVendor)
-    return false;
-
-  if (Triple.getOS() != llvm::Triple::UnknownOS)
-    return false;
-
-  return Triple.getEnvironmentName() == "elf";
-}
 
 static bool isRISCVBareMetal(const llvm::Triple &Triple) {
   if (!Triple.isRISCV())
@@ -363,8 +349,9 @@ void BareMetal::findMultilibs(const Driver &D, const llvm::Triple &Triple,
 }
 
 bool BareMetal::handlesTarget(const llvm::Triple &Triple) {
-  return arm::isARMEABIBareMetal(Triple) || isAArch64BareMetal(Triple) ||
-         isRISCVBareMetal(Triple) || isPPCBareMetal(Triple);
+  return arm::isARMEABIBareMetal(Triple) ||
+         aarch64::isAArch64BareMetal(Triple) || isRISCVBareMetal(Triple) ||
+         isPPCBareMetal(Triple);
 }
 
 Tool *BareMetal::buildLinker() const {
@@ -427,10 +414,22 @@ void BareMetal::AddClangSystemIncludeArgs(const ArgList &DriverArgs,
   const SmallString<128> SysRootDir(computeSysRoot());
   if (!SysRootDir.empty()) {
     for (const Multilib &M : getOrderedMultilibs()) {
-      SmallString<128> Dir(SysRootDir);
-      llvm::sys::path::append(Dir, M.includeSuffix());
-      llvm::sys::path::append(Dir, "include");
-      addSystemInclude(DriverArgs, CC1Args, Dir.str());
+      // Downstream issue: #446 (Extend the Multilib system to support an
+      // IncludeDirs field)
+      if (!M.includeDirs().empty()) {
+        // Add include directories specified in multilib.yaml under the
+        // 'IncludeDirs' field
+        for (const std::string &Path : M.includeDirs()) {
+          SmallString<128> Dir(SysRoot);
+          llvm::sys::path::append(Dir, Path);
+          addSystemInclude(DriverArgs, CC1Args, Dir.str());
+        }
+      } else {
+        SmallString<128> Dir(SysRootDir);
+        llvm::sys::path::append(Dir, M.includeSuffix());
+        llvm::sys::path::append(Dir, "include");
+        addSystemInclude(DriverArgs, CC1Args, Dir.str());
+      }
     }
   }
 }
@@ -509,6 +508,18 @@ void BareMetal::AddClangCXXStdlibIncludeArgs(const ArgList &DriverArgs,
       llvm::sys::path::append(TargetDir, "usr", "include", "c++", "v1");
       if (D.getVFS().exists(TargetDir)) {
         addSystemInclude(DriverArgs, CC1Args, TargetDir.str());
+        break;
+      }
+      // Downstream issue: #446 (Extend the Multilib system to support an
+      // IncludeDirs field)
+      if (!M.includeDirs().empty()) {
+        // Add include directories specified in multilib.yaml under the
+        // 'IncludeDirs' field
+        for (const std::string &Path : M.includeDirs()) {
+          Dir = SysRoot;
+          llvm::sys::path::append(Dir, Path, "c++", "v1");
+          addSystemInclude(DriverArgs, CC1Args, Dir.str());
+        }
         break;
       }
       // Add generic path if nothing else succeeded so far.
@@ -684,7 +695,8 @@ void baremetal::Linker::ConstructJob(Compilation &C, const JobAction &JA,
   if (!Args.hasArg(options::OPT_nostdlib, options::OPT_nodefaultlibs)) {
     CmdArgs.push_back("--start-group");
     AddRunTimeLibs(TC, D, CmdArgs, Args);
-    CmdArgs.push_back("-lc");
+    if (!Args.hasArg(options::OPT_nolibc))
+      CmdArgs.push_back("-lc");
     if (TC.hasValidGCCInstallation() || detectGCCToolchainAdjacent(D))
       CmdArgs.push_back("-lgloss");
     CmdArgs.push_back("--end-group");
