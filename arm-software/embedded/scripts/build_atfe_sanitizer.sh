@@ -31,7 +31,7 @@ mkdir -p "${REPO_ROOT}"/build_llvm
 cd "${REPO_ROOT}"/build_llvm
 
 cmake ../llvm -G Ninja \
-    -DLLVM_ENABLE_PROJECTS="clang-tools-extra;clang;llvm;lld" \
+    -DLLVM_ENABLE_PROJECTS="clang;llvm;lld" \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCLANG_DEFAULT_LINKER="lld"
