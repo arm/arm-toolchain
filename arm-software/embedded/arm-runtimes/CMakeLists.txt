@@ -151,9 +151,6 @@ endif()
 set(TEST_EXECUTION_INFO "${CMAKE_CURRENT_BINARY_DIR}/test_execution_info.json")
 file(WRITE "${TEST_EXECUTION_INFO}" "{\n")
 
-# Write Compile flags
-file(APPEND "${TEST_EXECUTION_INFO}" "  \"COMPILE_FLAGS\": \"--target ${target_triple} ${COMPILE_FLAGS}\",\n")
-
 # Build EXECUTION_FLAGS conditionally
 if("${TEST_EXECUTOR}" STREQUAL "fvp")
     string(REPLACE " " ";" fvp_config_list ${FVP_CONFIG})
@@ -161,7 +158,17 @@ if("${TEST_EXECUTOR}" STREQUAL "fvp")
     foreach(cfg ${fvp_config_list})
         string(APPEND FVP_CONFIG_TEMP " --fvp_config ${cfg}")
     endforeach()
-    set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --fvp_model ${FVP_MODEL}${FVP_CONFIG_TEMP}")
+
+    get_filename_component(FVP_INSTALL_ABS_PATH "${FVP_INSTALL_DIR}" REALPATH)
+    get_filename_component(FVP_CONFIG_ABS_PATH "${FVP_CONFIG_DIR}" REALPATH)
+
+    if ("${FVP_MODEL}" STREQUAL "aem-r")
+        set(COMPILE_FLAGS "${COMPILE_FLAGS} -mno-unaligned-access -nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
+        set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --fvp_model ${FVP_MODEL}${FVP_CONFIG_TEMP} --fvp_install_dir ${FVP_INSTALL_DIR} --fvp_config_dir ${FVP_CONFIG_DIR}")
+    else()
+        set(COMPILE_FLAGS "${COMPILE_FLAGS} -nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
+        set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --fvp_model ${FVP_MODEL}${FVP_CONFIG_TEMP} --fvp_install_dir ${FVP_INSTALL_ABS_PATH} --fvp_config_dir ${FVP_CONFIG_ABS_PATH}")
+    endif()
 
 elseif("${TEST_EXECUTOR}" STREQUAL "qemu")
     if(TARGET_ARCH MATCHES "^aarch64")
@@ -170,6 +177,7 @@ elseif("${TEST_EXECUTOR}" STREQUAL "qemu")
         find_program(QEMU_EXECUTABLE qemu-system-arm REQUIRED)
     endif()
 
+    set(COMPILE_FLAGS "${COMPILE_FLAGS} -nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
     set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --qemu_command ${QEMU_EXECUTABLE} --qemu_machine ${QEMU_MACHINE} --qemu_cpu ${QEMU_CPU}")
 
     # Append --qemu_params only if non-empty
@@ -178,6 +186,9 @@ elseif("${TEST_EXECUTOR}" STREQUAL "qemu")
         string(APPEND EXECUTION_FLAGS " --qemu_params=${QEMU_PARAMS}")
     endif()
 endif()
+
+# Write Compile flags
+file(APPEND "${TEST_EXECUTION_INFO}" "  \"COMPILE_FLAGS\": \"--target ${target_triple} ${COMPILE_FLAGS}\",\n")
 
 # Write execution flags
 file(APPEND "${TEST_EXECUTION_INFO}" "  \"EXECUTION_FLAGS\": \"${EXECUTION_FLAGS}\"\n")
@@ -713,7 +724,6 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ${common_llvmlibc_cmake_args}
         -DLIBC_TARGET_TRIPLE=${target_triple}
         -DLIBC_CONF_TIME_64BIT=ON
-        -DLIBC_CONF_ERRNO_MODE=LIBC_ERRNO_MODE_SHARED
         -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
         -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
         -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
