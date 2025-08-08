@@ -1,4 +1,4 @@
-From 8a5771253787cda5c8caa31b7e8a870840903084 Mon Sep 17 00:00:00 2001
+From d1f5b20e10a1c55838ae233d805ca5cd586ba883 Mon Sep 17 00:00:00 2001
 From: Simi Pallipurath <simi.pallipurath@arm.com>
 Date: Tue, 22 Jul 2025 15:08:45 +0100
 Subject: [Compiler-rt] FVP and QEMU do not support crash signal handling.
@@ -22,5 +22,5 @@ index 2140944b0eec..f3b8bb234f38 100644
  // RUN: %expect_crash %run %t 4
  
 -- 
-2.34.1
+2.43.0
 
