@@ -556,6 +556,64 @@ class bincombined(Base):
                 "0x1235",
             )
 
+    def testZeroLength(self):
+        "Test that a trailing length-0 segment doesn't cause trailing padding."
+
+        segment1_contents = bytes(range(0x10))
+
+        for bigend in False, True:
+            for sixtyfour in False, True:
+                with self.tempsubdir():
+                    makeelf(
+                        "input.elf",
+                        bigend,
+                        sixtyfour,
+                        [
+                            # A segment that is definitely not empty
+                            SegmentDesc(1, 0x1000, segment1_contents),
+
+                            # A segment that has no initialized contents but
+                            # does have ZI contents, so it's normally empty,
+                            # but stops counting as empty if you say
+                            # --zi
+                            SegmentDesc(1, 0x1100, b'', pad=0x80),
+
+                            # A completely empty segment
+                            SegmentDesc(1, 0x1200, b''),
+                        ],
+                    )
+
+                    # Without --zi: the first segment is the only non-empty
+                    # one, so we expect the output file to contain nothing but
+                    # the bytes in segment1_contents.
+                    self.elf2bin(
+                        "--bincombined", "-o", "output.bin", "input.elf"
+                    )
+                    with open("output.bin", "rb") as fh:
+                        bindata = fh.read()
+                    self.assertEqual(
+                        bindata,
+                        segment1_contents,
+                    )
+
+                    # With --zi: the second segment also counts as non-empty,
+                    # containing 0x80 zero bytes. So the output file contains
+                    # the 0x10 bytes of segment1_contents, the 0xF0 bytes of
+                    # padding to get from there to the second segment's
+                    # address, and the 0x80 ZI bytes from that segment. But we
+                    # stop there, and don't go on to the third segment, which
+                    # is still completely empty.
+                    self.elf2bin(
+                        "--bincombined", "-o", "output.bin", "input.elf",
+                        "--zi"
+                    )
+                    with open("output.bin", "rb") as fh:
+                        bindata = fh.read()
+                    self.assertEqual(
+                        bindata,
+                        segment1_contents + b'\0' * (0xF0 + 0x80),
+                    )
+
 
 class vhx(Base):
     def testOneSegment(self):
