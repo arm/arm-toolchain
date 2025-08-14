@@ -388,6 +388,7 @@ add_custom_target(
 )
 add_dependencies(check-clang llvm-xfail-files)
 add_dependencies(check-llvm llvm-xfail-files)
+add_dependencies(check-all llvm-xfail-files)
 
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
     install(
