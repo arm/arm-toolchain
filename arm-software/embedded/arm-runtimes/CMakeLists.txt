@@ -635,7 +635,12 @@ endif()
 ###############################################################################
 
 if(C_LIBRARY STREQUAL llvmlibc)
-    set(test_cmd "qemu-system-arm -M ${QEMU_MACHINE} -semihosting -nographic -device loader$<COMMA>file=@BINARY@")
+    set(test_cmd 
+        "qemu-system-arm -M ${QEMU_MACHINE} -cpu ${QEMU_CPU} ${QEMU_PARAMS} \
+        -chardev stdio$<COMMA>mux=on$<COMMA>id=stdio0 \
+        -semihosting-config enable=on$<COMMA>chardev=stdio0$<COMMA>arg=program-name \
+        -monitor none -serial none -nographic -device loader$<COMMA>file=@BINARY@$<COMMA>cpu-num=0")
+    
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
 
     set(common_llvmlibc_cmake_args
