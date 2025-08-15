@@ -35,8 +35,12 @@ void setup() {
   // The vector table is always at address 0. The inline assembly is needed
   // here to hide the memcpy to a null pointer from the compiler.
   void *final_vector_table = NULL;
-  asm("" : "+r"(final_vector_table));
-  memcpy(final_vector_table, (void *)&vector_table, 64);
+  // Don't use memcpy as llvmlibc memcpy will fault a copy to address 0.
+  // Size is more important than speed here so don't unroll the loop.
+  _Pragma("clang loop unroll(disable) vectorize(disable)") for (
+      int i = 0; i < 64 / sizeof(unsigned int); i++) {
+    ((unsigned int *)final_vector_table)[i] = ((unsigned int *)vector_table)[i];
+  }
 #endif
 }
 
