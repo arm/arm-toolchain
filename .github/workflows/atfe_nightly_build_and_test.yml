@@ -51,7 +51,7 @@ jobs:
 
           # LLVM-libc Overlay Package Build
           - build_script: build_llvmlibc_overlay.sh
-            test_script: test.sh
+            test_script: test_llvmlibc.sh
             install_script: install_dependencies.sh
             target_os: Ubuntu-22.04-arm64
             runner: ah-ubuntu_22_04-c7g_8x-100
