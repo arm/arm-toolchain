@@ -2,11 +2,11 @@
 
 # SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
-# This script will generate a list of tests where the expected result in the
-# source files needs to be overridden via the lit command line or environment
-# variables.
-# It can also be used to track where downstream testing diverges from
-# upstream, and why.
+"""This script will generate a list of tests where the expected result in the
+source files needs to be overridden via the lit command line or environment
+variables.
+It can also be used to track where downstream testing diverges from
+upstream, and why."""
 
 import argparse
 import subprocess
@@ -16,11 +16,15 @@ from typing import Callable, NamedTuple, List
 
 
 class NewResult(Enum):
+    """Enum storing the potential new result a test."""
+
     XFAILED = "FAILED"  # Replace a failure with an expected failure.
     PASSED = "PASSED"  # Replace an unexpected pass with a pass.
 
 
 class XFail(NamedTuple):
+    """Class to collect information about an xfail."""
+
     name: str  # Name to identify the xfail.
     testnames: List[str]  # The tests to include.
     result: NewResult  # The expected result.
@@ -72,7 +76,7 @@ def main():
             "arm-none-eabi",
             "-frwpi",
         ]
-        p = subprocess.run(test_args, capture_output=True)
+        p = subprocess.run(test_args, capture_output=True, check=False)
         return p.returncode != 0
 
     # Test whether there is a multilib warning from -mcpu=cortex-r52
@@ -85,7 +89,7 @@ def main():
             "-mcpu=cortex-r52",
             "-Werror",
         ]
-        p = subprocess.run(test_args, capture_output=True)
+        p = subprocess.run(test_args, capture_output=True, check=False)
         return p.returncode != 0
 
     xfails = [
@@ -345,8 +349,8 @@ def main():
         ),
     ]
 
-    tests_to_xfail = list()
-    tests_to_upass = list()
+    tests_to_xfail = []
+    tests_to_upass = []
 
     for xfail in xfails:
         if args.project != xfail.project:
@@ -356,9 +360,8 @@ def main():
                 raise ValueError(
                     f"--variant must be specified for project {args.project}"
                 )
-            else:
-                if args.variant not in xfail.variants:
-                    continue
+            if args.variant not in xfail.variants:
+                continue
         if xfail.conditional is not None:
             if not xfail.conditional():
                 continue
@@ -376,7 +379,7 @@ def main():
 
     # Save to files for easy consumption by other scripts, or print for users.
     if args.xfails_file:
-        with open(args.xfails_file, "w") as f:
+        with open(args.xfails_file, "w", encoding="utf-8") as f:
             for testname in tests_to_xfail:
                 f.write(testname + "\n")
     else:
@@ -384,7 +387,7 @@ def main():
         for testname in tests_to_xfail:
             f.write(testname + "\n")
     if args.xfails_not_file:
-        with open(args.xfails_not_file, "w") as f:
+        with open(args.xfails_not_file, "w", encoding="utf-8") as f:
             for testname in tests_to_upass:
                 f.write(testname + "\n")
     else:

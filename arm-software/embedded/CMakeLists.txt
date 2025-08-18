@@ -364,6 +364,7 @@ set(LLVM_EXTERNAL_ELF2BIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2b
 # Pass it the xfail/xfail-not lists.
 set(llvm_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/llvm.xfails")
 set(llvm_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/llvm.upasses")
+# Set LLVM_DEFAULT_EXTERNAL_LIT and LLVM_LIT_ARGS before including the LLVM subdirectory.
 set(LLVM_DEFAULT_EXTERNAL_LIT "${CMAKE_CURRENT_SOURCE_DIR}/arm-runtimes/test-support/lit-wrapper.py")
 set(LLVM_LIT_ARGS "${LLVM_LIT_ARGS} -sv --real-lit-path=${CMAKE_CURRENT_BINARY_DIR}/llvm/bin/llvm-lit --xfails-file=${llvm_xfails_file_path} --xfails-not-file=${llvm_xfails_not_file_path}" CACHE STRING "")
 
