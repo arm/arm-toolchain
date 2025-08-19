@@ -18,8 +18,28 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
-      - arm-software
-      - release/arm-software/**
+      - 'arm-software'
+      - 'release/arm-software/**'
+    paths:
+      # Run workflow if the PR modifies any of the following directories
+      - 'arm-software/embedded/**'
+      - 'clang/**'
+      - 'cmake/**'
+      - 'compiler-rt/**'
+      - 'libc/**'
+      - 'libcxx/**'
+      - 'libcxxabi/**'
+      - 'libunwind/**'
+      - 'lld/**'
+      - 'llvm/**'
+      - 'runtimes/**'
+      - 'utils/**'
+      # Exclude directories that are not relevant for ATfE
+      - '!arm-software/linux/**'
+      # Exclude changes in files with these extensions
+      - '!**/*.cfg'
+      - '!**/*.md'
+      - '!**/*.rst'
 
 jobs:
   build-and-test:
