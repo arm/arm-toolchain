@@ -55,9 +55,9 @@ following command line options, in addition to `--target`, `-march` or
   `__llvm_libc_heap_limit` in addition to whatever other memory layout
   you want.
 
-* LLVM libc does not define errno. If you are using a function that
-  sets errno then you must implement the function `int *__llvm_libc_errno()`
-  that returns the address of your definition of errno.
+* LLVM libc does not define `errno`. If you are using a function that
+  sets `errno` then you must implement the function `int *__llvm_libc_errno()`
+  that returns the address of your definition of `errno`.
 
 For example:
 
@@ -75,6 +75,6 @@ directory containing sample programs that use LLVM libc.
 At present, this toolchain builds C++ libraries limited to what is supported with
 LLVM libc, for example, iostream is not available.
 
-At the time of writing this (2024-07), LLVM libc is a work in
+LLVM libc is a work in
 progress. It is incomplete: not all standard C library functionality
-is provided.
+is provided yet.
