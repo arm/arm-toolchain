@@ -1,14 +1,53 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-This release is migrated from [LLVM-ET](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm).
-The package structure remains the same, making this a direct successor release.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+### Changed
+### Deprecated
+### Removed
+### Fixed
+### Security
+
+## [21.1.0]
+
+### Added
+
+- [`elf2bin`](../docs/elf2bin.md) utility added.
+- Use of zlib on Linux and macOS to allow compression of debug symbols.
+- C++ standard library `<fstream>` header support with `picolibc` and `newlib`.
+- C++ standard library support with LLVM libc overlay package.
+- Startup code, C++ sample for LLVM libc overlay package.
+
+### Changed
+
+- Multiple changes in added and updated library variants to improve coverage
+of supported targets.
+- Common header files for C and C++ libraries variants are now centralized under
+each target triple to avoid duplication and significantly reduce package size.
+- Arm AEABI memory builtins that are provided by the C library were excluded from the `compiler-rt` build, `-meabi gnu` should be used with `-nostdlib` to prevent the compiler from using the missing builtins.
+- `picolibc` now uses `__bothinit_array_start` and `__bothinit_array_end`
+linker defined symbols to run the static constructors instead of the traditional
+`__init_array_start` and `__init_array_end`.
+
+### Removed
+
+- Support for using `--sysroot` to point to a specific library variant directly,
+multilib driver selection logic should be used instead.
+
+### Fixed
+
+- Using samples on Windows.
+- Producing 64-bit compiler and tools binaries on Windows.
+
 ## [20.1.0]
+
+This release is migrated from [LLVM-ET](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm).
+The package structure remains the same, making this a direct successor release.
 
 ### Added
 - Support for targeting AArch64 v8-R in both big-endian and little-endian modes (#64) (#68) (#102).
