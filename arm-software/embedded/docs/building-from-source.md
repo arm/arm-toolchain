@@ -27,8 +27,9 @@ Testing with QEMU is enabled by default, but can be disabled using the
 `-DENABLE_QEMU_TESTING=OFF` CMake option if testing is not required or QEMU is
 not installed.
 
-Some recent targets are not supported by QEMU, for these the Arm FVP models are
-used instead. These models are available free-of-change but are not
+Some recent targets are not supported by QEMU, for these the
+Arm Fixed Virtual Platform (FVP) models are
+used instead. These models are available free-of-charge but are not
 open-source, and come with their own licenses.
 
 These models can be downloaded and installed (into the source tree) with the
@@ -162,7 +163,7 @@ The same build directory can be used for both native and MinGW toolchains.
   using picolibc and newlib as these functions are provided by the C library in both cases.
   However, if the toolchain is used with `-nostdlib` and the C library is not linked in, users relying
   solely on `compiler-rt` will have undefined symbol errors for these AEABI functions. To prevent the
-  generation of thse AEABI function calls by the compiler, pass the following option to the compiler:
+  generation of these AEABI function calls by the compiler, pass the following option to the compiler:
   ```
   -meabi gnu
   ```
@@ -270,4 +271,4 @@ using specific test targets:
 `ninja check-unwind`
 
 Alternatively, `ninja check-all` runs all enabled tests.
-`ninja check-<VARAINT_NAME>` runs all the tests for that specific variant.
+`ninja check-<VARIANT_NAME>` runs all the tests for that specific variant.
