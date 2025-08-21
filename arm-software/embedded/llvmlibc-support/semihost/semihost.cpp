@@ -16,9 +16,9 @@ namespace {
 
 void stdio_open(struct __llvm_libc_stdio_cookie *cookie, int mode) {
   size_t args[3];
-  args[0] = (size_t)":tt";
-  args[1] = (size_t)mode;
-  args[2] = (size_t)3; /* name length */
+  args[0] = reinterpret_cast<size_t>(":tt");
+  args[1] = static_cast<size_t>(mode);
+  args[2] = static_cast<size_t>(3); /* name length */
   cookie->handle = semihosting_call(SYS_OPEN, args);
 }
 } // namespace
@@ -33,7 +33,13 @@ void __llvm_libc_exit(int status) {
   block[1] = status;
   semihosting_call(SYS_EXIT, block);
 #else
-  semihosting_call(SYS_EXIT, (const void *)ADP_Stopped_ApplicationExit);
+  if (status == 0) {
+    semihosting_call(
+        SYS_EXIT, reinterpret_cast<const void *>(ADP_Stopped_ApplicationExit));
+  } else {
+    semihosting_call(SYS_EXIT, reinterpret_cast<const void *>(
+                                   ADP_Stopped_RunTimeErrorUnknown));
+  }
 #endif
 
   __builtin_unreachable(); /* semihosting call doesn't return */
@@ -42,9 +48,9 @@ void __llvm_libc_exit(int status) {
 ssize_t __llvm_libc_stdio_read(struct __llvm_libc_stdio_cookie *cookie,
                                const char *buf, size_t size) {
   size_t args[4];
-  args[0] = (size_t)cookie->handle;
-  args[1] = (size_t)buf;
-  args[2] = (size_t)size;
+  args[0] = static_cast<size_t>(cookie->handle);
+  args[1] = reinterpret_cast<size_t>(buf);
+  args[2] = size;
   args[3] = 0;
   ssize_t retval = semihosting_call(SYS_READ, args);
   if (retval >= 0)
@@ -55,9 +61,9 @@ ssize_t __llvm_libc_stdio_read(struct __llvm_libc_stdio_cookie *cookie,
 ssize_t __llvm_libc_stdio_write(struct __llvm_libc_stdio_cookie *cookie,
                                 const char *buf, size_t size) {
   size_t args[4];
-  args[0] = (size_t)cookie->handle;
-  args[1] = (size_t)buf;
-  args[2] = (size_t)size;
+  args[0] = static_cast<size_t>(cookie->handle);
+  args[1] = reinterpret_cast<size_t>(buf);
+  args[2] = size;
   ssize_t retval = semihosting_call(SYS_WRITE, args);
   if (retval >= 0)
     retval = size - retval;
