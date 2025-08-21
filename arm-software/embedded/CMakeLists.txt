@@ -360,12 +360,36 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 set(LLVM_EXTERNAL_PROJECTS elf2bin)
 set(LLVM_EXTERNAL_ELF2BIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin)
 
+# Use the downstream version of lit, which is just a wrapper for the built one.
+# Pass it the xfail/xfail-not lists.
+set(llvm_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/llvm.xfails")
+set(llvm_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/llvm.upasses")
+# Set LLVM_DEFAULT_EXTERNAL_LIT and LLVM_LIT_ARGS before including the LLVM subdirectory.
+set(LLVM_DEFAULT_EXTERNAL_LIT "${CMAKE_CURRENT_SOURCE_DIR}/arm-runtimes/test-support/lit-wrapper.py")
+set(LLVM_LIT_ARGS "${LLVM_LIT_ARGS} -sv --real-lit-path=${CMAKE_CURRENT_BINARY_DIR}/llvm/bin/llvm-lit --xfails-file=${llvm_xfails_file_path} --xfails-not-file=${llvm_xfails_not_file_path}" CACHE STRING "")
+
 set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 add_subdirectory(
     ${llvmproject_src_dir}/llvm llvm
 )
 
 add_dependencies(check-all check-elf2bin)
+
+# Generate a xfail/xfail-not list before running the tests.
+add_custom_target(
+    llvm-xfail-files
+    COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/arm-runtimes/test-support/xfails.py
+        --project llvm
+        --clang ${LLVM_BINARY_DIR}/bin/clang
+        --xfails_file ${llvm_xfails_file_path}
+        --xfails_not_file ${llvm_xfails_not_file_path}
+    DEPENDS
+        clang
+)
+add_dependencies(check-clang llvm-xfail-files)
+add_dependencies(check-llvm llvm-xfail-files)
+add_dependencies(check-all llvm-xfail-files)
 
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
     install(
@@ -571,11 +595,6 @@ add_dependencies(
     llvm-toolchain-runtimes
     version_txt
 )
-
-# Set LLVM_DEFAULT_EXTERNAL_LIT to the directory of clang
-# which was build in previous step. This path is not exported
-# by add_subdirectory of llvm project
-set(LLVM_DEFAULT_EXTERNAL_LIT "${LLVM_BINARY_DIR}/bin/llvm-lit")
 
 add_custom_target(check-llvm-toolchain-runtimes)
 add_custom_target(check-${LLVM_TOOLCHAIN_C_LIBRARY})

@@ -271,9 +271,24 @@ if(VARIANT STREQUAL "armv6m_soft_nofp")
 endif()
 
 if(ENABLE_COMPILER_RT_TESTS)
+    # Use the downstream version of lit, which is just a wrapper for the built one.
+    # Pass it the xfail/xfail-not lists.
+    set(compiler_rt_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.xfails")
+    set(compiler_rt_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.upasses")
     set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
-    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --xunit-xml-output=results.junit.xml")
-    set(external_lit_path "${LLVM_BINARY_DIR}/bin/llvm-lit")
+    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --xunit-xml-output=results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${compiler_rt_xfails_file_path} --xfails-not-file=${compiler_rt_xfails_not_file_path}"
+    )
+    set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
+    add_custom_target(
+        compiler-rt-xfail-files
+        COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
+            --variant ${VARIANT}
+            --project compiler-rt
+            --libc ${C_LIBRARY}
+            --xfails_file ${compiler_rt_xfails_file_path}
+            --xfails_not_file ${compiler_rt_xfails_not_file_path}
+    )
     set(
         compiler_rt_test_cmake_args
         -DCOMPILER_RT_INCLUDE_TESTS=ON
@@ -366,6 +381,7 @@ if(ENABLE_COMPILER_RT_TESTS)
         check-compiler-rt
         compiler_rt-build
         clib-install
+        compiler-rt-xfail-files
     )
     add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
 endif()
@@ -797,7 +813,23 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
         )
         if(ENABLE_LIBCXX_TESTS)
-            set(cxxlibs_lit_args "${LLVM_LIT_ARGS} --xunit-xml-output=results.junit.xml")
+            # Use the downstream version of lit, which is just a wrapper for the built one.
+            # Pass it the xfail/xfail-not lists.
+            set(libcxx_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.xfails")
+            set(libcxx_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.upasses")
+            set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
+            set(libcxx_lit_args "${LLVM_LIT_ARGS} -sv --xunit-xml-output=results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${libcxx_xfails_file_path} --xfails-not-file=${libcxx_xfails_not_file_path}"
+            )
+            add_custom_target(
+                libcxx-xfail-files
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
+                    --variant ${VARIANT}
+                    --project libcxx
+                    --libc ${C_LIBRARY}
+                    --xfails_file ${libcxx_xfails_file_path}
+                    --xfails_not_file ${libcxx_xfails_not_file_path}
+            )
             set(cxxlibs_test_cmake_options
                 -DLIBCXX_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++-picolibc.cfg.in
                 -DLIBCXX_TEST_PARAMS=executor=${lit_test_executor}
@@ -807,7 +839,8 @@ if(ENABLE_CXX_LIBS)
                 -DLIBUNWIND_TEST_PARAMS=executor=${lit_test_executor}
                 -DRUNTIME_TEST_ARCH_FLAGS=${compile_arch_flags}
                 -DRUNTIME_TEST_LINK_FLAGS=${test_link_flags}
-                -DLLVM_LIT_ARGS=${cxxlibs_lit_args}
+                -DLLVM_LIT_ARGS=${libcxx_lit_args}
+                -DLLVM_EXTERNAL_LIT=${external_lit_path}
             )
         endif()
     elseif(C_LIBRARY STREQUAL llvmlibc)
@@ -940,6 +973,7 @@ if(ENABLE_CXX_LIBS)
                 cxxlibs
                 ${check_target}
                 cxxlibs-install
+                libcxx-xfail-files
             )
             add_dependencies(${check_target} cxxlibs-${check_target})
         endforeach()
