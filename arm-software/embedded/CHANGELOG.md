@@ -18,7 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - [`elf2bin`](../docs/elf2bin.md) utility added.
-- Use of zlib on Linux and macOS to allow compression of debug symbols.
+- Use of zlib on Linux and macOS to allow compression of debug data with `-gz=zlib`.
 - C++ standard library `<fstream>` header support with `picolibc` and `newlib`.
 - C++ standard library support with LLVM libc overlay package.
 - Startup code, C++ sample for LLVM libc overlay package.
@@ -32,7 +32,9 @@ each target triple to avoid duplication and significantly reduce package size.
 - Arm AEABI memory builtins that are provided by the C library were excluded from the `compiler-rt` build, `-meabi gnu` should be used with `-nostdlib` to prevent the compiler from using the missing builtins.
 - `picolibc` now uses `__bothinit_array_start` and `__bothinit_array_end`
 linker defined symbols to run the static constructors instead of the traditional
-`__init_array_start` and `__init_array_end`.
+`__init_array_start` and `__init_array_end`. Linker scripts will need to be
+updated to define the `__bothinit_array_start` and `__bothinit_array_end` symbols.
+See the `picolibc.ld` linker script for an example.
 
 ### Removed
 
