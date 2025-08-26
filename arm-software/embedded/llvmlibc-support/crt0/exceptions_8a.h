@@ -206,7 +206,8 @@ EXFN_ATTR void exception_handler() {
 // For our purposes, each entry just contains one branch instruction to the
 // exception reporting function, since we never want to resume after an
 // exception.
-__attribute__((naked, section(".vectors"), aligned(2048))) void vector_table() {
+[[gnu::naked, gnu::section(".vectors"), gnu::aligned(2048)]]
+void vector_table() {
 #define VECTOR_TABLE_ENTRY                                                     \
   asm(".balign 128");                                                          \
   asm("B %0" : : "X"(exception_handler));

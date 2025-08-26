@@ -27,7 +27,7 @@ EXFN_ATTR void handle_reset() {
 
 EXFN_ATTR void handle_undefined() {
   unsigned pc_val = __arm_rsr("ELR_hyp");
-  unsigned instr = *(unsigned *)pc_val;
+  unsigned instr = *reinterpret_cast<unsigned *>(pc_val);
   print_str("CPU Exception: Undefined Instruction\n");
   print_str("  PC = ");
   print_hex(pc_val);
