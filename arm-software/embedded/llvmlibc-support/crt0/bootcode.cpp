@@ -77,13 +77,18 @@ extern "C" void __startup() {
   exit(main(0, 0));
 }
 
+extern "C" {
 // The entry point sets sp and branches to the main startup function.
 #ifdef __ARM_ARCH_ISA_ARM
-// If the target supports the A32 instruction set then the entry point has to
-// use it.
+// If the target supports the A32 instruction set then the entry point has
+// to use it.
 __attribute__((target("arm")))
+#elif defined(__ARM_ARCH_ISA_A64)
+// QEMU (AArch64) will jump to the first section when running from a .bin/.hex
+// file after boot. Therefore, place the entrypoint there.
+__attribute__((section(".text.init.enter")))
 #endif
-__attribute__((naked)) extern "C" void _start() {
+__attribute__((naked)) void _start() {
 #if __ARM_ARCH_PROFILE != 'M' && __ARM_ARCH >= 8 && !defined(__ARM_ARCH_ISA_A64)
   // Check if we're in hypervisor mode
   asm("mrs r0, CPSR\n\t"
@@ -109,3 +114,4 @@ __attribute__((naked)) extern "C" void _start() {
   asm("mov sp, %0" : : "r"(&__stack));
   asm("bl %0" : : "X"(__startup));
 }
+} // extern "C"

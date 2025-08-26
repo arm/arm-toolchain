@@ -65,9 +65,11 @@ SECTIONS
 {
         PROVIDE(__stack = ORIGIN(ram) + LENGTH(ram));
 
-        .boot_flash : {
-                KEEP (*(.vectors))
-        } >boot_flash AT>boot_flash :text_boot_flash
+		.boot_flash : {
+				KEEP (*(.text.init.enter))
+				KEEP (*(.vectors))
+				KEEP (*(.init))
+		} >boot_flash AT>boot_flash :text_boot_flash
 
         .text : {
 
