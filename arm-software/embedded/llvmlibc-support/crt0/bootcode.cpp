@@ -46,49 +46,47 @@ int main(int argc, const char **argv);
 extern "C" void __libc_init_array();
 extern "C" void _platform_init();
 
-// Required for exit() on baremetal
-// TODO: This is temporary, remove once implemented upstream
-extern "C" [[gnu::weak]] void __cxa_finalize(void *) {}
-
 extern char __data_source[];
 extern char __data_start[];
 extern char __data_size[];
 extern char __bss_start[];
 extern char __bss_size[];
-extern char __stack __attribute__((weak));
+[[gnu::weak]] extern char __stack;
 
+namespace {
 #ifdef __ARM_FEATURE_PAUTH
 // Disable pointer authentication, as it isn't enabled until misc::setup meaning
 // the PAC at the beginning would do nothing so the AUT at the end would fail.
-__attribute__((target("branch-protection=none")))
+[[gnu::target("branch-protection=none")]]
 #endif
-extern "C" void __startup() {
+void do_start() {
   exceptions::setup();
   memory::setup();
   misc::setup();
 
   // Perform the equivalent of scatterloading
-  memcpy(__data_start, __data_source, (uintptr_t)__data_size);
-  memset(__bss_start, '\0', (uintptr_t)__bss_size);
+  memcpy(__data_start, __data_source, reinterpret_cast<size_t>(__data_size));
+  memset(__bss_start, '\0', reinterpret_cast<size_t>(__bss_size));
 
   memory::enable_cache();
   __libc_init_array();
   _platform_init();
   exit(main(0, 0));
 }
+} // namespace
 
 extern "C" {
 // The entry point sets sp and branches to the main startup function.
 #ifdef __ARM_ARCH_ISA_ARM
 // If the target supports the A32 instruction set then the entry point has
 // to use it.
-__attribute__((target("arm")))
+[[gnu::target("arm")]]
 #elif defined(__ARM_ARCH_ISA_A64)
 // QEMU (AArch64) will jump to the first section when running from a .bin/.hex
 // file after boot. Therefore, place the entrypoint there.
-__attribute__((section(".text.init.enter")))
+[[gnu::section(".text.init.enter")]]
 #endif
-__attribute__((naked)) void _start() {
+[[gnu::naked]] void _start() {
 #if __ARM_ARCH_PROFILE != 'M' && __ARM_ARCH >= 8 && !defined(__ARM_ARCH_ISA_A64)
   // Check if we're in hypervisor mode
   asm("mrs r0, CPSR\n\t"
@@ -112,6 +110,6 @@ __attribute__((naked)) void _start() {
 
   // Configured through linker script defined symbols
   asm("mov sp, %0" : : "r"(&__stack));
-  asm("bl %0" : : "X"(__startup));
+  asm("bl %0" : : "X"(::do_start));
 }
 } // extern "C"

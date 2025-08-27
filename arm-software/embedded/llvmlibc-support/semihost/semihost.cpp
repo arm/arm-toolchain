@@ -14,10 +14,10 @@
 
 namespace {
 
-void stdio_open(struct __llvm_libc_stdio_cookie *cookie, int mode) {
+void stdio_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
   size_t args[3];
   args[0] = reinterpret_cast<size_t>(":tt");
-  args[1] = static_cast<size_t>(mode);
+  args[1] = mode;
   args[2] = static_cast<size_t>(3); /* name length */
   cookie->handle = semihosting_call(SYS_OPEN, args);
 }

@@ -19,18 +19,18 @@ namespace sysreg {
 // methods.
 template <class C> class SysRegBase {
 public:
-  __attribute__((always_inline)) operator unsigned long() { return C::read(); }
+  [[clang::always_inline]] operator unsigned long() { return C::read(); }
 
   template <int start, int end> class Field {
   public:
-    __attribute__((always_inline)) operator unsigned long() {
+    [[clang::always_inline]] operator unsigned long() {
       unsigned long reg = C::read();
       reg >>= start;
       reg &= (1UL << (end - start + 1)) - 1;
       return reg;
     }
 
-    __attribute__((always_inline)) Field &operator=(unsigned long val) {
+    [[clang::always_inline]] Field &operator=(unsigned long val) {
       unsigned long reg = C::read();
       unsigned long mask = ((1UL << (end - start + 1)) - 1) << start;
       reg &= ~mask;
@@ -42,7 +42,7 @@ public:
 
   template <int idx> class Bit : public Field<idx, idx> {
   public:
-    __attribute__((always_inline)) Bit &operator=(unsigned long val) {
+    [[clang::always_inline]] Bit &operator=(unsigned long val) {
       Field<idx, idx>::operator=(val);
       return *this;
     }
