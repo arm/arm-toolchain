@@ -6,7 +6,6 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 # A bash script to run the LLVM-libc tests from the Arm Toolchain for Embedded.
-
 # This script should be deleted when the generic test.sh script works
 
 set -ex
@@ -27,8 +26,6 @@ cd "${REPO_ROOT}"/build
 export LIT_OPTS="--ignore-fail --xunit-xml-output=results.xml"
 ninja check-all
 
-# The llvm-toolchain targets already set --xunit-xml-output so
-# only the --ignore-fail option is needed.
-# The picolibc tests do not use lit so do not support this option.
-export LIT_OPTS="--ignore-fail"
-ninja check-llvm-toolchain
+# The GTest framework in LLVM-libc does not yet have integration with lit.
+# However, we run all tests anyways (don't stop on failure with the flag -k 0)
+ninja check-llvmlibc -k 0
