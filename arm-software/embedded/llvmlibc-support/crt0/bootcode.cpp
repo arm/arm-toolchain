@@ -46,12 +46,12 @@ int main(int argc, const char **argv);
 extern "C" void __libc_init_array();
 extern "C" void _platform_init();
 
-extern uintptr_t __data_source[];
-extern uintptr_t __data_start[];
-extern uintptr_t __data_size[];
-extern uintptr_t __bss_start[];
-extern uintptr_t __bss_size[];
-[[gnu::weak]] extern uintptr_t __stack;
+extern char __data_source[];
+extern char __data_start[];
+extern char __data_size[];
+extern char __bss_start[];
+extern char __bss_size[];
+[[gnu::weak]] extern char __stack;
 
 namespace {
 #ifdef __ARM_FEATURE_PAUTH
@@ -65,8 +65,8 @@ void do_start() {
   misc::setup();
 
   // Perform the equivalent of scatterloading
-  memcpy(__data_start, __data_source, reinterpret_cast<uintptr_t>(__data_size));
-  memset(__bss_start, '\0', reinterpret_cast<uintptr_t>(__bss_size));
+  memcpy(__data_start, __data_source, reinterpret_cast<size_t>(__data_size));
+  memset(__bss_start, '\0', reinterpret_cast<size_t>(__bss_size));
 
   memory::enable_cache();
   __libc_init_array();

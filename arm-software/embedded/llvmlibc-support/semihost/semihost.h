@@ -53,6 +53,7 @@ static long semihosting_call(long val, const void *ptr) {
   return v;
 }
 
+namespace {
 inline constexpr uint32_t SYS_CLOCK = 0x10;
 inline constexpr uint32_t SYS_CLOSE = 0x02;
 inline constexpr uint32_t SYS_ELAPSED = 0x30;
@@ -103,6 +104,7 @@ inline constexpr uint32_t OPENMODE_W = 4;
 inline constexpr uint32_t OPENMODE_A = 8;
 inline constexpr uint32_t OPENMODE_B = 1;
 inline constexpr uint32_t OPENMODE_PLUS = 2;
+} // namespace
 
 struct __llvm_libc_stdio_cookie { int handle; };
 
