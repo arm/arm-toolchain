@@ -85,9 +85,8 @@ void setup() {
   // Put the page table in the .init section so it doesn't later get
   // zero-initialized.
   static_assert(sizeof(unsigned long) == PAGE_TABLE_ENTRY_SIZE);
-  [[gnu::section(".init"),
-    gnu::aligned(PAGE_TABLE_ALIGNMENT)]] static volatile unsigned long
-      pagetable[PAGE_TABLE_ENTRY_COUNT];
+  [[gnu::section(".init"), gnu::aligned(PAGE_TABLE_ALIGNMENT)]]
+  static volatile unsigned long pagetable[PAGE_TABLE_ENTRY_COUNT];
   setup_mmu(pagetable, get_stackheap_start(), get_stackheap_end());
 #endif
 
