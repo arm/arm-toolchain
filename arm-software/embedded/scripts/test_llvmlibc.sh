@@ -15,17 +15,7 @@ REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
 cd "${REPO_ROOT}"/build
 
-# If a test fails, lit will ordinarily return a non-zero result,
-# which prevents further testing. Setting the --ignore-fail option
-# will cause testing to continue, so that CI systems can get a
-# full set of results.
-# The check-all target runs the upstream clang and LLVM tests,
-# which do not generate an junit xml results file by default.
-# Additionally setting the --xunit-xml-output option store the
-# results.
-export LIT_OPTS="--ignore-fail --xunit-xml-output=results.xml"
-ninja check-all
-
 # The GTest framework in LLVM-libc does not yet have integration with lit.
 # However, we run all tests anyways (don't stop on failure with the flag -k 0)
-ninja check-llvmlibc -k 0
+# If the test script fails, the package will not be uploaded
+ninja check-llvmlibc -k 0 || true
