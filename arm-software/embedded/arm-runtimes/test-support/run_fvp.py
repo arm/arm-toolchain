@@ -133,12 +133,14 @@ def run_fvp(
     command.extend(["--parameter", f"{model.cmdline_param}={shlex.join(arguments)}"])
     command.extend(["--plugin", path.join(fvp_install_dir, model.crypto_plugin)])
     if tarmac_file is not None:
-        command.extend([
-            "--plugin",
-            path.join(fvp_install_dir, model.tarmac_plugin),
-            "--parameter",
-            "TRACE.TarmacTrace.trace-file=" + tarmac_file,
-        ])
+        command.extend(
+            [
+                "--plugin",
+                path.join(fvp_install_dir, model.tarmac_plugin),
+                "--parameter",
+                "TRACE.TarmacTrace.trace-file=" + tarmac_file,
+            ]
+        )
 
     if verbose:
         print("running: {}".format(shlex.join(command)))

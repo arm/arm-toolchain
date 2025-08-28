@@ -135,9 +135,7 @@ def get_target_features(args, fpu):
         "-###",  # print all the command lines rather than actually doing it
     ]
 
-    output = subprocess.check_output(
-        command, stderr=subprocess.STDOUT
-    ).decode()
+    output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode()
 
     # Find the clang -cc1 command, and parse it into an argv list.
     for line in output.splitlines():
@@ -184,8 +182,7 @@ def generate_fpus(args):
     # Collect all the data: make the list of FPU names, and the set of
     # features that LLVM maps each one to.
     fpu_features = {
-        fpuname: get_target_features(args, fpuname)
-        for fpuname in get_fpu_list(args)
+        fpuname: get_target_features(args, fpuname) for fpuname in get_fpu_list(args)
     }
 
     # Now, for each FPU, find all the FPUs that are subsets of it
@@ -223,9 +220,7 @@ def get_extension_list(clang, triple):
         "--print-supported-extensions",
     ]
 
-    output = subprocess.check_output(
-        command, stderr=subprocess.STDOUT
-    ).decode()
+    output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode()
 
     for line in output.split("\n"):
         parts = line.split(maxsplit=1)
@@ -242,12 +237,16 @@ def generate_extensions(args):
     # Combine the aarch64 and aarch32 lists without duplication.
     # Casting to sets and merging would be simpler, but creates
     # non-deterministic output.
-    all_features.extend(feat for feat in list(aarch32_features) if feat not in all_features)
+    all_features.extend(
+        feat for feat in list(aarch32_features) if feat not in all_features
+    )
 
     print("# Expand -march=...+[no]feature... into individual options we can match")
     print("# on. We use 'armvX' to represent a feature applied to any architecture, so")
     print("# that these don't need to be repeated for every version. Libraries which")
-    print("# require a particular architecture version or profile should also match on the")
+    print(
+        "# require a particular architecture version or profile should also match on the"
+    )
     print("# original option to check that.")
 
     for feature in all_features:
@@ -281,13 +280,14 @@ class Version:
             for compat_minor in range(self.minor + 5 + 1):
                 yield Version(self.major - 1, compat_minor, self.profile)
 
+
 def generate_versions(args):
     """Generate match blocks which allow selecting a library build for a
     lower-version architecture, for the v8.x-A and v9.x-A minor versions."""
     versions = (
-        [Version(8, minor, "a") for minor in range(10)] +
-        [Version(9, minor, "a") for minor in range(6)] +
-        [Version(8, minor, "r") for minor in range(1)]
+        [Version(8, minor, "a") for minor in range(10)]
+        + [Version(9, minor, "a") for minor in range(6)]
+        + [Version(8, minor, "r") for minor in range(1)]
     )
 
     for match_ver in versions:
@@ -298,15 +298,12 @@ def generate_versions(args):
     print()
 
 
-
 def main():
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument(
-        "--clang", required=True, help="Path to clang executable."
-    )
+    parser.add_argument("--clang", required=True, help="Path to clang executable.")
     parser.add_argument(
         "--llvm-source",
         required=True,
@@ -317,6 +314,7 @@ def main():
     generate_fpus(args)
     generate_extensions(args)
     generate_versions(args)
+
 
 if __name__ == "__main__":
     main()

@@ -48,14 +48,16 @@ class Git:
     def run_cmd(self, args: list[str], check: bool = True) -> str:
         git_cmd = ["git", "-C", str(self.repo_path)] + args
         logger.debug("Running git command: %s", git_cmd)
-        git_process = subprocess.run(git_cmd, check=check, capture_output=True, text=True)
+        git_process = subprocess.run(
+            git_cmd, check=check, capture_output=True, text=True
+        )
         logger.debug("Stdout:\n%s\nStderr:\n%s", git_process.stdout, git_process.stderr)
         return git_process.stdout
 
 
 def is_merge_in_progress(git_repo: Git) -> bool:
     # The `.git/MERGE_HEAD` file only exists when a merge operation is in progress.
-    merge_head_path = Path(git_repo.repo_path) / '.git' / 'MERGE_HEAD'
+    merge_head_path = Path(git_repo.repo_path) / ".git" / "MERGE_HEAD"
     return merge_head_path.exists()
 
 
@@ -67,7 +69,9 @@ def restore_changes_to_ignored_files(git_repo: Git, ignore_list: list[str]) -> N
     git_repo.run_cmd(["restore", "--ours", "--worktree"] + ignore_list)
     # Next, any files still unmerged are the ones deleted on the destination branch.
     # Make sure they stay deleted.
-    ls_files_output = git_repo.run_cmd(["diff", "--name-only", "--diff-filter=U", "--"] + ignore_list)
+    ls_files_output = git_repo.run_cmd(
+        ["diff", "--name-only", "--diff-filter=U", "--"] + ignore_list
+    )
     deleted_by_us = ls_files_output.splitlines()
     if deleted_by_us:
         git_repo.run_cmd(["rm"] + deleted_by_us)
@@ -82,16 +86,27 @@ def has_unresolved_conflicts(git_repo: Git) -> bool:
 
 
 def prefix_current_commit_message(git_repo: Git) -> None:
-    log_output = git_repo.run_cmd(["log", "HEAD", "--max-count=1", "--pretty=format:%B"])
+    log_output = git_repo.run_cmd(
+        ["log", "HEAD", "--max-count=1", "--pretty=format:%B"]
+    )
     commit_msg = f"Automerge: {log_output}"
     git_repo.run_cmd(["commit", "--amend", "--message=" + commit_msg])
 
 
-def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths: list[str], dry_run: bool, verbose: bool) -> None:
+def merge_commit(
+    git_repo: Git,
+    to_branch: str,
+    commit_hash: str,
+    ignored_paths: list[str],
+    dry_run: bool,
+    verbose: bool,
+) -> None:
     logger.info("Merging commit %s into %s", commit_hash, to_branch)
     git_repo.run_cmd(["switch", to_branch])
     if verbose:
-        current_head = git_repo.run_cmd(["log", "--no-walk", "HEAD", "--pretty=reference"])
+        current_head = git_repo.run_cmd(
+            ["log", "--no-walk", "HEAD", "--pretty=reference"]
+        )
         logger.debug("Current HEAD of %s is %s", to_branch, current_head)
     # `git merge` will return a non-zero exit status if there's a conflict, but
     # the conflict might be resolved by applying our ignore list. We work around
@@ -108,7 +123,9 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths:
     git_repo.run_cmd(["commit", "--reuse-message", commit_hash])
     prefix_current_commit_message(git_repo)
     if verbose:
-        merge_reference = git_repo.run_cmd(["log", "--no-walk", "HEAD", "--pretty=reference"])
+        merge_reference = git_repo.run_cmd(
+            ["log", "--no-walk", "HEAD", "--pretty=reference"]
+        )
         logger.debug("Merge commit finalized: %s", merge_reference)
     if dry_run:
         logger.info("Dry run. Skipping push into remote repository.")
@@ -119,17 +136,33 @@ def merge_commit(git_repo: Git, to_branch: str, commit_hash: str, ignored_paths:
 
 def create_pull_request(git_repo: Git, to_branch: str) -> None:
     logger.info("Creating Pull Request")
-    log_output = git_repo.run_cmd(["log", "HEAD", "--max-count=1", "--pretty=format:%s"])
+    log_output = git_repo.run_cmd(
+        ["log", "HEAD", "--max-count=1", "--pretty=format:%s"]
+    )
     pr_title = f"Automerge conflict: {log_output}"
     subprocess.run(
-        ["gh", "pr", "create", "--head", AUTOMERGE_BRANCH, "--base", to_branch, "--fill", "--title", pr_title,
-         "--label", MERGE_CONFLICT_LABEL],
+        [
+            "gh",
+            "pr",
+            "create",
+            "--head",
+            AUTOMERGE_BRANCH,
+            "--base",
+            to_branch,
+            "--fill",
+            "--title",
+            pr_title,
+            "--label",
+            MERGE_CONFLICT_LABEL,
+        ],
         cwd=git_repo.get_repo_path(),
         check=True,
     )
 
 
-def process_conflict(git_repo: Git, commit_hash: str, to_branch: str, dry_run: bool) -> None:
+def process_conflict(
+    git_repo: Git, commit_hash: str, to_branch: str, dry_run: bool
+) -> None:
     logger.info("Processing conflict for %s", commit_hash)
     git_repo.run_cmd(["switch", "--force-create", AUTOMERGE_BRANCH, commit_hash])
     if dry_run:
@@ -141,10 +174,14 @@ def process_conflict(git_repo: Git, commit_hash: str, to_branch: str, dry_run: b
 
 
 def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> list[str]:
-    logger.info("Calculating list of commits to be merged from %s to %s", from_branch, to_branch)
+    logger.info(
+        "Calculating list of commits to be merged from %s to %s", from_branch, to_branch
+    )
     merge_base_output = git_repo.run_cmd(["merge-base", from_branch, to_branch])
     merge_base_commit = merge_base_output.strip()
-    log_output = git_repo.run_cmd(["log", f"{merge_base_commit}..{from_branch}", "--pretty=format:%H"])
+    log_output = git_repo.run_cmd(
+        ["log", f"{merge_base_commit}..{from_branch}", "--pretty=format:%H"]
+    )
     commit_list = log_output.strip()
     if not commit_list:
         logger.info("No commits to be merged")
@@ -232,9 +269,18 @@ def main():
         with open(MERGE_IGNORE_PATHSPEC_FILE) as ignored_paths_file:
             ignored_paths = ignored_paths_file.read().splitlines()
 
-        merge_commits = get_merge_commit_list(git_repo, args.from_branch, args.to_branch)
+        merge_commits = get_merge_commit_list(
+            git_repo, args.from_branch, args.to_branch
+        )
         for commit_hash in merge_commits:
-            merge_commit(git_repo, args.to_branch, commit_hash, ignored_paths, args.dry_run, args.verbose)
+            merge_commit(
+                git_repo,
+                args.to_branch,
+                commit_hash,
+                ignored_paths,
+                args.dry_run,
+                args.verbose,
+            )
     except MergeConflictError as conflict:
         process_conflict(
             git_repo,

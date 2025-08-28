@@ -50,5 +50,6 @@ def main():
     tree.write(xml_file)
     print(f"Results written to {xml_file}")
 
+
 if __name__ == "__main__":
     main()
