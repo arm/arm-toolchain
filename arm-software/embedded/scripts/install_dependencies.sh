@@ -18,6 +18,6 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     python3-setuptools \
     qemu-system-arm=1:6.2+dfsg-2ubuntu6.26
 
-# Upgrade pip and install meson with a pinned version
+# Upgrade pip and install dependencies
 python3 -m pip install --upgrade pip
-python3 -m pip install meson==1.2.3
+python3 -m pip install meson==1.2.3 ruff==0.8.6
