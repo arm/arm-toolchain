@@ -3,10 +3,6 @@
 # branch of the arm/arm-toolchain repository.
 name: Automerge
 on:
-  workflow_run:
-    workflows: [Sync from Upstream LLVM]
-    types:
-      - completed
   workflow_dispatch:
 jobs:
   Run-Automerge:
@@ -17,8 +13,8 @@ jobs:
     strategy:
       matrix:
         branches:
-          - from_branch: main
-            to_branch: arm-software
+          - from_branch: release/21.x
+            to_branch: release/arm-software/21.x
     steps:
       - name: Configure Access Token
         uses: actions/create-github-app-token@v1
