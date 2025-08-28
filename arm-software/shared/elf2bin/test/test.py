@@ -96,9 +96,7 @@ class Base(unittest.TestCase):
         cmd = [elf2bin_path] + list(args)
         with open("commands.txt", "a") as fh:
             print(" ".join(map(shlex.quote, cmd)), file=fh)
-        p = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate(b"")
         p.wait()
         if not expect_error:
@@ -390,9 +388,7 @@ class bincombined(Base):
                         ],
                     )
 
-                    self.elf2bin(
-                        "--bincombined", "-o", "output.bin", "input.elf"
-                    )
+                    self.elf2bin("--bincombined", "-o", "output.bin", "input.elf")
                     with open("output.bin", "rb") as fh:
                         bindata = fh.read()
                     self.assertEqual(
@@ -517,10 +513,7 @@ class bincombined(Base):
                 bindata = fh.read()
             self.assertEqual(
                 bindata,
-                b"\0" * 0x34
-                + segment1_contents
-                + b"\0" * 0x20
-                + segment2_contents,
+                b"\0" * 0x34 + segment1_contents + b"\0" * 0x20 + segment2_contents,
             )
 
             # Should be OK to restate the base address we were going
@@ -571,24 +564,20 @@ class bincombined(Base):
                         [
                             # A segment that is definitely not empty
                             SegmentDesc(1, 0x1000, segment1_contents),
-
                             # A segment that has no initialized contents but
                             # does have ZI contents, so it's normally empty,
                             # but stops counting as empty if you say
                             # --zi
-                            SegmentDesc(1, 0x1100, b'', pad=0x80),
-
+                            SegmentDesc(1, 0x1100, b"", pad=0x80),
                             # A completely empty segment
-                            SegmentDesc(1, 0x1200, b''),
+                            SegmentDesc(1, 0x1200, b""),
                         ],
                     )
 
                     # Without --zi: the first segment is the only non-empty
                     # one, so we expect the output file to contain nothing but
                     # the bytes in segment1_contents.
-                    self.elf2bin(
-                        "--bincombined", "-o", "output.bin", "input.elf"
-                    )
+                    self.elf2bin("--bincombined", "-o", "output.bin", "input.elf")
                     with open("output.bin", "rb") as fh:
                         bindata = fh.read()
                     self.assertEqual(
@@ -604,14 +593,13 @@ class bincombined(Base):
                     # stop there, and don't go on to the third segment, which
                     # is still completely empty.
                     self.elf2bin(
-                        "--bincombined", "-o", "output.bin", "input.elf",
-                        "--zi"
+                        "--bincombined", "-o", "output.bin", "input.elf", "--zi"
                     )
                     with open("output.bin", "rb") as fh:
                         bindata = fh.read()
                     self.assertEqual(
                         bindata,
-                        segment1_contents + b'\0' * (0xF0 + 0x80),
+                        segment1_contents + b"\0" * (0xF0 + 0x80),
                     )
 
 
@@ -678,18 +666,12 @@ class vhx(Base):
                         ],
                     )
 
-                    self.elf2bin(
-                        "--vhxcombined", "-o", "output.hex", "input.elf"
-                    )
+                    self.elf2bin("--vhxcombined", "-o", "output.hex", "input.elf")
                     with open("output.hex") as fh:
                         hexdata = fh.read()
                     self.assertEqual(
                         hexdata,
-                        to_vhx(
-                            segment1_contents
-                            + b"\0" * 0x20
-                            + segment2_contents
-                        ),
+                        to_vhx(segment1_contents + b"\0" * 0x20 + segment2_contents),
                     )
 
 
@@ -728,8 +710,7 @@ class banks(Base):
                             bytes(
                                 b
                                 for i, b in enumerate(input_data)
-                                if (b % mod)
-                                in range(bank * width, (bank + 1) * width)
+                                if (b % mod) in range(bank * width, (bank + 1) * width)
                             ),
                         )
 
@@ -1092,9 +1073,7 @@ class segselect(Base):
                 hexdata = fh.read()
                 self.assertEqual(
                     hexdata,
-                    to_vhx(
-                        segment_contents1 + b"\0" * 0x30 + segment_contents3
-                    ),
+                    to_vhx(segment_contents1 + b"\0" * 0x30 + segment_contents3),
                 )
 
     def testIHex(self):
@@ -1254,9 +1233,7 @@ S70500000000FA
                 ],
             )
 
-            self.elf2bin(
-                "--bincombined", "--zi", "-o", "output.bin", "input.elf"
-            )
+            self.elf2bin("--bincombined", "--zi", "-o", "output.bin", "input.elf")
             with open(f"output.bin", "rb") as fh:
                 bindata = fh.read()
             self.assertEqual(
@@ -1286,9 +1263,7 @@ S70500000000FA
                 ],
             )
 
-            self.elf2bin(
-                "--bincombined", "--zi", "-o", "output.bin", "input.elf"
-            )
+            self.elf2bin("--bincombined", "--zi", "-o", "output.bin", "input.elf")
             with open(f"output.bin", "rb") as fh:
                 bindata = fh.read()
             self.assertEqual(
@@ -1311,11 +1286,7 @@ class vaddr(Base):
                     "input.elf",
                     False,
                     sixtyfour,
-                    [
-                        SegmentDesc(
-                            segtype=1, paddr=0x1234, vaddr=0x5678, data=b"a"
-                        )
-                    ],
+                    [SegmentDesc(segtype=1, paddr=0x1234, vaddr=0x5678, data=b"a")],
                 )
 
                 # Expected Intel Hex output if the segment's physical
@@ -1335,17 +1306,13 @@ class vaddr(Base):
 """
 
                 # Explicitly select --physical
-                self.elf2bin(
-                    "--physical", "--ihex", "-o", "output.hex", "input.elf"
-                )
+                self.elf2bin("--physical", "--ihex", "-o", "output.hex", "input.elf")
                 with open("output.hex") as fh:
                     hexdata = fh.read()
                 self.assertEqual(hexdata, expected_physical)
 
                 # Explicitly select --virtual
-                self.elf2bin(
-                    "--virtual", "--ihex", "-o", "output.hex", "input.elf"
-                )
+                self.elf2bin("--virtual", "--ihex", "-o", "output.hex", "input.elf")
                 with open("output.hex") as fh:
                     hexdata = fh.read()
                 self.assertEqual(hexdata, expected_virtual)

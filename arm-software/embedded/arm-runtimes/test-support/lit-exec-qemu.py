@@ -13,12 +13,8 @@ import sys
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Run a single test using qemu"
-    )
-    parser.add_argument(
-        "--qemu-command", required=True, help="qemu-system-<arch> path"
-    )
+    parser = argparse.ArgumentParser(description="Run a single test using qemu")
+    parser.add_argument("--qemu-command", required=True, help="qemu-system-<arch> path")
     parser.add_argument(
         "--qemu-machine",
         required=True,
