@@ -569,12 +569,27 @@ add_custom_target(
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_version_txt.cmake
     BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
 )
-install(
-    FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
+if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^llvmlibc")
+    install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
+    DESTINATION .
+    RENAME VERSION_llvmlibc.txt
+    COMPONENT llvm-toolchain-third-party-licenses
+    )
+elseif(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
+    install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
+    DESTINATION .
+    RENAME VERSION_newlib.txt
+    COMPONENT llvm-toolchain-third-party-licenses
+    )
+else()
+    install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
     DESTINATION .
     COMPONENT llvm-toolchain-third-party-licenses
-)
+    )
+endif()
 
 
 # Groups all the targets that comprise the toolchain.
