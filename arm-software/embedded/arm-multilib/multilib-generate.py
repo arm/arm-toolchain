@@ -41,8 +41,10 @@ which can be matched separately if a library requires them.
 import argparse
 import json
 import os
+import re
 import shlex
 import subprocess
+import unittest
 from dataclasses import dataclass
 
 
@@ -219,15 +221,121 @@ def get_extension_list(clang, triple):
         "--target=" + triple,
         "--print-supported-extensions",
     ]
-
     output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode()
+    return get_extension_list_from_clang_output(output, command)
 
-    for line in output.split("\n"):
-        parts = line.split(maxsplit=1)
-        # The feature lines will look like this, ignore everything else:
-        #   aes    FEAT_AES, FEAT_PMULL    Enable AES support
-        if len(parts) == 2 and parts[1].startswith("FEAT_"):
-            yield parts[0]
+
+def get_extension_list_from_clang_output(output, command):
+    it = iter(output.splitlines())
+
+    # Read and discard a version dump, terminated by the expected
+    # title line of the table.
+    for line in it:
+        if line.startswith("All available -march extensions for"):
+            break
+    else:
+        assert False, (
+            "Did not find expected header line in output of command:\n{}\n"
+            "Has clang --print-supported-extensions changed its output format?".format(
+                shlex.join(command)
+            )
+        )
+
+    # Now expect a blank line, followed by a line containing the
+    # table's column headings.
+    assert next(it) == "", (
+        "Did not find blank line after header in output of command:\n{}\n"
+        "Has clang --print-supported-extensions changed its output format?".format(
+            shlex.join(command)
+        )
+    )
+
+    # Read the table heading line and remember what column position
+    # each heading starts at.
+    headers = next(it)
+    headers_split = re.split(r"(  +)", headers)  # split at 2 or more spaces
+    column = 0
+    header_start = {}
+    header_end = {}
+    last_header_name = None
+    for substring in headers_split:
+        if substring.rstrip(" ") != "":
+            assert substring in {
+                # List of header names we recognize, so that if the
+                # spelling changes in some trivial way we find out
+                # rather than silently beginning to ignore a header
+                "Name",
+                "Architecture Feature(s)",
+                "Description",
+            }, (
+                "Unrecognized table heading {!r} in output of command:\n{}\n"
+                "Has clang --print-supported-extensions changed its output format?".format(
+                    substring, shlex.join(command)
+                )
+            )
+
+            if last_header_name is not None:
+                header_end[last_header_name] = column
+            header_start[substring] = column
+            last_header_name = substring
+        column += len(substring)
+
+    # Now read the table rows.
+    for line in it:
+        row = {}
+        for header_name, startcol in header_start.items():
+            endcol = header_end.get(header_name)
+            text = line[startcol:] if endcol is None else line[startcol:endcol]
+            row[header_name] = text.rstrip(" ")
+
+        # Mostly, we just return every extension name. An exception is
+        # that in AArch64, some extensions are shorthands for
+        # combinations of others. We can tell this because their
+        # 'Architecture Feature(s)' column is empty.
+        if (
+            "Architecture Feature(s)" in row
+            and row["Architecture Feature(s)"] == ""
+        ):
+            continue
+
+        yield row["Name"]
+
+
+class TestExtensionList(unittest.TestCase):
+    def testTwoColumn(self):
+        output = """\
+clang version information
+which should be ignored
+All available -march extensions for ARM
+
+    Name                Description
+    crc                 Enable support for CRC instructions
+    crypto              Enable support for Cryptography extensions
+    sha2                Enable SHA1 and SHA256 support
+"""
+        self.assertEqual(
+            list(get_extension_list_from_clang_output(output, ["dummy"])),
+            ["crc", "crypto", "sha2"],
+        )
+
+    def testThreeColumn(self):
+        output = """\
+clang version information
+which should be ignored
+All available -march extensions for AArch64
+
+    Name                Architecture Feature(s)                                Description
+    aes                 FEAT_AES, FEAT_PMULL                                   Enable AES support
+    sve2                FEAT_SVE2                                              Enable Scalable Vector Extension 2 (SVE2) instructions
+    sve2-aes                                                                   Shorthand for +sve2+sve-aes
+    tme                 FEAT_TME                                               Enable Transactional Memory Extension
+"""
+        # Expect sve2-aes to be ignored, because it has no associated
+        # architecture features
+        self.assertEqual(
+            list(get_extension_list_from_clang_output(output, ["dummy"])),
+            ["aes", "sve2", "tme"],
+        )
 
 
 def generate_extensions(args):
