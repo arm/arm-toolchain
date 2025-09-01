@@ -40,6 +40,6 @@ if exist hello.img del /q hello.img
 @exit /B 1
 
 :build_fn
-%BIN_PATH%\clang.exe --config=llvmlibc.cfg --target=aarch64-none-elf -nostartfiles -lcrt0-semihost -lsemihost -g -T ..\..\ldscripts\llvmlibc-raspi3b.ld -o hello.elf hello.c
+%BIN_PATH%\clang.exe --config=llvmlibc.cfg --target=aarch64-none-elf -nostartfiles -lcrt0-semihost -lsemihost -lm -g -T ..\..\ldscripts\llvmlibc-raspi3b.ld -o hello.elf hello.c
 %BIN_PATH%\llvm-objcopy.exe -O binary hello.elf hello.img
 @exit /B
