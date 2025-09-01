@@ -292,10 +292,7 @@ def get_extension_list_from_clang_output(output, command):
         # that in AArch64, some extensions are shorthands for
         # combinations of others. We can tell this because their
         # 'Architecture Feature(s)' column is empty.
-        if (
-            "Architecture Feature(s)" in row
-            and row["Architecture Feature(s)"] == ""
-        ):
+        if "Architecture Feature(s)" in row and row["Architecture Feature(s)"] == "":
             continue
 
         yield row["Name"]
