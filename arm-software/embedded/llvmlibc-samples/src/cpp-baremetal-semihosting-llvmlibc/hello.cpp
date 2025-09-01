@@ -4,7 +4,8 @@
 // See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-#include <cstdio> // iostream is not supported yet
+#include <cstdio>
+#include <iostream>
 #include <vector>
 
 int test_exceptions(int i)
@@ -30,7 +31,7 @@ int main(void) {
   try {
     int result = test_exceptions(0);
   } catch (...) {
-    std::puts("Exception caught.");
+    std::cout << "Exception caught." << std::endl;
   }
   return 0;
 }
