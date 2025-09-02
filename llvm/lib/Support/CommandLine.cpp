@@ -2673,6 +2673,7 @@ static void initCommonOptions() {
   initSignalsOptions();
   initStatisticOptions();
   initTimerOptions();
+  initTypeSizeOptions();
   initWithColorOptions();
   initDebugOptions();
   initRandomSeedOptions();
