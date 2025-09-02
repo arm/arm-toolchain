@@ -22,7 +22,7 @@ BUILD_DIR=${REPO_ROOT}/build_llvmlibc_overlay
 mkdir -p "${BUILD_DIR}"
 cd "${BUILD_DIR}"
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc -DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on
+cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc -DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on -DENABLE_PARALLEL_LIB_CONFIG=OFF
 ninja package-llvm-toolchain
 
 # The package-llvm-toolchain target will produce a .tar.xz package, but we also
