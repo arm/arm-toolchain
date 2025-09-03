@@ -64,7 +64,7 @@ them.
 ## Customizing
 
 To build additional library variants, add the JSON configuration under
-[arm-miltilib/json/variants](../arm-multilib/json/variants/) and register it in
+[arm-multilib/json/variants](../arm-multilib/json/variants/) and register it in
 [multilib.json](../arm-multilib/json/multilib.json).
 
 To build additional LLVM tools, edit the `CMakeLists.txt` by adding required
@@ -196,7 +196,7 @@ configured and built directly if you provide a path to a LLVM build or install.
 The default CMake arguments to build a particular variant are stored in a JSON
 format in the `arm-multilib/json/variants` folder, which can be loaded at
 configuration with the `-DVARIANT_JSON` setting. Any additional options
-provided on the command line will override values from he JSON. `-DC_LIBRARY`
+provided on the command line will override values from the JSON. `-DC_LIBRARY`
 will be required to set which library to build, and `-DLLVM_BINARY_DIR` should
 point to the top-level directory of a build or install of LLVM.
 
