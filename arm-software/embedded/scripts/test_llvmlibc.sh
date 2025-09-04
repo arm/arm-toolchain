@@ -13,7 +13,7 @@ set -ex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
-cd "${REPO_ROOT}"/build
+cd "${REPO_ROOT}"/build_llvmlibc_overlay
 
 # The GTest framework in LLVM-libc does not yet have integration with lit.
 # However, we run all tests anyways (don't stop on failure with the flag -k 0)
