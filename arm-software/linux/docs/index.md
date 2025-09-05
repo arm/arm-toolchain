@@ -13,5 +13,6 @@ platforms.
    Installation
    GettingStarted
    UsingArmPL
+   UsingBOLT
    PortingFromACfL
 ```
