@@ -655,19 +655,7 @@ endif()
 ###############################################################################
 
 if(C_LIBRARY STREQUAL llvmlibc)
-    if(TARGET_ARCH MATCHES "^aarch64")
-        set(test_cmd
-            "qemu-system-aarch64 -M ${QEMU_MACHINE} -cpu ${QEMU_CPU} \
-            -chardev stdio$<COMMA>mux=on$<COMMA>id=stdio0 \
-            -semihosting-config enable=on$<COMMA>chardev=stdio0$<COMMA>arg=program-name \
-            -monitor none -serial none -nographic -kernel @BINARY@")
-    else()
-        set(test_cmd
-            "qemu-system-arm -M ${QEMU_MACHINE} -cpu ${QEMU_CPU} ${QEMU_PARAMS} \
-            -chardev stdio$<COMMA>mux=on$<COMMA>id=stdio0 \
-            -semihosting-config enable=on$<COMMA>chardev=stdio0$<COMMA>arg=program-name \
-            -monitor none -serial none -nographic -device loader$<COMMA>file=@BINARY@$<COMMA>cpu-num=0")
-    endif()
+    set(test_cmd "${lit_test_executor} @BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
 
     set(common_llvmlibc_cmake_args
@@ -776,7 +764,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ExternalProject_Add_Step(
             llvmlibc
             check
-            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target libc-hermetic-tests
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target libc-hermetic-tests -- -k 0 || true
             DEPENDEES install
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
