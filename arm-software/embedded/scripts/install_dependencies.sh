@@ -17,7 +17,7 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     python3-pip \
     python3-setuptools \
     qemu-system-arm=1:6.2+dfsg-2ubuntu6.26 \
-    ipxe-qemu
+    ipxe-qemu=1.21.1+git-20220113.fbbdc3926-0ubuntu1
 
 # Upgrade pip and install dependencies
 python3 -m pip install --upgrade pip
