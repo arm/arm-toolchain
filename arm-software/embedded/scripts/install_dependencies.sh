@@ -16,7 +16,8 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     ninja-build=1.10.1-1 \
     python3-pip \
     python3-setuptools \
-    qemu-system-arm=1:6.2+dfsg-2ubuntu6.26
+    qemu-system-arm=1:6.2+dfsg-2ubuntu6.26 \
+    ipxe-qemu
 
 # Upgrade pip and install dependencies
 python3 -m pip install --upgrade pip
