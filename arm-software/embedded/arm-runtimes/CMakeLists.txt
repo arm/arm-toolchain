@@ -211,7 +211,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
 			file(APPEND "${TEST_EXECUTION_INFO}" "  \"COMPILE_FLAGS\": \"${variant_multilib_flags}\",\n")
 
 			# Write Linker flags
-			file(APPEND "${TEST_EXECUTION_INFO}" "  \"LINKER_FLAGS\": \"${variant_multilib_flags}\",\n")
+			file(APPEND "${TEST_EXECUTION_INFO}" "  \"LINKER_FLAGS\": \"${LINKER_FLAGS}\",\n")
 
 			# Write execution flags
 			file(APPEND "${TEST_EXECUTION_INFO}" "  \"EXECUTION_FLAGS\": \"${EXECUTION_FLAGS}\"\n")
