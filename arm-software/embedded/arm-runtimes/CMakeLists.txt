@@ -146,8 +146,6 @@ else()
     set(cpu_family arm)
 endif()
 
-
-
 # Read the JSON file to load a multilib configuration.
 set(MULTILIB_JSON "../arm-multilib/json/multilib.json")
 file(READ ${MULTILIB_JSON} multilib_json_str)
@@ -224,8 +222,6 @@ foreach(lib_idx RANGE ${lib_count_dec})
         endif()
     endif()
 endforeach()
-
-
 
 # Create a single target for all testing. If no testing is enabled, this
 # will simply do nothing.
