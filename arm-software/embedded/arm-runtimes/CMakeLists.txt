@@ -86,9 +86,10 @@ set(STACK_SIZE ${STACK_SIZE_def} CACHE STRING "")
 set(ENABLE_EXCEPTIONS ${ENABLE_EXCEPTIONS_def} CACHE BOOL "Enable C++ exceptions.")
 set(ENABLE_RTTI ${ENABLE_RTTI_def} CACHE BOOL "Enable C++ exceptions.")
 
-set(SUPPORTED_LIBRARY_BUILD_TYPES minsizerelease release)
+set(SUPPORTED_LIBRARY_BUILD_TYPES minsizerelease release releasewithdebuginfo)
 if(NOT LIBRARY_BUILD_TYPE_def IN_LIST SUPPORTED_LIBRARY_BUILD_TYPES)
-    message(FATAL_ERROR "Unsupported LIBRARY_BUILD_TYPE value. Supported values are: minsizerelease, release.")
+    string(REPLACE ";" ", " SUPPORTED_LIBRARY_BUILD_TYPES_STR "${SUPPORTED_LIBRARY_BUILD_TYPES}")
+    message(FATAL_ERROR "Unsupported LIBRARY_BUILD_TYPE value. Supported values are: ${SUPPORTED_LIBRARY_BUILD_TYPES_STR}")
 endif()
 set(LIBRARY_BUILD_TYPE ${LIBRARY_BUILD_TYPE_def} CACHE STRING "Build type to use in library builds.")
 set_property(CACHE LIBRARY_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_LIBRARY_BUILD_TYPES})
@@ -145,56 +146,86 @@ else()
     set(cpu_family arm)
 endif()
 
-# Write test execution information.
-# This file does not become part of binaries package, and is available only 
-# during config stage.
-set(TEST_EXECUTION_INFO "${CMAKE_CURRENT_BINARY_DIR}/test_execution_info.json")
-file(WRITE "${TEST_EXECUTION_INFO}" "{\n")
 
-# Build EXECUTION_FLAGS conditionally
-if("${TEST_EXECUTOR}" STREQUAL "fvp")
-    string(REPLACE " " ";" fvp_config_list ${FVP_CONFIG})
-    set (FVP_CONFIG_TEMP "")
-    foreach(cfg ${fvp_config_list})
-        string(APPEND FVP_CONFIG_TEMP " --fvp_config ${cfg}")
-    endforeach()
 
-    get_filename_component(FVP_INSTALL_ABS_PATH "${FVP_INSTALL_DIR}" REALPATH)
-    get_filename_component(FVP_CONFIG_ABS_PATH "${FVP_CONFIG_DIR}" REALPATH)
+# Read the JSON file to load a multilib configuration.
+set(MULTILIB_JSON "../arm-multilib/json/multilib.json")
+file(READ ${MULTILIB_JSON} multilib_json_str)
+string(JSON multilib_defs GET ${multilib_json_str} "libs")
+string(JSON lib_count LENGTH ${multilib_defs})
+math(EXPR lib_count_dec "${lib_count} - 1")
+message(STATUS "lib_count_dec: ${lib_count_dec}")
+foreach(lib_idx RANGE ${lib_count_dec})
+    string(JSON lib_def GET ${multilib_defs} ${lib_idx})
+    string(FIND "${lib_def}" "error" index) 
+    if(index EQUAL -1)
+        string(JSON multilib_variant GET ${lib_def} "variant")
+        if(${VARIANT} STREQUAL ${multilib_variant})
+            message(STATUS "multilib_variant: ${multilib_variant}")
+            string(JSON variant_multilib_flags GET ${lib_def} "flags")
+            message(STATUS "variant_multilib_flags: ${variant_multilib_flags}")
 
-    if ("${FVP_MODEL}" STREQUAL "aem-r")
-        set(COMPILE_FLAGS "${COMPILE_FLAGS} -mno-unaligned-access -nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
-        set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --fvp_model ${FVP_MODEL}${FVP_CONFIG_TEMP} --fvp_install_dir ${FVP_INSTALL_DIR} --fvp_config_dir ${FVP_CONFIG_DIR}")
-    else()
-        set(COMPILE_FLAGS "${COMPILE_FLAGS} -nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
-        set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --fvp_model ${FVP_MODEL}${FVP_CONFIG_TEMP} --fvp_install_dir ${FVP_INSTALL_ABS_PATH} --fvp_config_dir ${FVP_CONFIG_ABS_PATH}")
+            string(REPLACE "-march=armvX+nofp -march=armvX+nosimd" "-march=armv8-a+nofp+nosimd" variant_multilib_flags "${variant_multilib_flags}")
+
+			# Write test execution information.
+			# This file does not become part of binaries package, and is available only 
+			# during config stage.
+			set(TEST_EXECUTION_INFO "${CMAKE_CURRENT_BINARY_DIR}/test_execution_info.json")
+			file(WRITE "${TEST_EXECUTION_INFO}" "{\n")
+
+			# Build EXECUTION_FLAGS conditionally
+			if("${TEST_EXECUTOR}" STREQUAL "fvp")
+				string(REPLACE " " ";" fvp_config_list ${FVP_CONFIG})
+				set (FVP_CONFIG_TEMP "")
+				foreach(cfg ${fvp_config_list})
+					string(APPEND FVP_CONFIG_TEMP " --fvp_config ${cfg}")
+				endforeach()
+
+				get_filename_component(FVP_INSTALL_ABS_PATH "${FVP_INSTALL_DIR}" REALPATH)
+				get_filename_component(FVP_CONFIG_ABS_PATH "${FVP_CONFIG_DIR}" REALPATH)
+
+				if ("${FVP_MODEL}" STREQUAL "aem-r")
+					set(LINKER_FLAGS "-mno-unaligned-access -nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
+					set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --fvp_model ${FVP_MODEL}${FVP_CONFIG_TEMP} --fvp_install_dir ${FVP_INSTALL_DIR} --fvp_config_dir ${FVP_CONFIG_DIR}")
+				else()
+					set(LINKER_FLAGS "-nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
+					set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --fvp_model ${FVP_MODEL}${FVP_CONFIG_TEMP} --fvp_install_dir ${FVP_INSTALL_ABS_PATH} --fvp_config_dir ${FVP_CONFIG_ABS_PATH}")
+				endif()
+
+			elseif("${TEST_EXECUTOR}" STREQUAL "qemu")
+				if(TARGET_ARCH MATCHES "^aarch64")
+					find_program(QEMU_EXECUTABLE qemu-system-aarch64 REQUIRED)
+				else()
+					find_program(QEMU_EXECUTABLE qemu-system-arm REQUIRED)
+				endif()
+
+				set(LINKER_FLAGS "-nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
+				set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --qemu_command ${QEMU_EXECUTABLE} --qemu_machine ${QEMU_MACHINE} --qemu_cpu ${QEMU_CPU}")
+
+				# Append --qemu_params only if non-empty
+				if(NOT "${QEMU_PARAMS}" STREQUAL "")
+					string(REPLACE " " ":" QEMU_PARAMS ${QEMU_PARAMS})
+					string(APPEND EXECUTION_FLAGS " --qemu_params=${QEMU_PARAMS}")
+				endif()
+			endif()
+
+			# Write Compile flags
+			file(APPEND "${TEST_EXECUTION_INFO}" "  \"COMPILE_FLAGS\": \"${variant_multilib_flags}\",\n")
+
+			# Write Linker flags
+			file(APPEND "${TEST_EXECUTION_INFO}" "  \"LINKER_FLAGS\": \"${variant_multilib_flags}\",\n")
+
+			# Write execution flags
+			file(APPEND "${TEST_EXECUTION_INFO}" "  \"EXECUTION_FLAGS\": \"${EXECUTION_FLAGS}\"\n")
+
+			# Close JSON
+			file(APPEND "${TEST_EXECUTION_INFO}" "}\n")
+
+        endif()
     endif()
+endforeach()
 
-elseif("${TEST_EXECUTOR}" STREQUAL "qemu")
-    if(TARGET_ARCH MATCHES "^aarch64")
-        find_program(QEMU_EXECUTABLE qemu-system-aarch64 REQUIRED)
-    else()
-        find_program(QEMU_EXECUTABLE qemu-system-arm REQUIRED)
-    endif()
 
-    set(COMPILE_FLAGS "${COMPILE_FLAGS} -nostartfiles -lcrt0-semihost -lsemihost -T picolibc.ld")
-    set(EXECUTION_FLAGS "--test_executor ${TEST_EXECUTOR} --qemu_command ${QEMU_EXECUTABLE} --qemu_machine ${QEMU_MACHINE} --qemu_cpu ${QEMU_CPU}")
-
-    # Append --qemu_params only if non-empty
-    if(NOT "${QEMU_PARAMS}" STREQUAL "")
-        string(REPLACE " " ":" QEMU_PARAMS ${QEMU_PARAMS})
-        string(APPEND EXECUTION_FLAGS " --qemu_params=${QEMU_PARAMS}")
-    endif()
-endif()
-
-# Write Compile flags
-file(APPEND "${TEST_EXECUTION_INFO}" "  \"COMPILE_FLAGS\": \"--target ${target_triple} ${COMPILE_FLAGS}\",\n")
-
-# Write execution flags
-file(APPEND "${TEST_EXECUTION_INFO}" "  \"EXECUTION_FLAGS\": \"${EXECUTION_FLAGS}\"\n")
-
-# Close JSON
-file(APPEND "${TEST_EXECUTION_INFO}" "}\n")
 
 # Create a single target for all testing. If no testing is enabled, this
 # will simply do nothing.
@@ -210,8 +241,10 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
             set(picocrt "crt0-semihost-fvp")
         endif()
         set(test_link_flags "-nostartfiles -l${picocrt} -lsemihost -T picolibcpp.ld")
+    elseif(C_LIBRARY STREQUAL llvmlibc)
+        # QEMU logic handled later
     else()
-        message(FATAL_ERROR "Tests can only be enabled using picolibc.")
+        message(FATAL_ERROR "Tests can only be enabled using picolibc or llvmlibc.")
     endif()
 
     if(TEST_EXECUTOR STREQUAL qemu)
@@ -282,6 +315,9 @@ if(LIBRARY_BUILD_TYPE STREQUAL minsizerelease)
 elseif(LIBRARY_BUILD_TYPE STREQUAL release)
     set(LIBRARY_CMAKE_BUILD_TYPE Release)
     set(LIBRARY_MESON_BUILD_TYPE release)
+elseif(LIBRARY_BUILD_TYPE STREQUAL releasewithdebuginfo)
+    set(LIBRARY_CMAKE_BUILD_TYPE RelWithDebInfo)
+    set(LIBRARY_MESON_BUILD_TYPE debugoptimized)
 endif()
 
 ###############################################################################
@@ -316,9 +352,24 @@ if(VARIANT STREQUAL "armv6m_soft_nofp")
 endif()
 
 if(ENABLE_COMPILER_RT_TESTS)
+    # Use the downstream version of lit, which is just a wrapper for the built one.
+    # Pass it the xfail/xfail-not lists.
+    set(compiler_rt_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.xfails")
+    set(compiler_rt_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.upasses")
     set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
-    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --xunit-xml-output=results.junit.xml")
-    set(external_lit_path "${LLVM_BINARY_DIR}/bin/llvm-lit")
+    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --xunit-xml-output=results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${compiler_rt_xfails_file_path} --xfails-not-file=${compiler_rt_xfails_not_file_path}"
+    )
+    set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
+    add_custom_target(
+        compiler-rt-xfail-files
+        COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
+            --variant ${VARIANT}
+            --project compiler-rt
+            --libc ${C_LIBRARY}
+            --xfails_file ${compiler_rt_xfails_file_path}
+            --xfails_not_file ${compiler_rt_xfails_not_file_path}
+    )
     set(
         compiler_rt_test_cmake_args
         -DCOMPILER_RT_INCLUDE_TESTS=ON
@@ -411,6 +462,7 @@ if(ENABLE_COMPILER_RT_TESTS)
         check-compiler-rt
         compiler_rt-build
         clib-install
+        compiler-rt-xfail-files
     )
     add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
 endif()
@@ -593,7 +645,7 @@ if(C_LIBRARY MATCHES "^newlib")
     else()
         if(LIBRARY_BUILD_TYPE STREQUAL minsizerelease)
             set(newlib_optim_flags "-Os")
-        elseif(LIBRARY_BUILD_TYPE STREQUAL release)
+        elseif((LIBRARY_BUILD_TYPE STREQUAL release) OR (LIBRARY_BUILD_TYPE STREQUAL releasewithdebuginfo))
             set(newlib_optim_flags "-O3")
         endif()
         set(newlib_flags
@@ -684,10 +736,7 @@ endif()
 ###############################################################################
 
 if(C_LIBRARY STREQUAL llvmlibc)
-    if(ENABLE_LIBC_TESTS)
-        message(FATAL_ERROR "Tests cannot yet be enabled using llvm libc.")
-    endif()
-
+    set(test_cmd "${lit_test_executor} @BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
 
     set(common_llvmlibc_cmake_args
@@ -724,14 +773,17 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ${common_llvmlibc_cmake_args}
         -DLIBC_TARGET_TRIPLE=${target_triple}
         -DLIBC_CONF_TIME_64BIT=ON
+        -DLIBC_CONF_ERRNO_MODE=LIBC_ERRNO_MODE_SHARED
         -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
         -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
         -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
         -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
         -DLLVM_ENABLE_RUNTIMES=libc
-        -DLLVM_INCLUDE_TESTS=OFF # llvmlibc's tests require C++, so can't be built until llvmlibc can support libc++
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
+        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=-nostartfiles,-lcrt0-semihost,-lsemihost,-T,llvmlibc.ld
+        -DLIBC_TEST_CMD=${test_cmd}
+        -DLIBC_TEST_HERMETIC_ONLY=true
         STEP_TARGETS configure build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
@@ -766,6 +818,13 @@ if(C_LIBRARY STREQUAL llvmlibc)
         CMAKE_ARGS
         ${compiler_launcher_cmake_args}
         ${common_llvmlibc_cmake_args}
+        -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
+        -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
+        -DFLASH_ADDRESS=${FLASH_ADDRESS}
+        -DFLASH_SIZE=${FLASH_SIZE}
+        -DRAM_ADDRESS=${RAM_ADDRESS}
+        -DRAM_SIZE=${RAM_SIZE}
+        -DSTACK_SIZE=${STACK_SIZE}
         STEP_TARGETS build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
@@ -774,6 +833,37 @@ if(C_LIBRARY STREQUAL llvmlibc)
         LIST_SEPARATOR ,
         CONFIGURE_HANDLED_BY_BUILD TRUE
     )
+
+    if(ENABLE_LIBC_TESTS)
+        if(NOT(TEST_EXECUTOR STREQUAL qemu))
+            message(FATAL_ERROR "LLVM-libc tests are only able to run on QEMU.")
+        endif()
+
+        add_custom_target(check-llvmlibc)
+        add_dependencies(check-all check-llvmlibc)
+
+        ExternalProject_Add_Step(
+            llvmlibc
+            check
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target libc-hermetic-tests -- -k 0 || true
+            DEPENDEES install
+            USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
+            ALWAYS TRUE
+        )
+
+        ExternalProject_Add_StepTargets(llvmlibc check)
+        ExternalProject_Add_StepDependencies(
+            llvmlibc
+            check
+            llvmlibc-build
+            llvmlibc-support-build
+            compiler_rt-install
+            cxxlibs-install
+        )
+        
+        add_dependencies(check-llvmlibc llvmlibc-check)
+    endif()
 endif()
 
 add_dependencies(clib-configure ${C_LIBRARY}-configure)
@@ -799,7 +889,23 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
         )
         if(ENABLE_LIBCXX_TESTS)
-            set(cxxlibs_lit_args "${LLVM_LIT_ARGS} --xunit-xml-output=results.junit.xml")
+            # Use the downstream version of lit, which is just a wrapper for the built one.
+            # Pass it the xfail/xfail-not lists.
+            set(libcxx_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.xfails")
+            set(libcxx_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.upasses")
+            set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
+            set(libcxx_lit_args "${LLVM_LIT_ARGS} -sv --xunit-xml-output=results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${libcxx_xfails_file_path} --xfails-not-file=${libcxx_xfails_not_file_path}"
+            )
+            add_custom_target(
+                libcxx-xfail-files
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
+                    --variant ${VARIANT}
+                    --project libcxx
+                    --libc ${C_LIBRARY}
+                    --xfails_file ${libcxx_xfails_file_path}
+                    --xfails_not_file ${libcxx_xfails_not_file_path}
+            )
             set(cxxlibs_test_cmake_options
                 -DLIBCXX_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++-picolibc.cfg.in
                 -DLIBCXX_TEST_PARAMS=executor=${lit_test_executor}
@@ -809,7 +915,8 @@ if(ENABLE_CXX_LIBS)
                 -DLIBUNWIND_TEST_PARAMS=executor=${lit_test_executor}
                 -DRUNTIME_TEST_ARCH_FLAGS=${compile_arch_flags}
                 -DRUNTIME_TEST_LINK_FLAGS=${test_link_flags}
-                -DLLVM_LIT_ARGS=${cxxlibs_lit_args}
+                -DLLVM_LIT_ARGS=${libcxx_lit_args}
+                -DLLVM_EXTERNAL_LIT=${external_lit_path}
             )
         endif()
     elseif(C_LIBRARY STREQUAL llvmlibc)
@@ -942,6 +1049,7 @@ if(ENABLE_CXX_LIBS)
                 cxxlibs
                 ${check_target}
                 cxxlibs-install
+                libcxx-xfail-files
             )
             add_dependencies(${check_target} cxxlibs-${check_target})
         endforeach()
