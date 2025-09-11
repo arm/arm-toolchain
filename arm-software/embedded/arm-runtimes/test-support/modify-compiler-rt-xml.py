@@ -25,10 +25,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # A '.' character is used in junit xml to split classes/groups.
-    # Variants such as armv8m.main need to be renamed.
-    variant_name = args.variant.replace(".", "_")
-
     xml_file = os.path.join(args.dir, "compiler-rt", "test", "results.junit.xml")
 
     tree = ElementTree.parse(xml_file)
@@ -40,7 +36,7 @@ def main():
     # For readability, combine them all under compiler-rt-{variant}-Builtins
     for testsuite in root.iter("testsuite"):
         old_suitename = testsuite.get("name")
-        new_suitename = f"compiler-rt-{variant_name}-Builtins"
+        new_suitename = f"compiler-rt-{args.variant}-Builtins"
         testsuite.set("name", new_suitename)
         for testcase in testsuite.iter("testcase"):
             old_classname = testcase.get("classname")

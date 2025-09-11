@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
 """Helper script to generate a lit test suite from a meson project's tests.
 
@@ -71,7 +71,7 @@ def main():
             "w",
             encoding="utf-8",
         ) as f:
-            # Invoke meson to rub the test.
+            # Invoke meson to run the test.
             # Set --logbase so that each has a unique log name.
             f.write(
                 f"# RUN: {args.meson} test -C {args.build} {testname} --logbase {testname} --no-rebuild\n"

@@ -376,7 +376,7 @@ if(ENABLE_COMPILER_RT_TESTS)
         COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/test-support/modify-compiler-rt-xml.py
         --dir <BINARY_DIR>
-        --variant ${VARIANT}
+        --variant ${escaped_variant_name}
         USES_TERMINAL TRUE
         EXCLUDE_FROM_MAIN TRUE
         ALWAYS TRUE
