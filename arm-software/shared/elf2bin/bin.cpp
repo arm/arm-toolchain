@@ -210,8 +210,19 @@ static std::unique_ptr<BinaryDataStream>
 combined_prepare(const InputObject &inobj,
                  const std::vector<Segment> &segments_orig, bool include_zi,
                  std::optional<uint64_t> baseaddr) {
+  // Discard segments that contribute no actual bytes to the file, in case one
+  // of those appears at the highest address in the list and causes trailing
+  // padding of the binary output file.
+  std::vector<Segment> filtered;
+  std::copy_if(segments_orig.begin(), segments_orig.end(),
+               std::back_inserter(filtered),
+               [include_zi](const Segment &seg) {
+                 uint64_t size = include_zi ? seg.memsize : seg.filesize;
+                 return size != 0;
+               });
+
   // Sort the segments by base address, in case they weren't already.
-  std::vector<Segment> sorted = segments_orig;
+  std::vector<Segment> sorted = std::move(filtered);
   std::stable_sort(sorted.begin(), sorted.end(),
                    [](const Segment &a, const Segment &b) {
                      return a.baseaddr < b.baseaddr;

@@ -27,7 +27,7 @@ EXFN_ATTR void handle_reset() {
 
 EXFN_ATTR void handle_undefined() {
   unsigned pc_val = __arm_rsr("ELR_hyp");
-  unsigned instr = *(unsigned *)pc_val;
+  unsigned instr = *reinterpret_cast<unsigned *>(pc_val);
   print_str("CPU Exception: Undefined Instruction\n");
   print_str("  PC = ");
   print_hex(pc_val);
@@ -95,7 +95,9 @@ EXFN_ATTR void handle_fiq() {
 // bytes long, and contains code. The whole table must be 32-byte aligned.
 // The table may also be relocated, so we make it position-independent by
 // having a table of handler addresses and loading the address to pc.
-__attribute__((naked, section(".vectors"), aligned(32))) void vector_table() {
+[[gnu::section(".vectors"), gnu::aligned(32), gnu::used, gnu::naked,
+  gnu::target("arm")]]
+void vector_table() {
   asm("LDR pc, [pc, #24]");
   asm("LDR pc, [pc, #24]");
   asm("LDR pc, [pc, #24]");
@@ -104,14 +106,14 @@ __attribute__((naked, section(".vectors"), aligned(32))) void vector_table() {
   asm("LDR pc, [pc, #24]");
   asm("LDR pc, [pc, #24]");
   asm("LDR pc, [pc, #24]");
-  asm(".word %0" : : "X"(handle_reset));
-  asm(".word %0" : : "X"(handle_undefined));
-  asm(".word %0" : : "X"(handle_svc_hyp_smc));
-  asm(".word %0" : : "X"(handle_prefetch_abort));
-  asm(".word %0" : : "X"(handle_data_abort));
-  asm(".word %0" : : "X"(handle_hyp_trap));
-  asm(".word %0" : : "X"(handle_irq));
-  asm(".word %0" : : "X"(handle_fiq));
+  asm(".word %c0" : : "X"(handle_reset));
+  asm(".word %c0" : : "X"(handle_undefined));
+  asm(".word %c0" : : "X"(handle_svc_hyp_smc));
+  asm(".word %c0" : : "X"(handle_prefetch_abort));
+  asm(".word %c0" : : "X"(handle_data_abort));
+  asm(".word %c0" : : "X"(handle_hyp_trap));
+  asm(".word %c0" : : "X"(handle_irq));
+  asm(".word %c0" : : "X"(handle_fiq));
 }
 
 } // namespace exceptions

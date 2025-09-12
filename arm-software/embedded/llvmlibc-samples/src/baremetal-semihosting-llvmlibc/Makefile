@@ -10,7 +10,7 @@ include ../../Makefile.conf
 build: hello.elf
 
 hello.elf: *.c
-	$(BIN_PATH)/clang --config=llvmlibc.cfg $(MICROBIT_TARGET) $(CRT_SEMIHOST) -lm -g -fno-exceptions -fno-rtti -T microbit-llvmlibc.ld -o hello.elf $^
+	$(BIN_PATH)/clang --config=llvmlibc.cfg $(MICROBIT_TARGET) $(CRT_SEMIHOST) -lm -g -fno-exceptions -fno-rtti -T ../../ldscripts/llvmlibc-microbit.ld -o hello.elf $^
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@

@@ -96,6 +96,9 @@ public:
 
   // Do a linker relaxation pass and return true if we changed something.
   virtual bool relaxOnce(int pass) const { return false; }
+  virtual bool synthesizeAlign(uint64_t &dot, InputSection *sec) {
+    return false;
+  }
   // Do finalize relaxation after collecting relaxation infos.
   virtual void finalizeRelax(int passes) const {}
 
@@ -214,6 +217,7 @@ void processArmCmseSymbols(Ctx &);
 template <class ELFT> uint32_t calcMipsEFlags(Ctx &);
 uint8_t getMipsFpAbiFlag(Ctx &, InputFile *file, uint8_t oldFlag,
                          uint8_t newFlag);
+uint64_t getMipsPageAddr(uint64_t addr);
 bool isMipsN32Abi(Ctx &, const InputFile &f);
 bool isMicroMips(Ctx &);
 bool isMipsR6(Ctx &);
@@ -322,15 +326,6 @@ inline void write64(Ctx &ctx, void *p, uint64_t v) {
   llvm::support::endian::write64(p, v, ctx.arg.endianness);
 }
 
-// Overwrite a ULEB128 value and keep the original length.
-inline uint64_t overwriteULEB128(uint8_t *bufLoc, uint64_t val) {
-  while (*bufLoc & 0x80) {
-    *bufLoc++ = 0x80 | (val & 0x7f);
-    val >>= 7;
-  }
-  *bufLoc = val;
-  return val;
-}
 } // namespace elf
 } // namespace lld
 

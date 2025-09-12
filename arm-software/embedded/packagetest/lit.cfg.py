@@ -10,10 +10,10 @@ from lit.llvm.subst import FindTool, ToolSubst
 
 # Configuration file for the 'lit' test runner.
 
-config.name = 'package'
+config.name = "package"
 config.test_format = lit.formats.ShTest(not llvm_config.use_lit_shell)
-config.suffixes = ['.c', '.cpp', '.test']
-config.excludes = ['CMakeLists.txt', 'README.md']
+config.suffixes = [".c", ".cpp", ".test"]
+config.excludes = ["CMakeLists.txt", "README.md"]
 config.test_source_root = os.path.dirname(__file__)
 
 
@@ -38,10 +38,14 @@ tool_patterns = [
     ),
 ]
 llvm_config.config.substitutions.append(("%python", '"%s"' % (sys.executable)))
-llvm_config.add_tool_substitutions(tool_patterns, [os.path.join(config.llvm_obj_root, "bin")])
+llvm_config.add_tool_substitutions(
+    tool_patterns, [os.path.join(config.llvm_obj_root, "bin")]
+)
 llvm_config.add_err_msg_substitutions()
 llvm_config.use_clang()
 llvm_config.config.substitutions.append(("%samples_dir", '"%s"' % config.samples_dir))
-llvm_config.config.substitutions.append(("%unpack_directory", '"%s"' % config.unpack_directory))
+llvm_config.config.substitutions.append(
+    ("%unpack_directory", '"%s"' % config.unpack_directory)
+)
 
 config.environment["CLANG_NO_DEFAULT_CONFIG"] = "1"

@@ -14,7 +14,7 @@
 // We don't want memory tagging in exception handling functions, or the
 // functions that they call, as if there's been an exception due to memory
 // tagging we may well end up causing a recursive exception.
-#define EXFN_ATTR __attribute__((no_sanitize("memtag")))
+#define EXFN_ATTR [[clang::no_sanitize("memtag")]]
 
 namespace bootcode {
 namespace exceptions {

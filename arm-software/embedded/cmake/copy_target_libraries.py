@@ -36,9 +36,7 @@ def main():
     for distribution_file in glob.glob(args.distribution_file):
         break
     else:
-        raise RuntimeError(
-            f"Distribution glob '{args.distribution_file}' not found"
-        )
+        raise RuntimeError(f"Distribution glob '{args.distribution_file}' not found")
 
     lib_dir = os.path.join(args.build_dir, "llvm", "lib")
     os.makedirs(lib_dir, exist_ok=True)

@@ -63,15 +63,15 @@ private:
   static constexpr unsigned long Addr = SysRegTraits<Name>::Addr;
 
 public:
-  __attribute__((always_inline)) static unsigned long read() {
-    return *(volatile unsigned long *)Addr;
+  [[clang::always_inline]] static unsigned long read() {
+    return *reinterpret_cast<volatile unsigned long *>(Addr);
   }
 
-  __attribute__((always_inline)) static void write(unsigned long val) {
-    *(volatile unsigned long *)Addr = val;
+  [[clang::always_inline]] static void write(unsigned long val) {
+    *reinterpret_cast<volatile unsigned long *>(Addr) = val;
   }
 
-  __attribute__((always_inline)) SysReg &operator=(unsigned long val) {
+  [[clang::always_inline]] SysReg &operator=(unsigned long val) {
     write(val);
     return *this;
   }
@@ -104,10 +104,10 @@ private:
   static constexpr unsigned long Max = SysRegSetTraits<Name>::Max;
 
 public:
-  __attribute__((always_inline)) volatile unsigned long &
+  [[clang::always_inline]] volatile unsigned long &
   operator[](unsigned int idx) {
     assert(idx <= Max);
-    return ((volatile unsigned long *)Addr)[idx];
+    return (reinterpret_cast<volatile unsigned long *>(Addr))[idx];
   }
 };
 

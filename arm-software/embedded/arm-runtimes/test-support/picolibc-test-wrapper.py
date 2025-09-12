@@ -95,9 +95,7 @@ def main():
         description="Run a single test using either qemu or an FVP"
     )
     main_arg_group = parser.add_mutually_exclusive_group(required=True)
-    main_arg_group.add_argument(
-        "--qemu-command", help="qemu-system-<arch> path"
-    )
+    main_arg_group.add_argument("--qemu-command", help="qemu-system-<arch> path")
     main_arg_group.add_argument(
         "--fvp-install-dir", help="Directory in which FVP models are installed"
     )

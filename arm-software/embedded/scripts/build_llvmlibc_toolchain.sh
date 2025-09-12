@@ -22,5 +22,5 @@ BUILD_DIR=${REPO_ROOT}/build_llvmlibc_toolchain
 mkdir -p "${BUILD_DIR}"
 cd "${BUILD_DIR}"
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc
+cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc -DENABLE_PARALLEL_LIB_CONFIG=OFF
 ninja package-llvm-toolchain

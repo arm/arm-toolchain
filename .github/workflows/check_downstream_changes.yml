@@ -23,19 +23,15 @@ on:
       - reopened
       - edited
       - synchronize
-  # Trigger whenever a pull request is reviewed to check which
-  # teams have approved.
-  pull_request_review:
-    types:
-      - submitted
-      - edited
-      - dismissed
+    branches:
+      - arm-software
+      - release/arm-software/**
 
 jobs:
   check-downstream-changes:
     runs-on: ubuntu-24.04-arm
 
-    if: github.repository == 'arm/arm-toolchain' && (github.event.pull_request.base.ref == 'arm-software' || startsWith(github.event.pull_request.base.ref, 'release/arm-software/'))
+    if: github.repository == 'arm/arm-toolchain'
 
     steps:
       - name: Checkout

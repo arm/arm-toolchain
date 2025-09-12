@@ -10,7 +10,7 @@ include ../../Makefile.conf
 build: hello.elf
 
 hello.elf: *.cpp
-	$(BIN_PATH)/clang++ --config=llvmlibc.cfg $(MICROBIT_TARGET) $(CRT_SEMIHOST) -lm -g -T microbit-llvmlibc.ld -o hello.elf $^
+	$(BIN_PATH)/clang++ --config=llvmlibc.cfg $(MICROBIT_TARGET) $(CRT_SEMIHOST) -lm -g -T ../../ldscripts/llvmlibc-microbit.ld -o hello.elf $^
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@

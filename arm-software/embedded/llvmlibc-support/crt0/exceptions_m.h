@@ -46,7 +46,8 @@ EXFN_ATTR void __print_faulting_instruction(unsigned short *ptr) {
 }
 
 EXFN_ATTR void __hardfault_handler() {
-  unsigned *pushed_regs = 2 + (unsigned *)__builtin_frame_address(0);
+  unsigned *pushed_regs =
+      2 + reinterpret_cast<unsigned *>(__builtin_frame_address(0));
   unsigned pc_val = pushed_regs[6];
   print_str("CPU Exception: HardFault\n");
   print_str("  PC = 0x");
@@ -55,11 +56,12 @@ EXFN_ATTR void __hardfault_handler() {
   print_str("  HFSR = 0x");
   print_hex((unsigned int)HFSR);
   print_str("\n");
-  __print_faulting_instruction((unsigned short *)pc_val);
+  __print_faulting_instruction(reinterpret_cast<unsigned short *>(pc_val));
 }
 
 EXFN_ATTR void __memmanage_handler() {
-  unsigned *pushed_regs = 2 + (unsigned *)__builtin_frame_address(0);
+  unsigned *pushed_regs =
+      2 + reinterpret_cast<unsigned *>(__builtin_frame_address(0));
   unsigned pc_val = pushed_regs[6];
   print_str("CPU Exception: MemMange\n");
   print_str("  PC = 0x");
@@ -71,11 +73,12 @@ EXFN_ATTR void __memmanage_handler() {
   print_str("  MMFAR = 0x");
   print_hex((unsigned int)MMFAR);
   print_str("\n");
-  __print_faulting_instruction((unsigned short *)pc_val);
+  __print_faulting_instruction(reinterpret_cast<unsigned short *>(pc_val));
 }
 
 EXFN_ATTR void __busfault_handler() {
-  unsigned *pushed_regs = 2 + (unsigned *)__builtin_frame_address(0);
+  unsigned *pushed_regs =
+      2 + reinterpret_cast<unsigned *>(__builtin_frame_address(0));
   unsigned pc_val = pushed_regs[6];
   print_str("CPU Exception: BusFault\n");
   print_str("  PC = 0x");
@@ -87,11 +90,12 @@ EXFN_ATTR void __busfault_handler() {
   print_str("  BFAR = 0x");
   print_hex((unsigned int)BFAR);
   print_str("\n");
-  __print_faulting_instruction((unsigned short *)pc_val);
+  __print_faulting_instruction(reinterpret_cast<unsigned short *>(pc_val));
 }
 
 EXFN_ATTR void __usagefault_handler() {
-  unsigned *pushed_regs = 2 + (unsigned *)__builtin_frame_address(0);
+  unsigned *pushed_regs =
+      2 + reinterpret_cast<unsigned *>(__builtin_frame_address(0));
   unsigned pc_val = pushed_regs[6];
   print_str("CPU Exception: UsageFault\n");
   print_str("  PC = 0x");
@@ -99,11 +103,12 @@ EXFN_ATTR void __usagefault_handler() {
   print_str("\n");
   print_str("  CFSR.UsageFault = 0x");
   print_hex((unsigned short)CFSR.UFSR), print_str("\n");
-  __print_faulting_instruction((unsigned short *)pc_val);
+  __print_faulting_instruction(reinterpret_cast<unsigned short *>(pc_val));
 }
 
 EXFN_ATTR void __securefault_handler() {
-  unsigned *pushed_regs = 2 + (unsigned *)__builtin_frame_address(0);
+  unsigned *pushed_regs =
+      2 + reinterpret_cast<unsigned *>(__builtin_frame_address(0));
   unsigned pc_val = pushed_regs[6];
   print_str("CPU Exception: SecureFault\n");
   print_str("  PC = 0x");
@@ -115,7 +120,7 @@ EXFN_ATTR void __securefault_handler() {
   print_str("  SFAR = 0x");
   print_hex((unsigned int)SFAR);
   print_str("\n");
-  __print_faulting_instruction((unsigned short *)pc_val);
+  __print_faulting_instruction(reinterpret_cast<unsigned short *>(pc_val));
 }
 
 extern "C" unsigned int __systick_count = 0;
@@ -127,26 +132,26 @@ EXFN_ATTR void __exception_handler() { abort(); }
 // has to be 128-byte aligned, however an implementation can require more bits
 // to be zero and cortex-m23 can require up to 10, so 1024-byte align the vector
 // table.
-extern char __stack __attribute__((weak));
+[[gnu::weak]] extern char __stack;
 using vtable_t = void (*)(void);
-const vtable_t vector_table[]
-    __attribute__((section(".vectors"), aligned(1024))) = {
-        (vtable_t)&__stack,    // SP
-        _start,                // Reset
-        __exception_handler,   // NMI
-        __hardfault_handler,   // HardFault
-        __memmanage_handler,   // MemManage fault
-        __busfault_handler,    // BusFault
-        __usagefault_handler,  // UsageFault
-        __securefault_handler, // SecureFault
-        __exception_handler,   // Reserved
-        __exception_handler,   // Reserved
-        __exception_handler,   // Reserved
-        __exception_handler,   // SVCall
-        __exception_handler,   // DebugMonitor
-        __exception_handler,   // Reserved
-        __exception_handler,   // PendSV
-        __systick_handler,     // SysTick
+[[gnu::section(".vectors"), gnu::aligned(1024)]]
+const vtable_t vector_table[] = {
+    reinterpret_cast<vtable_t>(&__stack), // SP
+    _start,                               // Reset
+    __exception_handler,                  // NMI
+    __hardfault_handler,                  // HardFault
+    __memmanage_handler,                  // MemManage fault
+    __busfault_handler,                   // BusFault
+    __usagefault_handler,                 // UsageFault
+    __securefault_handler,                // SecureFault
+    __exception_handler,                  // Reserved
+    __exception_handler,                  // Reserved
+    __exception_handler,                  // Reserved
+    __exception_handler,                  // SVCall
+    __exception_handler,                  // DebugMonitor
+    __exception_handler,                  // Reserved
+    __exception_handler,                  // PendSV
+    __systick_handler,                    // SysTick
 };
 
 void setup() {
@@ -161,15 +166,16 @@ void setup() {
     if (VTOR == 0x0) {
       // Do nothing, vector_table is already placed in the correct place
     } else {
-      memcpy((void *)(unsigned int)VTOR, &vector_table, sizeof(vector_table));
+      memcpy(reinterpret_cast<void *>(VTOR.read()), &vector_table,
+             sizeof(vector_table));
     }
   } else {
 
     // VTOR is writable, so set it to the address of the vector table. This
     // should be sufficiently-aligned for all existing CPUs, but it's possible
     // a future one will require more alignment so check just in case.
-    VTOR = (unsigned long)&vector_table;
-    if (VTOR != (unsigned long)&vector_table) {
+    VTOR = reinterpret_cast<unsigned long>(&vector_table);
+    if (VTOR != reinterpret_cast<unsigned long>(&vector_table)) {
       print_str("Bootcode failed to set VTOR\n");
       abort();
     }
