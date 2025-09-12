@@ -105,7 +105,7 @@ set(VARIANT_BUILD_ID "${VARIANT}" CACHE STRING "Name to use to identify build di
 
 # A '.' character is used in junit xml to split classes/groups.
 # Variants such as armv8m.main need to be renamed.
-string(REPLACE "." "_" escaped_variant_name ${VARIANT})
+string(REPLACE "." "_" variant_xml_name ${VARIANT})
 
 # Temporary location to collect the libraries as they are built.
 set(TEMP_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/tmp_install")
@@ -376,7 +376,7 @@ if(ENABLE_COMPILER_RT_TESTS)
         COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/test-support/modify-compiler-rt-xml.py
         --dir <BINARY_DIR>
-        --variant ${escaped_variant_name}
+        --variant ${variant_xml_name}
         USES_TERMINAL TRUE
         EXCLUDE_FROM_MAIN TRUE
         ALWAYS TRUE
@@ -524,7 +524,7 @@ if(C_LIBRARY STREQUAL picolibc)
                 --meson ${MESON_EXECUTABLE}
                 --build <BINARY_DIR>
                 --output ${picolibc_lit_dir}
-                --name picolibc-${escaped_variant_name}
+                --name picolibc-${variant_xml_name}
             USES_TERMINAL TRUE
             DEPENDEES compile-tests
         )

@@ -10,7 +10,7 @@ setting particular tests to be expected to fail, and controlling
 whether or not testing should continue on a failure.
 Since meson can run tests individually and provide a list of all
 tests, it is possible to run the same tests through lit, with each
-individual test simply invoking meson
+individual test simply invoking meson.
 This allows a project built using meson to share the same test
 infrastructure as the other LLVM projects."""
 
