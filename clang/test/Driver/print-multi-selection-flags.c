@@ -108,6 +108,7 @@
 // CHECK-MULTILIB-CUSTOM-FLAG-DAG:     -fmultilib-flag=foo
 // CHECK-MULTILIB-CUSTOM-FLAG-DAG:     -fmultilib-flag=bar
 
+// Start downstream change. Issue #258
 // RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi -march=armv7a -Os | FileCheck --check-prefix=CHECK-OPT-OS %s
 // RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi -march=armv7a -Oz | FileCheck --check-prefix=CHECK-OPT-OZ %s
 // RUN: %clang -multi-lib-config=%S/Inputs/multilib/empty.yaml -print-multi-flags-experimental --target=arm-none-eabi -march=armv7a     | FileCheck --check-prefix=CHECK-OPT %s
@@ -124,3 +125,4 @@
 // CHECK-OPT-OS: -Os
 // CHECK-OPT-NOT: -Oz
 // CHECK-OPT-NOT: -Os
+// End downstream change. Issue #258

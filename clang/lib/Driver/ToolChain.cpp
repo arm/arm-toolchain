@@ -255,6 +255,7 @@ static void getAArch64MultilibFlags(const Driver &D,
     Result.push_back(ABIArg->getAsString(Args));
   }
 
+  // Start downstream change. Issue #258
   if (const Arg *A = Args.getLastArg(options::OPT_O_Group);
       A && A->getOption().matches(options::OPT_O)) {
     switch (A->getValue()[0]) {
@@ -266,6 +267,7 @@ static void getAArch64MultilibFlags(const Driver &D,
       break;
     }
   }
+  // End downstream change. Issue #258
 
   processMultilibCustomFlags(Result, Args);
 }
@@ -333,6 +335,7 @@ static void getARMMultilibFlags(const Driver &D,
       Result.push_back(Endian->getAsString(Args));
   }
 
+  // Start downstream change. Issue #258
   if (const Arg *A = Args.getLastArg(options::OPT_O_Group);
       A && A->getOption().matches(options::OPT_O)) {
     switch (A->getValue()[0]) {
@@ -344,6 +347,7 @@ static void getARMMultilibFlags(const Driver &D,
       break;
     }
   }
+  // End downstream change. Issue #258
 
   processMultilibCustomFlags(Result, Args);
 }
