@@ -29,6 +29,10 @@ static cl::opt<TPLoop::MemTransfer> EnableMemtransferTPLoop(
                clEnumValN(TPLoop::Allow, "allow",
                           "Allow (may be subject to certain conditions) "
                           "conversion of memcpy to TP loop.")));
+// #405
+static cl::opt<bool> EnableInlineMemcpyAsLdSt(
+    "enable-inline-memcpy-ld-st", cl::init(false), cl::Hidden,
+    cl::desc("Inline memcpy with LD/ST instructions."));
 
 bool ARMSelectionDAGInfo::isTargetMemoryOpcode(unsigned Opcode) const {
   return Opcode >= ARMISD::FIRST_MEMORY_OPCODE &&
@@ -136,6 +140,119 @@ SDValue ARMSelectionDAGInfo::EmitSpecializedLibcall(
   return CallResult.second;
 }
 
+// #405
+SDValue ARMSelectionDAGInfo::EmitMemcpyAsLdSt(
+    SelectionDAG &DAG, SDLoc dl, const ARMSubtarget &Subtarget, SDValue Chain,
+    SDValue Dst, SDValue Src, uint64_t SizeVal, bool isVolatile,
+    MachinePointerInfo DstPtrInfo, MachinePointerInfo SrcPtrInfo) const {
+  // Do repeated batches of 4-byte loads and stores.
+  unsigned BytesLeft = SizeVal & 3;
+  unsigned NumMemOps = SizeVal >> 2;
+  unsigned EmittedNumMemOps = 0;
+  EVT VT = MVT::i32;
+  unsigned VTSize = 4;
+  unsigned I = 0;
+  // Emit a maximum of 4 loads in Thumb1 since we have fewer registers
+  const unsigned MaxLoads = Subtarget.isThumb1Only() ? 4 : 6;
+  SDValue TFOps[6];
+  SDValue Loads[6];
+  uint64_t SrcOff = 0, DstOff = 0;
+
+  MachineMemOperand::Flags MOFlags = MachineMemOperand::Flags::MONone;
+  if (isVolatile)
+    MOFlags = MachineMemOperand::Flags::MOVolatile;
+  MachineMemOperand::Flags LoadMOFlags = MOFlags;
+  if (SrcPtrInfo.isDereferenceable(SizeVal, *DAG.getContext(),
+                                   DAG.getDataLayout()))
+    LoadMOFlags |= MachineMemOperand::Flags::MODereferenceable;
+  if (auto *V = SrcPtrInfo.V.dyn_cast<const Value *>())
+    if (isa<GlobalVariable>(V) && cast<GlobalVariable>(V)->isConstant())
+      LoadMOFlags |= MachineMemOperand::Flags::MOInvariant;
+  MachineMemOperand::Flags StoreMOFlags = MOFlags;
+  if (DstPtrInfo.isDereferenceable(SizeVal, *DAG.getContext(),
+                                   DAG.getDataLayout()))
+    StoreMOFlags |= MachineMemOperand::Flags::MODereferenceable;
+
+  // Emit up to MaxLoads loads, then a TokenFactor barrier, then the
+  // same number of stores.  The loads and stores may get combined into
+  // ldm/stm later on.
+  while (EmittedNumMemOps < NumMemOps) {
+    for (I = 0; I < MaxLoads && EmittedNumMemOps + I < NumMemOps; ++I) {
+      Loads[I] = DAG.getLoad(VT, dl, Chain,
+                             DAG.getNode(ISD::ADD, dl, MVT::i32, Src,
+                                         DAG.getConstant(SrcOff, dl, MVT::i32)),
+                             SrcPtrInfo.getWithOffset(SrcOff), MaybeAlign(0),
+                             LoadMOFlags);
+      TFOps[I] = Loads[I].getValue(1);
+      SrcOff += VTSize;
+    }
+    Chain = DAG.getNode(ISD::TokenFactor, dl, MVT::Other, ArrayRef(TFOps, I));
+
+    for (I = 0; I < MaxLoads && EmittedNumMemOps + I < NumMemOps; ++I) {
+      TFOps[I] = DAG.getStore(
+          Chain, dl, Loads[I],
+          DAG.getNode(ISD::ADD, dl, MVT::i32, Dst,
+                      DAG.getConstant(DstOff, dl, MVT::i32)),
+          DstPtrInfo.getWithOffset(DstOff), MaybeAlign(0), StoreMOFlags);
+      DstOff += VTSize;
+    }
+    Chain = DAG.getNode(ISD::TokenFactor, dl, MVT::Other, ArrayRef(TFOps, I));
+
+    EmittedNumMemOps += I;
+  }
+
+  if (BytesLeft == 0)
+    return Chain;
+
+  // Issue loads / stores for the trailing (1 - 3) bytes.
+  unsigned BytesLeftSave = BytesLeft;
+  I = 0;
+  while (BytesLeft) {
+    if (BytesLeft >= 2) {
+      VT = MVT::i16;
+      VTSize = 2;
+    } else {
+      VT = MVT::i8;
+      VTSize = 1;
+    }
+
+    Loads[I] = DAG.getLoad(VT, dl, Chain,
+                           DAG.getNode(ISD::ADD, dl, MVT::i32, Src,
+                                       DAG.getConstant(SrcOff, dl, MVT::i32)),
+                           SrcPtrInfo.getWithOffset(SrcOff), MaybeAlign(0),
+                           LoadMOFlags);
+
+    TFOps[I] = Loads[I].getValue(1);
+    ++I;
+    SrcOff += VTSize;
+    BytesLeft -= VTSize;
+  }
+  Chain = DAG.getNode(ISD::TokenFactor, dl, MVT::Other, ArrayRef(TFOps, I));
+
+  I = 0;
+  BytesLeft = BytesLeftSave;
+  while (BytesLeft) {
+    if (BytesLeft >= 2) {
+      VT = MVT::i16;
+      VTSize = 2;
+    } else {
+      VT = MVT::i8;
+      VTSize = 1;
+    }
+
+    TFOps[I] = DAG.getStore(Chain, dl, Loads[I],
+                            DAG.getNode(ISD::ADD, dl, MVT::i32, Dst,
+                                        DAG.getConstant(DstOff, dl, MVT::i32)),
+                            DstPtrInfo.getWithOffset(DstOff), MaybeAlign(0),
+                            StoreMOFlags);
+    ++I;
+    DstOff += VTSize;
+    BytesLeft -= VTSize;
+  }
+
+  return DAG.getNode(ISD::TokenFactor, dl, MVT::Other, ArrayRef(TFOps, I));
+}
+
 static bool shouldGenerateInlineTPLoop(const ARMSubtarget &Subtarget,
                                        const SelectionDAG &DAG,
                                        ConstantSDNode *ConstantSize,
@@ -189,6 +306,11 @@ SDValue ARMSelectionDAGInfo::EmitTargetCodeForMemcpy(
   if (!AlwaysInline && SizeVal > Subtarget.getMaxInlineSizeThreshold())
     return EmitSpecializedLibcall(DAG, dl, Chain, Dst, Src, Size,
                                   Alignment.value(), RTLIB::MEMCPY);
+
+  // #405
+  if (EnableInlineMemcpyAsLdSt && Subtarget.isMClass() && Subtarget.hasV7Ops())
+    return EmitMemcpyAsLdSt(DAG, dl, Subtarget, Chain, Dst, Src, SizeVal,
+                            isVolatile, DstPtrInfo, SrcPtrInfo);
 
   unsigned BytesLeft = SizeVal & 3;
   unsigned NumMemOps = SizeVal >> 2;

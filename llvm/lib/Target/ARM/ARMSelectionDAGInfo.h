@@ -46,6 +46,13 @@ public:
                                   MachinePointerInfo DstPtrInfo,
                                   MachinePointerInfo SrcPtrInfo) const override;
 
+// #405
+  SDValue EmitMemcpyAsLdSt(SelectionDAG &DAG, SDLoc dl,
+                           const ARMSubtarget &Subtarget, SDValue Chain,
+                           SDValue Dst, SDValue Src, uint64_t SizeVal,
+                           bool isVolatile, MachinePointerInfo DstPtrInfo,
+                           MachinePointerInfo SrcPtrInfo) const;
+
   SDValue
   EmitTargetCodeForMemmove(SelectionDAG &DAG, const SDLoc &dl, SDValue Chain,
                            SDValue Dst, SDValue Src, SDValue Size,
