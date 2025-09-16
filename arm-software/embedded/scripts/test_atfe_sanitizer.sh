@@ -18,24 +18,19 @@ set -vx
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
-cd "${REPO_ROOT}"/build
-
 # If a test fails, lit will ordinarily return a non-zero result,
 # which prevents further testing. Setting the --ignore-fail option
 # will cause testing to continue, so that CI systems can get a
 # full set of results.
-# The check-all target runs the upstream clang and LLVM tests,
-# which do not generate an junit xml results file by default.
-# Additionally setting the --xunit-xml-output option store the
-# results.
-export LIT_OPTS="--ignore-fail --xunit-xml-output=results.xml"
-ninja check-all
+# The lit test suites do not generate xml results by default.
+# This can be enabled with the --xunit-xml-output option. The file
+# written will be relative to the individual suite's build directly,
+# so the same name can be used for all files for consistency.
+export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 
-# The llvm-toolchain targets already set --xunit-xml-output so
-# only the --ignore-fail option is needed.
-# The picolibc tests do not use lit so do not support this option.
 # Command for each test is splitted across individual lines, to aid in debugging.
-export LIT_OPTS="--ignore-fail"
+cd "${REPO_ROOT}"/build
+ninja check-all
 ninja check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
 ninja check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
 ninja check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size

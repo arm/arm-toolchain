@@ -99,7 +99,7 @@ jobs:
         if: always()
         with:
           name: test-results-${{ matrix.build_script }}-${{ matrix.target_os }}
-          path: build/**/*.junit.xml
+          path: build/**/lit_results.junit.xml
 
       - name: Upload built packages
         uses: actions/upload-artifact@v4

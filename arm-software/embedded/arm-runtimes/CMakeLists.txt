@@ -283,7 +283,7 @@ if(ENABLE_COMPILER_RT_TESTS)
     set(compiler_rt_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.xfails")
     set(compiler_rt_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.upasses")
     set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
-    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --xunit-xml-output=results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${compiler_rt_xfails_file_path} --xfails-not-file=${compiler_rt_xfails_not_file_path}"
+    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${compiler_rt_xfails_file_path} --xfails-not-file=${compiler_rt_xfails_not_file_path}"
     )
     add_custom_target(
         compiler-rt-xfail-files
@@ -515,7 +515,7 @@ if(C_LIBRARY STREQUAL picolibc)
         set(picolibc_lit_dir ${CMAKE_CURRENT_BINARY_DIR}/picolibc_lit)
         set(picolibc_xfails_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.xfails")
         set(picolibc_xfails_not_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.upasses")
-        set(picolibc_lit_args -sv --xunit-xml-output=${picolibc_lit_dir}/results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${picolibc_xfails_file_path} --xfails-not-file=${picolibc_xfails_not_file_path})
+        set(picolibc_lit_args -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${picolibc_xfails_file_path} --xfails-not-file=${picolibc_xfails_not_file_path})
 
         ExternalProject_Add_Step(
             picolibc
@@ -858,7 +858,7 @@ if(ENABLE_CXX_LIBS)
             # Pass it the xfail/xfail-not lists.
             set(libcxx_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.xfails")
             set(libcxx_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.upasses")
-            set(libcxx_lit_args "${LLVM_LIT_ARGS} -sv --xunit-xml-output=results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${libcxx_xfails_file_path} --xfails-not-file=${libcxx_xfails_not_file_path}"
+            set(libcxx_lit_args "${LLVM_LIT_ARGS} -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${libcxx_xfails_file_path} --xfails-not-file=${libcxx_xfails_not_file_path}"
             )
             add_custom_target(
                 libcxx-xfail-files
