@@ -103,6 +103,10 @@ set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build librarie
 set(PROJECT_PREFIX "subproj" CACHE STRING "Directory to build subprojects in.")
 set(VARIANT_BUILD_ID "${VARIANT}" CACHE STRING "Name to use to identify build directories." )
 
+# A '.' character is used in junit xml to split classes/groups.
+# Variants such as armv8m.main need to be renamed.
+string(REPLACE "." "_" variant_xml_name ${VARIANT})
+
 # Temporary location to collect the libraries as they are built.
 set(TEMP_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/tmp_install")
 
@@ -243,6 +247,9 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
         message(FATAL_ERROR "Tests can only be enabled using picolibc or llvmlibc.")
     endif()
 
+    # lit wrapper to be used instead of the LLVM version.
+    set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
+
     if(TEST_EXECUTOR STREQUAL qemu)
         if(TARGET_ARCH MATCHES "^aarch64")
             find_program(QEMU_EXECUTABLE qemu-system-aarch64 REQUIRED)
@@ -353,9 +360,8 @@ if(ENABLE_COMPILER_RT_TESTS)
     set(compiler_rt_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.xfails")
     set(compiler_rt_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.upasses")
     set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
-    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --xunit-xml-output=results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${compiler_rt_xfails_file_path} --xfails-not-file=${compiler_rt_xfails_not_file_path}"
+    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${compiler_rt_xfails_file_path} --xfails-not-file=${compiler_rt_xfails_not_file_path}"
     )
-    set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
     add_custom_target(
         compiler-rt-xfail-files
         COMMAND ${Python3_EXECUTABLE}
@@ -447,7 +453,7 @@ if(ENABLE_COMPILER_RT_TESTS)
         COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/test-support/modify-compiler-rt-xml.py
         --dir <BINARY_DIR>
-        --variant ${VARIANT}
+        --variant ${variant_xml_name}
         USES_TERMINAL TRUE
         EXCLUDE_FROM_MAIN TRUE
         ALWAYS TRUE
@@ -570,26 +576,66 @@ if(C_LIBRARY STREQUAL picolibc)
             compiler_rt-install
         )
 
-        # Configure a script to run the picolibc tests in order
-        # to handle the return code.
-        ExternalProject_Get_property(picolibc BINARY_DIR)
-        configure_file(check-picolibc.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/check-picolibc.cmake @ONLY)
-
+        # Step target to run the picolibc test via meson.
         ExternalProject_Add_Step(
             picolibc
-            check
-            COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/check-picolibc.cmake
+            check-meson
+            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
+            DEPENDEES compile-tests
         )
-        ExternalProject_Add_StepTargets(picolibc check)
+        ExternalProject_Add_StepTargets(picolibc check-meson)
+
+        # Generate lit wrappers for the tests.
+        set(picolibc_lit_dir ${CMAKE_CURRENT_BINARY_DIR}/picolibc_lit)
+        set(picolibc_xfails_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.xfails")
+        set(picolibc_xfails_not_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.upasses")
+        set(picolibc_lit_args -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${picolibc_xfails_file_path} --xfails-not-file=${picolibc_xfails_not_file_path})
+
+        ExternalProject_Add_Step(
+            picolibc
+            gen-lit-tests
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test-support/gen-picolibc-lit-tests.py
+                --meson ${MESON_EXECUTABLE}
+                --build <BINARY_DIR>
+                --output ${picolibc_lit_dir}
+                --name picolibc-${variant_xml_name}
+            USES_TERMINAL TRUE
+            DEPENDEES compile-tests
+        )
+        ExternalProject_Add_StepTargets(picolibc gen-lit-tests)
+
+        # Generate xfails for picolibc.
+        add_custom_target(
+            picolibc-xfail-files
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
+                --variant ${VARIANT}
+                --project picolibc
+                --libc ${C_LIBRARY}
+                --xfails_file ${picolibc_xfails_file_path}
+                --xfails_not_file ${picolibc_xfails_not_file_path}
+        )
+
+        # Step target to run the picolibc test via lit.
+        ExternalProject_Add_Step(
+            picolibc
+            check-lit
+            COMMAND ${Python3_EXECUTABLE} ${external_lit_path} ${picolibc_lit_dir} ${picolibc_lit_args}
+            USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
+            ALWAYS TRUE
+            DEPENDEES gen-lit-tests
+        )
+        ExternalProject_Add_StepTargets(picolibc check-lit)
         ExternalProject_Add_StepDependencies(
             picolibc
-            check
-            picolibc-compile-tests
+            check-lit
+            picolibc-xfail-files
         )
-        add_dependencies(check-picolibc picolibc-check)
+        add_dependencies(check-picolibc picolibc-check-lit)
         add_dependencies(clib-build ${C_LIBRARY}-compile-tests)
     endif()
 
@@ -889,8 +935,7 @@ if(ENABLE_CXX_LIBS)
             # Pass it the xfail/xfail-not lists.
             set(libcxx_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.xfails")
             set(libcxx_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.upasses")
-            set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
-            set(libcxx_lit_args "${LLVM_LIT_ARGS} -sv --xunit-xml-output=results.junit.xml --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${libcxx_xfails_file_path} --xfails-not-file=${libcxx_xfails_not_file_path}"
+            set(libcxx_lit_args "${LLVM_LIT_ARGS} -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${libcxx_xfails_file_path} --xfails-not-file=${libcxx_xfails_not_file_path}"
             )
             add_custom_target(
                 libcxx-xfail-files
