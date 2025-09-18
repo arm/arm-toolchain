@@ -490,6 +490,7 @@ if(C_LIBRARY STREQUAL picolibc)
             COMMAND ${MESON_EXECUTABLE} setup -Dtests=true --reconfigure <BINARY_DIR> <SOURCE_DIR>
             COMMAND ${MESON_EXECUTABLE} compile -C <BINARY_DIR>
             USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
         )
         ExternalProject_Add_StepTargets(picolibc compile-tests)
         ExternalProject_Add_StepDependencies(
@@ -526,6 +527,7 @@ if(C_LIBRARY STREQUAL picolibc)
                 --output ${picolibc_lit_dir}
                 --name picolibc-${variant_xml_name}
             USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
             DEPENDEES compile-tests
         )
         ExternalProject_Add_StepTargets(picolibc gen-lit-tests)
