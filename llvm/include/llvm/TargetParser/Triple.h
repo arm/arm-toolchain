@@ -197,6 +197,7 @@ public:
     SUSE,
     OpenEmbedded,
     Intel,
+    // Downstream issue: #533 (Amazon Linux still not recognized correctly)
     Amazon,
     LastVendorType = Amazon
   };

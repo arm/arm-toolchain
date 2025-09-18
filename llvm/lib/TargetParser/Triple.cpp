@@ -271,6 +271,7 @@ StringRef Triple::getVendorTypeName(VendorType Kind) {
   case PC: return "pc";
   case SCEI: return "scei";
   case SUSE: return "suse";
+  // Downstream issue: #533 (Amazon Linux still not recognized correctly)
   case Amazon:
     return "amazon";
   }
@@ -671,6 +672,7 @@ static Triple::VendorType parseVendor(StringRef VendorName) {
       .Case("suse", Triple::SUSE)
       .Case("oe", Triple::OpenEmbedded)
       .Case("intel", Triple::Intel)
+      // Downstream issue: #533 (Amazon Linux still not recognized correctly)
       .Case("amazon", Triple::Amazon)
       .Default(Triple::UnknownVendor);
 }
@@ -1304,6 +1306,7 @@ std::string Triple::normalize(StringRef Str, CanonicalForm Form) {
   if (Vendor == Triple::SUSE && Environment == llvm::Triple::GNUEABI)
     Components[3] = "gnueabihf";
 
+  // Downstream issue: #533 (Amazon Linux still not recognized correctly)
   // Amazon Linux uses a "gnu" environment by default.
   if (Environment == Triple::UnknownEnvironment && Vendor == Triple::Amazon &&
       OS == Triple::Linux) {
