@@ -89,7 +89,7 @@ def main():
     )
     parser.add_argument(
         "--tarmac",
-        help="file to wrote tarmac trace to (FVP only)",
+        help="file to write tarmac trace to (FVP only)",
     )
 
     # QEMU arguments
