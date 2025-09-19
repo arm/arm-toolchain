@@ -155,6 +155,8 @@ abort() {
     ***************
     '
     echo "An error occurred. Exiting..." >&2
+    rm -f "${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg"
+    rm -f "${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg"
     if ${INTERACTIVE}; then
         cd "${BASE_DIR}"
         bash
@@ -372,7 +374,11 @@ product_build() {
         tee "${LOGS_DIR}/product.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
+    rm "${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg"
+    rm "${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg"
 }
 
 shared_lib_build() {
@@ -407,9 +413,13 @@ shared_lib_build() {
     cp -d ${ATFL_DIR}.libs/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
+    rm "${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg"
+    rm "${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg"
 }
 
 package() {
