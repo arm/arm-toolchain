@@ -95,7 +95,7 @@ EXFN_ATTR void handle_fiq() {
 // bytes long, and contains code. The whole table must be 32-byte aligned.
 // The table may also be relocated, so we make it position-independent by
 // having a table of handler addresses and loading the address to pc.
-[[gnu::section(".vectors"), gnu::aligned(32), gnu::used, gnu::naked,
+[[gnu::section(".text.init.enter"), gnu::aligned(32), gnu::used, gnu::naked,
   gnu::target("arm")]]
 void vector_table() {
   asm("LDR pc, [pc, #24]");

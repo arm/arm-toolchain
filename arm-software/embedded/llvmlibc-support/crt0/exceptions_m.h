@@ -134,7 +134,7 @@ EXFN_ATTR void __exception_handler() { abort(); }
 // table.
 [[gnu::weak]] extern char __stack;
 using vtable_t = void (*)(void);
-[[gnu::section(".vectors"), gnu::aligned(1024)]]
+[[gnu::section(".text.init.enter"), gnu::aligned(1024)]]
 const vtable_t vector_table[] = {
     reinterpret_cast<vtable_t>(&__stack), // SP
     _start,                               // Reset

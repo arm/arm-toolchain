@@ -51,6 +51,11 @@ following command line options, in addition to `--target`, `-march` or
   or write your own linker script defining `__stack`, and
   `__llvm_libc_heap_limit` if you are using the heap
 
+> [!IMPORTANT]
+> The default `llvmlibc.ld` is provided for testing and is derived from the
+> `picolibc.ld` licensed under the BSD 3 Clause license. This may cause
+> licensing obligations if used in real projects.
+
 For example:
 
 ```
