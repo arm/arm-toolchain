@@ -197,7 +197,9 @@ public:
     SUSE,
     OpenEmbedded,
     Intel,
-    LastVendorType = Intel
+    // Downstream issue: #533 (Amazon Linux still not recognized correctly)
+    Amazon,
+    LastVendorType = Amazon
   };
   enum OSType {
     UnknownOS,
