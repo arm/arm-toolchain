@@ -346,7 +346,7 @@ libcpp_build() {
         tee "${LOGS_DIR}/libcpp.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
-    export LD_LIBRARY_PATH="${ATFL_DIR}/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="${ATFL_DIR}/lib:${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}:$LD_LIBRARY_PATH"
     run_command ninja ${NINJA_ARGS} check-cxx 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command ninja ${NINJA_ARGS} check-cxxabi 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
 }
@@ -374,6 +374,8 @@ product_build() {
         tee "${LOGS_DIR}/product.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    cp -d ${ATFL_DIR}/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
+        "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
     echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
