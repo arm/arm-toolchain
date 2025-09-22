@@ -87,12 +87,42 @@ jobs:
       - name: Apply llvm-project-perf patches
         run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
 
-      - name: Build ${{ matrix.build_script }}
-        run: ./arm-software/embedded/scripts/${{ matrix.build_script }}
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          set -o pipefail # ensure failure is propagated even when piping to tee
+          ./arm-software/embedded/scripts/${{ matrix.build_script }} 2>&1 | tee build.log
 
-      - name: Test ${{ matrix.test_script }}
-        if: matrix.test_script != ''
-        run: ./arm-software/embedded/scripts/${{ matrix.test_script }}
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\arm-software\embedded\scripts\${{ matrix.build_script }} *>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE } # Propagate failure
+
+      - name: Test (Unix)
+        if: runner.os != 'Windows' && matrix.test_script != ''
+        run: |
+          set -o pipefail # ensure failure is propagated even when piping to tee
+          ./arm-software/embedded/scripts/${{ matrix.test_script }} 2>&1 | tee test.log
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows' && matrix.test_script != ''
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\arm-software\embedded\scripts\${{ matrix.test_script }} *>&1 | Tee-Object -FilePath test.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE } # Propagate failure
+
+      - name: Upload logs as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs-${{ matrix.build_script }}-${{ matrix.target_os }}
+          path: |
+            build.log
+            test.log
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
