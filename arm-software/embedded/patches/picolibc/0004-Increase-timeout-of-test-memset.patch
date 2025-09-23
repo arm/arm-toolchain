@@ -1,0 +1,54 @@
+From b3093eb1b0cdf77344ff357fe7d0e4da0c469124 Mon Sep 17 00:00:00 2001
+From: Victor Campos <victor.campos@arm.com>
+Date: Tue, 23 Sep 2025 11:21:58 +0100
+Subject: Increase timeout of test-memset
+
+When picolibc is built with buildtype `minsize` for Arm and with PACBTI
+enabled (Pointer Authentication and Branch Target Identification),
+test-memset becomes quite a lot slower. The presence of PACBTI function
+prologues and epilogues, in addition to the greatly reduced function
+inlining, makes the overhead of PACBTI significant.
+
+This patch increases the timeout of test-memset from 60 seconds to 120
+seconds.
+---
+ test/meson.build | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/test/meson.build b/test/meson.build
+index b5790a6854..1e3694be17 100644
+--- a/test/meson.build
++++ b/test/meson.build
+@@ -39,7 +39,7 @@ plain_tests_common = ['regex', 'ungetc',
+ 	              'timegm',
+                       'test-atomic',
+                       'test-strchr', 'test-memchr',
+-	              'test-memset', 'test-put',
++	              'test-put',
+ 	              'test-raise',
+                       'test-sprintf-percent-n',
+                       'test-ctype',
+@@ -511,6 +511,20 @@ foreach params : targets
+        suite: 'test',
+        env: test_env)
+ 
++  t1 = 'test-memset'
++
++  test(t1 + target,
++       executable(t1 + target, ['test-memset.c', 'lock-valid.c'],
++		  c_args: printf_compile_args_d + _c_args,
++		  link_args: printf_link_args_d + _link_args,
++		  objects: _objs,
++		  link_depends:  _link_depends,
++		  include_directories: inc),
++       depends: bios_bin,
++       timeout: 120,
++       suite: 'test',
++       env: test_env)
++
+   foreach t1 : plain_tests
+     t1_src = t1 + '.c'
+     test_file_name_arg=['-DTEST_FILE_NAME="' + t1 + target + '.txt"']
+-- 
+2.43.0
+
