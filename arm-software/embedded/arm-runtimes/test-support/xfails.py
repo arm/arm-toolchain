@@ -507,7 +507,7 @@ def main():
     else:
         print("LIT_XFAIL=" + ";".join(tests_to_xfail))
     if args.xfails_not_file:
-        os.makedirs(os.path.dirname(args.xfails_file), exist_ok=True)
+        os.makedirs(os.path.dirname(args.xfails_not_file), exist_ok=True)
         with open(args.xfails_not_file, "w", encoding="utf-8") as f:
             for testname in tests_to_upass:
                 f.write(testname + "\n")
