@@ -9,6 +9,7 @@ It can also be used to track where downstream testing diverges from
 upstream, and why."""
 
 import argparse
+import os
 import subprocess
 
 from enum import Enum
@@ -499,14 +500,14 @@ def main():
 
     # Save to files for easy consumption by other scripts, or print for users.
     if args.xfails_file:
+        os.makedirs(os.path.dirname(args.xfails_file), exist_ok=True)
         with open(args.xfails_file, "w", encoding="utf-8") as f:
             for testname in tests_to_xfail:
                 f.write(testname + "\n")
     else:
         print("LIT_XFAIL=" + ";".join(tests_to_xfail))
-        for testname in tests_to_xfail:
-            f.write(testname + "\n")
     if args.xfails_not_file:
+        os.makedirs(os.path.dirname(args.xfails_not_file), exist_ok=True)
         with open(args.xfails_not_file, "w", encoding="utf-8") as f:
             for testname in tests_to_upass:
                 f.write(testname + "\n")
