@@ -14,4 +14,4 @@
 /arm-software/linux/ @arm/arm-toolchain-linux
 
 # ATfE workflows. Only requires the ATfE team input
-.github/workflows/atfe_* @arm/arm-toolchain-embedded
+/.github/workflows/atfe_* @arm/arm-toolchain-embedded
