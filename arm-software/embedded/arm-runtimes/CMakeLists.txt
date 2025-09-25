@@ -748,7 +748,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_ENABLE_RUNTIMES=libc
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
-        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=-nostartfiles,-lcrt0-semihost,-lsemihost,-T,llvmlibc.ld
+        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=-nostartfiles,-lsemihost,-T,llvmlibc.ld
         -DLIBC_TEST_CMD=${test_cmd}
         -DLIBC_TEST_HERMETIC_ONLY=true
         STEP_TARGETS configure build install
