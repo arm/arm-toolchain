@@ -29,9 +29,15 @@ using namespace llvm::sys;
 
 Multilib::Multilib(StringRef GCCSuffix, StringRef OSSuffix,
                    StringRef IncludeSuffix, const flags_list &Flags,
+                   // Downstream issue: #446 (Extend the Multilib system to
+                   // support an IncludeDirs field)
+                   const includedirs_list &IncludeDirs,
                    StringRef ExclusiveGroup, std::optional<StringRef> Error)
     : GCCSuffix(GCCSuffix), OSSuffix(OSSuffix), IncludeSuffix(IncludeSuffix),
-      Flags(Flags), ExclusiveGroup(ExclusiveGroup), Error(Error) {
+      Flags(Flags),
+      // Downstream issue: #446 (Extend the Multilib system to support an
+      // IncludeDirs field)
+      IncludeDirs(IncludeDirs), ExclusiveGroup(ExclusiveGroup), Error(Error) {
   assert(GCCSuffix.empty() ||
          (StringRef(GCCSuffix).front() == '/' && GCCSuffix.size() > 1));
   assert(OSSuffix.empty() ||
@@ -60,9 +66,7 @@ void Multilib::print(raw_ostream &OS) const {
 bool Multilib::operator==(const Multilib &Other) const {
   // Check whether the flags sets match
   // allowing for the match to be order invariant
-  llvm::StringSet<> MyFlags;
-  for (const auto &Flag : Flags)
-    MyFlags.insert(Flag);
+  llvm::StringSet<> MyFlags(llvm::from_range, Flags);
 
   for (const auto &Flag : Other.Flags)
     if (!MyFlags.contains(Flag))
@@ -272,9 +276,7 @@ bool MultilibSet::select(
 
 llvm::StringSet<>
 MultilibSet::expandFlags(const Multilib::flags_list &InFlags) const {
-  llvm::StringSet<> Result;
-  for (const auto &F : InFlags)
-    Result.insert(F);
+  llvm::StringSet<> Result(llvm::from_range, InFlags);
   for (const FlagMatcher &M : FlagMatchers) {
     std::string RegexString(M.Match);
 
@@ -288,7 +290,7 @@ MultilibSet::expandFlags(const Multilib::flags_list &InFlags) const {
     assert(Regex.isValid());
     if (llvm::any_of(InFlags,
                      [&Regex](StringRef F) { return Regex.match(F); })) {
-      Result.insert(M.Flags.begin(), M.Flags.end());
+      Result.insert_range(M.Flags);
     }
   }
   return Result;
@@ -303,6 +305,9 @@ struct MultilibSerialization {
   std::string Dir;        // if this record successfully selects a library dir
   std::string Error;      // if this record reports a fatal error message
   std::vector<std::string> Flags;
+  // Downstream issue: #446 (Extend the Multilib system to support an
+  // IncludeDirs field)
+  std::vector<std::string> IncludeDirs;
   std::string Group;
 };
 
@@ -354,6 +359,9 @@ template <> struct llvm::yaml::MappingTraits<MultilibSerialization> {
     io.mapOptional("Dir", V.Dir);
     io.mapOptional("Error", V.Error);
     io.mapRequired("Flags", V.Flags);
+    // Downstream issue: #446 (Extend the Multilib system to support an
+    // IncludeDirs field)
+    io.mapOptional("IncludeDirs", V.IncludeDirs);
     io.mapOptional("Group", V.Group);
   }
   static std::string validate(IO &io, MultilibSerialization &V) {
@@ -363,6 +371,12 @@ template <> struct llvm::yaml::MappingTraits<MultilibSerialization> {
       return "the 'Dir' and 'Error' keys may not both be specified";
     if (StringRef(V.Dir).starts_with("/"))
       return "paths must be relative but \"" + V.Dir + "\" starts with \"/\"";
+    // Downstream issue: #446 (Extend the Multilib system to support an
+    // IncludeDirs field)
+    for (const auto &Path : V.IncludeDirs) {
+      if (StringRef(Path).starts_with("/"))
+        return "paths must be relative but \"" + Path + "\" starts with \"/\"";
+    }
     return std::string{};
   }
 };
@@ -493,7 +507,10 @@ MultilibSet::parseYaml(llvm::MemoryBufferRef Input,
   Multilibs.reserve(MS.Multilibs.size());
   for (const auto &M : MS.Multilibs) {
     if (!M.Error.empty()) {
-      Multilibs.emplace_back("", "", "", M.Flags, M.Group, M.Error);
+      // Downstream issue: #446 (Extend the Multilib system to support an
+      // IncludeDirs field)
+      Multilibs.emplace_back("", "", "", M.Flags, M.IncludeDirs, M.Group,
+                             M.Error);
     } else {
       std::string Dir;
       if (M.Dir != ".")
@@ -502,7 +519,9 @@ MultilibSet::parseYaml(llvm::MemoryBufferRef Input,
       // Multilib constructor. If we later support more than one type of group,
       // we'll have to look up the group name in MS.Groups, check its type, and
       // decide what to do here.
-      Multilibs.emplace_back(Dir, Dir, Dir, M.Flags, M.Group);
+      // Downstream issue: #446 (Extend the Multilib system to support an
+      // IncludeDirs field)
+      Multilibs.emplace_back(Dir, Dir, Dir, M.Flags, M.IncludeDirs, M.Group);
     }
   }
 

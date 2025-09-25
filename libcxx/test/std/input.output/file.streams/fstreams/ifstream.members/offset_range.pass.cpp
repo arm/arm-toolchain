@@ -26,6 +26,9 @@
 // meaning it can represent file sizes up to 2GB (2^31 bytes) only.
 //
 // UNSUPPORTED: target=armv7-unknown-linux-gnueabihf
+// Downstream issue: #375 (Enable fstream independently of filesystem)
+// UNSUPPORTED: baremetal
+
 
 #include <fstream>
 #include <iostream>
@@ -46,7 +49,7 @@ void test_tellg(std::streamoff total_size) {
     ofs.open(p, std::ios::out | std::ios::binary);
     assert(ofs.is_open());
     for (std::streamoff size = 0; size < total_size;) {
-      std::size_t n = std::min(static_cast<std::streamoff>(data.size()), total_size - size);
+      std::streamoff n = std::min(static_cast<std::streamoff>(data.size()), total_size - size);
       ofs.write(data.data(), n);
       size += n;
     }

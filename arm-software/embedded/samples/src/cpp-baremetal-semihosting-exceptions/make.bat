@@ -43,11 +43,11 @@ if exist hello-exn.hex del /q hello-exn.hex
 @exit /B 1
 
 :build_fn
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -print-multi-directory -g -T ..\..\ldscripts\microbit.ld -o hello.elf hello.cpp
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -g -T ..\..\ldscripts\microbit.ld -o hello.elf hello.cpp
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -print-multi-directory -g -T ..\..\ldscripts\microbit.ld -o hello.elf hello.cpp
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -g -T ..\..\ldscripts\microbit.ld -o hello.elf hello.cpp
 %BIN_PATH%\llvm-objcopy.exe -O ihex hello.elf hello.hex
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -lcrt0-semihost -lsemihost -print-multi-directory -g -T ..\..\ldscripts\microbit.ld -o hello-exn.elf hello-exn.cpp
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -lcrt0-semihost -lsemihost -g -T ..\..\ldscripts\microbit.ld -o hello-exn.elf hello-exn.cpp
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -print-multi-directory -g -T ..\..\ldscripts\microbit.ld -o hello-exn.elf hello-exn.cpp
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -g -T ..\..\ldscripts\microbit.ld -o hello-exn.elf hello-exn.cpp
 %BIN_PATH%\llvm-objcopy.exe -O ihex hello-exn.elf hello-exn.hex
 @exit /B
 

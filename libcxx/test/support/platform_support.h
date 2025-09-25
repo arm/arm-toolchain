@@ -40,6 +40,10 @@
 #   include <io.h> // _mktemp_s
 #   include <fcntl.h> // _O_EXCL, ...
 #   include <sys/stat.h> // _S_IREAD, ...
+// Downstream issue: #375 (Enable fstream independently of filesystem)
+#elif defined(_NEWLIB_VERSION)
+// No need to include extra headers for the get_temp_file_name() implementation
+// below: tmpnam() is defined in <stdio.h>
 #elif __has_include(<unistd.h>)
 #  include <unistd.h> // close
 #endif
@@ -70,6 +74,15 @@ inline std::string get_temp_file_name() {
       continue;
     abort();
   }
+// Downstream issue: #375 (Enable fstream independently of filesystem)
+#elif defined(_NEWLIB_VERSION)
+  char tmp_name[L_tmpnam];
+  char *ret = tmpnam(tmp_name);
+  if (ret == NULL) {
+    perror("tmpnam");
+    abort();
+  }
+  return std::string(ret);
 #elif !__has_include(<unistd.h>)
   // Without `unistd.h` we cannot guarantee that the file is unused, however we
   // can simply generate a good guess in the temporary folder and create it.

@@ -42,6 +42,15 @@ Groups:
 Variants:
 @multilib_yaml_content@
 
+# Append an error case to the Variants list, matching anything that
+# enables the RWPI option. We don't build any library variants using
+# the RWPI style of access to writable static data, so if a user
+# compiles with -frwpi, we don't have any compatible library.
+- Error: Arm Toolchain for Embedded does not provide RWPI library variants
+  Flags:
+  - -frwpi
+  Group: stdlibs
+
 Mappings:
 
 # Map higher architecture versions to subsets of them, so that a
@@ -158,9 +167,15 @@ Mappings:
 - Match: --target=(arm|thumb)v(8|8\.[1-9]|9|9\.[1-9])a-unknown-none-eabi
   Flags:
   - --target=armv7-unknown-none-eabi
+- Match: --target=(arm|thumb)ebv(8|8\.[1-9]|9|9\.[1-9])a-unknown-none-eabi
+  Flags:
+  - --target=armebv7-unknown-none-eabi
 - Match: --target=(arm|thumb)v(8|8\.[1-9]|9|9\.[1-9])a-unknown-none-eabihf
   Flags:
   - --target=armv7-unknown-none-eabihf
+- Match: --target=(arm|thumb)ebv(8|8\.[1-9]|9|9\.[1-9])a-unknown-none-eabihf
+  Flags:
+  - --target=armebv7-unknown-none-eabihf
 - Match: --target=(arm|thumb)v(8|8\.[1-9]|9|9\.[1-9])r-unknown-none-eabi
   Flags:
   - --target=armv7r-unknown-none-eabi
@@ -186,3 +201,7 @@ Mappings:
 - Match: -mbranch-protection=(standard|pac-ret(\+leaf)?(\+bti)?|bti(\+pac-ret(\+leaf)?)?)
   Flags:
   - -mbranch-protection=pac-ret+bti
+
+- Match: -Oz
+  Flags:
+  - -Os

@@ -10,11 +10,14 @@ fi
 ################################
 
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-README_MD_PATH=${README_MD_PATH:-"${BASE_DIR}/README.md"}
+CHANGELOG_MD_PATH=${CHANGELOG_MD_PATH:-"${BASE_DIR}/CHANGELOG.md"}
+SBOM_FILE_PATH=${SBOM_FILE_PATH:-"${BASE_DIR}/SBOM_Files/ATfL-SBOM.spdx.json"}
 MKMODULEDIRS_PATH=${MKMODULEDIRS_PATH:-"${BASE_DIR}/mkmoduledirs.sh.var"}
 SOURCES_DIR=${SOURCES_DIR:-"$(git -C "${BASE_DIR}" rev-parse --show-toplevel)"}
 LIBRARIES_DIR=${LIBRARIES_DIR:-"${BASE_DIR}/lib"}
+BOLTTESTS_DIR=${BOLTTESTS_DIR:-"${BASE_DIR}/bolt-tests"}
 PATCHES_DIR=${PATCHES_DIR:-"${BASE_DIR}/patches"}
+DOCS_DIR=${DOCS_DIR:-"${BASE_DIR}/docs"}
 BUILD_DIR=${BUILD_DIR:-"${BASE_DIR}/build"}
 ATFL_DIR=${ATFL_DIR:-"${BUILD_DIR}/atfl"}
 LOGS_DIR=${LOGS_DIR:-"${BASE_DIR}/logs"}
@@ -70,19 +73,24 @@ PRODUCT_CMAKE_FLAGS=(
     -DCMAKE_CXX_COMPILER="${BUILD_DIR}/bootstrap_compiler/bin/clang++"
     -DCMAKE_INSTALL_PREFIX="${ATFL_DIR}"
     -DLLVM_ENABLE_LLD=ON
-    -DLLVM_ENABLE_LIBCXX=ON
 )
 COMPILER_CMAKE_FLAGS=(
-    -DCMAKE_C_FLAGS="-I${ATFL_DIR}/include"
-    -DCMAKE_CXX_FLAGS="-I${ATFL_DIR}/include -I${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT"
-    -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed"
-    -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed"
-    -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed"
+    -DCMAKE_CXX_FLAGS="-stdlib++-isystem ${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT"
+    -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
+    -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
+    -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++"
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_SKIP_RPATH=No
     -DCMAKE_SKIP_INSTALL_RPATH=No
-    -DLLVM_ENABLE_PROJECTS="llvm;clang;flang;lld"
-    -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind;openmp"
+    -DLLVM_BUILD_DOCS=ON
+    -DLLVM_ENABLE_SPHINX=ON
+    -DSPHINX_WARNINGS_AS_ERRORS=OFF
+    -DLLVM_ENABLE_PROJECTS="llvm;clang;flang;bolt;lld"
+    -DLLVM_ENABLE_RUNTIMES="compiler-rt;flang-rt;libunwind;openmp"
+    -DLLVM_TOOL_BOLT_BUILD=True
+    -DBOLT_TARGETS_TO_BUILD=AArch64
+    -DBOLT_BUILD_TOOLS=ON
+    -DBOLT_ENABLE_RUNTIME=ON
     -DCLANG_ENABLE_LIBXML2=OFF
     -DCLANG_PLUGIN_SUPPORT=ON
     -DCLANG_ENABLE_STATIC_ANALYZER=ON
@@ -100,6 +108,8 @@ COMPILER_CMAKE_FLAGS=(
     -DCOMPILER_RT_USE_ATOMIC_LIBRARY=ON
     -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF
     -DCOMPILER_RT_LIBRARY_atomic_${ATFL_TARGET_TRIPLE}="-rtlib=compiler-rt"
+    -DFLANG_RT_ENABLE_SHARED=ON
+    -DFLANG_RT_ENABLE_STATIC=ON
     -DLIBOMP_COPY_EXPORTS=False
     -DLIBOMP_USE_HWLOC=False
     -DLIBOMP_OMPT_SUPPORT=ON
@@ -145,6 +155,8 @@ abort() {
     ***************
     '
     echo "An error occurred. Exiting..." >&2
+    rm -f "${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg"
+    rm -f "${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg"
     if ${INTERACTIVE}; then
         cd "${BASE_DIR}"
         bash
@@ -173,16 +185,22 @@ Options:
 
 Environment Variables:
 
-    README_MD_PATH      Specifies the location of the README.md file to bundle
-                        (default: ${README_MD_PATH})
+    CHANGELOG_MD_PATH   Specifies the location of the CHANGELOG.md file to bundle
+                        (default: ${CHANGELOG_MD_PATH})
+    SBOM_FILE_PATH      Specifies the location of the SBOM JSON file to bundle
+                        (default: ${SBOM_FILE_PATH})
     MKMODULEDIRS_PATH   Specifies the location of mkmoduledirs.sh.var to tweak
                         (default: ${MKMODULEDIRS_PATH})
     SOURCES_DIR         The directory where all source code will be stored
                         (default: $SOURCES_DIR)
+    BOLTTESTS_DIR       The optional directory where the bolt-tests repo has been cloned
+                        (default: $BOLTTESTS_DIR)
     LIBRARIES_DIR       The optional directory where the ArmPL veclibs will be stored
                         (default: $LIBRARIES_DIR)
     PATCHES_DIR         The optional directory where all patches will be stored
                         (default: $PATCHES_DIR)
+    DOCS_DIR            The directory where ATfL documents will be stored
+                        (default: $DOCS_DIR)
     BUILD_DIR           The directory where all build output will be stored
                         (default: $BUILD_DIR)
     LOGS_DIR            The directory where all build logs will be stored
@@ -210,6 +228,14 @@ EOF
 
 libraries_present() {
     if [ "$(ls -A "${LIBRARIES_DIR}")" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+bolttests_present() {
+    if [ "$(ls -A "${BOLTTESTS_DIR}")" ]; then
         return 0
     else
         return 1
@@ -320,17 +346,22 @@ libcpp_build() {
         tee "${LOGS_DIR}/libcpp.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
-    export LD_LIBRARY_PATH="${ATFL_DIR}/lib:$LD_LIBRARY_PATH"
+    export LD_LIBRARY_PATH="${ATFL_DIR}/lib:${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}:$LD_LIBRARY_PATH"
     run_command ninja ${NINJA_ARGS} check-cxx 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command ninja ${NINJA_ARGS} check-cxxabi 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
 }
 
 product_build() {
     local extra_flags=""
-    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
-        extra_flags="-DLLVM_APPEND_VC_REV=OFF"
+    if ! bolttests_present; then
+        echo "Bolt tests not present, external Bolt tests will not be executed."
     else
-        extra_flags="-DLLVM_APPEND_VC_REV=ON"
+        extra_flags="${extra_flags} -DLLVM_EXTERNAL_PROJECTS=bolttests -DLLVM_EXTERNAL_BOLTTESTS_SOURCE_DIR=${BOLTTESTS_DIR}"
+    fi
+    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=OFF"
+    else
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=ON"
     fi
 
     mkdir -p "${BUILD_DIR}/stage/product_build"
@@ -338,19 +369,31 @@ product_build() {
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
         -DBUILD_SHARED_LIBS=False \
         -DLIBOMP_ENABLE_SHARED=True \
+        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++;-DCMAKE_MODULE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++;-DCMAKE_SHARED_LINKER_FLAGS=-L${ATFL_DIR}/lib  -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++" \
         "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
         tee "${LOGS_DIR}/product.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    cp -d ${ATFL_DIR}/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
+        "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
+    rm "${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg"
+    rm "${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg"
 }
 
 shared_lib_build() {
     local extra_flags=""
-    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
-        extra_flags="-DLLVM_APPEND_VC_REV=OFF"
+    if ! bolttests_present; then
+        echo "Bolt tests not present, external Bolt tests will not be executed."
     else
-        extra_flags="-DLLVM_APPEND_VC_REV=ON"
+        extra_flags="${extra_flags} -DLLVM_EXTERNAL_PROJECTS=bolttests -DLLVM_EXTERNAL_BOLTTESTS_SOURCE_DIR=${BOLTTESTS_DIR}"
+    fi
+    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=OFF"
+    else
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=ON"
     fi
 
     mkdir -p "${BUILD_DIR}/stage/shared_lib_build"
@@ -358,7 +401,8 @@ shared_lib_build() {
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
         -DBUILD_SHARED_LIBS=True \
         -DLIBOMP_ENABLE_SHARED=False \
-        "${COMMON_CMAKE_FLAGS[@]}" -DLLVM_ENABLE_ZSTD=OFF "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
+        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++;-DCMAKE_MODULE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++;-DCMAKE_SHARED_LINKER_FLAGS=-L${ATFL_DIR}/lib  -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++" \
+        "${COMMON_CMAKE_FLAGS[@]}" -DLLVM_ENABLE_ZSTD=OFF "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" -DLIBOMP_OMPT_SUPPORT=OFF "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
         tee "${LOGS_DIR}/shared_lib.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
     rm -rf "${ATFL_DIR}.keep" "${ATFL_DIR}.libs"
@@ -368,18 +412,26 @@ shared_lib_build() {
     mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
     cp "${ATFL_DIR}.libs/lib/${ATFL_TARGET_TRIPLE}/libomp.a" \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
-    cp -d ${ATFL_DIR}.libs/lib/libflang_rt* \
+    cp -d ${ATFL_DIR}.libs/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" > ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
+    rm "${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg"
+    rm "${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg"
 }
 
 package() {
-    cp "${README_MD_PATH}" "${ATFL_DIR}/README.md"
+    cp "${SOURCES_DIR}/LICENSE.TXT" "${ATFL_DIR}/LICENSE.TXT"
+    cp "${CHANGELOG_MD_PATH}" "${ATFL_DIR}/CHANGELOG.md"
+    cp "${SBOM_FILE_PATH}" "${ATFL_DIR}/ATfL-SBOM.spdx.json"
     mkdir -p "${ATFL_DIR}/arm"
     cp "${MKMODULEDIRS_PATH}" "${ATFL_DIR}/arm/mkmoduledirs.sh"
+    mkdir -p "${ATFL_DIR}/docs"
+    cp "${DOCS_DIR}"/*.md "${ATFL_DIR}/docs"
     sed -i "s/%ATFL_VERSION%/${ATFL_VERSION}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_BUILD%/${BUILD_NUMBER:-"unknown"}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_INSTALL_PREFIX%/\$\(dirname \$\(dirname \`realpath \$BASH_SOURCE\`\)\)/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
@@ -392,10 +444,21 @@ package() {
       cp "${LIBRARIES_DIR}/libamath.so" \
           "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     fi
-    cp "${ATFL_DIR}/lib/libflang_rt.runtime.a" \
-      "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     cp ${ATFL_DIR}/include/flang/omp* "${ATFL_DIR}/include"
+    cp "${ATFL_DIR}/share/man/man1/clang.1" "${ATFL_DIR}/share/man/man1/armclang.1"
+    sed -i "s/clang /armclang /g" "${ATFL_DIR}/share/man/man1/armclang.1"
+    sed -i "s/Bclang/Barmclang/g" "${ATFL_DIR}/share/man/man1/armclang.1"
+    sed -i "s/CLANG/ARMCLANG/g" "${ATFL_DIR}/share/man/man1/armclang.1"
+    sed -i "s/\"Clang\"/\"Armclang\"/g" "${ATFL_DIR}/share/man/man1/armclang.1"
+    sed -i "s/Xarmclang/Xclang/g" "${ATFL_DIR}/share/man/man1/armclang.1"
+    cp "${ATFL_DIR}/share/man/man1/flang.1" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/flang /armflang /g" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/Bflang/Barmflang/g" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/FLANG/ARMFLANG/g" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/\"Flang\"/\"Armflang\"/g" "${ATFL_DIR}/share/man/man1/armflang.1"
+    sed -i "s/Xarmflang/Xflang/g" "${ATFL_DIR}/share/man/man1/armflang.1"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
+    echo 'export MANPATH="$(dirname `realpath $BASH_SOURCE`)/share/man:$MANPATH"' >>"${ATFL_DIR}/env.bash"
     echo "export PS1=\"(ATfL ${ATFL_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
     cd "${ATFL_DIR}/bin"
     ln -sf clang armclang
@@ -411,6 +474,9 @@ package() {
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang++.cfg
     echo "-frtlib-add-rpath @atfl-performance.cfg" > flang.cfg
     cd -
+    echo "complete -F _clang armclang" >> ${ATFL_DIR}/share/clang/bash-autocomplete.sh
+    echo "complete -F _clang armclang++" >> ${ATFL_DIR}/share/clang/bash-autocomplete.sh
+    echo "complete -F _clang armflang" >> ${ATFL_DIR}/share/clang/bash-autocomplete.sh
     run_command tar --owner=root --group=root -czf "$OUTPUT_DIR/$TAR_NAME" -C "$BUILD_DIR" atfl |
         tee "${LOGS_DIR}/package.txt"
 }
@@ -475,15 +541,27 @@ if [[ $# -gt 0 ]]; then
     esac
 fi
 
-if ! [[ -f "${README_MD_PATH}" ]]
+if ! [[ -f "${CHANGELOG_MD_PATH}" ]]
 then
-  echo "The path to README.md file is configured incorrectly or does not exist."
+  echo "The path to CHANGELOG.md file is configured incorrectly or does not exist."
+  exit 1
+fi
+
+if ! [[ -f "${SBOM_FILE_PATH}" ]]
+then
+  echo "The path to SBOM JSON file is configured incorrectly or does not exist."
   exit 1
 fi
 
 if ! [[ -f "${MKMODULEDIRS_PATH}" ]]
 then
   echo "The path to mkmoduledirs.sh.var file is configured incorrectly or does not exist."
+  exit 1
+fi
+
+if ! [[ -e "${DOCS_DIR}" ]]
+then
+  echo "The documentation directory is configured incorrectly or does not exist."
   exit 1
 fi
 

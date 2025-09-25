@@ -20,17 +20,16 @@
 # libcrt0.a might still be useful.
 
 cmake_minimum_required(VERSION 3.20.0)
-project(llvmlibc-support LANGUAGES C ASM)
+project(llvmlibc-support LANGUAGES C CXX ASM)
 
-add_library(semihost STATIC
-  init.c
-  exit.c
-  stdio_read.c
-  stdio_write.c
+add_subdirectory(crt0) # crt0, crt0-none and crt0-semihost
+add_subdirectory(semihost)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc.ld.in
+    ${CMAKE_CURRENT_BINARY_DIR}/llvmlibc.ld
+    @ONLY
 )
 
-add_library(crt0 STATIC
-  crt0.c
-)
-
-install(TARGETS semihost crt0)
+install(TARGETS crt0 crt0-none crt0-semihost semihost DESTINATION lib)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/llvmlibc.ld DESTINATION lib)

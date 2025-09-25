@@ -1,5 +1,7 @@
 # Arm Toolchain for Embedded
 
+[![ATfE Nightly Build and Test](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml/badge.svg)](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml)
+
 This repository contains build scripts and auxiliary material for building a
 bare-metal LLVM based toolchain targeting Arm® architecture based on:
 * clang + llvm
@@ -31,6 +33,8 @@ embedded and realtime operating systems.
 - AArch32 Armv8-A
 - AArch32 Armv8-R
 - AArch64 Armv8-A
+- AArch64 Armv8-R
+- AArch64 Armv9-A
 
 ## C++ support
 
@@ -42,6 +46,10 @@ Arm Toolchain for Embedded uses the unstable libc++ ABI version. This ABI
 uses all the latest libc++ improvements and bugfixes, but may result in link
 errors when linking against objects compiled against older versions of the ABI.
 For more information see https://libcxx.llvm.org/DesignDocs/ABIVersioning.html.
+
+Libc++ testing has been fully completed for only a few of the variants. The specific
+variants for which testing is enabled can be found in the corresponding JSON files
+located at the [path](arm-multilib/json/variants).
 
 ## Components
 
@@ -56,10 +64,9 @@ picolibc   | https://github.com/picolibc/picolibc
 
 Content of this repository is licensed under Apache-2.0 with LLVM Exceptions, see
 [LICENSE.txt](LICENSE.txt). Individual patch files under the
-[patches](https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/tree/main/patches)
-folder may contain code under the upstream project license, if they are
-cherry-picks of upstream commits into the LLVM Embedded Toolchain for Arm
-release branches, see corresponding pull requests for references.
+[patches](patches) folder may contain code under the upstream project license. If they are
+cherry-picks of upstream commits into the Arm Toolchain for Embedded release branches,
+see corresponding pull requests for references.
 
 The resulting binaries are covered under their respective open source licenses,
 see component links above.
@@ -70,20 +77,22 @@ models, which have their own licenses. These are not used by default, see
 
 ## Host platforms
 
-Arm Toolchain for Embedded is built and tested on Ubuntu 18.04 LTS.
+Arm Toolchain for Embedded is built and tested on:
+* Linux Ubuntu 22.04 LTS on x86_64 and AArch64.
+* macOS on x86_64 and Apple Silicon.
+* Windows Server 2019 with Visual Studio on x86_64.
 
-The Windows version is built on Windows Server 2019 and lightly tested on Windows 10.
-
-Building on macOS is functional for x86_64 and Apple Silicon.
-
-[Binary packages](https://github.com/arm/arm-toolchain/-/releases)
+[Binary packages](https://github.com/arm/arm-toolchain/releases)
 are provided for major LLVM releases for Linux and Windows.
 
 ## Getting started
 
-Download a release of the toolchain for your platform from [Github
-releases](https://github.com/arm/arm-toolchain/-/releases)
-and extract the archive into an arbitrary directory.
+Download a release of the toolchain for your platform from [GitHub
+releases](https://github.com/arm/arm-toolchain/releases), or use a
+[Nightly](docs/atfe-nightly-builds.md)
+build for early access to the latest features.
+
+After downloading, extract the archive into an arbitrary directory.
 
 ### Pre-requisite for using toolchain on Windows
 
@@ -91,7 +100,8 @@ Install appropriate latest supported Microsoft Visual C++ Redistributable packag
 
 ### Using the toolchain
 
-> *Note:* If you are using the toolchain in a shared environment with untrusted input,
+> [!CAUTION]
+> If you are using the toolchain in a shared environment with untrusted input,
 > make sure it is sufficiently sandboxed.
 
 To use the toolchain, on the command line you need to provide the following options:
@@ -133,28 +143,18 @@ To display the directory selected by the multilib system, add the flag
 To display all available multilibs run `clang` with the flag `-print-multi-lib`
 and a target triple like `--target=aarch64-none-elf` or `--target=arm-none-eabi`.
 
-It's possible that `clang` will choose a set of libraries that are not the ones
-you want to use. In this case you can bypass the multilib system by providing a
-`--sysroot` option specifying the directory containing the `include` and `lib`
-directories of the libraries you want to use. For example:
-
-```
-$ clang \
---sysroot=<install-dir>/ATfE-<revision>/lib/clang-runtimes/arm-none-eabi/armv6m_soft_nofp \
---target=armv6m-none-eabi \
--mfpu=none \
--fno-exceptions \
--fno-rtti \
--nostartfiles \
--lcrt0-semihost \
--lsemihost \
--T picolibc.ld \
--o example example.c
-```
+> [!WARNING]
+> `--sysroot` is not a substitute for multilib selection
+> The `--sysroot` option cannot be used to override multilib logic
+> or manually select an arbitrary library variant.
 
 The FPU selection can be skipped, but it is not recommended to as the defaults
 are different to GCC ones.
 
+> [!WARNING]
+> The AArch64 no-FP library variants are intended for use in projects that
+> do not use floating-point calculations. They include software floating-point
+> functions to enable testing only - these are not designed for production use.
 
 The builds of the toolchain come packaged with two config files, Omax.cfg and OmaxLTO.cfg.
 When used, these config files enable several build optimisation flags to achieve highest performance on typical embedded benchmarks. OmaxLTO.cfg enables link-time optimisation (LTO) specific flags.
@@ -178,6 +178,9 @@ to find out more. Users are also encouraged to create their own configs and tune
 flag parameters.
 Information on Arm Toolchain for Embedded specific optimization flags is available in [Optimization Flags](docs/optimization-flags.md)
 
+To optimize for code size, use `Osize.cfg` or a relevant subset of flags
+provided there.
+
 Binary releases of the Arm Toolchain for Embedded are based on release
 branches of the upstream LLVM Project, thus can safely be used with all tools
 provided by LLVM [releases](https://github.com/llvm/llvm-project/releases)
@@ -188,7 +191,8 @@ and [Experimental newlib support](docs/newlib.md)
 for advice on using Arm Toolchain for Embedded with existing projects
 relying on the Arm GNU Toolchain.
 
-> *Note:* `picolibc` provides excellent
+> [!TIP]
+> `picolibc` provides excellent
 > [support for Arm GNU Toolchain](https://github.com/picolibc/picolibc/blob/main/doc/using.md),
 > so projects that require using both Arm GNU Toolchain and Arm Toolchain for Embedded
 > can choose either `picolibc` or `newlib`/`newlib-nano`.
@@ -201,8 +205,8 @@ guide for detailed instructions.
 
 ## Providing feedback and reporting issues
 
-Please raise an issue via [Github issues](https://github.com/arm/arm-toolchain/issues).
+Please see the [Contribution Guide](../../CONTRIBUTING.md#report-an-issue) for guidance on how to report an issue or raise a feature request.
 
 ## Contributions and Pull Requests
 
-Please see the [Contribution Guide](docs/contributing.md) for details.
+Please see the [Contribution Guide](../../CONTRIBUTING.md) for details.

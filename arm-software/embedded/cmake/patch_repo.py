@@ -67,87 +67,90 @@ def main():
     patch_list = list(pathlib.Path(abs_patch_dir).glob("*.patch"))
     patch_list.sort()
 
-    print(f"Found {len(patch_list)} patches to apply:")
-    print("\n".join(p.name for p in patch_list))
-
-    if args.method == "am":
-        merge_args = git_cmd + ["am", "-k", "--ignore-whitespace"]
-        if args.three_way:
-            merge_args.append("--3way")
-        for patch in patch_list:
-            merge_args.append(str(patch))
-        p = subprocess.run(merge_args, capture_output=True, text=True)
-        print(p.stdout)
-        print(p.stderr)
-
-        if p.returncode == 0:
-            print(f"All patches applied.")
-            sys.exit(0)
-        if args.restore_on_fail:
-            # Check that the operation can be aborted.
-            # git am doesn't give any specific return codes,
-            # so check for unresolved working files.
-            rebase_apply_path = os.path.join(".git", "rebase-apply")
-            if args.repo_dir:
-                rebase_apply_path = os.path.join(args.repo_dir, rebase_apply_path)
-            if os.path.isdir(rebase_apply_path):
-                print("Aborting git am...")
-                subprocess.run(git_cmd + ["am", "--abort"], check=True)
-                print(f"Abort successful.")
-                sys.exit(2)
-            else:
-                print("Unable to abort.")
-        sys.exit(1)
+    if len(patch_list) == 0:
+        print(f"Found no patches to apply.")
     else:
-        applied_patches = []
-        for current_patch in patch_list:
-            print(f"Checking {current_patch.name}...")
-            # Check that the patch applies before trying to apply it.
-            apply_check_args = git_cmd + [
-                "apply",
-                "--ignore-whitespace",
-                "--check",
-            ]
-            if args.three_way:
-                apply_check_args.append("--3way")
-            apply_check_args.append(str(current_patch))
-            p_check = subprocess.run(apply_check_args)
+        print(f"Found {len(patch_list)} patches to apply:")
+        print("\n".join(p.name for p in patch_list))
 
-            if p_check.returncode == 0:
-                # Patch will apply.
-                print(f"Applying {current_patch.name}...")
-                apply_args = git_cmd + [
+        if args.method == "am":
+            merge_args = git_cmd + ["am", "-k", "--ignore-whitespace"]
+            if args.three_way:
+                merge_args.append("--3way")
+            for patch in patch_list:
+                merge_args.append(str(patch))
+            p = subprocess.run(merge_args, capture_output=True, text=True)
+            print(p.stdout)
+            print(p.stderr)
+
+            if p.returncode == 0:
+                print(f"All patches applied.")
+                sys.exit(0)
+            if args.restore_on_fail:
+                # Check that the operation can be aborted.
+                # git am doesn't give any specific return codes,
+                # so check for unresolved working files.
+                rebase_apply_path = os.path.join(".git", "rebase-apply")
+                if args.repo_dir:
+                    rebase_apply_path = os.path.join(args.repo_dir, rebase_apply_path)
+                if os.path.isdir(rebase_apply_path):
+                    print("Aborting git am...")
+                    subprocess.run(git_cmd + ["am", "--abort"], check=True)
+                    print(f"Abort successful.")
+                    sys.exit(2)
+                else:
+                    print("Unable to abort.")
+            sys.exit(1)
+        else:
+            applied_patches = []
+            for current_patch in patch_list:
+                print(f"Checking {current_patch.name}...")
+                # Check that the patch applies before trying to apply it.
+                apply_check_args = git_cmd + [
                     "apply",
                     "--ignore-whitespace",
+                    "--check",
                 ]
                 if args.three_way:
-                    apply_args.append("--3way")
-                apply_args.append(str(current_patch))
-                p = subprocess.run(apply_args, check=True)
-                applied_patches.append(current_patch)
-            else:
-                # Patch won't apply.
-                print(f"Unable to apply {current_patch.name}")
-                if args.restore_on_fail:
-                    # Remove any patches that have already been applied.
-                    while len(applied_patches) > 0:
-                        previous_patch = applied_patches.pop()
-                        print(f"Reversing {previous_patch.name}...")
-                        reverse_args = git_cmd + [
-                            "apply",
-                            "--ignore-whitespace",
-                            "--reverse",
-                        ]
-                        if args.three_way:
-                            reverse_args.append("--3way")
-                        reverse_args.append(str(previous_patch))
-                        p_check = subprocess.run(reverse_args, check=True)
-                    print(
-                        f"Rollback successful, failure occured on {current_patch.name}"
-                    )
-                    sys.exit(2)
-                sys.exit(1)
-        print(f"All patches applied.")
+                    apply_check_args.append("--3way")
+                apply_check_args.append(str(current_patch))
+                p_check = subprocess.run(apply_check_args)
+
+                if p_check.returncode == 0:
+                    # Patch will apply.
+                    print(f"Applying {current_patch.name}...")
+                    apply_args = git_cmd + [
+                        "apply",
+                        "--ignore-whitespace",
+                    ]
+                    if args.three_way:
+                        apply_args.append("--3way")
+                    apply_args.append(str(current_patch))
+                    p = subprocess.run(apply_args, check=True)
+                    applied_patches.append(current_patch)
+                else:
+                    # Patch won't apply.
+                    print(f"Unable to apply {current_patch.name}")
+                    if args.restore_on_fail:
+                        # Remove any patches that have already been applied.
+                        while len(applied_patches) > 0:
+                            previous_patch = applied_patches.pop()
+                            print(f"Reversing {previous_patch.name}...")
+                            reverse_args = git_cmd + [
+                                "apply",
+                                "--ignore-whitespace",
+                                "--reverse",
+                            ]
+                            if args.three_way:
+                                reverse_args.append("--3way")
+                            reverse_args.append(str(previous_patch))
+                            p_check = subprocess.run(reverse_args, check=True)
+                        print(
+                            f"Rollback successful, failure occured on {current_patch.name}"
+                        )
+                        sys.exit(2)
+                    sys.exit(1)
+            print(f"All patches applied.")
 
 
 main()

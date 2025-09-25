@@ -11,6 +11,8 @@ on:
 jobs:
   Run-Automerge:
     runs-on: ubuntu-24.04-arm
+    permissions:
+      pull-requests: write
     if: github.repository == 'arm/arm-toolchain'
     strategy:
       matrix:
@@ -41,4 +43,4 @@ jobs:
       - name: Run automerge
         run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ matrix.branches.from_branch }} --to-branch ${{ matrix.branches.to_branch }} --verbose
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}

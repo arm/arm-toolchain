@@ -29,6 +29,10 @@ static cl::opt<TPLoop::MemTransfer> EnableMemtransferTPLoop(
                clEnumValN(TPLoop::Allow, "allow",
                           "Allow (may be subject to certain conditions) "
                           "conversion of memcpy to TP loop.")));
+// #405
+static cl::opt<bool> EnableInlineMemcpyAsLdSt(
+    "enable-inline-memcpy-ld-st", cl::init(false), cl::Hidden,
+    cl::desc("Inline memcpy with LD/ST instructions."));
 
 bool ARMSelectionDAGInfo::isTargetMemoryOpcode(unsigned Opcode) const {
   return Opcode >= ARMISD::FIRST_MEMORY_OPCODE &&
@@ -89,19 +93,15 @@ SDValue ARMSelectionDAGInfo::EmitSpecializedLibcall(
     AlignVariant = ALIGN1;
 
   TargetLowering::ArgListTy Args;
-  TargetLowering::ArgListEntry Entry;
-  Entry.Ty = DAG.getDataLayout().getIntPtrType(*DAG.getContext());
-  Entry.Node = Dst;
-  Args.push_back(Entry);
+  Type *IntPtrTy = DAG.getDataLayout().getIntPtrType(*DAG.getContext());
+  Args.emplace_back(Dst, IntPtrTy);
   if (AEABILibcall == AEABI_MEMCLR) {
-    Entry.Node = Size;
-    Args.push_back(Entry);
+    Args.emplace_back(Size, IntPtrTy);
   } else if (AEABILibcall == AEABI_MEMSET) {
     // Adjust parameters for memset, EABI uses format (ptr, size, value),
     // GNU library uses (ptr, value, size)
     // See RTABI section 4.3.4
-    Entry.Node = Size;
-    Args.push_back(Entry);
+    Args.emplace_back(Size, IntPtrTy);
 
     // Extend or truncate the argument to be an i32 value for the call.
     if (Src.getValueType().bitsGT(MVT::i32))
@@ -109,36 +109,148 @@ SDValue ARMSelectionDAGInfo::EmitSpecializedLibcall(
     else if (Src.getValueType().bitsLT(MVT::i32))
       Src = DAG.getNode(ISD::ZERO_EXTEND, dl, MVT::i32, Src);
 
-    Entry.Node = Src;
-    Entry.Ty = Type::getInt32Ty(*DAG.getContext());
+    TargetLowering::ArgListEntry Entry(Src,
+                                       Type::getInt32Ty(*DAG.getContext()));
     Entry.IsSExt = false;
     Args.push_back(Entry);
   } else {
-    Entry.Node = Src;
-    Args.push_back(Entry);
-
-    Entry.Node = Size;
-    Args.push_back(Entry);
+    Args.emplace_back(Src, IntPtrTy);
+    Args.emplace_back(Size, IntPtrTy);
   }
 
-  char const *FunctionNames[4][3] = {
-    { "__aeabi_memcpy",  "__aeabi_memcpy4",  "__aeabi_memcpy8"  },
-    { "__aeabi_memmove", "__aeabi_memmove4", "__aeabi_memmove8" },
-    { "__aeabi_memset",  "__aeabi_memset4",  "__aeabi_memset8"  },
-    { "__aeabi_memclr",  "__aeabi_memclr4",  "__aeabi_memclr8"  }
-  };
+  static const RTLIB::Libcall FunctionImpls[4][3] = {
+      {RTLIB::MEMCPY, RTLIB::AEABI_MEMCPY4, RTLIB::AEABI_MEMCPY8},
+      {RTLIB::MEMMOVE, RTLIB::AEABI_MEMMOVE4, RTLIB::AEABI_MEMMOVE8},
+      {RTLIB::MEMSET, RTLIB::AEABI_MEMSET4, RTLIB::AEABI_MEMSET8},
+      {RTLIB::AEABI_MEMCLR, RTLIB::AEABI_MEMCLR4, RTLIB::AEABI_MEMCLR8}};
+
+  RTLIB::Libcall NewLC = FunctionImpls[AEABILibcall][AlignVariant];
+
   TargetLowering::CallLoweringInfo CLI(DAG);
   CLI.setDebugLoc(dl)
       .setChain(Chain)
       .setLibCallee(
-          TLI->getLibcallCallingConv(LC), Type::getVoidTy(*DAG.getContext()),
-          DAG.getExternalSymbol(FunctionNames[AEABILibcall][AlignVariant],
+          TLI->getLibcallCallingConv(NewLC), Type::getVoidTy(*DAG.getContext()),
+          DAG.getExternalSymbol(TLI->getLibcallName(NewLC),
                                 TLI->getPointerTy(DAG.getDataLayout())),
           std::move(Args))
       .setDiscardResult();
   std::pair<SDValue,SDValue> CallResult = TLI->LowerCallTo(CLI);
 
   return CallResult.second;
+}
+
+// #405
+SDValue ARMSelectionDAGInfo::EmitMemcpyAsLdSt(
+    SelectionDAG &DAG, SDLoc dl, const ARMSubtarget &Subtarget, SDValue Chain,
+    SDValue Dst, SDValue Src, uint64_t SizeVal, bool isVolatile,
+    MachinePointerInfo DstPtrInfo, MachinePointerInfo SrcPtrInfo) const {
+  // Do repeated batches of 4-byte loads and stores.
+  unsigned BytesLeft = SizeVal & 3;
+  unsigned NumMemOps = SizeVal >> 2;
+  unsigned EmittedNumMemOps = 0;
+  EVT VT = MVT::i32;
+  unsigned VTSize = 4;
+  unsigned I = 0;
+  // Emit a maximum of 4 loads in Thumb1 since we have fewer registers
+  const unsigned MaxLoads = Subtarget.isThumb1Only() ? 4 : 6;
+  SDValue TFOps[6];
+  SDValue Loads[6];
+  uint64_t SrcOff = 0, DstOff = 0;
+
+  MachineMemOperand::Flags MOFlags = MachineMemOperand::Flags::MONone;
+  if (isVolatile)
+    MOFlags = MachineMemOperand::Flags::MOVolatile;
+  MachineMemOperand::Flags LoadMOFlags = MOFlags;
+  if (SrcPtrInfo.isDereferenceable(SizeVal, *DAG.getContext(),
+                                   DAG.getDataLayout()))
+    LoadMOFlags |= MachineMemOperand::Flags::MODereferenceable;
+  if (auto *V = SrcPtrInfo.V.dyn_cast<const Value *>())
+    if (isa<GlobalVariable>(V) && cast<GlobalVariable>(V)->isConstant())
+      LoadMOFlags |= MachineMemOperand::Flags::MOInvariant;
+  MachineMemOperand::Flags StoreMOFlags = MOFlags;
+  if (DstPtrInfo.isDereferenceable(SizeVal, *DAG.getContext(),
+                                   DAG.getDataLayout()))
+    StoreMOFlags |= MachineMemOperand::Flags::MODereferenceable;
+
+  // Emit up to MaxLoads loads, then a TokenFactor barrier, then the
+  // same number of stores.  The loads and stores may get combined into
+  // ldm/stm later on.
+  while (EmittedNumMemOps < NumMemOps) {
+    for (I = 0; I < MaxLoads && EmittedNumMemOps + I < NumMemOps; ++I) {
+      Loads[I] = DAG.getLoad(VT, dl, Chain,
+                             DAG.getNode(ISD::ADD, dl, MVT::i32, Src,
+                                         DAG.getConstant(SrcOff, dl, MVT::i32)),
+                             SrcPtrInfo.getWithOffset(SrcOff), MaybeAlign(0),
+                             LoadMOFlags);
+      TFOps[I] = Loads[I].getValue(1);
+      SrcOff += VTSize;
+    }
+    Chain = DAG.getNode(ISD::TokenFactor, dl, MVT::Other, ArrayRef(TFOps, I));
+
+    for (I = 0; I < MaxLoads && EmittedNumMemOps + I < NumMemOps; ++I) {
+      TFOps[I] = DAG.getStore(
+          Chain, dl, Loads[I],
+          DAG.getNode(ISD::ADD, dl, MVT::i32, Dst,
+                      DAG.getConstant(DstOff, dl, MVT::i32)),
+          DstPtrInfo.getWithOffset(DstOff), MaybeAlign(0), StoreMOFlags);
+      DstOff += VTSize;
+    }
+    Chain = DAG.getNode(ISD::TokenFactor, dl, MVT::Other, ArrayRef(TFOps, I));
+
+    EmittedNumMemOps += I;
+  }
+
+  if (BytesLeft == 0)
+    return Chain;
+
+  // Issue loads / stores for the trailing (1 - 3) bytes.
+  unsigned BytesLeftSave = BytesLeft;
+  I = 0;
+  while (BytesLeft) {
+    if (BytesLeft >= 2) {
+      VT = MVT::i16;
+      VTSize = 2;
+    } else {
+      VT = MVT::i8;
+      VTSize = 1;
+    }
+
+    Loads[I] = DAG.getLoad(VT, dl, Chain,
+                           DAG.getNode(ISD::ADD, dl, MVT::i32, Src,
+                                       DAG.getConstant(SrcOff, dl, MVT::i32)),
+                           SrcPtrInfo.getWithOffset(SrcOff), MaybeAlign(0),
+                           LoadMOFlags);
+
+    TFOps[I] = Loads[I].getValue(1);
+    ++I;
+    SrcOff += VTSize;
+    BytesLeft -= VTSize;
+  }
+  Chain = DAG.getNode(ISD::TokenFactor, dl, MVT::Other, ArrayRef(TFOps, I));
+
+  I = 0;
+  BytesLeft = BytesLeftSave;
+  while (BytesLeft) {
+    if (BytesLeft >= 2) {
+      VT = MVT::i16;
+      VTSize = 2;
+    } else {
+      VT = MVT::i8;
+      VTSize = 1;
+    }
+
+    TFOps[I] = DAG.getStore(Chain, dl, Loads[I],
+                            DAG.getNode(ISD::ADD, dl, MVT::i32, Dst,
+                                        DAG.getConstant(DstOff, dl, MVT::i32)),
+                            DstPtrInfo.getWithOffset(DstOff), MaybeAlign(0),
+                            StoreMOFlags);
+    ++I;
+    DstOff += VTSize;
+    BytesLeft -= VTSize;
+  }
+
+  return DAG.getNode(ISD::TokenFactor, dl, MVT::Other, ArrayRef(TFOps, I));
 }
 
 static bool shouldGenerateInlineTPLoop(const ARMSubtarget &Subtarget,
@@ -194,6 +306,11 @@ SDValue ARMSelectionDAGInfo::EmitTargetCodeForMemcpy(
   if (!AlwaysInline && SizeVal > Subtarget.getMaxInlineSizeThreshold())
     return EmitSpecializedLibcall(DAG, dl, Chain, Dst, Src, Size,
                                   Alignment.value(), RTLIB::MEMCPY);
+
+  // #405
+  if (EnableInlineMemcpyAsLdSt && Subtarget.isMClass() && Subtarget.hasV7Ops())
+    return EmitMemcpyAsLdSt(DAG, dl, Subtarget, Chain, Dst, Src, SizeVal,
+                            isVolatile, DstPtrInfo, SrcPtrInfo);
 
   unsigned BytesLeft = SizeVal & 3;
   unsigned NumMemOps = SizeVal >> 2;

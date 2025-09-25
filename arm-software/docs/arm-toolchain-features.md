@@ -19,4 +19,13 @@ There are no experimental features implemented.
 
 # Features
 
-There are no additional features implemented.
+## Additional loop unroll in the LTO pipeline
+In some cases it is beneficial to perform an additional loop unroll pass
+during Link Time Optimization (LTO) so that extra information becomes available
+to later passes, e.g. Scalar Replacement of Aggregates (SROA) pass.
+Use cases where this could be beneficial - multiple (N>=4) nested loops.
+
+Usage:
+```
+    -Wl,-plugin-opt=-extra-LTO-loop-unroll=true/false
+```

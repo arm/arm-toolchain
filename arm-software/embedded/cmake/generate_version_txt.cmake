@@ -26,10 +26,15 @@ if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)) # libc in a separate repo?
 
     execute_process(
         COMMAND git -C ${${base_library}_SOURCE_DIR} rev-parse HEAD
-        OUTPUT_VARIABLE ${LLVM_TOOLCHAIN_C_LIBRARY}_COMMIT
+        OUTPUT_VARIABLE ${base_library}_COMMIT
         OUTPUT_STRIP_TRAILING_WHITESPACE 
         COMMAND_ERROR_IS_FATAL ANY
     )
+    set(LLVM_TOOLCHAIN_C_LIBRARY_URL ${${base_library}_URL})
+    set(LLVM_TOOLCHAIN_C_LIBRARY_COMMIT ${${base_library}_COMMIT})
+else()
+    set(LLVM_TOOLCHAIN_C_LIBRARY_URL "https://github.com/arm/arm-toolchain/tree/arm-software/libc")
+    set(LLVM_TOOLCHAIN_C_LIBRARY_COMMIT ${armtoolchain_COMMIT})
 endif()
 
 configure_file(

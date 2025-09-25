@@ -16,13 +16,13 @@ export CC=clang
 export CXX=clang++
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-REPO_ROOT=$( git -C ${SCRIPT_DIR} rev-parse --show-toplevel )
+REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 BUILD_DIR=${REPO_ROOT}/build_llvmlibc_overlay
 
-mkdir -p ${BUILD_DIR}
-cd ${BUILD_DIR}
+mkdir -p "${BUILD_DIR}"
+cd "${BUILD_DIR}"
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc -DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on
+cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc -DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on -DENABLE_PARALLEL_LIB_CONFIG=OFF
 ninja package-llvm-toolchain
 
 # The package-llvm-toolchain target will produce a .tar.xz package, but we also

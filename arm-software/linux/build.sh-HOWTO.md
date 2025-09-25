@@ -15,6 +15,7 @@ The following packages need to be installed (using `apt`):
 
 - `binutils-dev`
 - `build-essential`
+- `graphviz`
 - `cmake`
 - `git`
 - `libzstd-dev`
@@ -36,6 +37,7 @@ The following packages need to be installed (using `apt`):
 - `patch`
 - `binutils`
 - `binutils-devel`
+- `graphviz`
 - `make`
 - `cmake`
 - `git`
@@ -135,16 +137,22 @@ must be pointed at by the `LIBRARIES_DIR` environmental variable.
 
 The `build.sh` script reads the following environment variables:
 
-- `README_MD_PATH` - Specifies the location of the README.md file to bundle
-  (default: `arm-software/linux/README.md`)
+- `CHANGELOG_MD_PATH` - Specifies the location of the CHANGELOG.md file to bundle
+  (default: `arm-software/linux/CHANGELOG.md`)
+- `SBOM_FILE_PATH` - Specifies the location of the SBOM JSON file to bundle
+  (default: `arm-software/linux/SBOM_Files/ATfL-SBOM.spdx.json`)
 - `MKMODULEDIRS_PATH` - Specifies the location of mkmoduledirs.sh.var to tweak
   (default: `arm-software/linux/mkmoduledirs.sh.var`)
 - `SOURCES_DIR` - The directory where all source code will be stored
   (default: the top level of the cloned git repository)
+- `BOLTTESTS_DIR` - The **optional** directory where the bolt-tests repo has been cloned
+  (default: `arm-software/linux/bolt-tests`)
 - `LIBRARIES_DIR` - The **optional** directory where the ArmPL veclibs will be stored
   (default: `arm-software/linux/lib`)
 - `PATCHES_DIR` - The **optional** directory where all patches will be stored
   (default: `arm-software/linux/patches`)
+- `DOCS_DIR` - The directory where ATfL documents will be stored
+  (default: `arm-software/linux/docs`)
 - `BUILD_DIR` - The directory where all build will be happening
   (default: `arm-software/linux/build`)
 - `LOGS_DIR` - The directory where all build logs will be stored
@@ -169,5 +177,5 @@ The `build.sh` script reads the following environment variables:
 Particular attention must be paid when doing a release build, the
 `RELEASE_FLAGS` and `ATFL_ASSERTIONS` variables must be set correctly.
 
-The optional directories (`PATCHES_DIR` and `LIBRARIES_DIR`) will not be used
-if not present.
+The optional directories (`PATCHES_DIR`, `BOLTTESTS_DIR`, `LIBRARIES_DIR`) will
+not be used if not present.

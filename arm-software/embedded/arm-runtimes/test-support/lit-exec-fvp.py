@@ -13,9 +13,7 @@ import sys
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Run a single test using Arm FVPs"
-    )
+    parser = argparse.ArgumentParser(description="Run a single test using Arm FVPs")
     parser.add_argument(
         "--fvp-install-dir",
         help="Directory in which FVP models are installed",

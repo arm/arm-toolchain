@@ -1,3 +1,7 @@
-# RUN: %clang -print-multi-directory --target=arm-none-eabi -mfpu=none | FileCheck %s
-# CHECK: arm-none-eabi/armv4t_exn_rtti{{$}}
-# CHECK-EMPTY:
+# RUN: %clang -print-multi-directory --target=arm-none-eabi -mfpu=none | FileCheck %s --check-prefix=ARMV4T-EXN-RTTI
+# ARMV4T-EXN-RTTI: arm-none-eabi/armv4t_exn_rtti_size{{$}}
+# ARMV4T-EXN-RTTI-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=arm-none-eabi -mfpu=none -fno-exceptions -fno-rtti | FileCheck %s --check-prefix=ARMV4T
+# ARMV4T: arm-none-eabi/armv4t_size{{$}}
+# ARMV4T-EMPTY:

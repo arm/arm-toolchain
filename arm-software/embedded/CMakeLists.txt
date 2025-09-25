@@ -180,6 +180,11 @@ option(
     OFF
 )
 
+option(
+    ENABLE_MULTILIB_HEADER_OPTIMISATION "Enable multilib header optimisation phase"
+    ON
+)
+
 # Previously, the LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL option was
 # called LLVM_TOOLCHAIN_NEWLIB_OVERLAY_INSTALL. Detect a setting of
 # that name, in case it's in an existing CMakeCache.txt or command
@@ -204,12 +209,14 @@ set(LLVM_DISTRIBUTION_COMPONENTS
     clang-resource-headers
     clang
     dsymutil
+    elf2bin
     lld
     llvm-ar
     llvm-config
     llvm-cov
     llvm-cxxfilt
     llvm-dwarfdump
+    llvm-mc
     llvm-nm
     llvm-objcopy
     llvm-objdump
@@ -235,10 +242,9 @@ installed by the install-llvm-toolchain target"
 )
 set(LLVM_ENABLE_PROJECTS clang;lld CACHE STRING "")
 set(LLVM_TARGETS_TO_BUILD AArch64;ARM CACHE STRING "")
-set(LLVM_DEFAULT_TARGET_TRIPLE aarch64-linux-gnu CACHE STRING "")
+set(LLVM_DEFAULT_TARGET_TRIPLE aarch64-unknown-linux-gnu CACHE STRING "")
 set(LLVM_APPEND_VC_REV OFF CACHE BOOL "")
 set(LLVM_ENABLE_TERMINFO OFF CACHE BOOL "")
-set(LLVM_ENABLE_ZLIB OFF CACHE BOOL "")
 set(LLVM_ENABLE_ZSTD OFF CACHE BOOL "")
 set(LLVM_ENABLE_LIBXML2 OFF CACHE BOOL "")
 set(CLANG_DEFAULT_LINKER lld CACHE STRING "")
@@ -249,6 +255,8 @@ set(CLANG_DEFAULT_LINKER lld CACHE STRING "")
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE BOOL "" FORCE)
 endif()
+
+set(CMAKE_OSX_ARCHITECTURES arm64;x86_64 CACHE STRING "")
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
@@ -337,6 +345,7 @@ install(
     FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/Omax.cfg
     ${CMAKE_CURRENT_SOURCE_DIR}/OmaxLTO.cfg
+    ${CMAKE_CURRENT_SOURCE_DIR}/Osize.cfg
     DESTINATION bin
     COMPONENT llvm-toolchain-config-files
 )
@@ -347,10 +356,40 @@ set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
 set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
 include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 
+# Include elf2bin
+set(LLVM_EXTERNAL_PROJECTS elf2bin)
+set(LLVM_EXTERNAL_ELF2BIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin)
+
+# Use the downstream version of lit, which is just a wrapper for the built one.
+# Pass it the xfail/xfail-not lists.
+set(llvm_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/llvm.xfails")
+set(llvm_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/llvm.upasses")
+# Set LLVM_DEFAULT_EXTERNAL_LIT and LLVM_LIT_ARGS before including the LLVM subdirectory.
+set(LLVM_DEFAULT_EXTERNAL_LIT "${CMAKE_CURRENT_SOURCE_DIR}/arm-runtimes/test-support/lit-wrapper.py")
+set(LLVM_LIT_ARGS "${LLVM_LIT_ARGS} -sv --real-lit-path=${CMAKE_CURRENT_BINARY_DIR}/llvm/bin/llvm-lit --xfails-file=${llvm_xfails_file_path} --xfails-not-file=${llvm_xfails_not_file_path}" CACHE STRING "")
+
 set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 add_subdirectory(
     ${llvmproject_src_dir}/llvm llvm
 )
+
+add_dependencies(check-all check-elf2bin)
+
+# Generate a xfail/xfail-not list before running the tests.
+add_custom_target(
+    llvm-xfail-files
+    COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/arm-runtimes/test-support/xfails.py
+        --project llvm
+        --clang ${LLVM_BINARY_DIR}/bin/clang
+        --xfails_file ${llvm_xfails_file_path}
+        --xfails_not_file ${llvm_xfails_not_file_path}
+    DEPENDS
+        clang
+)
+add_dependencies(check-clang llvm-xfail-files)
+add_dependencies(check-llvm llvm-xfail-files)
+add_dependencies(check-all llvm-xfail-files)
 
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
     install(
@@ -369,7 +408,7 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
 
     install(
       DIRECTORY
-      ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/src
+      ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/
       DESTINATION samples
       COMPONENT llvm-toolchain-llvmlibc-configs
     )
@@ -401,6 +440,12 @@ project(
 
 # Set package name for shorter archive file name
 set(SHORT_PACKAGE_NAME "ATfE")
+
+# Set directory name containing CFI ignore file
+set(TARGET_CFI_DIR
+    "lib/clang/${LLVM_VERSION_MAJOR}/share" CACHE STRING
+    "Directory containing the CFI ignore file."
+)
 
 # Set package name and version.
 if(DEFINED LLVM_TOOLCHAIN_PACKAGE_NAME)
@@ -471,7 +516,12 @@ endif()
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
     set(CPACK_SYSTEM_NAME "Windows-${processor_name}")
 else()
-    set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-${processor_name}")
+    # If a specific system name is supplied, use that instead.
+    if (PACKAGE_SYSTEM_NAME)
+        set(CPACK_SYSTEM_NAME "${PACKAGE_SYSTEM_NAME}-${processor_name}")
+    else()
+        set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-${processor_name}")
+    endif()
 endif()
 
 set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
@@ -479,7 +529,11 @@ set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
 if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
     set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${LLVM_TOOLCHAIN_C_LIBRARY}-overlay-${PACKAGE_VERSION})
 else()
-    set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
+    if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "picolibc")
+        set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
+    else()
+        set(PACKAGE_FILE_NAME ${PACKAGE_NAME}_${LLVM_TOOLCHAIN_C_LIBRARY}-${PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
+    endif()
 endif()
 set(CPACK_PACKAGE_FILE_NAME ${PACKAGE_FILE_NAME})
 
@@ -504,21 +558,31 @@ add_custom_target(
     -DArmToolchainForEmbedded_VERSION=${ArmToolchainForEmbedded_VERSION}
     -DArmToolchainForEmbedded_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
     -Dllvmproject_src_dir=${llvmproject_src_dir}
-    # at most one of picolibc and newlib source dirs is needed, but easiest to
+    # at most one of picolibc and newlib options is needed, but easiest to
     # specify both definitions
     -Dpicolibc_SOURCE_DIR=${picolibc_SOURCE_DIR}
+    -Dpicolibc_URL=${picolibc_URL}
     -Dnewlib_SOURCE_DIR=${newlib_SOURCE_DIR}
+    -Dnewlib_URL=${newlib_URL}
     # but we do tell the script which library we're actually using
     -DLLVM_TOOLCHAIN_C_LIBRARY=${LLVM_TOOLCHAIN_C_LIBRARY}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_version_txt.cmake
     BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
 )
-install(
-    FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
-    DESTINATION .
-    COMPONENT llvm-toolchain-docs
-)
+if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc))
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
+        DESTINATION .
+        RENAME VERSION_${LLVM_TOOLCHAIN_C_LIBRARY}.txt
+        COMPONENT llvm-toolchain-third-party-licenses
+    )
+else()
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
+        DESTINATION .
+        COMPONENT llvm-toolchain-third-party-licenses
+    )
+endif()
 
 
 # Groups all the targets that comprise the toolchain.
@@ -539,11 +603,6 @@ add_dependencies(
     llvm-toolchain-runtimes
     version_txt
 )
-
-# Set LLVM_DEFAULT_EXTERNAL_LIT to the directory of clang
-# which was build in previous step. This path is not exported
-# by add_subdirectory of llvm project
-set(LLVM_DEFAULT_EXTERNAL_LIT "${LLVM_BINARY_DIR}/bin/llvm-lit")
 
 add_custom_target(check-llvm-toolchain-runtimes)
 add_custom_target(check-${LLVM_TOOLCHAIN_C_LIBRARY})
@@ -619,6 +678,7 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         -DLLVM_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/llvm
         -DMULTILIB_JSON=${LLVM_TOOLCHAIN_MULTILIB_JSON}
         -DENABLE_VARIANTS=${ENABLE_VARIANTS_PASSTHROUGH}
+	-DENABLE_MULTILIB_HEADER_OPTIMISATION=${ENABLE_MULTILIB_HEADER_OPTIMISATION}
         -DENABLE_PARALLEL_LIB_CONFIG=${ENABLE_PARALLEL_LIB_CONFIG}
         -DENABLE_PARALLEL_LIB_BUILD=${ENABLE_PARALLEL_LIB_BUILD}
         -DPARALLEL_LIB_BUILD_LEVELS=${PARALLEL_LIB_BUILD_LEVELS}
@@ -693,6 +753,14 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
     endforeach()
 endif()
 
+FILE(WRITE "${CMAKE_BINARY_DIR}/llvm/${TARGET_CFI_DIR}/cfi_ignorelist.txt" "")
+install(
+    FILES
+    ${CMAKE_BINARY_DIR}/llvm/${TARGET_CFI_DIR}/cfi_ignorelist.txt
+    DESTINATION ${TARGET_CFI_DIR}
+    COMPONENT llvm-toolchain-libs
+)
+
 install(
     DIRECTORY ${LLVM_BINARY_DIR}/${TARGET_LIBRARIES_DIR}/.
     DESTINATION ${TARGET_LIBRARIES_DIR}
@@ -702,6 +770,15 @@ install(
 install(
     FILES CHANGELOG.md LICENSE.txt README.md ATfE-SBOM.spdx.json
     DESTINATION .
+    COMPONENT llvm-toolchain-docs
+)
+
+install(
+    FILES
+        ../docs/arm-toolchain-features.md
+        ../docs/arm-toolchain-for-embedded-features.md
+        ../docs/elf2bin.md
+    DESTINATION docs
     COMPONENT llvm-toolchain-docs
 )
 
@@ -860,13 +937,25 @@ add_custom_target(
     COMMAND "${CMAKE_COMMAND}" -E rm -rf unpack
     COMMAND "${CMAKE_COMMAND}" -E make_directory unpack
 )
-add_custom_target(
-    unpack-llvm-toolchain
-    COMMAND "${CMAKE_COMMAND}" -E tar x ${package_filepath}
-    DEPENDS ${package_filepath}
-    USES_TERMINAL
-    WORKING_DIRECTORY unpack
-)
+if(package_filename_extension STREQUAL ".dmg")
+    # Extract only the toolchain directory from the .dmg file in ${package_filepath},
+    # as the image also includes a symlink to the "Applications" directory.
+    add_custom_target(
+        unpack-llvm-toolchain
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/extract_dmg.sh ${package_filepath} ${PACKAGE_FILE_NAME}
+        DEPENDS ${package_filepath}
+        USES_TERMINAL
+        WORKING_DIRECTORY unpack
+    )
+else()
+    add_custom_target(
+        unpack-llvm-toolchain
+        COMMAND "${CMAKE_COMMAND}" -E tar x ${package_filepath}
+        DEPENDS ${package_filepath}
+        USES_TERMINAL
+        WORKING_DIRECTORY unpack
+    )
+endif()
 add_dependencies(
     unpack-llvm-toolchain
     clear-unpack-directory
