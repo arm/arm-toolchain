@@ -197,7 +197,9 @@ public:
     SUSE,
     OpenEmbedded,
     Intel,
-    LastVendorType = Intel
+    // Downstream issue: #533 (Amazon Linux still not recognized correctly)
+    Amazon,
+    LastVendorType = Amazon
   };
   enum OSType {
     UnknownOS,
@@ -913,6 +915,12 @@ public:
   /// Tests whether the target is ARM (little and big endian).
   bool isARM() const {
     return getArch() == Triple::arm || getArch() == Triple::armeb;
+  }
+
+  /// Downstream issue: #533 (Amazon Linux still not recognized correctly)
+  /// Tests whether the target is Amazon Linux.
+  bool isAmazonLinux() const {
+    return getOS() == Triple::Linux && getVendor() == Triple::Amazon;
   }
 
   /// Tests whether the target supports the EHABI exception
