@@ -132,7 +132,7 @@ EXFN_ATTR void __exception_handler() { abort(); }
 // has to be 128-byte aligned, however an implementation can require more bits
 // to be zero and cortex-m23 can require up to 10, so 1024-byte align the vector
 // table.
-[[gnu::weak]] extern char __stack;
+extern "C" [[gnu::weak]] extern char __stack;
 using vtable_t = void (*)(void);
 [[gnu::section(".text.init.enter"), gnu::aligned(1024)]]
 const vtable_t vector_table[] = {
