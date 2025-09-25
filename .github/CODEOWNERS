@@ -6,5 +6,12 @@
 # Changes to each toolchain's specific directories are assigned to the relevant
 # team only.
 * @arm/arm-toolchain-embedded @arm/arm-toolchain-linux
+
+# ATfE specific code. Only requires the ATfE team input
 /arm-software/embedded/ @arm/arm-toolchain-embedded
+
+# ATfL specific code. Only requires the ATfL team input
 /arm-software/linux/ @arm/arm-toolchain-linux
+
+# ATfE workflows. Only requires the ATfE team input
+/.github/workflows/atfe_* @arm/arm-toolchain-embedded
