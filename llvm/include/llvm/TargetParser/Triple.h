@@ -203,7 +203,9 @@ public:
     OpenEmbedded,
     Intel,
     Meta,
-    LastVendorType = Meta
+    // Downstream issue: #533 (Amazon Linux still not recognized correctly)
+    Amazon,
+    LastVendorType = Amazon
   };
   enum OSType {
     UnknownOS,
@@ -947,6 +949,12 @@ public:
   bool isLFI() const {
     return getArch() == Triple::aarch64 &&
            getSubArch() == Triple::AArch64SubArch_lfi;
+  }
+
+  /// Downstream issue: #533 (Amazon Linux still not recognized correctly)
+  /// Tests whether the target is Amazon Linux.
+  bool isAmazonLinux() const {
+    return getOS() == Triple::Linux && getVendor() == Triple::Amazon;
   }
 
   /// Tests whether the target supports the EHABI exception

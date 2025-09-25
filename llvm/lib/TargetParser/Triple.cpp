@@ -283,6 +283,9 @@ StringRef Triple::getVendorTypeName(VendorType Kind) {
   case SUSE: return "suse";
   case Meta:
     return "meta";
+  // Downstream issue: #533 (Amazon Linux still not recognized correctly)
+  case Amazon:
+    return "amazon";
   }
 
   llvm_unreachable("Invalid VendorType!");
@@ -703,6 +706,8 @@ static Triple::VendorType parseVendor(StringRef VendorName) {
       .Case("oe", Triple::OpenEmbedded)
       .Case("intel", Triple::Intel)
       .Case("meta", Triple::Meta)
+      // Downstream issue: #533 (Amazon Linux still not recognized correctly)
+      .Case("amazon", Triple::Amazon)
       .Default(Triple::UnknownVendor);
 }
 
