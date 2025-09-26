@@ -6,7 +6,7 @@ code into an executable binary.
 
 ## Looking at the toolchain
 
-The default installation site of Arm Toolchain For Linux is the
+The default installation site of Arm Toolchain for Linux is the
 `/opt/arm/arm-toolchain-for-linux` directory. It contains a complete set of LLVM
 tooling, header files, compiler libraries and runtime libraries (including the
 OpenMP runtime). The main tools are as follows:
@@ -67,7 +67,7 @@ $ source /etc/profile.d/modules.csh
 ```
 
 Use the `module use` command to update your `MODULEPATH` environment variable to
-include the path to the Arm Toolchain For Linux module files directory:
+include the path to the Arm Toolchain for Linux module files directory:
 
 ```
 $ module use /opt/arm/modulefiles
@@ -229,7 +229,7 @@ $ armflang -o binary source1.o source2.o
 ```
 
 When mixing both C/C++ and Fortran codes in a single application, it is
-important to to make sure that the Fortran runtime library is always linked in.
+important to make sure that the Fortran runtime library is always linked in.
 This can be ensured by using the `armflang` command for linking:
 
 ```
@@ -250,7 +250,7 @@ For the Fortran compiler's command line arguments reference visit this page:
 To control the optimization level, specify the `-O<level>` option on your
 compile line, and replace `<level>` with one of `0`, `1`, `2` or `3`. The `-O0`
 option is the lowest, and the default, optimization level. `-O3` is the highest
-optimization level. Arm compilers performs auto-vectorization at level `-O2` and
+optimization level. Arm compilers perform auto-vectorization at level `-O2` and
 above.
 
 For example, to compile the `source.c` file into a binary called `binary`, and
@@ -260,8 +260,8 @@ use the `-O3` optimization level, use:
 $ armclang -O3 -o binary source.c
 ```
 
-To compile the `source.f90` file into a binary called binary, and use the `-O3`
-optimization level, use:
+To compile the `source.f90` file into an executable file called `binary`, and
+use the `-O3` optimization level, use:
 
 ```
 $ armflang -O3 -o binary source.f90
@@ -289,7 +289,7 @@ warning: argument '-Ofast' is deprecated; use '-O3 -ffast-math -fstack-arrays' f
 ```
 
 As the warning message states, the effect of applying the `-Ofast` option when
-compiling Fortram programs can be achieved by using the
+compiling Fortran programs can be achieved by using the
 `-O3 -ffast-math -fstack-arrays` options instead.
 
 ## Compile and optimize using CPU auto-detection
@@ -336,7 +336,7 @@ generates  portable output suitable for any Armv8-A-based target.
 
 ## Fortran Recommendations
 
-### Who should use Arm Toolchain For Linux
+### Who should use Arm Toolchain for Linux
 
 * Code with modern Fortran features (except coarrays/teams/collectives) will
   work with ATfL.
@@ -347,7 +347,7 @@ generates  portable output suitable for any Armv8-A-based target.
 
 * Applications requiring quadmath support can be compiled with ATfL.
 
-### Who should not use Arm Toolchain For Linux
+### Who should not use Arm Toolchain for Linux
 
 * Performance is not guaranteed. For users seeking highest performance ATfL is
   not recommended.

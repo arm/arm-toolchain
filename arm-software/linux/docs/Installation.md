@@ -30,7 +30,7 @@ $ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] https://develope
 $ sudo apt update
 ```
 
-### Red Hat Entrprise Linux 8
+### Red Hat Enterprise Linux 8
 
 ```
 $ sudo dnf install 'dnf-command(config-manager)'
@@ -38,7 +38,7 @@ $ sudo dnf install 'dnf-command(config-manager)'
 $ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-toolchains:rhel-8/el8/arm-toolchains:rhel-8.repo
 ```
 
-### Red Hat Entrprise Linux 9
+### Red Hat Enterprise Linux 9
 
 ```
 $ sudo dnf install 'dnf-command(config-manager)'
@@ -63,7 +63,7 @@ $ sudo zypper ar -f https://developer.arm.com/packages/arm-toolchains:sles-15/sl
 ## Installation step
 
 Please select the command below appropriate for your Linux distribution. This
-will install Arm Toolchain For Linux, along with Arm Performance Libraries,
+will install Arm Toolchain for Linux, along with Arm Performance Libraries,
 which is a required dependency.
 
 ### Ubuntu systems
