@@ -15,9 +15,11 @@ that with the following commands:
 ```
 $ git clone https://git.gitlab.arm.com/telemetry-solution/telemetry-solution.git
 
+$ cd telemetry-solution
+
 $ git checkout ffaf62bd11d42213fe175fbe3d313a246c85535f
 
-$ cd telemetry-solution/tools/ustress
+$ cd tools/ustress
 ```
 
 As BOLT utilizes relocations, you must ensure their emission. In our example,
@@ -28,7 +30,7 @@ this requires the following modification with the `sed` command:
 $ sed -i 's/^LINKER_FLAGS = -lm$/LINKER_FLAGS = -lm -Wl,--emit-relocs/' Makefile
 ```
 
-Also, you must deactivate the assestions:
+Also, you must deactivate the assertions:
 
 ```
 $ sed -i 's/^\(\s*assert.*\)$/\/\/\1/' l1i_cache_workload.c
@@ -118,7 +120,7 @@ $ less heatmap-orig.txt
 $ less heatmap-bolt.txt
 ```
 
-As these heatmaps are usually big, we suggest to use the `aha` utility to
+As these heatmaps are usually big, we suggest using the `aha` utility to
 convert them into HTML pages and view them in a web browser:
 
 ```
