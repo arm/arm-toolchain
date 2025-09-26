@@ -1,4 +1,4 @@
-## How to use BOLT with our toolchain
+# How to use BOLT with our toolchain
 
 BOLT is a post-link optimizer available in ATfL. To benefit from it you can use
 the following tools:
@@ -7,7 +7,7 @@ the following tools:
 * `llvm-bolt-heatmap`
 * `perf2bolt`
 
-### Example optimization of a pathological case
+## Example optimization of a pathological case
 
 To try this example, download and adapt our Telemetry repository. You can do
 that with the following commands:
