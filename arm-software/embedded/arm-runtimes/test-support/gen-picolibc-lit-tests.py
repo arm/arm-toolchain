@@ -45,7 +45,7 @@ def main():
         help="Name to give the lit suite.",
     )
     arg_parser.add_argument(
-        "--timeout-multiplier", type=int, help="Timeout multiplier (integer)."
+        "--timeout-multiplier", type=float, help="Timeout multiplier (float)."
     )
 
     args = arg_parser.parse_args()

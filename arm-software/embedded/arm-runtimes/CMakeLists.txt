@@ -500,11 +500,19 @@ if(C_LIBRARY STREQUAL picolibc)
             compiler_rt-install
         )
 
+        # Timeout multipliers. The actual timeout value used in testing is:
+        # Timeout in seconds (defined in the picolibc's testing specs) x Timeout multiplier
+        if(LIBRARY_MESON_BUILD_TYPE STREQUAL "minsizerelease" AND COMPILE_FLAGS MATCHES "-mbranch-protection=pacret\\+bti")
+            set(timeout_multiplier 2)
+        else()
+            set(timeout_multiplier 1)
+        endif()
+
         # Step target to run the picolibc test via meson.
         ExternalProject_Add_Step(
             picolibc
             check-meson
-            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild
+            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild --timeout-multiplier ${timeout_multiplier}
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
@@ -517,25 +525,6 @@ if(C_LIBRARY STREQUAL picolibc)
         set(picolibc_xfails_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.xfails")
         set(picolibc_xfails_not_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.upasses")
         set(picolibc_lit_args -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${picolibc_xfails_file_path} --xfails-not-file=${picolibc_xfails_not_file_path})
-
-        # Query the timeouts file to see if a timeout multipler is needed.
-        set(timeout_multiplier 1)
-        file(READ "${CMAKE_CURRENT_SOURCE_DIR}/test-support/timeouts.json" timeouts_json_contents)
-        string(JSON timeouts_len LENGTH "${timeouts_json_contents}")
-        math(EXPR timeouts_len "${timeouts_len} - 1")
-        foreach(timeout_decl_i RANGE ${timeouts_len})
-            string(JSON timeout_decl GET "${timeouts_json_contents}" ${timeout_decl_i})
-            string(JSON timeout_variant_list GET "${timeout_decl}" Variants)
-            string(JSON timeout_variants_list_len LENGTH "${timeout_variant_list}")
-            math(EXPR timeout_variants_list_len "${timeout_variants_list_len} - 1")
-            foreach(timeout_variants_list_i RANGE ${timeout_variants_list_len})
-                string(JSON timeout_variant_name GET "${timeout_variant_list}" ${timeout_variants_list_i})
-                if(timeout_variant_name STREQUAL VARIANT)
-                    string(JSON timeout_multiplier GET "${timeout_decl}" TimeoutMultiplier)
-                    break()
-                endif()
-            endforeach()
-        endforeach()
 
         ExternalProject_Add_Step(
             picolibc
