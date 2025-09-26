@@ -502,7 +502,7 @@ if(C_LIBRARY STREQUAL picolibc)
 
         # Timeout multipliers. The actual timeout value used in testing is:
         # Timeout in seconds (defined in the picolibc's testing specs) x Timeout multiplier
-        if(LIBRARY_MESON_BUILD_TYPE STREQUAL "minsizerelease" AND COMPILE_FLAGS MATCHES "-mbranch-protection=pacret\\+bti")
+        if(LIBRARY_MESON_BUILD_TYPE STREQUAL minsize AND COMPILE_FLAGS MATCHES "-mbranch-protection=pac-ret\\+bti")
             set(timeout_multiplier 2)
         else()
             set(timeout_multiplier 1)
@@ -512,7 +512,7 @@ if(C_LIBRARY STREQUAL picolibc)
         ExternalProject_Add_Step(
             picolibc
             check-meson
-            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild --timeout-multiplier ${timeout_multiplier}
+            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild -t ${timeout_multiplier}
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
