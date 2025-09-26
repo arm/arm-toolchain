@@ -26,6 +26,7 @@ def run(args):
             None,
             pathlib.Path.cwd(),
             args.verbose,
+            args.trace,
         )
     else:
         return run_fvp(
@@ -77,6 +78,12 @@ def main():
     parser.add_argument(
         "--tarmac",
         help="file to wrote tarmac trace to (FVP only)",
+    )
+    parser.add_argument(
+        "--trace",
+        type=str,
+        default=None,
+        help="File to write execution trace to (QEMU only)",
     )
     parser.add_argument(
         "--verbose",

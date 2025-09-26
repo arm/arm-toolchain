@@ -16,6 +16,7 @@ def run_qemu(
     timeout,
     working_directory,
     verbose,
+    trace,
 ):
     """Execute the program using QEMU and return the subprocess return code."""
     qemu_params = ["-M", qemu_machine]
@@ -43,6 +44,13 @@ def run_qemu(
         qemu_params += ["-kernel", image]
     else:
         qemu_params += ["-device", f"loader,file={image},cpu-num=0"]
+
+    # Enable tracing: disassembly, CPU state, interrupts and guest errors like
+    # invalid instructions. One instruction at a time.
+    if trace:
+        qemu_params += ["-singlestep"]
+        qemu_params += ["-d", "in_asm,nochain,cpu,int,guest_errors"]
+        qemu_params += ["-D", trace]
 
     command = [qemu_command] + qemu_params
 
