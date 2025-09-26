@@ -1,9 +1,9 @@
-## Using the Arm Performance Libraries
+# Using the Arm Performance Libraries
 
 You can get greater performance from your code if you enable linking to the
 optimized math libraries at compilation time.
 
-### Linking to Arm Performance Libraries
+## Linking to Arm Performance Libraries
 
 To enable you to get the best performance on Arm-based systems, Arm recommends
 linking to Arm Performance Libraries. Arm Performance Libraries provide
@@ -35,8 +35,11 @@ $ module load arm-performance-libraries
 This should set the `ARMPL_`-prefixed environment variables and two other
 critical environment variables: `LD_LIBRARY_PATH` and `PKG_CONFIG_PATH`. The
 recommended way of selecting command line flags for using a specific variant of
-Arm Performance Libraries is through invoking the `pkg-config` command. Note
-that the Arm Performance Libraries export several `pkg-config` modules, you
+Arm Performance Libraries is through invoking the `pkg-config` command.
+
+### Note
+
+The Arm Performance Libraries export several `pkg-config` modules, you
 should be picking the one that you actually need, particularly when you plan to
 use OpenMP (notice the `seq` vs. `omp` suffix):
 
@@ -61,7 +64,7 @@ armpl-static-lp64-omp           ArmPL - Arm Performance Libraries
 armpl-static-lp64-seq           ArmPL - Arm Performance Libraries
 ```
 
-#### C/C++ examples
+### C/C++ examples
 
 To link to the OpenMP multi-threaded Arm Performance Libraries with a 64-bit
 integer interface, and include compiler and library optimizations for an
@@ -87,7 +90,7 @@ Neoverse V2-based system, use:
 $ armclang -o binary code_with_math_routines.c -mcpu=neoverse-v2 `pkg-config armpl-dynamic-lp64-seq --cflags --libs`
 ```
 
-#### Fortran examples
+### Fortran examples
 
 To link to the OpenMP multi-threaded Arm Performance Libraries with a 64-bit
 integer interface, and include compiler and library optimizations for an
@@ -113,7 +116,7 @@ Neoverse V1-based system, use:
 $ armflang -o binary code_with_math_routines.f90 -mcpu=neoverse-v1 `pkg-config armpl-dynamic-lp64-seq --cflags --libs`
 ```
 
-#### More information
+### More information
 
 For more information please visit this page:
 [Get started with Arm Performance Libraries (stand-alone Linux version) Version 24.10](https://developer.arm.com/documentation/102620/latest).
@@ -121,7 +124,7 @@ For more information please visit this page:
 To learn more about integrating Arm Performance Libraries with Arm Toolchain For
 Linux please visit [Using Arm Performance Libraries (ArmPL) with ATfL](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/linux/README.md#using-arm-performance-libraries-armpl-with-atfl).
 
-#### Note
+### Note
 
 The Arm Performance Libraries suite is also the provider of the vectorized math
 routines library (libamath). This is a subset of the libm functions, which makes

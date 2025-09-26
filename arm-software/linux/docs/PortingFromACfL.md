@@ -1,4 +1,4 @@
-## ACfL to ATfL Porting Guide
+# ACfL to ATfL Porting Guide
 
 This document outlines the key differences between using the Arm Toolchain for
 Linux (ATfL) and the Arm Compiler for Linux (ACfL). It also lists command-line
@@ -11,14 +11,14 @@ the names of these frontends are consistent across both: `armclang` for C,
 
 The quadmath is supported by ATfL, while it was not supported by ACfL.
 
-### Reference Version
+## Reference Version
 
 |Compiler                      |Version|
 |------------------------------|-------|
 |Arm Compiler for Linux (ACfL) |24.10  |
 |Arm Toolchain for Linux (ATfL)|20.0   |
 
-### ArmPL integration
+## ArmPL integration
 
 In ACfL, Arm Performance Libraries (ArmPL) are bundled with the compiler. To
 simplify usage, the `-armpl` flag is provided to automatically include the
@@ -31,17 +31,17 @@ users must manually specify the locations of the headers and libraries using
 `pkg-config`. Detailed instructions are available in the
 [Getting Started](./GettingStarted.md) guide.
 
-#### Note
+### Note
 
 Vector math functions from libamath are accessible without manually specifying
 the libraries.
 
-### C/C++ Frontend
+## C/C++ Frontend
 
 The C/C++ frontend in ATfL is identical to the one used in ACfL. Both are built
 on the Clang frontend from the upstream LLVM project (`llvm-project/clang`).
 
-### Fortran Frontend
+## Fortran Frontend
 
 The Fortran frontend in ATfL is based on the new LLVM Flang project
 (`llvm-project/flang`). This frontend is a modern, from-scratch implementation.
@@ -50,7 +50,7 @@ In contrast, ACfL used the older Classic Flang frontend, available at
 Because ATfL introduces a new Fortran frontend, this document will primarily
 focus on the differences in Fortran support between the two toolchains.
 
-#### Major difference
+### Major difference
 
 |                |Compatibility|
 |----------------|-------------|
@@ -58,12 +58,12 @@ focus on the differences in Fortran support between the two toolchains.
 |Module file     |No           |
 |Array descriptor|No           |
 
-#### Difference in Fortran features
+### Difference in Fortran features
 
 |Feature                   |ACfL                                                                                         |ATfL                                                                                                 |
 |--------------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
 |Base Fortran standard     |Fortran 2008                                                                                 |Fortran 2018                                                                                         |
-|Base OpenMP Specification |OpenMP 4.0                                                                                   |OpenMP 2.5<br>Note: OpenMP support is experimental                                                   |
+|Base OpenMP Specification |OpenMP 4.0                                                                                   |OpenMP 2.5<br>OpenMP support is experimental                                                         |
 |Parameterized Derived Type|Supported                                                                                    |PDT Kind - Supported<br>PDT Length - Not supported                                                   |
 |Preprocessor              |Use `-cpp` to switch ON                                                                      |Always ON<br>Use `-cpp` to switch ON processing of predefined macros and macros from the command line|
 |Directives                |`ivdep`, `prefetch`, `unroll`, `nounroll`, `vector always`, `vector vectorlength`, `novector`|`vector always`                                                                                      |
@@ -71,7 +71,7 @@ focus on the differences in Fortran support between the two toolchains.
 |Recursive functions       |Use `-frecursive`                                                                            |Default                                                                                              |
 |Main function             |Is a library linked at link-time                                                             |Is generated in the object file containing the program statement                                     |
 
-#### Difference in command line flags
+### Difference in command line flags
 
 The following table summarises some of the most commonly used compiler flags in
 gfortran and gives their equivalent in the Arm Fortran compiler:
@@ -84,7 +84,7 @@ gfortran and gives their equivalent in the Arm Fortran compiler:
 |`-r8`             |`-fdefault-real-8`        |Sets the default `KIND` for `REAL` and `COMPLEX` declarations, constants, functions, and intrinsics|
 |`-i8`             |`-fdefault-integer-8`     |Set the default `KIND` for `INTEGER` and `LOGICAL` to 64bit (i.e., `KIND = 8`)                     |
 
-#### Pre-defined macros
+### Pre-defined macros
 
 `armflang` has the following compiler and machine specific predefined processor
 macros:
