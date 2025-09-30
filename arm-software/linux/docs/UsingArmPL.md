@@ -1,47 +1,48 @@
-# Using the Arm Performance Libraries
+# How to use the Arm Performance Libraries
 
 You can get greater performance from your code if you enable linking to the
 optimized math libraries at compilation time.
 
-## Linking to Arm Performance Libraries
+## How to link to the Arm Performance Libraries
 
-To enable you to get the best performance on Arm-based systems, Arm recommends
-linking to Arm Performance Libraries. Arm Performance Libraries provide
+To enable you to get the best performance on Arm-based systems, we recommend
+linking to the Arm Performance Libraries. Arm Performance Libraries provide
 optimized standard core math libraries for high-performance computing
 applications on Arm processors. Through a C interface, the following types of
 routines are available:
 
-* BLAS: Basic Linear Algebra Subprograms (including XBLAS, the extended
-  precision BLAS).
+* BLAS: Basic Linear Algebra Subprograms, including XBLAS, the extended
+  precision BLAS
 
-* LAPACK: A comprehensive package of higher level linear algebra routines.
+* LAPACK: A comprehensive package of higher level linear algebra routines
 
 * FFT functions: A set of Fast Fourier Transform routines for real and complex
-  data using the FFTW interface.
+  data using the FFTW interface
 
-* Sparse linear algebra.
+* Sparse linear algebra
 
-* libastring: A subset of libc, which is a set of optimized string functions.
+* libastring: A subset of libc, which is a set of optimized string functions
 
 The easiest way to make the Arm Performance Libraries visible to the compiler is
 to load the `arm-performance-libraries` environment module. After the `atfl`
-environment module has been loaded, the arm-performance-libraries module should
-become available for loading:
+environment module has been loaded, the arm-performance-libraries module is
+available for loading:
 
 ```
 $ module load arm-performance-libraries
 ```
 
-This should set the `ARMPL_`-prefixed environment variables and two other
-critical environment variables: `LD_LIBRARY_PATH` and `PKG_CONFIG_PATH`. The
-recommended way of selecting command line flags for using a specific variant of
-Arm Performance Libraries is through invoking the `pkg-config` command.
+This sets the `ARMPL_`-prefixed environment variables and two other critical
+environment variables: `LD_LIBRARY_PATH` and `PKG_CONFIG_PATH`.
+
+To obtain a set of the command-line flags required for a specific variant of the
+Arm Performance Libraries we recommend invoking the `pkg-config` command.
 
 ### Note
 
-The Arm Performance Libraries export several `pkg-config` modules, you
-should be picking the one that you actually need, particularly when you plan to
-use OpenMP (notice the `seq` vs. `omp` suffix):
+The Arm Performance Libraries export several `pkg-config` modules. You must pick
+the one that you actually need, particularly when you plan to use OpenMP. Notice
+the `seq` and `omp` name parts:
 
 ```
 $ pkg-config --list-all | grep armpl
@@ -118,18 +119,18 @@ $ armflang -o binary code_with_math_routines.f90 -mcpu=neoverse-v1 `pkg-config a
 
 ### More information
 
-For more information please visit this page:
+For more information see:
 [Get started with Arm Performance Libraries (stand-alone Linux version) Version 24.10](https://developer.arm.com/documentation/102620/latest).
 
 To learn more about integrating Arm Performance Libraries with Arm Toolchain For
-Linux please visit [Using Arm Performance Libraries (ArmPL) with ATfL](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/linux/README.md#using-arm-performance-libraries-armpl-with-atfl).
+Linux see: [Using Arm Performance Libraries (ArmPL) with ATfL](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/linux/README.md#using-arm-performance-libraries-armpl-with-atfl).
 
 ### Note
 
 The Arm Performance Libraries suite is also the provider of the vectorized math
-routines library (libamath). This is a subset of the libm functions, which makes
-it possible to vectorize the loops containing calls to those functions. The Arm
-Toolchain for Linux default configuration instructs the C/C++ and Fortran
-compilers to make use of this library during vectorization automatically, no
-further command line options are needed. This can be disabled by specifying the
-`-fveclib=none` option.
+routines library, `libamath`. This is a subset of the libm functions, which
+makes it possible to vectorize the loops containing calls to those functions.
+The Arm Toolchain for Linux default configuration instructs the C/C++ and
+Fortran compilers to make use of this library during vectorization
+automatically. No further command-line options are needed. You can disable this
+by specifying the `-fveclib=none` option.
