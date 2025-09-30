@@ -123,7 +123,7 @@ ninja package-llvm-toolchain
 The Arm Toolchain for Embedded can be cross-compiled to run on Windows.
 The compilation itself still happens on Linux. In addition to the prerequisites
 mentioned in the [Installing prerequisites](#installing-prerequisites) section
-you will also need a Mingw-w64 toolchain based on GCC 7.1.0 or above installed.
+you will also need a Mingw-w64 toolchain based on GCC 13 or above installed.
 For example, to install it on Ubuntu Linux use the following command:
 ```
 # apt-get install mingw-w64
