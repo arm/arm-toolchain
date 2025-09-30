@@ -1,17 +1,17 @@
-# ACfL to ATfL Porting Guide
+# ACfL to ATfL porting guide
 
-This document outlines the key differences between using the Arm Toolchain for
+This section describes the key differences between using the Arm Toolchain for
 Linux (ATfL) and the Arm Compiler for Linux (ACfL). It also lists command-line
-options and macros that can be used with ATfL as alternatives to those used in
+options and macros that you can use with ATfL as alternatives to those used in
 ACfL.
 
-Both toolchains provide frontends for compiling C, C++, and Fortran code, and
-the names of these frontends are consistent across both: `armclang` for C,
+Both toolchains provide frontends for compiling C, C++, and Fortran code. The
+names of these frontends are consistent across both: `armclang` for C,
 `armclang++` for C++, and `armflang` for Fortran.
 
-The quadmath is supported by ATfL, while it was not supported by ACfL.
+ATfL supports quadruple precision real and complex types. ACfL does not.
 
-## Reference Version
+## Reference version
 
 |Compiler                      |Version|
 |------------------------------|-------|
@@ -26,29 +26,29 @@ necessary headers and libraries for BLAS, LAPACK, FFT, and other numerical
 routines.
 
 In contrast, ATfL does not include ArmPL directly, but it depends on the ArmPL
-package, which is installed alongside the toolchain. To use ArmPL with ATfL, the
-users must manually specify the locations of the headers and libraries using
-`pkg-config`. Detailed instructions are available in the
-[Getting Started](./GettingStarted.md) guide.
+package, which is installed alongside the toolchain. To use ArmPL with ATfL, you
+must manually specify the locations of the headers and libraries using
+`pkg-config`. See the [Getting started](./GettingStarted.md) guide for detailed
+instructions.
 
 ### Note
 
 Vector math functions from libamath are accessible without manually specifying
 the libraries.
 
-## C/C++ Frontend
+## C/C++ frontend
 
 The C/C++ frontend in ATfL is identical to the one used in ACfL. Both are built
-on the Clang frontend from the upstream LLVM project (`llvm-project/clang`).
+on the Clang frontend from the upstream LLVM project.
 
-## Fortran Frontend
+## Fortran frontend
 
-The Fortran frontend in ATfL is based on the new LLVM Flang project
-(`llvm-project/flang`). This frontend is a modern, from-scratch implementation.
+The Fortran frontend in ATfL is based on the new LLVM Flang project. This
+frontend is a modern, from-scratch implementation.
 In contrast, ACfL used the older Classic Flang frontend, available at
 [https://github.com/flang-compiler/flang](https://github.com/flang-compiler/flang).
-Because ATfL introduces a new Fortran frontend, this document will primarily
-focus on the differences in Fortran support between the two toolchains.
+Because ATfL introduces a new Fortran frontend, this section describes the
+differences in Fortran support between the two toolchains.
 
 ### Major difference
 
@@ -71,7 +71,7 @@ focus on the differences in Fortran support between the two toolchains.
 |Recursive functions       |Use `-frecursive`                                                                            |Default                                                                                              |
 |Main function             |Is a library linked at link-time                                                             |Is generated in the object file containing the program statement                                     |
 
-### Difference in command line flags
+### Difference in command-line flags
 
 The following table summarises some of the most commonly used compiler flags in
 gfortran and gives their equivalent in the Arm Fortran compiler:
@@ -84,7 +84,7 @@ gfortran and gives their equivalent in the Arm Fortran compiler:
 |`-r8`             |`-fdefault-real-8`        |Sets the default `KIND` for `REAL` and `COMPLEX` declarations, constants, functions, and intrinsics|
 |`-i8`             |`-fdefault-integer-8`     |Set the default `KIND` for `INTEGER` and `LOGICAL` to 64bit (i.e., `KIND = 8`)                     |
 
-### Pre-defined macros
+* Pre-defined macros
 
 `armflang` has the following compiler and machine specific predefined processor
 macros:
