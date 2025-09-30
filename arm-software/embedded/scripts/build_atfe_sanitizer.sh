@@ -51,8 +51,8 @@ fi
 mkdir -p "${REPO_ROOT}"/build
 cd "${REPO_ROOT}"/build
 
-# Enable below flag to disable memory leaks detection of LeakSanitizer.
-# export ASAN_OPTIONS=detect_leaks=0
+# Flag to disable detection of memory leaks in address sanitizer.
+export ASAN_OPTIONS=detect_leaks=0
 
 cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=Release -DLLVM_USE_SANITIZER="Address;Undefined" -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS}
 
