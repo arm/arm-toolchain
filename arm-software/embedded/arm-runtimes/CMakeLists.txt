@@ -774,11 +774,11 @@ if(C_LIBRARY STREQUAL llvmlibc)
             -E copy_directory
             <INSTALL_DIR>/lib/${target_triple}
             "${TEMP_LIB_DIR}/lib"
-        # And copy the include directory, which is already arranged right.
+        # Also copy the includes from their target-specific subdirectory.
         COMMAND
             ${CMAKE_COMMAND}
             -E copy_directory
-            <INSTALL_DIR>/include
+            <INSTALL_DIR>/include/${target_triple}
             "${TEMP_LIB_DIR}/include"
     )
 
