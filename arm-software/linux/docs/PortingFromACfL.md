@@ -16,7 +16,7 @@ ATfL supports quadruple precision real and complex types. ACfL does not.
 |Compiler                      |Version|
 |------------------------------|-------|
 |Arm Compiler for Linux (ACfL) |24.10  |
-|Arm Toolchain for Linux (ATfL)|20.0   |
+|Arm Toolchain for Linux (ATfL)|21.1   |
 
 ## ArmPL integration
 
@@ -96,7 +96,7 @@ macros:
 |`__aarch64__`         |N/A                   |`1`          |Selection of architecture dependent source at compile time|
 |`__ARM_ARCH`          |N/A                   |`8`          |Selection of architecture dependent source at compile time|
 |`__ARM_ARCH__`        |N/A                   |`8`          |Selection of architecture dependent source at compile time|
-|`__armflang_major__`  |`__flang_major__`     |`24`/`20`    |Underlying LLVM version details                           |
+|`__armflang_major__`  |`__flang_major__`     |`24`/`21`    |Underlying LLVM version details                           |
 |`__armflang_minor__`  |`__flang_minor__`     |`10`/`1`     |Underlying LLVM version details                           |
 |`__armflang_version__`|`__flang_patchlevel__`|`24.10.1`/`0`|Underlying LLVM version details                           |
 |`__linux__`           |`__linux__`           |`1`          |Targeted Operating System                                 |
