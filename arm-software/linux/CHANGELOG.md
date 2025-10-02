@@ -26,6 +26,10 @@ introduced specifically for this toolchain. The most notable include:
   See [this pull request](https://github.com/llvm/llvm-project/pull/136114) for
   more details.
 
+- Passing non-contiguous arrays to an MPI procedure causes issues in MPICH.
+  [This bug report](https://github.com/llvm/llvm-project/issues/138471) provides
+  more details. The issue is scheduled to be fixed in the 22.x release.
+
 ## [20.1.0]
 
 This is the first release of the Arm Toolchain for Linux (ATfL), a successor of
