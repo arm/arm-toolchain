@@ -11,8 +11,8 @@ This section describes the OpenMP API features supported by Flang.
 It is intended as a general reference. For the most accurate information on
 unimplemented features, see the compiler's TODO or `Not Yet Implemented`
 messages, which we consider authoritative.  With the exception of a few cases,
-Flang offers full support for [OpenMP 2.5](#openmp-25-openmp-11), and partial support for [OpenMP 3.1](#openmp-31-openmp-30)
-and [OpenMP 4.0](#openmp-40). The tables below describes the current status of
+Flang offers full support for OpenMP 2.5, and partial support for OpenMP 3.1,
+and OpenMP 4.0 standards. The tables below describe the current status of
 OpenMP 4.0, 3.1, 3.0 feature support.
 
 Work is ongoing to add support for OpenMP 4.5 and newer versions. A support
