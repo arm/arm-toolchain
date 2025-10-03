@@ -15,7 +15,7 @@ linker script file should be provided.
 */
 
 __boot_flash = 0x80000; /* Default firmware address for Rapberry Pi 3 */
-__boot_flash_size = 0x2000; /* 8K of space for added page table */
+__boot_flash_size = 0x3000; /* 12K of space for added page table */
 __flash = 0x10000000;
 __flash_size = 0x10000000;
 __ram = 0x20000000;
