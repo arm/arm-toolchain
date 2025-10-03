@@ -51,7 +51,12 @@ cd "${REPO_ROOT}"/build_libcxx
 export CC="${REPO_ROOT}/build_llvm/bin/clang"
 export CXX="${REPO_ROOT}/build_llvm/bin/clang++"
 
-cmake -G Ninja ../runtimes -DLLVM_TARGETS_TO_BUILD=AArch64 -DLLVM_USE_SANITIZER="Address;Undefined" -DLLVM_ENABLE_ASSERTIONS=True -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX
+cmake -G Ninja ../runtimes \
+    -DLLVM_TARGETS_TO_BUILD=AArch64 \
+    -DLLVM_USE_SANITIZER="Address;Undefined" \
+    -DLLVM_ENABLE_ASSERTIONS=True \
+    -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
+    -DCMAKE_C_COMPILER="$CC" -DCMAKE_CXX_COMPILER="$CXX"
 
 ninja
 
@@ -71,10 +76,9 @@ export LD_LIBRARY_PATH="${REPO_ROOT}"/build_libcxx/lib:$LD_LIBRARY_PATH
 export ASAN_OPTIONS=detect_leaks=0
 
 ASAN_OPTIONS=detect_leaks=0 cmake -G Ninja ../llvm \
-
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_USE_SANITIZER="Address;Undefined" -DLLVM_ENABLE_ASSERTIONS=True \
-    -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX \
+    -DCMAKE_C_COMPILER="$CC" -DCMAKE_CXX_COMPILER="$CXX" \
     -DLLVM_LIT_ARGS="-v" \
     -DCMAKE_INSTALL_PREFIX=../stage1.install \
     -DLLVM_TARGETS_TO_BUILD=AArch64 \

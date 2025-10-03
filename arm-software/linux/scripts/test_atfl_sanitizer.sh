@@ -18,7 +18,7 @@ set -vx
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
-cd "${REPO_ROOT}"/build_clang_with_sanitizer
+cd "${REPO_ROOT}"/build_clang_with_sanitizer || exit
 
 # If a test fails, lit will ordinarily return a non-zero result,
 # which prevents further testing. Setting the --ignore-fail option
