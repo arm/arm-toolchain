@@ -4,6 +4,6 @@ __flash = 0x00003000;       /* starting address of the remaining flash */
 __flash_size = 0x3d000;     /* length of the remaining flash */
 __ram = 0x20000000;         /* starting address of RAM bank 0 */
 __ram_size = 0x4000;        /* length of RAM bank 0 */
-__stack_size = 512;
+__stack_size = 0x400;       /* 1 KB of stack */
 
 INCLUDE picolibcpp.ld
