@@ -84,10 +84,8 @@ gfortran and gives their equivalent in the Arm Fortran compiler:
 |`-r8`             |`-fdefault-real-8`        |Sets the default `KIND` for `REAL` and `COMPLEX` declarations, constants, functions, and intrinsics|
 |`-i8`             |`-fdefault-integer-8`     |Set the default `KIND` for `INTEGER` and `LOGICAL` to 64bit (i.e., `KIND = 8`)                     |
 
-* Pre-defined macros
-
-`armflang` has the following compiler and machine specific predefined processor
-macros:
+The following table summarises the macros predefined in the
+`armflang` compiler:
 
 |ACfL                  |ATfL                  |Value        |Description                                               |
 |----------------------|----------------------|-------------|----------------------------------------------------------|
