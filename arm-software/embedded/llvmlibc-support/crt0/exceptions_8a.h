@@ -206,7 +206,7 @@ EXFN_ATTR void exception_handler() {
 // For our purposes, each entry just contains one branch instruction to the
 // exception reporting function, since we never want to resume after an
 // exception.
-[[gnu::naked, gnu::section(".text.init.enter"), gnu::aligned(2048)]]
+[[gnu::naked, gnu::section(".init.vectors"), gnu::aligned(2048)]]
 void vector_table() {
 #define VECTOR_TABLE_ENTRY                                                     \
   asm(".balign 128");                                                          \
