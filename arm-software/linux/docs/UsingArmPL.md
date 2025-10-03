@@ -11,13 +11,11 @@ optimized standard core math libraries for high-performance computing
 applications on Arm processors. Through a C interface, the following types of
 routines are available:
 
-* BLAS: Basic Linear Algebra Subprograms, including XBLAS, the extended
-  precision BLAS
+* BLAS: Basic Linear Algebra Subprograms, including XBLAS, the extended precision BLAS
 
 * LAPACK: A comprehensive package of higher level linear algebra routines
 
-* FFT functions: A set of Fast Fourier Transform routines for real and complex
-  data using the FFTW interface
+* FFT functions: A set of Fast Fourier Transform routines for real and complex data using the FFTW interface
 
 * Sparse linear algebra
 
