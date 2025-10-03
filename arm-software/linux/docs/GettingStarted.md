@@ -334,14 +334,9 @@ generates a portable output suitable for any Armv8-A-based target.
 
 ### Note
 
-* The optimizations that are performed due to setting the `-mcpu` option, are
-  independent of the optimizations that are performed due to setting the
-  `-O<level>` option.
+* The optimizations that are performed due to setting the `-mcpu` option, are independent of the optimizations that are performed due to setting the `-O<level>` option.
 
-* If you run the compiler on one target, but plan to run the application you are
-  compiling on a different target, do not use `-mcpu=native`. Instead, use
-  `-mcpu=<target>` where `<target>` is the target processor that you run
-  the application on.
+* If you run the compiler on one target, but plan to run the application you are compiling on a different target, do not use `-mcpu=native`. Instead, use `-mcpu=<target>` where `<target>` is the target processor that you run the application on.
 
 ## Standards support
 
@@ -355,20 +350,17 @@ For details on OpenMP support in Arm Toolchain for Linux, see the
 
 ### When to use Arm Toolchain for Linux?
 
-* To compile a code with the modern Fortran features (except
-  coarrays/teams/collectives).
+* To compile a code with the modern Fortran features (except coarrays/teams/collectives).
 
 * To compile Applications that are standards compliant.
 
 * To compile large scale applications like CP2K.
 
-* To compile applications requiring quadruple precision real/complex type
-  support.
+* To compile applications requiring quadruple precision real/complex type support.
 
 ### When not to use Arm Toolchain for Linux?
 
-* Performance is not guaranteed. For the users seeking highest performance,
-  Arm Toolchain for Linux is not recommended.
+* Performance is not guaranteed. For the users seeking highest performance, Arm Toolchain for Linux is not recommended.
 
 * OpenMP support is experimental.
 
