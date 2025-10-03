@@ -92,8 +92,8 @@ macros:
 |ACfL                  |ATfL                  |Value        |Description                                               |
 |----------------------|----------------------|-------------|----------------------------------------------------------|
 |`__FLANG`             |`__flang__`           |`1`          |Selection of compiler dependent source at compile time    |
-|`__arch64`            |N/A                   |`1`          |Selection of architecture dependent source at compile time|
-|`__aarch64__`         |N/A                   |`1`          |Selection of architecture dependent source at compile time|
+|`__arch64`            |`__arch64`            |`1`          |Selection of architecture dependent source at compile time|
+|`__aarch64__`         |`__arch64__`          |`1`          |Selection of architecture dependent source at compile time|
 |`__ARM_ARCH`          |N/A                   |`8`          |Selection of architecture dependent source at compile time|
 |`__ARM_ARCH__`        |N/A                   |`8`          |Selection of architecture dependent source at compile time|
 |`__armflang_major__`  |`__flang_major__`     |`24`/`20`    |Underlying LLVM version details                           |
