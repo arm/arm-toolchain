@@ -82,7 +82,9 @@ gfortran and gives their equivalent in the Arm Fortran compiler:
 |`-Mallocatable=03`|`-frealloc-lhs`           |Use Fortran 2003 standard semantics for assignments to allocatables                                |
 |`-Mallocatable=95`|`-fno-realloc-lhs`        |Use pre-Fortran 2003 standard semantics for assignments to allocatables                            |
 |`-r8`             |`-fdefault-real-8`        |Sets the default `KIND` for `REAL` and `COMPLEX` declarations, constants, functions, and intrinsics|
-|`-i8`             |`-fdefault-integer-8`     |Set the default `KIND` for `INTEGER` and `LOGICAL` to 64bit (i.e., `KIND = 8`)                     |
+|`-i8`             |`-fdefault-integer-8`     |Set the default `KIND` for `INTEGER` and `LOGICAL` to 64bit (for example, `KIND = 8`)              |
+
+### Difference in predefined macros
 
 The following table summarises the macros predefined in the
 `armflang` compiler:
