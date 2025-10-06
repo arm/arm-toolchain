@@ -502,7 +502,12 @@ if(C_LIBRARY STREQUAL picolibc)
 
         # Timeout multipliers. The actual timeout value used in testing is:
         # Timeout in seconds (defined in the picolibc's testing specs) x Timeout multiplier
-        if(LIBRARY_MESON_BUILD_TYPE STREQUAL minsize AND COMPILE_FLAGS MATCHES "-mbranch-protection=pac-ret\\+bti")
+        # In general, tests execute slower with FVPs compared to qemu. However certain
+        # variants can also be slower due to features enabled, for example: 
+        # * Armv6m big-endian
+        # * Armv7m big-endian
+        # * Armv8.1-M Main PACBTI optimized for code size
+        if(TEST_EXECUTOR STREQUAL fvp)
             set(timeout_multiplier 2)
         else()
             set(timeout_multiplier 1)
