@@ -5,7 +5,7 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-# A bash script to run the tests from the Arm Toolchain for Embedded, when sanitizers
+# A bash script to run the tests from the Arm Toolchain for Linux, when sanitizers
 # are enabled.
 
 # The script assumes a successful build of the toolchain exists in the 'build'
@@ -24,12 +24,10 @@ cd "${REPO_ROOT}"/build_clang_with_sanitizer || exit
 # which prevents further testing. Setting the --ignore-fail option
 # will cause testing to continue, so that CI systems can get a
 # full set of results.
-# The check-all target runs the upstream clang and LLVM tests,
-# which do not generate an junit xml results file by default.
+# Upstream clang and LLVM tests do not generate the junit xml results file by default.
 # Additionally setting the --xunit-xml-output option store the
 # results.
-export LIT_OPTS="--ignore-fail --xunit-xml-output=results.xml"
-ninja
+export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 ninja check-llvm
 ninja check-clang
 ninja check-cxx

@@ -10,7 +10,7 @@
 # Script implements 2-stage pipeline: first clang is built using arm-toolchain sources.
 # Then this clang is used to compile ATfL sanitizer build.
 #
-# The script creates a build of the toolchain in the 'build' directory, inside
+# The script creates a build of the toolchain in the 'build_clang_with_sanitizer' directory, inside
 # the repository tree.
 
 set -vex
@@ -75,15 +75,17 @@ export LD_LIBRARY_PATH="${REPO_ROOT}"/build_libcxx/lib:$LD_LIBRARY_PATH
 # Flag to disable memory leaks detection of LeakSanitizer.
 export ASAN_OPTIONS=detect_leaks=0
 
-ASAN_OPTIONS=detect_leaks=0 cmake -G Ninja ../llvm \
+cmake -G Ninja ../llvm \
     -DCMAKE_BUILD_TYPE=Release \
-    -DLLVM_USE_SANITIZER="Address;Undefined" -DLLVM_ENABLE_ASSERTIONS=True \
+    -DLLVM_USE_SANITIZER="Address;Undefined" \
+    -DLLVM_ENABLE_ASSERTIONS=True \
     -DCMAKE_C_COMPILER="$CC" -DCMAKE_CXX_COMPILER="$CXX" \
-    -DLLVM_LIT_ARGS="-v" \
+    -DLLVM_LIT_ARGS="-v --param=env=ASAN_OPTIONS=detect_leaks=0" \
     -DCMAKE_INSTALL_PREFIX=../stage1.install \
     -DLLVM_TARGETS_TO_BUILD=AArch64 \
     -DLLVM_ENABLE_PROJECTS="clang-tools-extra;clang;llvm" \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt"
 
+ninja
 echo "==> Stage 3: Completed sanitizer build"
 
