@@ -80,7 +80,7 @@ cmake -G Ninja ../llvm \
     -DLLVM_USE_SANITIZER="Address;Undefined" \
     -DLLVM_ENABLE_ASSERTIONS=True \
     -DCMAKE_C_COMPILER="$CC" -DCMAKE_CXX_COMPILER="$CXX" \
-    -DLLVM_LIT_ARGS="-v --param=env=ASAN_OPTIONS=detect_leaks=0" \
+    -DLLVM_LIT_ARGS="-v --param=env='ASAN_OPTIONS=detect_leaks=0'" \
     -DCMAKE_INSTALL_PREFIX=../stage1.install \
     -DLLVM_TARGETS_TO_BUILD=AArch64 \
     -DLLVM_ENABLE_PROJECTS="clang-tools-extra;clang;llvm" \

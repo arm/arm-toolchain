@@ -29,9 +29,12 @@ cd "${REPO_ROOT}"/build_clang_with_sanitizer || exit
 # results.
 export ASAN_OPTIONS=detect_leaks=0
 
-export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
-ninja check-llvm
-ninja check-clang
-ninja check-cxx
-ninja check-cxxabi
+# test_atfl_sanitizer.sh
+export ASAN_OPTIONS=detect_leaks=0
+export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=detect_leaks=0'"
+
+ninja check-llvm   LIT_ARGS="$LIT_OPTS"
+ninja check-clang  LIT_ARGS="$LIT_OPTS"
+ninja check-cxx    LIT_ARGS="$LIT_OPTS"
+ninja check-cxxabi LIT_ARGS="$LIT_OPTS"
 
