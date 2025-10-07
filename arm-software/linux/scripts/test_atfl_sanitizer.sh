@@ -32,9 +32,14 @@ export ASAN_OPTIONS=detect_leaks=0
 # results.
 export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=detect_leaks=0'"
 
+ninja -v check-llvm
+echo "check-llvm exit code: $?"
 
-ninja check-llvm
-ninja check-clang
-ninja check-cxx
-ninja check-cxxabi
+ninja -v check-clang
+echo "check-clang exit code: $?"
 
+ninja -v check-cxx
+echo "check-cxx exit code: $?"
+
+ninja -v check-cxxabi
+echo "check-cxxabi exit code: $?"
