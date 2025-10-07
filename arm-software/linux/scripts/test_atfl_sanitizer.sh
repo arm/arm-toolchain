@@ -20,6 +20,9 @@ REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
 cd "${REPO_ROOT}"/build_clang_with_sanitizer || exit
 
+# Flag to disable memory leaks detection of LeakSanitizer.
+export ASAN_OPTIONS=detect_leaks=0
+
 # If a test fails, lit will ordinarily return a non-zero result,
 # which prevents further testing. Setting the --ignore-fail option
 # will cause testing to continue, so that CI systems can get a
@@ -27,14 +30,11 @@ cd "${REPO_ROOT}"/build_clang_with_sanitizer || exit
 # Upstream clang and LLVM tests do not generate the junit xml results file by default.
 # Additionally setting the --xunit-xml-output option store the
 # results.
-export ASAN_OPTIONS=detect_leaks=0
+export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=detect_leaks=0'"
 
-# test_atfl_sanitizer.sh
-export ASAN_OPTIONS=detect_leaks=0
-export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=detect_leaks=0'"
 
-ninja check-llvm   LIT_ARGS="$LIT_OPTS"
-ninja check-clang  LIT_ARGS="$LIT_OPTS"
-ninja check-cxx    LIT_ARGS="$LIT_OPTS"
-ninja check-cxxabi LIT_ARGS="$LIT_OPTS"
+ninja check-llvm
+ninja check-clang
+ninja check-cxx
+ninja check-cxxabi
 
