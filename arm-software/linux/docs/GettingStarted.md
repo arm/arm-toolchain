@@ -341,10 +341,10 @@ generates a portable output suitable for any Armv8-A-based target.
 ## Standards support
 
 For information on C, C++, and Fortran language support in Arm Toolchain for
-Linux, see the [Standards support](StandardsSupport.md) page.
+Linux, see the [Standards support](StandardsSupport.md) section.
 
 For details on OpenMP support in Arm Toolchain for Linux, see the
-[OpenMP support](OpenMPSupport.md) page.
+[OpenMP support](OpenMPSupport.md) section.
 
 ## Fortran recommendations
 
