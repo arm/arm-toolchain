@@ -375,7 +375,11 @@ add_subdirectory(
 
 add_dependencies(check-all check-elf2bin)
 
-# Generate a xfail/xfail-not list before running the tests.
+# Ensure the list files exist for anything reading LLVM_LIT_ARGS.
+file(TOUCH ${llvm_xfails_file_path})
+file(TOUCH ${llvm_xfails_not_file_path})
+
+# Update the xfail/xfail-not list before running the tests.
 add_custom_target(
     llvm-xfail-files
     COMMAND ${Python3_EXECUTABLE}
