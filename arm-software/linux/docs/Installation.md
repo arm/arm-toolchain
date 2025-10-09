@@ -2,6 +2,14 @@
 
 This section describes how to download and install the Arm Toolchain for Linux.
 
+### Note
+
+The recommended installation method requires system administrator (`root`)
+assistance. Non-root installation is also possible, you can read about it
+further.
+
+## Recommended installation method
+
 The first step is to configure your Linux package manager to be able to fetch
 packages from Arm. You do this step only once.
 
@@ -87,3 +95,24 @@ $ sudo dnf install arm-toolchain-for-linux
 ```
 $ sudo zypper install arm-toolchain-for-linux
 ```
+
+## Non-root installation method
+
+You can install the Arm Toolchain for Linux, along with the Arm Performance
+Libraries in any directory that you wish to specify. For this, the auxiliary
+installation script can be used. This script does not require system
+administrator (`root`) assistance:
+
+```
+$ bash <(curl -L https://developer.arm.com/-/cdn-downloads/permalink/Arm-Toolchain-for-Linux/Package/user_install.sh) --yes <installation_directory>
+```
+
+The `<installation_directory>` path can be either absolute or relative.
+For example, you can invoke a local directory installation:
+
+```
+$ bash <(curl -L https://developer.arm.com/-/cdn-downloads/permalink/Arm-Toolchain-for-Linux/Package/user_install.sh) --yes .
+```
+
+After completion, you can see the `opt` directory tree unpacked into your local
+directory.
