@@ -72,7 +72,7 @@ export CC="${REPO_ROOT}/build_llvm/bin/clang"
 export CXX="${REPO_ROOT}/build_llvm/bin/clang++"
 export LD_LIBRARY_PATH="${REPO_ROOT}"/build_libcxx/lib:$LD_LIBRARY_PATH
 
-# Flag to disable memory leaks detection of LeakSanitizer.
+# Flag to disable LeakSanitizer (memory leaks detection) in AddressSanitizer.
 export ASAN_OPTIONS=detect_leaks=0
 
 cmake -G Ninja ../llvm \
