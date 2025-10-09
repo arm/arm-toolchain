@@ -5,7 +5,7 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-# A bash script to build the Arm Toolchain for Linux, with address and undefined sanitizer enabled.
+# A bash script to build the Arm Toolchain for Linux, with Address (ASan) and Undefined Behaviour Sanitizer (UBSan) enabled.
 
 # Script implements 2-stage pipeline: first clang is built using arm-toolchain sources.
 # Then this clang is used to compile ATfL sanitizer build.
