@@ -36,7 +36,7 @@ config.substitutions.append(('%{link_flags}',
     ' %{libc-extra-link-flags}'
 ))
 config.substitutions.append(('%{exec}',
-    '%{executor} --execdir %T -- '
+    '%{executor} --execdir %{temp} -- '
 ))
 
 import os, site
