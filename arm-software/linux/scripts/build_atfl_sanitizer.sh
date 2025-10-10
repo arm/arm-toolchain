@@ -20,10 +20,6 @@ REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
 clang --version
 
-export CC=clang
-export CXX=clang++
-
-# Stage 1: Building clang (unsanitized)
 echo "==> Stage 1: Building clang (unsanitized)"
 
 mkdir -p "${REPO_ROOT}"/build_llvm
@@ -34,13 +30,14 @@ cmake -G Ninja ../llvm \
     -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
     -DLLVM_LIT_ARGS="-v" \
     -DCMAKE_INSTALL_PREFIX=../stage1.install \
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
     -DLLVM_TARGETS_TO_BUILD=AArch64 \
     -DLLVM_ENABLE_PROJECTS="clang;llvm" \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt"
 
 ninja
 
-# Stage 2: Building libraries (unsanitized)
 echo "==> Stage 2: Building libraries (unsanitized)"
 
 mkdir -p "${REPO_ROOT}"/build_libcxx
@@ -56,7 +53,6 @@ cmake -G Ninja ../runtimes \
 
 ninja
 
-# Stage 3: Building clang (sanitized)
 echo "==> Stage 3: Building clang (sanitized)"
 
 mkdir -p "${REPO_ROOT}"/build_clang_with_sanitizer
