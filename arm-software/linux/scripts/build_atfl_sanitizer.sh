@@ -18,8 +18,6 @@ set -vex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
-clang --version
-
 echo "==> Stage 1: Building clang (unsanitized)"
 
 mkdir -p "${REPO_ROOT}"/build_llvm
