@@ -118,7 +118,7 @@ $ armflang -o binary code_with_math_routines.f90 -mcpu=neoverse-v1 `pkg-config a
 ### More information
 
 For more information see:
-[Get started with Arm Performance Libraries (stand-alone Linux version) Version 24.10](https://developer.arm.com/documentation/102620/latest).
+[Get started with Arm Performance Libraries (stand-alone Linux version)](https://developer.arm.com/documentation/102620/latest).
 
 To learn more about integrating Arm Performance Libraries with Arm Toolchain For
 Linux see: [Using Arm Performance Libraries (ArmPL) with ATfL](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/linux/README.md#using-arm-performance-libraries-armpl-with-atfl).
