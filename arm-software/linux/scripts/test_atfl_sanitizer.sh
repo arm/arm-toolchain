@@ -43,3 +43,9 @@ echo "check-cxx exit code: $?"
 
 ninja -v check-cxxabi
 echo "check-cxxabi exit code: $?"
+
+ninja -v check-compiler-rt
+echo "check-compiler-rt exit code: $?"
+
+ninja -v check-unwind
+echo "check-unwind exit code: $?"
