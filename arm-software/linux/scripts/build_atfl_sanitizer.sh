@@ -23,8 +23,8 @@ clang --version
 export CC=clang
 export CXX=clang++
 
-# Stage 1: Compile clang
-echo "==> Stage 1: Starting clang build"
+# Stage 1: Building clang (unsanitized)
+echo "==> Stage 1: Building clang (unsanitized)"
 
 mkdir -p "${REPO_ROOT}"/build_llvm
 cd "${REPO_ROOT}"/build_llvm
@@ -35,51 +35,50 @@ cmake -G Ninja ../llvm \
     -DLLVM_LIT_ARGS="-v" \
     -DCMAKE_INSTALL_PREFIX=../stage1.install \
     -DLLVM_TARGETS_TO_BUILD=AArch64 \
-    -DLLVM_ENABLE_PROJECTS="clang-tools-extra;clang;llvm" \
+    -DLLVM_ENABLE_PROJECTS="clang;llvm" \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt"
 
 ninja
 
-echo "==> Stage 1: Completed clang build"
-
-# Stage 2: Compile library
-echo "==> Stage 2: Starting library build"
+# Stage 2: Building libraries (unsanitized)
+echo "==> Stage 2: Building libraries (unsanitized)"
 
 mkdir -p "${REPO_ROOT}"/build_libcxx
 cd "${REPO_ROOT}"/build_libcxx
-
-export CC="${REPO_ROOT}/build_llvm/bin/clang"
-export CXX="${REPO_ROOT}/build_llvm/bin/clang++"
 
 cmake -G Ninja ../runtimes \
     -DLLVM_TARGETS_TO_BUILD=AArch64 \
     -DLLVM_USE_SANITIZER="Address;Undefined" \
     -DLLVM_ENABLE_ASSERTIONS=True \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
-    -DCMAKE_C_COMPILER="$CC" -DCMAKE_CXX_COMPILER="$CXX"
+    -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
+    -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++"
 
 ninja
 
-echo "==> Stage 2: Completed library build"
-
-# Stage 3: Compile sanitizer build
-echo "==> Stage 3: Starting sanitizer build"
+# Stage 3: Building clang (sanitized)
+echo "==> Stage 3: Building clang (sanitized)"
 
 mkdir -p "${REPO_ROOT}"/build_clang_with_sanitizer
 cd "${REPO_ROOT}"/build_clang_with_sanitizer
 
-export CC="${REPO_ROOT}/build_llvm/bin/clang"
-export CXX="${REPO_ROOT}/build_llvm/bin/clang++"
 export LD_LIBRARY_PATH="${REPO_ROOT}"/build_libcxx/lib:$LD_LIBRARY_PATH
 
 # Flag to disable LeakSanitizer (memory leaks detection) in AddressSanitizer.
 export ASAN_OPTIONS=detect_leaks=0
 
+# Have chosen Address Sanitizer and Undefined Sanitizer to build and test.
+# These sanitizers are most commonly used and relatively easy to set-up.
+# These sanitizers will help to detect runtime issues related to use after free, 
+# overflow (Heap buffer, stack buffer) etc.
+# We have explicitly disabled memory leak detection, since the observed issues are
+# unrelated to product under test.
 cmake -G Ninja ../llvm \
     -DCMAKE_BUILD_TYPE=Release \
     -DLLVM_USE_SANITIZER="Address;Undefined" \
     -DLLVM_ENABLE_ASSERTIONS=True \
-    -DCMAKE_C_COMPILER="$CC" -DCMAKE_CXX_COMPILER="$CXX" \
+    -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
+    -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++" \
     -DLLVM_LIT_ARGS="-v --param=env='ASAN_OPTIONS=detect_leaks=0'" \
     -DCMAKE_INSTALL_PREFIX=../stage1.install \
     -DLLVM_TARGETS_TO_BUILD=AArch64 \
@@ -87,5 +86,5 @@ cmake -G Ninja ../llvm \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt"
 
 ninja
-echo "==> Stage 3: Completed sanitizer build"
+echo "==> Stage 3: Completed building clang (sanitized)"
 
