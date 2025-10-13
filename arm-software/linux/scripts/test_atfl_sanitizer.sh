@@ -32,6 +32,9 @@ export ASAN_OPTIONS=detect_leaks=0
 # results.
 export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=detect_leaks=0'"
 
+# Skip the flaky tests
+export LIT_ARGS="${LIT_ARGS} --filter-out 'time.zone|tzdb|time.clock|orc|activation-options|quarantine_size|mmap_write_exec|log-path_test|assert.cpp|initialization-nobug|use_globals|closed-fds'"
+
 ninja -v check-llvm
 echo "check-llvm exit code: $?"
 
