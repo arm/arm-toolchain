@@ -81,7 +81,7 @@ include the path to the Arm Toolchain for Linux module files directory:
 $ module use /opt/arm/modulefiles
 ```
 
-You can use the `module avail` command to examine the list of available modules.
+Use the `module avail` command to examine the list of available modules.
 
 To load the module for Arm Toolchain for Linux, type:
 
@@ -111,7 +111,8 @@ $ which armflang
 
 ### Example 1: Compile and run an example C program
 
-Consider a simple program stored in a `.c` file, for example: `hello.c`:
+This example shows a simple program stored in a `.c` file,
+for example: `hello.c`:
 
 ```
 #include <stdio.h>
@@ -140,7 +141,8 @@ Hello, World!
 
 ### Example 2: Compile and run an example Fortran program
 
-Consider a simple program stored in a `.f90` file, for example: `hello.f90`:
+This example shows a simple program stored in a `.f90` file,
+for example: `hello.f90`:
 
 ```
 program hello
