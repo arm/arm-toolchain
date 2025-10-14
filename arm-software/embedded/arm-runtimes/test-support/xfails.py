@@ -152,6 +152,7 @@ def main():
             name="atomics part 1",
             testnames=[
                 "extensions/libcxx/atomics/atomics.flag/init_bool.pass.cpp",
+                "libcxx/diagnostics/atomic.nodiscard.verify.cpp",
                 "libcxx/thread/thread.stoptoken/intrusive_shared_ptr.pass.cpp",
                 "libcxx/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_from_underaligned_buffer.pass.cpp",
                 "libcxx/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_in_geometric_progression.pass.cpp",
@@ -167,6 +168,7 @@ def main():
                 "std/atomics/atomics.flag/init.pass.cpp",
                 "std/atomics/atomics.flag/test_and_set.pass.cpp",
                 "std/atomics/atomics.general/replace_failure_order.pass.cpp",
+                "std/atomics/atomics.ref/address.pass.cpp",
                 "std/atomics/atomics.ref/ctor.pass.cpp",
                 "std/atomics/atomics.ref/deduction.pass.cpp",
                 "std/atomics/atomics.ref/is_always_lock_free.pass.cpp",
