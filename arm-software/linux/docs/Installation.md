@@ -13,8 +13,9 @@ further.
 The first step is to configure your Linux package manager to be able to fetch
 packages from Arm. You do this step only once.
 
-From the available options, select the packages repository matching with your
-installed Linux distribution:
+From the available options, select the packages repository that matches your
+installed Linux distribution. This adds the Arm toolchain repository to the
+package manager:
 
 * Ubuntu 22.04
 
