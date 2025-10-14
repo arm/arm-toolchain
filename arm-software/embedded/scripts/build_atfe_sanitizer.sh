@@ -26,7 +26,7 @@ clang --version
 export CC=clang
 export CXX=clang++
 
-# Stage 1: Compile clang
+echo "==> Stage 1: Building clang (unsanitized)"
 mkdir -p "${REPO_ROOT}"/build_llvm
 cd "${REPO_ROOT}"/build_llvm
 
@@ -34,28 +34,30 @@ cmake ../llvm -G Ninja \
     -DLLVM_ENABLE_PROJECTS="clang;llvm;lld" \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCLANG_DEFAULT_LINKER="lld"
+    -DCLANG_DEFAULT_LINKER="lld" \
+    -DCMAKE_INSTALL_PREFIX="${REPO_ROOT}/stage1.install"
 
 ninja
 
-echo "==> Stage 1: Completed clang build"
-
-# Stage 2: Compile ATfE with sanitizer
-export CC="${REPO_ROOT}/build_llvm/bin/clang"
-export CXX="${REPO_ROOT}/build_llvm/bin/clang++"
+echo "==> Stage 2: Building clang (sanitized)"
 
 if [[ ! -z "${FVP_INSTALL_DIR}" ]]; then
     EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DENABLE_FVP_TESTING=ON -DFVP_INSTALL_DIR=${FVP_INSTALL_DIR}"
 fi
 
-mkdir -p "${REPO_ROOT}"/build
-cd "${REPO_ROOT}"/build
+mkdir -p "${REPO_ROOT}"/build_clang_with_sanitizer
+cd "${REPO_ROOT}"/build_clang_with_sanitizer
 
-# Flag to disable detection of memory leaks in address sanitizer.
-export ASAN_OPTIONS=detect_leaks=0
-
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=Release -DLLVM_USE_SANITIZER="Address;Undefined" -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS}
+cmake ../arm-software/embedded \
+    -GNinja -DFETCHCONTENT_QUIET=OFF \
+    -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
+    -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DLLVM_USE_SANITIZER="Address;Undefined" \
+    -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS} \
+    -DCMAKE_INSTALL_PREFIX="${REPO_ROOT}/stage2.install"
 
 ninja package-llvm-toolchain
 
-echo "==> Stage 2: Completed sanitizer build"
+echo "==> Stage 2: Completed building clang (sanitized)"
+

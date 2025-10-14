@@ -28,8 +28,13 @@ REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 # so the same name can be used for all files for consistency.
 export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 
+if [[ ! -d "${REPO_ROOT}/build_clang_with_sanitizer" ]]; then
+  echo "Error: build directory not found. Run the sanitizer build first."
+  exit 1
+fi
+
 # Command for each test is splitted across individual lines, to aid in debugging.
-cd "${REPO_ROOT}"/build
+cd "${REPO_ROOT}"/build_clang_with_sanitizer
 ninja check-all
 ninja check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
 ninja check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
