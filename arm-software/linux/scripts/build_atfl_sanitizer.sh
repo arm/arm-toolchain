@@ -36,7 +36,7 @@ cmake -G Ninja ../llvm \
 
 ninja
 
-echo "==> Stage 2: Building libraries (unsanitized)"
+echo "==> Stage 2: Building libraries (sanitized)"
 
 mkdir -p "${REPO_ROOT}"/build_libcxx
 cd "${REPO_ROOT}"/build_libcxx
@@ -47,7 +47,8 @@ cmake -G Ninja ../runtimes \
     -DLLVM_ENABLE_ASSERTIONS=True \
     -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
     -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
-    -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++"
+    -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++" \
+    -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=off
 
 ninja
 
@@ -74,12 +75,12 @@ cmake -G Ninja ../llvm \
   -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
   -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++" \
   -DLLVM_LIT_ARGS="-v --param=env='ASAN_OPTIONS=detect_leaks=0' \
-    --filter-out 'time.zone|tzdb|time.clock|orc|activation-options|quarantine_size|mmap_write_exec|log-path_test|assert.cpp|initialization-nobug|use_globals|closed-fds'" \
-  -DCMAKE_INSTALL_PREFIX=../stage1.install \
+  --filter-out='(time\.zone|tzdb|time\.clock|orc|activation-options|quarantine_size|mmap_write_exec|log-path_test|assert\.cpp|initialization-nobug|use_globals|closed-fds)'" \
+  -DCMAKE_INSTALL_PREFIX=../stage3.install \
   -DLLVM_TARGETS_TO_BUILD=AArch64 \
-  -DLLVM_ENABLE_PROJECTS="clang-tools-extra;clang;llvm" \
-  -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt"
+  -DLLVM_ENABLE_PROJECTS="clang;llvm" \
+  -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
+  -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=off
 
 ninja
 echo "==> Stage 3: Completed building clang (sanitized)"
-
