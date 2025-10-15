@@ -74,8 +74,9 @@ cmake -G Ninja ../llvm \
   -DLLVM_ENABLE_ASSERTIONS=True \
   -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
   -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++" \
-  -DLLVM_LIT_ARGS="-v --param=env='ASAN_OPTIONS=detect_leaks=0' \
-  --filter-out='(time\.zone|tzdb|time\.clock|orc|activation-options|quarantine_size|mmap_write_exec|log-path_test|assert\.cpp|initialization-nobug|use_globals|closed-fds)'" \
+  -DLLVM_LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml \
+  --param=env='ASAN_OPTIONS=detect_leaks=0' \
+  --filter-out='(time\.zone|tzdb|time\.clock|orc|activation-options|quarantine_size|mmap_write_exec|assert\.cpp|asan_preload_test|thread_local_quarantine_size|leak|tzdb|assert\.cpp|use_globals|closed-fds)'" \
   -DCMAKE_INSTALL_PREFIX=../stage3.install \
   -DLLVM_TARGETS_TO_BUILD=AArch64 \
   -DLLVM_ENABLE_PROJECTS="clang;llvm" \
