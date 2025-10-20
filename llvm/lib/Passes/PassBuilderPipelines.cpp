@@ -2082,7 +2082,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
 
   FunctionPassManager FPM;
 
-// #409
+//  #409
   if (LTOExtraLoopUnroll) {
     LoopPassManager OmaxLPM;
     OmaxLPM.addPass(LoopFullUnrollPass(Level.getSpeedupLevel(),
@@ -2090,8 +2090,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
                                        PTO.ForgetAllSCEVInLoopUnroll));
     FPM.addPass(
         createFunctionToLoopPassAdaptor(std::move(OmaxLPM),
-                                        /*UseMemorySSA=*/false,
-                                        /*UseBlockFrequencyInfo=*/true));
+                                        /*UseMemorySSA=*/false));
   }
 
   // The IPO Passes may leave cruft around. Clean up after them.
