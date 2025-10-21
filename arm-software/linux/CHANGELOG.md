@@ -2,13 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [21.1.0]
+## [21.1.1]
 
 This is the second release of the Arm Toolchain for Linux (ATfL), a successor of
 the Arm Compiler for Linux (ACfL).
 
-Although ATfL is based entirely on LLVM version 21.1, several changes have been
-introduced specifically for this toolchain. The most notable include:
+Although ATfL is based entirely on LLVM version 21.1.1, several changes have
+been introduced specifically for this toolchain. The most notable include:
 
 - The compiler uses a config file by default, which improves
   performance-specific optimizations; most notably, it encourages the use of the
