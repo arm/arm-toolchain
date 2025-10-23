@@ -374,7 +374,7 @@ product_build() {
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     cp -d ${ATFL_DIR}/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
-    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
+    LIT_USE_INTERNAL_SHELL=0 run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
 }
 
 shared_lib_build() {
@@ -411,7 +411,7 @@ shared_lib_build() {
     rm -r "${ATFL_DIR}.libs"
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
-    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
+    LIT_USE_INTERNAL_SHELL=0 run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
 }
 
 package() {
