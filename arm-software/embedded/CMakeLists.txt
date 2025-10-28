@@ -382,6 +382,7 @@ add_custom_target(
         clang
 )
 add_dependencies(check-clang clang-xfail-lit-args)
+add_dependencies(check-all clang-xfail-lit-args)
 
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
     install(
