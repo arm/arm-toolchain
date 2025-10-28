@@ -269,7 +269,10 @@ bootstrap_compiler_build() {
 
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
         -DBUILD_SHARED_LIBS=False \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_ASM_FLAGS_RELEASE="-O2 -DNDEBUG" \
+        -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG" \
+        -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG" \
         -DCMAKE_SKIP_RPATH=No \
         -DCMAKE_SKIP_INSTALL_RPATH=No \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/bootstrap_compiler" \
