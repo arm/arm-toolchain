@@ -59,12 +59,9 @@ def main():
         help="Project to generate xfails for.",
     )
     arg_parser.add_argument(
-        "--xfails_file",
-        help="Save the test list to a file, instead of outputting.",
-    )
-    arg_parser.add_argument(
-        "--xfails_not_file",
-        help="Save the test list to a file, instead of outputting.",
+        "--output-args",
+        help="Write the test lists to a file with --xfail and --xfail-not"
+        "parameters, which can be read directly by lit by prefixing with @.",
     )
     args = arg_parser.parse_args()
 
@@ -102,7 +99,7 @@ def main():
             ],
             result=NewResult.XFAILED,
             conditional=check_frwpi_error,
-            project="llvm",
+            project="clang",
             description="The multilib built by ATfE will generate a configuration error if -frwpi is used. Will pass if run before the multilib is installed.",
         ),
         XFail(
@@ -112,7 +109,7 @@ def main():
             ],
             result=NewResult.XFAILED,
             conditional=check_r52_warning,
-            project="llvm",
+            project="clang",
             description="If the installed default multilib does not have a library available for -mcpu=cortex-r52, this test will fail.",
         ),
         XFail(
@@ -476,21 +473,27 @@ def main():
     tests_to_xfail.sort()
     tests_to_upass.sort()
 
-    # Save to files for easy consumption by other scripts, or print for users.
-    if args.xfails_file:
-        os.makedirs(os.path.dirname(args.xfails_file), exist_ok=True)
-        with open(args.xfails_file, "w", encoding="utf-8") as f:
+    if args.output_args:
+        os.makedirs(os.path.dirname(args.output_args), exist_ok=True)
+        with open(args.output_args, "w", encoding="utf-8") as f:
+            if len(tests_to_xfail) > 0:
+                f.write("--xfail=")
+                f.write(";".join(tests_to_xfail))
+                f.write("\n")
+            if len(tests_to_upass) > 0:
+                f.write("--xfail-not=")
+                f.write(";".join(tests_to_upass))
+                f.write("\n")
+        print(f"xfail list written to {args.output_args}")
+    else:
+        if len(tests_to_xfail) > 0:
+            print("xfailed tests:")
             for testname in tests_to_xfail:
-                f.write(testname + "\n")
-    else:
-        print("LIT_XFAIL=" + ";".join(tests_to_xfail))
-    if args.xfails_not_file:
-        os.makedirs(os.path.dirname(args.xfails_not_file), exist_ok=True)
-        with open(args.xfails_not_file, "w", encoding="utf-8") as f:
+                print(testname)
+        if len(tests_to_upass) > 0:
+            print("xfail removed from tests:")
             for testname in tests_to_upass:
-                f.write(testname + "\n")
-    else:
-        print("LIT_XFAIL_NOT=" + ";".join(tests_to_upass))
+                print(testname)
 
 
 if __name__ == "__main__":

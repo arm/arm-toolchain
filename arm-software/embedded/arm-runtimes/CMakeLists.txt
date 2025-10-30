@@ -170,8 +170,12 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
         message(FATAL_ERROR "Tests can only be enabled using picolibc or llvmlibc.")
     endif()
 
-    # lit wrapper to be used instead of the LLVM version.
-    set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
+    set(external_lit_path "${LLVM_BINARY_DIR}/bin/llvm-lit")
+    set(default_lit_args "-sv --show-xfail --show-unsupported")
+    if (MSVC OR XCODE)
+        set(default_lit_args "${default_lit_args} --no-progress-bar")
+    endif()
+    set(LLVM_LIT_ARGS "${default_lit_args}" CACHE STRING "Default options for lit")
 
     if(TEST_EXECUTOR STREQUAL qemu)
         if(TARGET_ARCH MATCHES "^aarch64")
@@ -278,23 +282,20 @@ if(VARIANT STREQUAL "armv6m_soft_nofp")
 endif()
 
 if(ENABLE_COMPILER_RT_TESTS)
-    # Use the downstream version of lit, which is just a wrapper for the built one.
-    # Pass it the xfail/xfail-not lists.
-    set(compiler_rt_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.xfails")
-    set(compiler_rt_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.upasses")
-    set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
-    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${compiler_rt_xfails_file_path} --xfails-not-file=${compiler_rt_xfails_not_file_path}"
-    )
+    # Generate xfails for compiler-rt.
+    set(compiler_rt_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt_lit_xfails.txt")
+    set(compiler_rt_lit_args "--path=${LLVM_BINARY_DIR}/bin @${compiler_rt_lit_xfails_path} ${LLVM_LIT_ARGS}")
     add_custom_target(
-        compiler-rt-xfail-files
+        compiler-rt-xfail-lit-args
         COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
             --variant ${VARIANT}
             --project compiler-rt
             --libc ${C_LIBRARY}
-            --xfails_file ${compiler_rt_xfails_file_path}
-            --xfails_not_file ${compiler_rt_xfails_not_file_path}
+            --output-args ${compiler_rt_lit_xfails_path}
     )
+
+    set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
     set(
         compiler_rt_test_cmake_args
         -DCOMPILER_RT_INCLUDE_TESTS=ON
@@ -387,7 +388,7 @@ if(ENABLE_COMPILER_RT_TESTS)
         check-compiler-rt
         compiler_rt-build
         clib-install
-        compiler-rt-xfail-files
+        compiler-rt-xfail-lit-args
     )
     add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
 endif()
@@ -527,10 +528,6 @@ if(C_LIBRARY STREQUAL picolibc)
 
         # Generate lit wrappers for the tests.
         set(picolibc_lit_dir ${CMAKE_CURRENT_BINARY_DIR}/picolibc_lit)
-        set(picolibc_xfails_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.xfails")
-        set(picolibc_xfails_not_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.upasses")
-        set(picolibc_lit_args -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${picolibc_xfails_file_path} --xfails-not-file=${picolibc_xfails_not_file_path})
-
         ExternalProject_Add_Step(
             picolibc
             gen-lit-tests
@@ -547,22 +544,27 @@ if(C_LIBRARY STREQUAL picolibc)
         ExternalProject_Add_StepTargets(picolibc gen-lit-tests)
 
         # Generate xfails for picolibc.
+        set(picolibc_lit_xfails_path "${picolibc_lit_dir}/${VARIANT}_picolibc_lit_xfails.txt")
         add_custom_target(
-            picolibc-xfail-files
+            picolibc-xfail-lit-args
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
                 --variant ${VARIANT}
                 --project picolibc
                 --libc ${C_LIBRARY}
-                --xfails_file ${picolibc_xfails_file_path}
-                --xfails_not_file ${picolibc_xfails_not_file_path}
+                --output-args ${picolibc_lit_xfails_path}
         )
+
+        set(check_lit_cmd "${Python3_EXECUTABLE} ${external_lit_path} ${picolibc_lit_dir} ${LLVM_LIT_ARGS} @${picolibc_lit_xfails_path}")
+        # LLVM_LIT_ARGS has space separated flags, but the
+        # step COMMAND needs a list of arguments.
+        separate_arguments(check_lit_cmd)
 
         # Step target to run the picolibc test via lit.
         ExternalProject_Add_Step(
             picolibc
             check-lit
-            COMMAND ${Python3_EXECUTABLE} ${external_lit_path} ${picolibc_lit_dir} ${picolibc_lit_args}
+            COMMAND ${check_lit_cmd}
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
@@ -572,7 +574,7 @@ if(C_LIBRARY STREQUAL picolibc)
         ExternalProject_Add_StepDependencies(
             picolibc
             check-lit
-            picolibc-xfail-files
+            picolibc-xfail-lit-args
         )
         add_dependencies(check-picolibc picolibc-check-lit)
         add_dependencies(clib-build ${C_LIBRARY}-compile-tests)
@@ -870,21 +872,18 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
         )
         if(ENABLE_LIBCXX_TESTS)
-            # Use the downstream version of lit, which is just a wrapper for the built one.
-            # Pass it the xfail/xfail-not lists.
-            set(libcxx_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.xfails")
-            set(libcxx_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.upasses")
-            set(libcxx_lit_args "${LLVM_LIT_ARGS} -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${libcxx_xfails_file_path} --xfails-not-file=${libcxx_xfails_not_file_path}"
+            # Generate xfails for libxx.
+            set(libcxx_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx_lit_xfails.txt")
+            set(libcxx_lit_args "@${libcxx_lit_xfails_path} ${LLVM_LIT_ARGS}"
             )
             add_custom_target(
-                libcxx-xfail-files
+                libcxx-xfail-lit-args
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
                     --variant ${VARIANT}
                     --project libcxx
                     --libc ${C_LIBRARY}
-                    --xfails_file ${libcxx_xfails_file_path}
-                    --xfails_not_file ${libcxx_xfails_not_file_path}
+                    --output-arg ${libcxx_lit_xfails_path}
             )
             set(cxxlibs_test_cmake_options
                 -DLIBCXX_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++-picolibc.cfg.in
@@ -1029,7 +1028,7 @@ if(ENABLE_CXX_LIBS)
                 cxxlibs
                 ${check_target}
                 cxxlibs-install
-                libcxx-xfail-files
+                libcxx-xfail-lit-args
             )
             add_dependencies(${check_target} cxxlibs-${check_target})
         endforeach()
