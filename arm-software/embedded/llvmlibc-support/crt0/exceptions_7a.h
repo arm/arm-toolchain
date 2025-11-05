@@ -20,20 +20,47 @@ namespace exceptions {
 
 using namespace sysreg;
 
+// The following function is only valid in architectures with the
+// Virtualization Extension. armv7ve is the most basic architecture with it.
+// However, because armv7ve is not a valid value for the target attribute,
+// Cortex-A7 is used instead. The code is simple enough not to use instructions
+// that would be valid for Cortex-A7 but not for armv7ve.
+[[gnu::target("arch=cortex-a7")]] static uintptr_t read_elr_hyp() {
+  return __arm_rsr("ELR_hyp");
+}
+
+static bool is_in_hyp_mode() {
+  const uint32_t cpsr = __arm_rsr("CPSR");
+  const uint32_t mode_bits = cpsr & 0x1F;
+  return mode_bits == 0x1A;
+}
+
+#define GET_LR_VALUE_INTO(var)                                                 \
+  do {                                                                         \
+    if (is_in_hyp_mode())                                                      \
+      var = read_elr_hyp();                                                    \
+    else                                                                       \
+      var = (uint32_t)__builtin_return_address(0);                             \
+  } while (0)
+
 EXFN_ATTR void handle_reset() {
   print_str("CPU Exception: Reset\n");
   abort();
 }
 
 EXFN_ATTR void handle_undefined() {
-  unsigned pc_val = __arm_rsr("ELR_hyp");
-  unsigned instr = *reinterpret_cast<unsigned *>(pc_val);
+  uintptr_t lr_val;
+  GET_LR_VALUE_INTO(lr_val);
   print_str("CPU Exception: Undefined Instruction\n");
   print_str("  PC = ");
-  print_hex(pc_val);
+  print_hex(lr_val);
   print_str("\n");
-  print_str("  Instruction = ");
-  print_hex(instr);
+  const uint16_t half_word0 = *(uint16_t *)lr_val;
+  const uint16_t half_word1 = *((uint16_t *)lr_val + 1);
+  print_str("  Instruction (first half word) = ");
+  print_hex(half_word0);
+  print_str("  Instruction (second half word) = ");
+  print_hex(half_word1);
   print_str("\n");
   abort();
 }
@@ -41,7 +68,9 @@ EXFN_ATTR void handle_undefined() {
 EXFN_ATTR void handle_svc_hyp_smc() {
   print_str("CPU Exception: SVC, HVC or SMC\n");
   print_str("  PC = ");
-  print_hex(__arm_rsr("ELR_hyp"));
+  uintptr_t lr_val;
+  GET_LR_VALUE_INTO(lr_val);
+  print_hex(lr_val);
   print_str("\n");
   abort();
 }
@@ -49,7 +78,9 @@ EXFN_ATTR void handle_svc_hyp_smc() {
 EXFN_ATTR void handle_prefetch_abort() {
   print_str("CPU Exception: Prefetch Abort\n");
   print_str("  PC = ");
-  print_hex(__arm_rsr("ELR_hyp"));
+  uintptr_t lr_val;
+  GET_LR_VALUE_INTO(lr_val);
+  print_hex(lr_val);
   print_str("\n");
   print_str("  IFSR = 0x%08x\n");
   print_str("  IFAR = 0x%08x\n");
@@ -59,7 +90,9 @@ EXFN_ATTR void handle_prefetch_abort() {
 EXFN_ATTR void handle_data_abort() {
   print_str("CPU Exception: Data Abort\n");
   print_str("  PC = ");
-  print_hex(__arm_rsr("ELR_hyp"));
+  uintptr_t lr_val;
+  GET_LR_VALUE_INTO(lr_val);
+  print_hex(lr_val);
   print_str("\n");
   print_str("  DFSR = 0x%08x\n");
   print_str("  DFAR = 0x%08x\n");
@@ -69,7 +102,9 @@ EXFN_ATTR void handle_data_abort() {
 EXFN_ATTR void handle_hyp_trap() {
   print_str("CPU Exception: Hypervisor Trap\n");
   print_str("  PC = ");
-  print_hex(__arm_rsr("ELR_hyp"));
+  uintptr_t lr_val;
+  GET_LR_VALUE_INTO(lr_val);
+  print_hex(lr_val);
   print_str("\n");
   print_str("  HSR = 0x%08x\n");
   abort();
@@ -78,7 +113,9 @@ EXFN_ATTR void handle_hyp_trap() {
 EXFN_ATTR void handle_irq() {
   print_str("CPU Exception: IRQ\n");
   print_str("  PC = ");
-  print_hex(__arm_rsr("ELR_hyp"));
+  uintptr_t lr_val;
+  GET_LR_VALUE_INTO(lr_val);
+  print_hex(lr_val);
   print_str("\n");
   abort();
 }
@@ -86,7 +123,9 @@ EXFN_ATTR void handle_irq() {
 EXFN_ATTR void handle_fiq() {
   print_str("CPU Exception: FIQ\n");
   print_str("  PC = ");
-  print_hex(__arm_rsr("ELR_hyp"));
+  uintptr_t lr_val;
+  GET_LR_VALUE_INTO(lr_val);
+  print_hex(lr_val);
   print_str("\n");
   abort();
 }
