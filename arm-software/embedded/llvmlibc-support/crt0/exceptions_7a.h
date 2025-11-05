@@ -35,13 +35,8 @@ static bool is_in_hyp_mode() {
   return mode_bits == 0x1A;
 }
 
-#define GET_LR_VALUE_INTO(var)                                                 \
-  do {                                                                         \
-    if (is_in_hyp_mode())                                                      \
-      var = read_elr_hyp();                                                    \
-    else                                                                       \
-      var = (uint32_t)__builtin_return_address(0);                             \
-  } while (0)
+#define GET_LR_VALUE()                                                         \
+  (is_in_hyp_mode() ? read_elr_hyp() : (uintptr_t)__builtin_return_address(0))
 
 EXFN_ATTR void handle_reset() {
   print_str("CPU Exception: Reset\n");
@@ -49,8 +44,7 @@ EXFN_ATTR void handle_reset() {
 }
 
 EXFN_ATTR void handle_undefined() {
-  uintptr_t lr_val;
-  GET_LR_VALUE_INTO(lr_val);
+  uintptr_t lr_val = GET_LR_VALUE();
   print_str("CPU Exception: Undefined Instruction\n");
   print_str("  PC = ");
   print_hex(lr_val);
@@ -68,9 +62,7 @@ EXFN_ATTR void handle_undefined() {
 EXFN_ATTR void handle_svc_hyp_smc() {
   print_str("CPU Exception: SVC, HVC or SMC\n");
   print_str("  PC = ");
-  uintptr_t lr_val;
-  GET_LR_VALUE_INTO(lr_val);
-  print_hex(lr_val);
+  print_hex(GET_LR_VALUE());
   print_str("\n");
   abort();
 }
@@ -78,9 +70,7 @@ EXFN_ATTR void handle_svc_hyp_smc() {
 EXFN_ATTR void handle_prefetch_abort() {
   print_str("CPU Exception: Prefetch Abort\n");
   print_str("  PC = ");
-  uintptr_t lr_val;
-  GET_LR_VALUE_INTO(lr_val);
-  print_hex(lr_val);
+  print_hex(GET_LR_VALUE());
   print_str("\n");
   print_str("  IFSR = 0x%08x\n");
   print_str("  IFAR = 0x%08x\n");
@@ -90,9 +80,7 @@ EXFN_ATTR void handle_prefetch_abort() {
 EXFN_ATTR void handle_data_abort() {
   print_str("CPU Exception: Data Abort\n");
   print_str("  PC = ");
-  uintptr_t lr_val;
-  GET_LR_VALUE_INTO(lr_val);
-  print_hex(lr_val);
+  print_hex(GET_LR_VALUE());
   print_str("\n");
   print_str("  DFSR = 0x%08x\n");
   print_str("  DFAR = 0x%08x\n");
@@ -102,9 +90,7 @@ EXFN_ATTR void handle_data_abort() {
 EXFN_ATTR void handle_hyp_trap() {
   print_str("CPU Exception: Hypervisor Trap\n");
   print_str("  PC = ");
-  uintptr_t lr_val;
-  GET_LR_VALUE_INTO(lr_val);
-  print_hex(lr_val);
+  print_hex(GET_LR_VALUE());
   print_str("\n");
   print_str("  HSR = 0x%08x\n");
   abort();
@@ -113,9 +99,7 @@ EXFN_ATTR void handle_hyp_trap() {
 EXFN_ATTR void handle_irq() {
   print_str("CPU Exception: IRQ\n");
   print_str("  PC = ");
-  uintptr_t lr_val;
-  GET_LR_VALUE_INTO(lr_val);
-  print_hex(lr_val);
+  print_hex(GET_LR_VALUE());
   print_str("\n");
   abort();
 }
@@ -123,9 +107,7 @@ EXFN_ATTR void handle_irq() {
 EXFN_ATTR void handle_fiq() {
   print_str("CPU Exception: FIQ\n");
   print_str("  PC = ");
-  uintptr_t lr_val;
-  GET_LR_VALUE_INTO(lr_val);
-  print_hex(lr_val);
+  print_hex(GET_LR_VALUE());
   print_str("\n");
   abort();
 }
