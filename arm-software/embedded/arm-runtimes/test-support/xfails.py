@@ -443,6 +443,19 @@ def main():
             ],
             description="rateInHz port not connected in Corstone-310 FVP (SDDKW-94045).",
         ),
+        XFail(
+            name="string push back",
+            testnames=[
+                "std/strings/basic.string/string.modifiers/string_append/push_back.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "armv7m_hard_fpv5_d16_exn_rtti_unaligned_size",
+                "armv7m_hard_fpv5_d16_unaligned_size",
+            ],
+            description="push_back crashes on a basic_string with an oversized value type",
+        ),
     ]
 
     tests_to_xfail = []
