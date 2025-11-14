@@ -171,7 +171,7 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
     endif()
 
     set(external_lit_path "${LLVM_BINARY_DIR}/bin/llvm-lit")
-    set(default_lit_args "-sv --show-xfail --show-unsupported")
+    set(default_lit_args "-sv --show-xfail --show-unsupported --show-excluded")
     if (MSVC OR XCODE)
         set(default_lit_args "${default_lit_args} --no-progress-bar")
     endif()
