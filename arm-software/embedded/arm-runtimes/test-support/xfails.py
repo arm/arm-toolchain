@@ -10,6 +10,7 @@ upstream, and why."""
 
 import argparse
 import os
+import re
 import subprocess
 
 from enum import Enum
@@ -21,6 +22,7 @@ class NewResult(Enum):
 
     XFAILED = "FAILED"  # Replace a failure with an expected failure.
     PASSED = "PASSED"  # Replace an unexpected pass with a pass.
+    EXCLUDE = "EXCLUDE"  # Exclude a test, so that it is not run at all.
 
 
 class XFail(NamedTuple):
@@ -456,10 +458,26 @@ def main():
             ],
             description="push_back crashes on a basic_string with an oversized value type",
         ),
+        XFail(
+            name="picolibc_serial_test",
+            testnames=[
+                "test-hello-raw.test",
+            ],
+            result=NewResult.EXCLUDE,
+            project="picolibc",
+            variants=[
+                "aarch64a_exn_rtti_unaligned",
+                "aarch64a_soft_nofp",
+                "aarch64a_soft_nofp_exn_rtti",
+                "aarch64a_unaligned",
+            ],
+            description="The test expects serial port activity to end the test and times out without it.",
+        ),
     ]
 
     tests_to_xfail = []
     tests_to_upass = []
+    tests_to_exclude = []
 
     for xfail in xfails:
         if args.project != xfail.project:
@@ -478,24 +496,32 @@ def main():
             tests_to_xfail.extend(xfail.testnames)
         elif xfail.result == NewResult.PASSED:
             tests_to_upass.extend(xfail.testnames)
-        # TODO: allow tests to be skipped and not run at all.
-        # This can be done through the LIT_FILTER environment variable.
-        # Unlike the xfail variables, this takes a regex, so an expression
-        # will need to be constructed to cover the tests.
+        elif xfail.result == NewResult.EXCLUDE:
+            tests_to_exclude.extend(xfail.testnames)
 
     tests_to_xfail.sort()
     tests_to_upass.sort()
+    tests_to_exclude.sort()
 
     if args.output_args:
         os.makedirs(os.path.dirname(args.output_args), exist_ok=True)
         with open(args.output_args, "w", encoding="utf-8") as f:
             if len(tests_to_xfail) > 0:
+                # --xfail and --xfail-not expect a comma separated list of test names.
                 f.write("--xfail=")
                 f.write(";".join(tests_to_xfail))
                 f.write("\n")
             if len(tests_to_upass) > 0:
                 f.write("--xfail-not=")
                 f.write(";".join(tests_to_upass))
+                f.write("\n")
+            if len(tests_to_exclude) > 0:
+                # --filter-out expects a regular expression to match any test names.
+                escaped_testnames = [
+                    re.escape(testname) for testname in tests_to_exclude
+                ]
+                f.write("--filter-out=")
+                f.write("|".join(escaped_testnames))
                 f.write("\n")
         print(f"xfail list written to {args.output_args}")
     else:
@@ -506,6 +532,10 @@ def main():
         if len(tests_to_upass) > 0:
             print("xfail removed from tests:")
             for testname in tests_to_upass:
+                print(testname)
+        if len(tests_to_exclude) > 0:
+            print("excluded tests:")
+            for testname in tests_to_exclude:
                 print(testname)
 
 
