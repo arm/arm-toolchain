@@ -25,10 +25,3 @@ for loading into embedded targets, such as Intel Hex, Motorola
 S-records, or raw binary files. The documentation for `elf2bin` can be
 found in `elf2bin.md`.
 
-## Inline memcpy with LD/ST instructions
-In some cases inlining of memcpy instructions performs best when using LD/ST instructions.
-
-Usage:
-```
-    -mllvm -enable-inline-memcpy-ld-st
-```
