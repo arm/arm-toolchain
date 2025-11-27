@@ -18,6 +18,12 @@ if [[ "$(uname)" != "Darwin" ]]; then
     exit 1
 fi
 
+# Check for Homebrew installation
+if ! command -v brew >/dev/null 2>&1; then
+    echo "Homebrew is required but was not found on this runner." >&2
+    exit 1
+fi
+
 # Install required Homebrew packages if not already installed
 REQUIRED_FORMULAE=(
     ccache
