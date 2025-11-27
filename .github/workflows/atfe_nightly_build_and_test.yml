@@ -49,6 +49,12 @@ jobs:
             target_os: Windows-2022-x86_64
             runner: ToolchainGroup_LargeRunner_Windows-x64
 
+          - build_script: build.sh
+            test_script: test.sh
+            install_script: install_dependencies_macos.sh
+            target_os: macOS-arm64
+            runner: mini-github-m4-01
+
           # LLVM-libc Overlay Package Build
           - build_script: build_llvmlibc_overlay.sh
             test_script: test_llvmlibc.sh
