@@ -27,6 +27,8 @@ fi
 # Install required Homebrew packages if not already installed
 REQUIRED_FORMULAE=(
     ccache
+    cmake
+    ninja
     qemu
 )
 MISSING_FORMULAE=()
