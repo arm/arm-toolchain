@@ -145,3 +145,4 @@ jobs:
           path: |
             build*/ATfE-*.tar.xz
             build*/ATfE-*.zip
+            build*/ATfE-*.dmg

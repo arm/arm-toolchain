@@ -6,9 +6,6 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 # This script installs the essential build dependencies for ATfE on macOS.
-#
-# Please check the packages installed by default on the GitHub-hosted macOS-15 runner image:
-# https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
 
 set -euo pipefail
 
