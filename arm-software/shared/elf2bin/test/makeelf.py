@@ -23,7 +23,7 @@ import struct
 
 class ElfHdr:
     def __init__(self, bigend):
-        self.e_ident = list(b"\x7FELF") + [0] * 12
+        self.e_ident = list(b"\x7fELF") + [0] * 12
         self.e_ident[5] = 2 if bigend else 1
         self.e_type = 2  # ET_EXEC
         self.e_machine = 0
@@ -329,9 +329,7 @@ A line beginning 'entry' specifies the entry point of the file.
         "-o", "--output", type=opener("wb"), required=True, help="Output file."
     )
     parser.add_argument("-b", "--bi", action="store_true", help="Big-endian")
-    parser.add_argument(
-        "-s", "--sixtyfour", action="store_true", help="64-bit"
-    )
+    parser.add_argument("-s", "--sixtyfour", action="store_true", help="64-bit")
     args = parser.parse_args()
 
     with args.infile() as fh:

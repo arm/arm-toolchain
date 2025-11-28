@@ -15,38 +15,27 @@ set -ex
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 
-# Get processor count, to execute job in parallel threads
-PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
-
-cd "${REPO_ROOT}"/build
-
 # If a test fails, lit will ordinarily return a non-zero result,
 # which prevents further testing. Setting the --ignore-fail option
 # will cause testing to continue, so that CI systems can get a
 # full set of results.
-# The check-all target runs the upstream clang and LLVM tests,
-# which do not generate a junit xml results file by default.
-# Additionally setting the --xunit-xml-output option store the
-# results.
-export LIT_OPTS="--ignore-fail --xunit-xml-output=results.xml"
+# The lit test suites do not generate xml results by default.
+# This can be enabled with the --xunit-xml-output option. The file
+# written will be relative to the individual suite's build directly,
+# so the same name can be used for all files for consistency.
+export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
+
+# Run all relevant test targets using Ninja.
+cd "${REPO_ROOT}"/build
 ninja check-all
-
-# The llvm-toolchain targets already set --xunit-xml-output so
-# only the --ignore-fail option is needed.
-# The picolibc tests do not use lit so do not support this option.
-export LIT_OPTS="--ignore-fail"
-
-# Run all relevant test targets using Ninja in parallel
-ninja -j$PROCESSOR_COUNT \
-    check-all \
-    check-compiler-rt-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
-    check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
-    check-cxx-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
-    check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
-    check-cxxabi-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
-    check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
-    check-picolibc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
-    check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
-    check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
-    check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-compiler-rt-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
+ninja check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-cxx-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
+ninja check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-cxxabi-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
+ninja check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-picolibc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
+ninja check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
+ninja check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
 

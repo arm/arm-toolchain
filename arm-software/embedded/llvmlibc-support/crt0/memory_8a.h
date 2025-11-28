@@ -25,7 +25,7 @@ using namespace sysreg;
 void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
                unsigned long stackheap_end) {
   // Find the memory pages that the image and stackheap occupy
-  unsigned long start_page = ((unsigned long)setup_mmu) >> 30;
+  unsigned long start_page = reinterpret_cast<unsigned long>(&setup_mmu) >> 30;
   unsigned long stackheap_page = stackheap_start >> 30;
 
   // Invalidate the TLBs
@@ -38,10 +38,10 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
   // Set the base address
   if (!pagetable) {
     // Place at end of image page
-    pagetable = (unsigned long *)(((start_page + 1) << 30) -
-                                  (512 * sizeof(unsigned long)));
+    pagetable = reinterpret_cast<unsigned long *>(
+        ((start_page + 1) << 30) - (512 * sizeof(unsigned long)));
   }
-  TTBR0 = (unsigned long)pagetable;
+  TTBR0 = reinterpret_cast<unsigned long>(pagetable);
 
   // No need to program TTBR1_EL2, as we will set TCR_EL3.EPD1=1 to prevent
   // table walks using this table.

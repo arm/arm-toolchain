@@ -25,7 +25,7 @@ using namespace sysreg;
 void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
                unsigned long stackheap_end) {
   // Find the memory pages that the image and stackheap occupy
-  unsigned long start_page = ((unsigned long)setup_mmu) >> 30;
+  unsigned long start_page = reinterpret_cast<unsigned long>(&setup_mmu) >> 30;
   unsigned long stackheap_page = stackheap_start >> 30;
 
   // Enable manager access to domain 0
@@ -37,10 +37,10 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
   // Set the base address
   if (!pagetable) {
     // Place after the end of the image
-    pagetable = (unsigned long *)stackheap_end;
+    pagetable = reinterpret_cast<unsigned long *>(stackheap_end);
   }
   // Set the low bit to mark translation table as inner cacheable
-  TTBR0 = 1 | (unsigned long)pagetable;
+  TTBR0 = 1 | reinterpret_cast<unsigned long>(pagetable);
 
   // Ensure changes to system register are visible before the MMU is enabled
   __isb(0xf);

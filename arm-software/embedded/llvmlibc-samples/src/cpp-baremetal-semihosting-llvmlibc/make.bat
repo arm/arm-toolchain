@@ -40,6 +40,6 @@ if exist hello.hex del /q hello.hex
 @exit /B 1
 
 :build_fn
-%BIN_PATH%\clang++.exe --config=llvmlibc.cfg --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -g -T ..\..\ldscripts\llvmlibc-microbit.ld -lm -o hello.elf hello.cpp
+%BIN_PATH%\clang++.exe --config=llvmlibc.cfg --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -g -T ..\..\ldscripts\llvmlibc-microbit.ld -lm -o hello.elf hello.cpp
 %BIN_PATH%\llvm-objcopy.exe -O ihex hello.elf hello.hex
 @exit /B

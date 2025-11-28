@@ -99,7 +99,9 @@ def extract_common_headers_for_targets(args):
             # optimization is applied. In that case, multilib-optimised will just contain a copy of the
             # single variant from the non-optimised multilib directory.
             if os.path.exists(input_target_dir):
-                shutil.copytree(input_target_dir, output_target_dir, dirs_exist_ok=False)
+                shutil.copytree(
+                    input_target_dir, output_target_dir, dirs_exist_ok=False
+                )
             continue
 
         # Creating the common include headers for each target

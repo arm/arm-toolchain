@@ -36,6 +36,8 @@ following command line options, in addition to `--target`, `-march` or
   package (but you do not need this if you have built the whole
   toolchain with only LLVM libc)
 
+* `-nostartfiles` to not include the currently non-existent `crt0.o`
+
 * `-lcrt0` to include a library defining the `_start` symbol (or else
   provide that symbol yourself)
 
@@ -43,26 +45,21 @@ following command line options, in addition to `--target`, `-march` or
   in LLVM's libc in terms of the Arm semihosting API (or else provide
   an alternative implementation of those functions yourself)
 
-* `-Wl,--defsym=__stack=0x`_nnnnnn_ to define the starting value of
-  your stack pointer. Alternatively, use a linker script that defines
-  the symbol `__stack` in addition to whatever other memory layout you
-  want.
+* `-T llvmlibc.ld` to include the default linker script. Alternatively,
+  you can include the linker script in your custom linker script,
+  similar to [how `picolibc.ld` is used](https://github.com/picolibc/picolibc/blob/main/doc/linking.md#using-picolibcld),
+  or write your own linker script defining `__stack`, and
+  `__llvm_libc_heap_limit` if you are using the heap
 
-* `-Wl,__llvm_libc_heap_limit=0x`_nnnnnn_ if you are using the heap.
-  The heap start defined by the value of the symbol `_end` which will
-  be defined by the linker if no linker script is used. Alternatively
-  use a linker script that defines the symbols `_end` and
-  `__llvm_libc_heap_limit` in addition to whatever other memory layout
-  you want.
-
-* LLVM libc does not define errno. If you are using a function that
-  sets errno then you must implement the function `int *__llvm_libc_errno()`
-  that returns the address of your definition of errno.
+> [!IMPORTANT]
+> The default `llvmlibc.ld` is provided for testing and is derived from the
+> `picolibc.ld` licensed under the BSD 3 Clause license. This may cause
+> licensing obligations if used in real projects.
 
 For example:
 
 ```
-clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m -o hello hello.c -lsemihost -lcrt0 -Wl,--defsym=__stack=0x200000
+clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles -lcrt0 -lsemihost -T llvmlibc.ld -o hello hello.c
 ```
 
 ## Samples
@@ -75,6 +72,6 @@ directory containing sample programs that use LLVM libc.
 At present, this toolchain builds C++ libraries limited to what is supported with
 LLVM libc, for example, iostream is not available.
 
-At the time of writing this (2024-07), LLVM libc is a work in
+LLVM libc is a work in
 progress. It is incomplete: not all standard C library functionality
-is provided.
+is provided yet.

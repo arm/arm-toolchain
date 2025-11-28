@@ -14,6 +14,7 @@
 #define LLVMET_LLVMLIBC_SUPPORT_SEMIHOST_H
 
 #include <llvm-libc-types/ssize_t.h>
+#include <stdint.h>
 
 #if __ARM_64BIT_STATE
 #  define ARG_REG_0 "x0"
@@ -41,7 +42,7 @@
 #  endif
 #endif
 
-__attribute__((always_inline))
+[[clang::always_inline]]
 static long semihosting_call(long val, const void *ptr) {
   register long v __asm__(ARG_REG_0) = val;
   register const void *p __asm__(ARG_REG_1) = ptr;
@@ -52,56 +53,58 @@ static long semihosting_call(long val, const void *ptr) {
   return v;
 }
 
-#define SYS_CLOCK 0x10
-#define SYS_CLOSE 0x02
-#define SYS_ELAPSED 0x30
-#define SYS_ERRNO 0x13
-#define SYS_EXIT 0x18
-#define SYS_EXIT_EXTENDED 0x20
-#define SYS_FLEN 0x0c
-#define SYS_GET_CMDLINE 0x15
-#define SYS_HEAPINFO 0x16
-#define SYS_ISERROR 0x08
-#define SYS_ISTTY 0x09
-#define SYS_OPEN 0x01
-#define SYS_READ 0x06
-#define SYS_READC 0x07
-#define SYS_REMOVE 0x0e
-#define SYS_RENAME 0x0f
-#define SYS_SEEK 0x0a
-#define SYS_SYSTEM 0x12
-#define SYS_TICKFREQ 0x31
-#define SYS_TIME 0x11
-#define SYS_TMPNAM 0x0d
-#define SYS_WRITE0 0x04
-#define SYS_WRITE 0x05
-#define SYS_WRITEC 0x03
+namespace {
+inline constexpr uint32_t SYS_CLOCK = 0x10;
+inline constexpr uint32_t SYS_CLOSE = 0x02;
+inline constexpr uint32_t SYS_ELAPSED = 0x30;
+inline constexpr uint32_t SYS_ERRNO = 0x13;
+inline constexpr uint32_t SYS_EXIT = 0x18;
+inline constexpr uint32_t SYS_EXIT_EXTENDED = 0x20;
+inline constexpr uint32_t SYS_FLEN = 0x0c;
+inline constexpr uint32_t SYS_GET_CMDLINE = 0x15;
+inline constexpr uint32_t SYS_HEAPINFO = 0x16;
+inline constexpr uint32_t SYS_ISERROR = 0x08;
+inline constexpr uint32_t SYS_ISTTY = 0x09;
+inline constexpr uint32_t SYS_OPEN = 0x01;
+inline constexpr uint32_t SYS_READ = 0x06;
+inline constexpr uint32_t SYS_READC = 0x07;
+inline constexpr uint32_t SYS_REMOVE = 0x0e;
+inline constexpr uint32_t SYS_RENAME = 0x0f;
+inline constexpr uint32_t SYS_SEEK = 0x0a;
+inline constexpr uint32_t SYS_SYSTEM = 0x12;
+inline constexpr uint32_t SYS_TICKFREQ = 0x31;
+inline constexpr uint32_t SYS_TIME = 0x11;
+inline constexpr uint32_t SYS_TMPNAM = 0x0d;
+inline constexpr uint32_t SYS_WRITE0 = 0x04;
+inline constexpr uint32_t SYS_WRITE = 0x05;
+inline constexpr uint32_t SYS_WRITEC = 0x03;
 
-#define ADP_Stopped_BranchThroughZero 0x20000
-#define ADP_Stopped_UndefinedInstr 0x20001
-#define ADP_Stopped_SoftwareInterrupt 0x20002
-#define ADP_Stopped_PrefetchAbort 0x20003
-#define ADP_Stopped_DataAbort 0x20004
-#define ADP_Stopped_AddressException 0x20005
-#define ADP_Stopped_IRQ 0x20006
-#define ADP_Stopped_FIQ 0x20007
-#define ADP_Stopped_BreakPoint 0x20020
-#define ADP_Stopped_WatchPoint 0x20021
-#define ADP_Stopped_StepComplete 0x20022
-#define ADP_Stopped_RunTimeErrorUnknown 0x20023
-#define ADP_Stopped_InternalError 0x20024
-#define ADP_Stopped_UserInterruption 0x20025
-#define ADP_Stopped_ApplicationExit 0x20026
-#define ADP_Stopped_StackOverflow 0x20027
-#define ADP_Stopped_DivisionByZero 0x20028
-#define ADP_Stopped_OSSpecific 0x20029
+inline constexpr uint32_t ADP_Stopped_BranchThroughZero = 0x20000;
+inline constexpr uint32_t ADP_Stopped_UndefinedInstr = 0x20001;
+inline constexpr uint32_t ADP_Stopped_SoftwareInterrupt = 0x20002;
+inline constexpr uint32_t ADP_Stopped_PrefetchAbort = 0x20003;
+inline constexpr uint32_t ADP_Stopped_DataAbort = 0x20004;
+inline constexpr uint32_t ADP_Stopped_AddressException = 0x20005;
+inline constexpr uint32_t ADP_Stopped_IRQ = 0x20006;
+inline constexpr uint32_t ADP_Stopped_FIQ = 0x20007;
+inline constexpr uint32_t ADP_Stopped_BreakPoint = 0x20020;
+inline constexpr uint32_t ADP_Stopped_WatchPoint = 0x20021;
+inline constexpr uint32_t ADP_Stopped_StepComplete = 0x20022;
+inline constexpr uint32_t ADP_Stopped_RunTimeErrorUnknown = 0x20023;
+inline constexpr uint32_t ADP_Stopped_InternalError = 0x20024;
+inline constexpr uint32_t ADP_Stopped_UserInterruption = 0x20025;
+inline constexpr uint32_t ADP_Stopped_ApplicationExit = 0x20026;
+inline constexpr uint32_t ADP_Stopped_StackOverflow = 0x20027;
+inline constexpr uint32_t ADP_Stopped_DivisionByZero = 0x20028;
+inline constexpr uint32_t ADP_Stopped_OSSpecific = 0x20029;
 
 /* SYS_OPEN modes must be one of R,W,A, plus an optional B and optional PLUS */
-#define OPENMODE_R 0
-#define OPENMODE_W 4
-#define OPENMODE_A 8
-#define OPENMODE_B 1
-#define OPENMODE_PLUS 2
+inline constexpr uint32_t OPENMODE_R = 0;
+inline constexpr uint32_t OPENMODE_W = 4;
+inline constexpr uint32_t OPENMODE_A = 8;
+inline constexpr uint32_t OPENMODE_B = 1;
+inline constexpr uint32_t OPENMODE_PLUS = 2;
+} // namespace
 
 struct __llvm_libc_stdio_cookie { int handle; };
 

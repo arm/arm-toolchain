@@ -4,6 +4,16 @@
 
 import subprocess
 import sys
+import re
+
+
+def get_qemu_major_version(qemu_command):
+    output = subprocess.check_output([qemu_command, "--version"], text=True)
+    version_match = re.search(r"version (\d+)\.", output)
+    if version_match:
+        return int(version_match.group(1))
+    else:
+        raise Exception("Cannot get version of " + qemu_command)
 
 
 def run_qemu(
@@ -16,6 +26,7 @@ def run_qemu(
     timeout,
     working_directory,
     verbose,
+    trace,
 ):
     """Execute the program using QEMU and return the subprocess return code."""
     qemu_params = ["-M", qemu_machine]
@@ -43,6 +54,17 @@ def run_qemu(
         qemu_params += ["-kernel", image]
     else:
         qemu_params += ["-device", f"loader,file={image},cpu-num=0"]
+
+    # Enable tracing: disassembly, CPU state, interrupts and guest errors like
+    # invalid instructions.
+    if trace:
+        qemu_params += ["-d", "in_asm,nochain,cpu,int,guest_errors"]
+        qemu_params += ["-D", trace]
+        # Enable per instruction tracing depending on EQMU version
+        if get_qemu_major_version(qemu_command) >= 9:
+            qemu_params += ["-accel", "tcg,one-insn-per-tb=on"]
+        else:
+            qemu_params += ["-singlestep"]
 
     command = [qemu_command] + qemu_params
 

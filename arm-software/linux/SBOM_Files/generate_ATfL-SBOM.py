@@ -288,7 +288,7 @@ document.packages = [
     package_flang,
     package_flang_rt,
     package_zlib,
-    package_zstd
+    package_zstd,
 ]
 
 # A DESCRIBES relationship asserts that the document indeed describes the package.

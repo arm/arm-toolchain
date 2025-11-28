@@ -159,6 +159,8 @@ public:
 
     /// True if this call results in convergent operations.
     bool IsConvergent = true;
+
+    GlobalValue *DeactivationSymbol = nullptr;
   };
 
   /// Argument handling is mostly uniform between the four places that
@@ -198,7 +200,7 @@ public:
                            CCValAssign::LocInfo LocInfo, const ArgInfo &Info,
                            ISD::ArgFlagsTy Flags, CCState &State) {
       if (getAssignFn(State.isVarArg())(ValNo, ValVT, LocVT, LocInfo, Flags,
-                                        State))
+                                        Info.Ty, State))
         return true;
       StackSize = State.getStackSize();
       return false;

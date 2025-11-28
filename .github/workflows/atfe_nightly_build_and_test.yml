@@ -17,7 +17,7 @@ name: ATfE Nightly Build and Test
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *'  # Every day at 02:00 UTC
+    - cron: '0 6 * * *'  # Every day at 06:00 UTC
 
 jobs:
   build-and-test-toolchain:
@@ -49,9 +49,15 @@ jobs:
             target_os: Windows-2022-x86_64
             runner: ToolchainGroup_LargeRunner_Windows-x64
 
+          - build_script: build.sh
+            test_script: test.sh
+            install_script: install_dependencies_macos.sh
+            target_os: macOS-arm64
+            runner: mini-github-m4-01
+
           # LLVM-libc Overlay Package Build
           - build_script: build_llvmlibc_overlay.sh
-            test_script: ''
+            test_script: test_llvmlibc.sh
             install_script: install_dependencies.sh
             target_os: Ubuntu-22.04-arm64
             runner: ah-ubuntu_22_04-c7g_8x-100
@@ -87,19 +93,49 @@ jobs:
       - name: Apply llvm-project-perf patches
         run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
 
-      - name: Build ${{ matrix.build_script }}
-        run: ./arm-software/embedded/scripts/${{ matrix.build_script }}
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          set -o pipefail # ensure failure is propagated even when piping to tee
+          ./arm-software/embedded/scripts/${{ matrix.build_script }} 2>&1 | tee build.log
 
-      - name: Test ${{ matrix.test_script }}
-        if: matrix.test_script != ''
-        run: ./arm-software/embedded/scripts/${{ matrix.test_script }}
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\arm-software\embedded\scripts\${{ matrix.build_script }} *>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE } # Propagate failure
+
+      - name: Test (Unix)
+        if: runner.os != 'Windows' && matrix.test_script != ''
+        run: |
+          set -o pipefail # ensure failure is propagated even when piping to tee
+          ./arm-software/embedded/scripts/${{ matrix.test_script }} 2>&1 | tee test.log
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows' && matrix.test_script != ''
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\arm-software\embedded\scripts\${{ matrix.test_script }} *>&1 | Tee-Object -FilePath test.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE } # Propagate failure
+
+      - name: Upload logs as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs-${{ matrix.build_script }}-${{ matrix.target_os }}
+          path: |
+            build.log
+            test.log
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results-${{ matrix.build_script }}-${{ matrix.target_os }}
-          path: build/**/*.junit.xml
+          path: build/**/lit_results.junit.xml
 
       - name: Upload built packages
         uses: actions/upload-artifact@v4
@@ -109,3 +145,4 @@ jobs:
           path: |
             build*/ATfE-*.tar.xz
             build*/ATfE-*.zip
+            build*/ATfE-*.dmg

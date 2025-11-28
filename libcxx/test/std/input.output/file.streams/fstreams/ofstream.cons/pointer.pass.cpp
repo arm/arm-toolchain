@@ -18,7 +18,6 @@
 
 // XFAIL: LIBCXX-AIX-FIXME
 
-// XFAIL: FROZEN-CXX03-HEADERS-FIXME
 // Downstream issue: #375 (Enable fstream independently of filesystem)
 // UNSUPPORTED: baremetal
 

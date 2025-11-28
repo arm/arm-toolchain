@@ -8,6 +8,7 @@
 
 import argparse
 import os
+import re
 from xml.etree import ElementTree
 
 
@@ -25,11 +26,26 @@ def main():
     )
     args = parser.parse_args()
 
-    # A '.' character is used in junit xml to split classes/groups.
-    # Variants such as armv8m.main need to be renamed.
-    variant_name = args.variant.replace(".", "_")
-
-    xml_file = os.path.join(args.dir, "compiler-rt", "test", "results.junit.xml")
+    xml_file = None
+    # The xml file path can be set by lit's --xunit-xml-output option.
+    # Since ATfE does not set this directly, it will likely be found
+    # in the LIT_OPTS environment variable, which lit will read
+    # options from.
+    if "LIT_OPTS" in os.environ:
+        lit_opts = os.environ["LIT_OPTS"]
+        m = re.search("--xunit-xml-output=([^ ]+)", lit_opts)
+        if m is not None:
+            results_path = m.group(1)
+            # Path may be absolute or relative.
+            if os.path.isabs(results_path):
+                xml_file = results_path
+            else:
+                # If not absolute, the path will be relative to compiler-rt/test
+                # in the build directory, not this script.
+                xml_file = os.path.join(args.dir, "compiler-rt", "test", results_path)
+    if xml_file is None:
+        print(f"No xml results generated to modify.")
+        return
 
     tree = ElementTree.parse(xml_file)
     root = tree.getroot()
@@ -40,7 +56,7 @@ def main():
     # For readability, combine them all under compiler-rt-{variant}-Builtins
     for testsuite in root.iter("testsuite"):
         old_suitename = testsuite.get("name")
-        new_suitename = f"compiler-rt-{variant_name}-Builtins"
+        new_suitename = f"compiler-rt-{args.variant}-Builtins"
         testsuite.set("name", new_suitename)
         for testcase in testsuite.iter("testcase"):
             old_classname = testcase.get("classname")
@@ -49,6 +65,7 @@ def main():
 
     tree.write(xml_file)
     print(f"Results written to {xml_file}")
+
 
 if __name__ == "__main__":
     main()

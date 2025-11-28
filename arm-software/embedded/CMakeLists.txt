@@ -360,12 +360,29 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 set(LLVM_EXTERNAL_PROJECTS elf2bin)
 set(LLVM_EXTERNAL_ELF2BIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin)
 
+set(clang_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/clang_lit_xfails.txt")
+set(CLANG_TEST_EXTRA_ARGS "@${clang_lit_xfails_path}")
+
 set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 add_subdirectory(
     ${llvmproject_src_dir}/llvm llvm
 )
 
 add_dependencies(check-all check-elf2bin)
+
+# Update the xfail/xfail-not list before running the tests.
+add_custom_target(
+    clang-xfail-lit-args
+    COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/arm-runtimes/test-support/xfails.py
+        --project clang
+        --clang ${LLVM_BINARY_DIR}/bin/clang
+        --output-args ${clang_lit_xfails_path}
+    DEPENDS
+        clang
+)
+add_dependencies(check-clang clang-xfail-lit-args)
+add_dependencies(check-all clang-xfail-lit-args)
 
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
     install(
@@ -545,12 +562,20 @@ add_custom_target(
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_version_txt.cmake
     BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
 )
-install(
-    FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
-    DESTINATION .
-    COMPONENT llvm-toolchain-third-party-licenses
-)
+if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc))
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
+        DESTINATION .
+        RENAME VERSION_${LLVM_TOOLCHAIN_C_LIBRARY}.txt
+        COMPONENT llvm-toolchain-third-party-licenses
+    )
+else()
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
+        DESTINATION .
+        COMPONENT llvm-toolchain-third-party-licenses
+    )
+endif()
 
 
 # Groups all the targets that comprise the toolchain.
@@ -974,6 +999,9 @@ if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
         -DLLVM_ENABLE_PROJECTS=${LLVM_ENABLE_PROJECTS_comma}
         -DLLVM_TABLEGEN=${LLVM_BINARY_DIR}/bin/llvm-tblgen${CMAKE_EXECUTABLE_SUFFIX}
         -DLLVM_TARGETS_TO_BUILD=${LLVM_TARGETS_TO_BUILD_comma}
+        -DLLVM_DEFAULT_TARGET_TRIPLE=${LLVM_DEFAULT_TARGET_TRIPLE}
+        -DLLVM_EXTERNAL_PROJECTS=elf2bin
+        -DLLVM_EXTERNAL_ELF2BIN_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin
         BUILD_COMMAND "" # Let the install command build whatever it needs
         INSTALL_COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target install-distribution
         USES_TERMINAL_CONFIGURE TRUE

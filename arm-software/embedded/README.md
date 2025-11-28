@@ -176,7 +176,6 @@ and/or increased memory usage during linking. Some of the options in the config 
 corresponding optimisation passes in the [LLVM project](https://github.com/llvm/llvm-project)
 to find out more. Users are also encouraged to create their own configs and tune their own
 flag parameters.
-Information on Arm Toolchain for Embedded specific optimization flags is available in [Optimization Flags](docs/optimization-flags.md)
 
 To optimize for code size, use `Osize.cfg` or a relevant subset of flags
 provided there.

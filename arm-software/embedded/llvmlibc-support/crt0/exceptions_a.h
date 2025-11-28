@@ -26,17 +26,22 @@ using namespace sysreg;
 
 #ifndef __ARM_ARCH_ISA_A64
 // Floating-point instructions aren't enabled yet
-__attribute__((target("no-fpregs")))
+[[gnu::target("no-fpregs")]]
 #endif
 void setup() {
 #if __ARM_ARCH_PROFILE == 'A'
-  VBAR = (unsigned long)&vector_table;
+  VBAR = reinterpret_cast<unsigned long>(&vector_table);
 #elif __ARM_ARCH_PROFILE == 'R'
   // The vector table is always at address 0. The inline assembly is needed
   // here to hide the memcpy to a null pointer from the compiler.
   void *final_vector_table = NULL;
-  asm("" : "+r"(final_vector_table));
-  memcpy(final_vector_table, (void *)&vector_table, 64);
+  // Don't use memcpy as llvmlibc memcpy will fault a copy to address 0.
+  // Size is more important than speed here so don't unroll the loop.
+  _Pragma("clang loop unroll(disable) vectorize(disable)") for (
+      int i = 0; i < 64 / sizeof(unsigned int); i++) {
+    (reinterpret_cast<unsigned int *>(final_vector_table))[i] =
+        (reinterpret_cast<unsigned int *>(vector_table))[i];
+  }
 #endif
 }
 

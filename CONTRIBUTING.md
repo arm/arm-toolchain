@@ -165,10 +165,21 @@ requirements below:
   of why the patch isn't being made upstream. This should include
   links to any previous attempts to upstream.
 
+* An issue must be opened to track the downstream change, including why it
+  must be made downstream, and linking to any attempts to make the change
+  upstream. This issue should then be updated with any progress on
+  upstreaming, as well as the on-going maintenance of the change downstream,
+  such as updates or merge conflicts. The issue can be closed when the change
+  is removed, or when the branch the change exists on is no longer active and
+  the change no longer requires maintaining.
+
 * The commit message for a new downstream patch must include
-  `Downstream issue:#<issue number>` where `#<issue number>` is an issue
-  that contains the reason for the downstream patch,
-  for example `Downstream issue:#123`. A space is allowed before the `#<issue number>`.
+  `Downstream issue:#<issue number>` on its own line, where `#<issue number>`
+  is the issue created above, for example `Downstream issue:#123`. Some
+  tolerance is allowed for whitespace, so `Downstream issue: #123` will also
+  work, but using a link of `arm/arm-toolchain#123` will not, even if this
+  displays as `#123` in the UI. Any commits modifying the downstream change
+  will also need this line.
 
 * The source change should be annotated with a comment including the
   `#<issue number>`, if there are multiple lines changed a single

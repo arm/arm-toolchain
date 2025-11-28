@@ -16,8 +16,9 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     ninja-build=1.10.1-1 \
     python3-pip \
     python3-setuptools \
-    qemu-system-arm=1:6.2+dfsg-2ubuntu6.26
+    qemu-system-arm=1:6.2+dfsg-2ubuntu6.27 \
+    ipxe-qemu=1.21.1+git-20220113.fbbdc3926-0ubuntu1
 
-# Upgrade pip and install meson with a pinned version
+# Upgrade pip and install dependencies
 python3 -m pip install --upgrade pip
-python3 -m pip install meson==1.2.3
+python3 -m pip install meson==1.2.3 ruff==0.8.6

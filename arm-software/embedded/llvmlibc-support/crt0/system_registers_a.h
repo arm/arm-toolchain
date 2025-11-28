@@ -66,7 +66,7 @@ public:
   // so we have to specialize the read/write functions for each register name.
   static unsigned long read();
   static void write(unsigned long val);
-  __attribute__((always_inline)) SysReg &operator=(unsigned long val) {
+  [[clang::always_inline]] SysReg &operator=(unsigned long val) {
     write(val);
     return *this;
   }
@@ -76,12 +76,12 @@ public:
 
 #define REGNAME(X, Y)                                                          \
   template <>                                                                  \
-  __attribute__((always_inline)) inline unsigned long                          \
+  [[clang::always_inline]] inline unsigned long                          \
   SysReg<SysRegName::X>::read() {                                              \
     return __arm_rsr64(#X "_EL0");                                             \
   }                                                                            \
   template <>                                                                  \
-  __attribute__((always_inline)) inline void SysReg<SysRegName::X>::write(     \
+  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
       unsigned long val) {                                                     \
     __arm_wsr64(#X "_EL0", val);                                               \
   }
@@ -90,12 +90,12 @@ EL0_REGNAMES
 
 #define REGNAME(X, Y)                                                          \
   template <>                                                                  \
-  __attribute__((always_inline)) inline unsigned long                          \
+  [[clang::always_inline]] inline unsigned long                          \
   SysReg<SysRegName::X>::read() {                                              \
     return __arm_rsr64(#X "_EL1");                                             \
   }                                                                            \
   template <>                                                                  \
-  __attribute__((always_inline)) inline void SysReg<SysRegName::X>::write(     \
+  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
       unsigned long val) {                                                     \
     __arm_wsr64(#X "_EL1", val);                                               \
   }
@@ -104,7 +104,7 @@ EL1_REGNAMES
 
 #define REGNAME(X, Y)                                                          \
   template <>                                                                  \
-  __attribute__((always_inline)) inline unsigned long                          \
+  [[clang::always_inline]] inline unsigned long                          \
   SysReg<SysRegName::X>::read() {                                              \
     if (__arm_rsr("CurrentEL") == 3 << 2)                                      \
       return __arm_rsr64(#X "_EL3");                                           \
@@ -112,7 +112,7 @@ EL1_REGNAMES
       return __arm_rsr64(#X "_EL2");                                           \
   }                                                                            \
   template <>                                                                  \
-  __attribute__((always_inline)) inline void SysReg<SysRegName::X>::write(     \
+  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
       unsigned long val) {                                                     \
     if (__arm_rsr("CurrentEL") == 3 << 2)                                      \
       __arm_wsr64(#X "_EL3", val);                                             \
@@ -126,12 +126,12 @@ EL23_REGNAMES
 
 #define REGNAME(X, Y)                                                          \
   template <>                                                                  \
-  __attribute__((always_inline)) inline unsigned long                          \
+  [[clang::always_inline]] inline unsigned long                          \
   SysReg<SysRegName::X>::read() {                                              \
     return __arm_rsr(Y);                                                       \
   }                                                                            \
   template <>                                                                  \
-  __attribute__((always_inline)) inline void SysReg<SysRegName::X>::write(     \
+  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
       unsigned long val) {                                                     \
     __arm_wsr(Y, val);                                                         \
   }
@@ -189,7 +189,7 @@ public:
   Field<30, 32> ICB;
   Field<33, 46> Ttype;
 
-  __attribute__((always_inline)) unsigned long Ctype(unsigned level) {
+  [[clang::always_inline]] unsigned long Ctype(unsigned level) {
     unsigned long val = *this;
     return (val >> (3 * level)) & 0x7;
   }

@@ -10,56 +10,8 @@ import argparse
 import pathlib
 import sys
 
-# https://mesonbuild.com/Unit-tests.html#skipped-tests-and-hard-errors
-EXIT_CODE_SKIP = 77
-
-disabled_tests = [
-    # compiler-rt does not properly set floating point exceptions for
-    # computations on types implemented in software
-    # https://github.com/picolibc/picolibc/pull/500
-    "picolibc_armv7m_soft_fpv4_sp_d16-build/test/math_errhandling",
-    "picolibc_armv7m_hard_fpv4_sp_d16-build/test/math_errhandling",
-    "picolibc_armv7r_hard_vfpv3xd-build/test/math_errhandling",
-    "picolibc_armv7r_hard_vfpv3xd_exn_rtti-build/test/math_errhandling",
-    "picolibc_armv8.1m.main_hard_fp_nomve-build/test/math_errhandling",
-    "picolibc_armv7m_soft_fpv4_sp_d16_exn_rtti-build/test/math_errhandling",
-    "picolibc_armv7m_hard_fpv4_sp_d16_exn_rtti-build/test/math_errhandling",
-    "picolibc_armv8.1m.main_hard_fp_nomve_exn_rtti-build/test/math_errhandling",
-    "picolibc_armv8.1m.main_hard_nofp_mve-build/test/fenv",
-    "picolibc_armv8.1m.main_hard_nofp_mve-build/test/math_errhandling",
-    "picolibc_armv8m.main_hard_fp-build/test/math_errhandling",
-    "picolibc_armv8.1m.main_hard_nofp_mve_exn_rtti-build/test/fenv",
-    "picolibc_armv8.1m.main_hard_nofp_mve_exn_rtti-build/test/math_errhandling",
-    "picolibc_armv8m.main_hard_fp_exn_rtti-build/test/math_errhandling",
-    "picolibc_armv8.1m.main_hard_nofp_mve_pacret_bti-build/test/fenv",
-    "picolibc_armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti-build/test/fenv",
-    "picolibc_armv8.1m.main_hard_fp_nomve_pacret_bti-build/test/math_errhandling",
-    "picolibc_armv8.1m.main_hard_fp_nomve_pacret_bti_exn_rtti-build/test/math_errhandling",
-    "picolibc_armv8.1m.main_hard_nofp_mve_pacret_bti-build/test/math_errhandling",
-    "picolibc_armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti-build/test/math_errhandling",
-]
-
-disabled_tests_fvp = [
-    # SDDKW-25808: SYS_SEEK returns wrong value.
-    "test/semihost/semihost-seek",
-    "test/test-fread-fwrite",
-    "test/posix-io",
-    # SDDKW-94045: rateInHz port not connected in Corstone-310 FVP.
-    "test/semihost/semihost-gettimeofday",
-]
-
-
-def is_disabled(image, use_fvp):
-    if any([image.endswith(t) for t in disabled_tests]):
-        return True
-    if use_fvp and any([image.endswith(t) for t in disabled_tests_fvp]):
-        return True
-    return False
-
 
 def run(args):
-    if is_disabled(args.image, args.qemu_command is None):
-        return EXIT_CODE_SKIP
     # Some picolibc tests expect argv[0] to be literally "program-name", not
     # the actual program name.
     argv = ["program-name"] + args.arguments
@@ -74,6 +26,7 @@ def run(args):
             None,
             pathlib.Path.cwd(),
             args.verbose,
+            args.trace,
         )
     else:
         return run_fvp(
@@ -95,9 +48,7 @@ def main():
         description="Run a single test using either qemu or an FVP"
     )
     main_arg_group = parser.add_mutually_exclusive_group(required=True)
-    main_arg_group.add_argument(
-        "--qemu-command", help="qemu-system-<arch> path"
-    )
+    main_arg_group.add_argument("--qemu-command", help="qemu-system-<arch> path")
     main_arg_group.add_argument(
         "--fvp-install-dir", help="Directory in which FVP models are installed"
     )
@@ -127,6 +78,12 @@ def main():
     parser.add_argument(
         "--tarmac",
         help="file to wrote tarmac trace to (FVP only)",
+    )
+    parser.add_argument(
+        "--trace",
+        type=str,
+        default=None,
+        help="File to write execution trace to (QEMU only)",
     )
     parser.add_argument(
         "--verbose",
