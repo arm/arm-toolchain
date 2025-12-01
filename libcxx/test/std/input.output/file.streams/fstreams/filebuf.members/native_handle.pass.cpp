@@ -13,8 +13,6 @@
 // class basic_filebuf;
 
 // native_handle_type native_handle() const noexcept;
-// Downstream issue: #375 (Enable fstream independently of filesystem)
-// UNSUPPORTED: baremetal
 
 #include <cassert>
 #include <fstream>

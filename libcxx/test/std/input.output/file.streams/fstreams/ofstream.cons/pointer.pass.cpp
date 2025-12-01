@@ -18,9 +18,6 @@
 
 // XFAIL: LIBCXX-AIX-FIXME
 
-// Downstream issue: #375 (Enable fstream independently of filesystem)
-// UNSUPPORTED: baremetal
-
 #include <fstream>
 #include <cassert>
 #include <ios>

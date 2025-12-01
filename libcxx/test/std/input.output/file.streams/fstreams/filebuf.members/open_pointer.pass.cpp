@@ -14,8 +14,6 @@
 // XFAIL: (!c++03 && !c++11 && !c++14 && !c++17 && !c++20) && using-built-library-before-llvm-18
 
 // XFAIL: LIBCXX-AIX-FIXME
-// Downstream issue: #375 (Enable fstream independently of filesystem)
-// UNSUPPORTED: baremetal
 
 #include <fstream>
 #include <cassert>
