@@ -870,6 +870,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            -DRUNTIMES_USE_LIBC=picolibc
         )
         if(ENABLE_LIBCXX_TESTS)
             # Generate xfails for libxx.
@@ -913,6 +914,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            -DRUNTIMES_USE_LIBC=llvm-libc
             )
             set(lib_compile_flags "${lib_compile_flags} -D_LIBCPP_PRINT=1")
     elseif(C_LIBRARY MATCHES "^newlib")
@@ -926,6 +928,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            -DRUNTIMES_USE_LIBC=newlib
         )
 
         if(C_LIBRARY STREQUAL newlib-nano)
