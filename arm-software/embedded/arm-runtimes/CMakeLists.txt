@@ -908,7 +908,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
-            -DRUNTIMES_USE_LIBC=llvm-libc
+            -DRUNTIMES_USE_LIBC=system # llvm-libc logic in HandleLibC.cmake is not compatible with ATfE now
             )
             set(lib_compile_flags "${lib_compile_flags} -D_LIBCPP_PRINT=1")
     elseif(C_LIBRARY MATCHES "^newlib")
