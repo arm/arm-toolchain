@@ -1,0 +1,34 @@
+From 7daa8f56fa130e7d6d02ab73e611b795882b58c3 Mon Sep 17 00:00:00 2001
+From: Codex Autogen <codex@example.com>
+Date: Tue, 11 Feb 2025 12:00:00 +0000
+Subject: [PATCH] Include stddef.h and stdint.h in stdatomic.h
+
+Newlib's stdatomic.h only includes sys/_types.h, which requests a
+restricted <stddef.h> subset and therefore does not actually define
+types such as wchar_t, size_t, intptr_t or the int_leastN_t family.
+Clang subsequently errors out when the header declares the atomic typedefs.
+
+Include <stddef.h> and <stdint.h> explicitly so the standard typedefs are
+always available before they are used in the atomic aliases. This mirrors
+the behaviour of other libcs and fixes the runtimes build when both newlib
+and picolibc headers share the same sysroot.
+---
+ newlib/libc/include/stdatomic.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/newlib/libc/include/stdatomic.h b/newlib/libc/include/stdatomic.h
+index 13d1e176..32e16632 100644
+--- a/newlib/libc/include/stdatomic.h
++++ b/newlib/libc/include/stdatomic.h
+@@ -32,6 +32,8 @@
+ 
+ #include <sys/cdefs.h>
+ #include <sys/_types.h>
++#include <stddef.h>
++#include <stdint.h>
+ 
+ #if (__has_extension(c_atomic) || __has_extension(cxx_atomic)) && \
+     defined(__clang__)
+-- 
+2.43.0
+

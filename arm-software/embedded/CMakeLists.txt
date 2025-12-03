@@ -167,10 +167,27 @@ set(
 set(FVP_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/fvp/config")
 set(LLVM_TOOLCHAIN_C_LIBRARY
     "picolibc" CACHE STRING
-    "Which C library to use."
+    "Legacy compatibility hook for selecting a single C library."
 )
 set_property(CACHE LLVM_TOOLCHAIN_C_LIBRARY
     PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
+
+set(_enable_picolibc_default ON)
+if(NOT LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "picolibc")
+    set(_enable_picolibc_default OFF)
+endif()
+set(_enable_newlib_default OFF)
+if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
+    set(_enable_newlib_default ON)
+endif()
+set(_enable_llvmlibc_default OFF)
+if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "llvmlibc")
+    set(_enable_llvmlibc_default ON)
+endif()
+
+option(LLVM_TOOLCHAIN_ENABLE_PICOLIBC "Enable building picolibc runtime" ${_enable_picolibc_default})
+option(LLVM_TOOLCHAIN_ENABLE_NEWLIB "Enable building newlib runtime" ${_enable_newlib_default})
+option(LLVM_TOOLCHAIN_ENABLE_LLVMLIBC "Enable building LLVM libc runtime" ${_enable_llvmlibc_default})
 
 option(
     SHORT_BUILD_PATHS
@@ -198,10 +215,47 @@ endif()
 option(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL
     "Make cpack build an overlay package that can be unpacked over the main toolchain to install a secondary set of libraries based on newlib or llvm-libc."
     ${overlay_install_default})
+
+set(LLVM_TOOLCHAIN_ENABLED_LIBCS "")
+if(LLVM_TOOLCHAIN_ENABLE_PICOLIBC)
+    list(APPEND LLVM_TOOLCHAIN_ENABLED_LIBCS picolibc)
+endif()
+if(LLVM_TOOLCHAIN_ENABLE_NEWLIB)
+    if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL AND LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "newlib-nano")
+        list(APPEND LLVM_TOOLCHAIN_ENABLED_LIBCS newlib-nano)
+    else()
+        list(APPEND LLVM_TOOLCHAIN_ENABLED_LIBCS newlib)
+    endif()
+endif()
+if(LLVM_TOOLCHAIN_ENABLE_LLVMLIBC)
+    list(APPEND LLVM_TOOLCHAIN_ENABLED_LIBCS llvmlibc)
+endif()
+list(REMOVE_DUPLICATES LLVM_TOOLCHAIN_ENABLED_LIBCS)
+
+if(NOT LLVM_TOOLCHAIN_ENABLED_LIBCS)
+    message(FATAL_ERROR
+        "At least one C library must be enabled. Set LLVM_TOOLCHAIN_ENABLE_PICOLIBC, "
+        "LLVM_TOOLCHAIN_ENABLE_NEWLIB or LLVM_TOOLCHAIN_ENABLE_LLVMLIBC to ON.")
+endif()
+
+list(GET LLVM_TOOLCHAIN_ENABLED_LIBCS 0 LLVM_TOOLCHAIN_PRIMARY_LIBC)
+set(LLVM_TOOLCHAIN_C_LIBRARY ${LLVM_TOOLCHAIN_PRIMARY_LIBC} CACHE STRING "" FORCE)
+
 if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
-  if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "picolibc")
-    message(FATAL_ERROR "LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL is only permitted for C libraries other than the default picolibc")
-  endif()
+    list(LENGTH LLVM_TOOLCHAIN_ENABLED_LIBCS _overlay_libc_count)
+    if(NOT _overlay_libc_count EQUAL 1)
+        message(FATAL_ERROR
+            "Overlay builds require exactly one enabled C library. "
+            "Enable a single LLVM_TOOLCHAIN_ENABLE_* option when using overlays.")
+    endif()
+    if(LLVM_TOOLCHAIN_PRIMARY_LIBC STREQUAL "picolibc")
+        message(FATAL_ERROR "LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL is only permitted for C libraries other than the default picolibc")
+    endif()
+endif()
+list(LENGTH LLVM_TOOLCHAIN_ENABLED_LIBCS LLVM_TOOLCHAIN_ENABLED_LIBCS_COUNT)
+set(LLVM_TOOLCHAIN_MULTI_LIB_BUILD OFF)
+if(LLVM_TOOLCHAIN_ENABLED_LIBCS_COUNT GREATER 1)
+    set(LLVM_TOOLCHAIN_MULTI_LIB_BUILD ON)
 endif()
 
 set(BUG_REPORT_URL "https://github.com/arm/arm-toolchain/issues" CACHE STRING "")
@@ -297,10 +351,11 @@ include(ProcessorCount)
 #
 # If you want to stop cmake updating the repos then run
 # cmake . -DFETCHCONTENT_FULLY_DISCONNECTED=ON
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc)
+if("picolibc" IN_LIST LLVM_TOOLCHAIN_ENABLED_LIBCS)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_picolibc.cmake)
 endif()
-if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
+if("newlib" IN_LIST LLVM_TOOLCHAIN_ENABLED_LIBCS
+        OR "newlib-nano" IN_LIST LLVM_TOOLCHAIN_ENABLED_LIBCS)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_newlib.cmake)
 endif()
 
@@ -323,27 +378,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 endif()
 ##################################################################################################
 
-if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
-    install(
-        FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/${LLVM_TOOLCHAIN_C_LIBRARY}.cfg
-        DESTINATION bin
-        COMPONENT llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
-    )
-    install(
-        FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/ATfE-SBOM-newlib-overlay.spdx.json
-        DESTINATION .
-        COMPONENT llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
-    )
-    install(
-        DIRECTORY
-        ${CMAKE_CURRENT_SOURCE_DIR}/newlib-samples/
-        DESTINATION samples
-        COMPONENT llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
-    )
-endif()
-
 install(
     FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/Omax.cfg
@@ -353,11 +387,72 @@ install(
     COMPONENT llvm-toolchain-config-files
 )
 
-# Generate a toolchain ID.
-# Product code 'E' for Embedded.
-set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
-set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
-include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
+set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
+set(LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS "")
+foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
+    set(LLVM_TOOLCHAIN_CFG_LIBC_NAME ${libc})
+    set(LLVM_TOOLCHAIN_CFG_LIBC_SUBDIR ${libc})
+    set(libc_cfg_path ${CMAKE_CURRENT_BINARY_DIR}/${libc}.cfg)
+
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/libc-config.cfg.in
+        ${libc_cfg_path}
+        @ONLY
+    )
+
+    set(libc_component llvm-toolchain-${libc}-configs)
+    list(APPEND LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS ${libc_component})
+    install(
+        FILES ${libc_cfg_path}
+        DESTINATION bin
+        COMPONENT ${libc_component}
+    )
+
+    if(libc MATCHES "^newlib")
+        install(
+            FILES
+            ${CMAKE_CURRENT_SOURCE_DIR}/ATfE-SBOM-newlib-overlay.spdx.json
+            DESTINATION .
+            COMPONENT ${libc_component}
+        )
+        install(
+            DIRECTORY
+            ${CMAKE_CURRENT_SOURCE_DIR}/newlib-samples/
+            DESTINATION samples
+            COMPONENT ${libc_component}
+        )
+    elseif(libc STREQUAL llvmlibc)
+        install(
+            FILES
+            ${CMAKE_CURRENT_SOURCE_DIR}/ATfE-SBOM-llvmlibc-overlay.spdx.json
+            DESTINATION .
+            COMPONENT ${libc_component}
+        )
+
+        install(
+          DIRECTORY
+          ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/
+          DESTINATION samples
+          COMPONENT ${libc_component}
+        )
+
+        # LLVM libc lacks a configuration for AArch64, but the AArch32 one works
+        # fine. However, setting the configuration for both architectures to the
+        # arm config directory means the baremetal config.json is never loaded,
+        # as it resides in the directory above. To ensure both are used, copy
+        # them to the same location and point libc to that.
+        set(LIBC_CFG_DIR ${CMAKE_BINARY_DIR}/llvmlibc-config)
+        file(COPY
+            ${llvmproject_src_dir}/libc/config/baremetal/config.json
+            ${llvmproject_src_dir}/libc/config/baremetal/arm/.
+            DESTINATION
+            ${LIBC_CFG_DIR}
+        )
+    endif()
+endforeach()
+list(REMOVE_DUPLICATES LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS)
+list(APPEND LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS ${LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS})
+list(REMOVE_DUPLICATES LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS)
 
 # Include elf2bin
 set(LLVM_EXTERNAL_PROJECTS elf2bin)
@@ -366,7 +461,6 @@ set(LLVM_EXTERNAL_ELF2BIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2b
 set(clang_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/clang_lit_xfails.txt")
 set(CLANG_TEST_EXTRA_ARGS "@${clang_lit_xfails_path}")
 
-set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 add_subdirectory(
     ${llvmproject_src_dir}/llvm llvm
 )
@@ -387,21 +481,11 @@ add_custom_target(
 add_dependencies(check-clang clang-xfail-lit-args)
 add_dependencies(check-all clang-xfail-lit-args)
 
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
-    install(
-        FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc.cfg
-        DESTINATION bin
-        COMPONENT llvm-toolchain-llvmlibc-configs
-    )
-
-    install(
-        FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/ATfE-SBOM-llvmlibc-overlay.spdx.json
-        DESTINATION .
-        COMPONENT llvm-toolchain-llvmlibc-configs
-    )
-endif()
+# Generate a toolchain ID.
+# Product code 'E' for Embedded.
+set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
+set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
+include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 
 get_directory_property(LLVM_VERSION_MAJOR DIRECTORY ${llvmproject_src_dir}/llvm DEFINITION LLVM_VERSION_MAJOR)
 get_directory_property(LLVM_VERSION_MINOR DIRECTORY ${llvmproject_src_dir}/llvm DEFINITION LLVM_VERSION_MINOR)
@@ -439,13 +523,16 @@ endif()
 if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
     set(CPACK_COMPONENTS_ALL
         llvm-toolchain-libs
-        llvm-toolchain-${LLVM_TOOLCHAIN_C_LIBRARY}-configs
         llvm-toolchain-third-party-licenses)
+    foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
+        list(APPEND CPACK_COMPONENTS_ALL llvm-toolchain-${libc}-configs)
+    endforeach()
 elseif(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
     set(CPACK_COMPONENTS_ALL ${LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS} llvm-toolchain-mingw)
 else()
     set(CPACK_COMPONENTS_ALL ${LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS} ${LLVM_DISTRIBUTION_COMPONENTS})
 endif()
+list(REMOVE_DUPLICATES CPACK_COMPONENTS_ALL)
 # Enable limiting the installed components in TGZ and ZIP packages.
 set(CPACK_ARCHIVE_COMPONENT_INSTALL TRUE)
 # Don't create a separate archive for each component.
@@ -503,12 +590,13 @@ endif()
 set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
 
 if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
-    set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${LLVM_TOOLCHAIN_C_LIBRARY}-overlay-${PACKAGE_VERSION})
+    list(GET LLVM_TOOLCHAIN_ENABLED_LIBCS 0 _overlay_package_libc)
+    set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${_overlay_package_libc}-overlay-${PACKAGE_VERSION})
 else()
-    if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "picolibc")
+    if(LLVM_TOOLCHAIN_MULTI_LIB_BUILD OR LLVM_TOOLCHAIN_PRIMARY_LIBC STREQUAL "picolibc")
         set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
     else()
-        set(PACKAGE_FILE_NAME ${PACKAGE_NAME}_${LLVM_TOOLCHAIN_C_LIBRARY}-${PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
+        set(PACKAGE_FILE_NAME ${PACKAGE_NAME}_${LLVM_TOOLCHAIN_PRIMARY_LIBC}-${PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
     endif()
 endif()
 set(CPACK_PACKAGE_FILE_NAME ${PACKAGE_FILE_NAME})
@@ -542,14 +630,23 @@ add_custom_target(
     -Dnewlib_URL=${newlib_URL}
     # but we do tell the script which library we're actually using
     -DLLVM_TOOLCHAIN_C_LIBRARY=${LLVM_TOOLCHAIN_C_LIBRARY}
+    -DLLVM_TOOLCHAIN_ENABLED_LIBCS=${LLVM_TOOLCHAIN_ENABLED_LIBCS}
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_version_txt.cmake
     BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
 )
-if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc))
+set(_version_rename OFF)
+if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
+    list(GET LLVM_TOOLCHAIN_ENABLED_LIBCS 0 _version_libc_name)
+    set(_version_rename ON)
+elseif(NOT LLVM_TOOLCHAIN_MULTI_LIB_BUILD AND NOT (LLVM_TOOLCHAIN_PRIMARY_LIBC STREQUAL "picolibc"))
+    set(_version_libc_name ${LLVM_TOOLCHAIN_PRIMARY_LIBC})
+    set(_version_rename ON)
+endif()
+if(_version_rename)
     install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
         DESTINATION .
-        RENAME VERSION_${LLVM_TOOLCHAIN_C_LIBRARY}.txt
+        RENAME VERSION_${_version_libc_name}.txt
         COMPONENT llvm-toolchain-third-party-licenses
     )
 else()
@@ -586,11 +683,18 @@ add_dependencies(
 set(LLVM_DEFAULT_EXTERNAL_LIT "${LLVM_BINARY_DIR}/bin/llvm-lit")
 
 add_custom_target(check-llvm-toolchain-runtimes)
-add_custom_target(check-${LLVM_TOOLCHAIN_C_LIBRARY})
+set(LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS "")
+foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
+    set(_libc_check_target check-${libc})
+    add_custom_target(${_libc_check_target})
+    list(APPEND LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS ${_libc_check_target})
+endforeach()
 add_custom_target(check-compiler-rt)
 add_custom_target(check-cxx)
 add_custom_target(check-cxxabi)
 add_custom_target(check-unwind)
+set(LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS
+    check-compiler-rt check-cxx check-cxxabi check-unwind)
 
 if(NOT PREBUILT_TARGET_LIBRARIES)
     if(LIBS_DEPEND_ON_TOOLS)
@@ -608,24 +712,9 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
 
     add_dependencies(
         check-llvm-toolchain-runtimes
-        check-${LLVM_TOOLCHAIN_C_LIBRARY}
-        check-compiler-rt
-        check-cxx
-        check-cxxabi
-        check-unwind
+        ${LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS}
+        ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS}
     )
-
-    if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
-        # If we're building a non-default libc with the intention of
-        # installing it as an overlay on the main package archive, then
-        # all of its includes, libraries and multilib.yaml go in a
-        # subdirectory of lib/clang-runtimes. Configuration files in the
-        # bin directory will make it easy to reset the sysroot to point at
-        # that subdir.
-        set(library_subdir "/${LLVM_TOOLCHAIN_C_LIBRARY}")
-    else()
-        set(library_subdir "")
-    endif()
 
     if(LIBS_USE_COMPILER_LAUNCHER)
         if(CMAKE_C_COMPILER_LAUNCHER)
@@ -644,92 +733,101 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
 
     set(multilib_prefix ${CMAKE_BINARY_DIR}/multilib-builds)
 
-    ExternalProject_Add(
-        multilib-${LLVM_TOOLCHAIN_C_LIBRARY}
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arm-multilib
-        STAMP_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-stamp
-        BINARY_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-build
-        DOWNLOAD_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-dl
-        TMP_DIR ${multilib_prefix}/multilib/${LLVM_TOOLCHAIN_C_LIBRARY}-tmp
-        INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR}${library_subdir}
-        DEPENDS ${lib_tool_dependencies}
-        CMAKE_ARGS
-        ${compiler_launcher_cmake_args}
-        -DC_LIBRARY=${LLVM_TOOLCHAIN_C_LIBRARY}
-        -DLLVM_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/llvm
-        -DMULTILIB_JSON=${LLVM_TOOLCHAIN_MULTILIB_JSON}
-        -DENABLE_VARIANTS=${ENABLE_VARIANTS_PASSTHROUGH}
-	-DENABLE_MULTILIB_HEADER_OPTIMISATION=${ENABLE_MULTILIB_HEADER_OPTIMISATION}
-        -DENABLE_PARALLEL_LIB_CONFIG=${ENABLE_PARALLEL_LIB_CONFIG}
-        -DENABLE_PARALLEL_LIB_BUILD=${ENABLE_PARALLEL_LIB_BUILD}
-        -DPARALLEL_LIB_BUILD_LEVELS=${PARALLEL_LIB_BUILD_LEVELS}
-        -DFVP_INSTALL_DIR=${FVP_INSTALL_DIR}
-        -DENABLE_QEMU_TESTING=${ENABLE_QEMU_TESTING}
-        -DENABLE_FVP_TESTING=${ENABLE_FVP_TESTING}
-        -DFVP_CONFIG_DIR=${CMAKE_CURRENT_SOURCE_DIR}/fvp/config
-        -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=${FETCHCONTENT_SOURCE_DIR_PICOLIBC}
-        -DFETCHCONTENT_SOURCE_DIR_NEWLIB=${FETCHCONTENT_SOURCE_DIR_NEWLIB}
-        -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        -DPROJECT_PREFIX=${multilib_prefix}
-        -DNUMERICAL_BUILD_NAMES=${SHORT_BUILD_PATHS}
-        USES_TERMINAL_CONFIGURE TRUE
-        USES_TERMINAL_BUILD TRUE
-        LIST_SEPARATOR ,
-        CONFIGURE_HANDLED_BY_BUILD TRUE
-        TEST_EXCLUDE_FROM_MAIN TRUE
-        STEP_TARGETS build install
-    )
-
-    add_dependencies(
-        llvm-toolchain-runtimes
-        multilib-${LLVM_TOOLCHAIN_C_LIBRARY}-install
-    )
-
-    foreach(check_target check-${LLVM_TOOLCHAIN_C_LIBRARY} check-compiler-rt check-cxx check-cxxabi check-unwind)
-        ExternalProject_Add_Step(
-            multilib-${LLVM_TOOLCHAIN_C_LIBRARY}
-            ${check_target}
-            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target ${check_target}
-            USES_TERMINAL TRUE
-            EXCLUDE_FROM_MAIN TRUE
-            ALWAYS TRUE
-        )
-        ExternalProject_Add_StepTargets(multilib-${LLVM_TOOLCHAIN_C_LIBRARY} ${check_target})
-        ExternalProject_Add_StepDependencies(
-            multilib-${LLVM_TOOLCHAIN_C_LIBRARY}
-            ${check_target}
-            multilib-${LLVM_TOOLCHAIN_C_LIBRARY}-install
-        )
-        add_dependencies(${check_target} multilib-${LLVM_TOOLCHAIN_C_LIBRARY}-${check_target})
-    endforeach()
-
     # Read the json to generate variant specific target names for convenience.
     file(READ ${LLVM_TOOLCHAIN_MULTILIB_JSON} multilib_json_str)
     string(JSON multilib_defs GET ${multilib_json_str} "libs")
-
     string(JSON lib_count LENGTH ${multilib_defs})
     math(EXPR lib_count_dec "${lib_count} - 1")
 
-    foreach(lib_idx RANGE ${lib_count_dec})
-        string(JSON lib_def GET ${multilib_defs} ${lib_idx})
-        string(JSON variant GET ${lib_def} "variant")
-        foreach(check_target check-${LLVM_TOOLCHAIN_C_LIBRARY} check-compiler-rt check-cxx check-cxxabi check-unwind)
+    foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
+        set(multilib_project multilib-${libc})
+        set(libc_install_dir ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR}/${libc})
+        set(libc_check_target check-${libc})
+        set(libc_check_targets ${libc_check_target} ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS})
+
+        ExternalProject_Add(
+            ${multilib_project}
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arm-multilib
+            STAMP_DIR ${multilib_prefix}/multilib/${libc}-stamp
+            BINARY_DIR ${multilib_prefix}/multilib/${libc}-build
+            DOWNLOAD_DIR ${multilib_prefix}/multilib/${libc}-dl
+            TMP_DIR ${multilib_prefix}/multilib/${libc}-tmp
+            INSTALL_DIR ${libc_install_dir}
+            DEPENDS ${lib_tool_dependencies}
+            CMAKE_ARGS
+            ${compiler_launcher_cmake_args}
+            -DC_LIBRARY=${libc}
+            -DLLVM_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/llvm
+            -DMULTILIB_JSON=${LLVM_TOOLCHAIN_MULTILIB_JSON}
+            -DENABLE_VARIANTS=${ENABLE_VARIANTS_PASSTHROUGH}
+            -DENABLE_MULTILIB_HEADER_OPTIMISATION=${ENABLE_MULTILIB_HEADER_OPTIMISATION}
+            -DENABLE_PARALLEL_LIB_CONFIG=${ENABLE_PARALLEL_LIB_CONFIG}
+            -DENABLE_PARALLEL_LIB_BUILD=${ENABLE_PARALLEL_LIB_BUILD}
+            -DPARALLEL_LIB_BUILD_LEVELS=${PARALLEL_LIB_BUILD_LEVELS}
+            -DFVP_INSTALL_DIR=${FVP_INSTALL_DIR}
+            -DENABLE_QEMU_TESTING=${ENABLE_QEMU_TESTING}
+            -DENABLE_FVP_TESTING=${ENABLE_FVP_TESTING}
+            -DFVP_CONFIG_DIR=${CMAKE_CURRENT_SOURCE_DIR}/fvp/config
+            -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=${FETCHCONTENT_SOURCE_DIR_PICOLIBC}
+            -DFETCHCONTENT_SOURCE_DIR_NEWLIB=${FETCHCONTENT_SOURCE_DIR_NEWLIB}
+            -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+            -DPROJECT_PREFIX=${multilib_prefix}
+            -DNUMERICAL_BUILD_NAMES=${SHORT_BUILD_PATHS}
+            USES_TERMINAL_CONFIGURE TRUE
+            USES_TERMINAL_BUILD TRUE
+            LIST_SEPARATOR ,
+            CONFIGURE_HANDLED_BY_BUILD TRUE
+            TEST_EXCLUDE_FROM_MAIN TRUE
+            STEP_TARGETS build install
+        )
+
+        add_dependencies(
+            llvm-toolchain-runtimes
+            ${multilib_project}-install
+        )
+
+        foreach(check_target IN LISTS libc_check_targets)
             ExternalProject_Add_Step(
-                multilib-${LLVM_TOOLCHAIN_C_LIBRARY}
-                ${check_target}-${variant}
-                COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target ${check_target}-${variant}
+                ${multilib_project}
+                ${check_target}
+                COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target ${check_target}
                 USES_TERMINAL TRUE
                 EXCLUDE_FROM_MAIN TRUE
                 ALWAYS TRUE
             )
-            ExternalProject_Add_StepTargets(multilib-${LLVM_TOOLCHAIN_C_LIBRARY} ${check_target}-${variant})
+            ExternalProject_Add_StepTargets(${multilib_project} ${check_target})
             ExternalProject_Add_StepDependencies(
-                multilib-${LLVM_TOOLCHAIN_C_LIBRARY}
-                ${check_target}-${variant}
-                multilib-${LLVM_TOOLCHAIN_C_LIBRARY}-install
+                ${multilib_project}
+                ${check_target}
+                ${multilib_project}-install
             )
-            add_custom_target(${check_target}-${variant})
-            add_dependencies(${check_target}-${variant} multilib-${LLVM_TOOLCHAIN_C_LIBRARY}-${check_target}-${variant})
+            add_dependencies(${check_target} ${multilib_project}-${check_target})
+        endforeach()
+
+        foreach(lib_idx RANGE ${lib_count_dec})
+            string(JSON lib_def GET ${multilib_defs} ${lib_idx})
+            string(JSON variant GET ${lib_def} "variant")
+            foreach(check_target IN LISTS libc_check_targets)
+                set(variant_target ${check_target}-${variant})
+                ExternalProject_Add_Step(
+                    ${multilib_project}
+                    ${variant_target}
+                    COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target ${variant_target}
+                    USES_TERMINAL TRUE
+                    EXCLUDE_FROM_MAIN TRUE
+                    ALWAYS TRUE
+                )
+                ExternalProject_Add_StepTargets(${multilib_project} ${variant_target})
+                ExternalProject_Add_StepDependencies(
+                    ${multilib_project}
+                    ${variant_target}
+                    ${multilib_project}-install
+                )
+                if(NOT TARGET ${variant_target})
+                    add_custom_target(${variant_target})
+                endif()
+                add_dependencies(${variant_target} ${multilib_project}-${variant_target})
+            endforeach()
         endforeach()
     endforeach()
 endif()
@@ -769,25 +867,56 @@ install(
     COMPONENT llvm-toolchain-docs
 )
 
+set(LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES "")
+foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
+    if(libc STREQUAL picolibc)
+        set(_libc_display_name "Picolibc")
+        set(_libc_license_names COPYING.NEWLIB COPYING.picolibc)
+    elseif(libc STREQUAL llvmlibc)
+        set(_libc_display_name "LLVM libc")
+        set(_libc_license_names LIBC-LICENSE.TXT)
+    elseif(libc STREQUAL newlib-nano)
+        set(_libc_display_name "Newlib-nano")
+        set(_libc_license_names COPYING.NEWLIB COPYING.LIBGLOSS)
+    elseif(libc STREQUAL newlib)
+        set(_libc_display_name "Newlib")
+        set(_libc_license_names COPYING.NEWLIB COPYING.LIBGLOSS)
+    else()
+        unset(_libc_license_names)
+    endif()
+
+    if(_libc_license_names)
+        set(_libc_license_dir third-party-licenses)
+        if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL OR LLVM_TOOLCHAIN_MULTI_LIB_BUILD)
+            set(_libc_license_dir ${_libc_license_dir}/${libc})
+        endif()
+        set(_libc_license_paths "")
+        foreach(_license_name IN LISTS _libc_license_names)
+            if(_libc_license_paths STREQUAL "")
+                set(_libc_license_paths "${_libc_license_dir}/${_license_name}")
+            else()
+                string(APPEND _libc_license_paths ", ${_libc_license_dir}/${_license_name}")
+            endif()
+        endforeach()
+        string(APPEND LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES " - ${_libc_display_name}: ${_libc_license_paths}\n")
+    endif()
+    unset(_libc_license_names)
+endforeach()
+
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
-    set(mingw_runtime_dlls
-        "\n - MinGW runtime DLLs: third-party-licenses/COPYING.MinGW-w64-runtime.txt, third-party-licenses/COPYING3.GCC, third-party-licenses/COPYING.RUNTIME"
-    )
+    set(_mingw_license_dir third-party-licenses)
+    set(LLVM_TOOLCHAIN_MINGW_LICENSE_LINES
+        "\n - MinGW runtime DLLs: ${_mingw_license_dir}/COPYING.MinGW-w64-runtime.txt, ${_mingw_license_dir}/COPYING3.GCC, ${_mingw_license_dir}/COPYING.RUNTIME")
+else()
+    set(LLVM_TOOLCHAIN_MINGW_LICENSE_LINES "")
 endif()
 configure_file(cmake/THIRD-PARTY-LICENSES.txt.in THIRD-PARTY-LICENSES.txt)
+unset(_mingw_license_dir)
 
-if(NOT LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
-    set(third_party_license_summary_install_dir .)
-    set(third_party_license_files_install_dir third-party-licenses)
+if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
+    set(third_party_license_summary_install_dir third-party-licenses/${LLVM_TOOLCHAIN_PRIMARY_LIBC})
 else()
-    # If we're building an overlay archive, put all the license files
-    # one level down in third-party-licenses/<library type>, so that
-    # COPYING.NEWLIB doesn't collide with the file of the same name
-    # from picolibc, and the LLVM license files are also duplicated
-    # (in case the overlay archive is used with a non-matching version
-    # of the main toolchain).
-    set(third_party_license_summary_install_dir third-party-licenses/${LLVM_TOOLCHAIN_C_LIBRARY})
-    set(third_party_license_files_install_dir third-party-licenses/${LLVM_TOOLCHAIN_C_LIBRARY})
+    set(third_party_license_summary_install_dir .)
 endif()
 
 install(
@@ -796,7 +925,7 @@ install(
     COMPONENT llvm-toolchain-third-party-licenses
 )
 
-set(third_party_license_files
+set(common_third_party_license_files
     ${llvmproject_src_dir}/llvm/LICENSE.TXT          LLVM-LICENSE.txt
     ${llvmproject_src_dir}/clang/LICENSE.TXT         CLANG-LICENSE.txt
     ${llvmproject_src_dir}/lld/LICENSE.TXT           LLD-LICENSE.txt
@@ -805,32 +934,56 @@ set(third_party_license_files
     ${llvmproject_src_dir}/libcxxabi/LICENSE.TXT     LIBCXXABI-LICENSE.txt
     ${llvmproject_src_dir}/libunwind/LICENSE.TXT     LIBUNWIND-LICENSE.txt
 )
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc)
-    list(APPEND third_party_license_files
-        ${picolibc_SOURCE_DIR}/COPYING.picolibc         COPYING.picolibc
-    )
+set(common_license_destination third-party-licenses)
+if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
+    set(common_license_destination third-party-licenses/${LLVM_TOOLCHAIN_PRIMARY_LIBC})
 endif()
-if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
-    list(APPEND third_party_license_files
-        ${newlib_SOURCE_DIR}/COPYING.NEWLIB             COPYING.NEWLIB
-        ${newlib_SOURCE_DIR}/COPYING.LIBGLOSS           COPYING.LIBGLOSS
-    )
-endif()
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
-    list(APPEND third_party_license_files
-        ${llvmproject_src_dir}/libc/LICENSE.TXT      LIBC-LICENSE.TXT
-    )
-endif()
-
-while(third_party_license_files)
-    list(POP_FRONT third_party_license_files source_file destination_name)
+while(common_third_party_license_files)
+    list(POP_FRONT common_third_party_license_files source_file destination_name)
     install(
         FILES ${source_file}
-        DESTINATION ${third_party_license_files_install_dir}
+        DESTINATION ${common_license_destination}
         COMPONENT llvm-toolchain-third-party-licenses
         RENAME ${destination_name}
     )
 endwhile()
+
+foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
+    if(libc STREQUAL picolibc)
+        set(libc_license_sources
+            ${picolibc_SOURCE_DIR}/COPYING.NEWLIB           COPYING.NEWLIB
+            ${picolibc_SOURCE_DIR}/COPYING.picolibc         COPYING.picolibc
+        )
+    elseif(libc MATCHES "^newlib")
+        set(libc_license_sources
+            ${newlib_SOURCE_DIR}/COPYING.NEWLIB             COPYING.NEWLIB
+            ${newlib_SOURCE_DIR}/COPYING.LIBGLOSS           COPYING.LIBGLOSS
+        )
+    elseif(libc STREQUAL llvmlibc)
+        set(libc_license_sources
+            ${llvmproject_src_dir}/libc/LICENSE.TXT      LIBC-LICENSE.TXT
+        )
+    else()
+        unset(libc_license_sources)
+    endif()
+
+    if(libc_license_sources)
+        set(libc_license_destination third-party-licenses)
+        if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL OR LLVM_TOOLCHAIN_MULTI_LIB_BUILD)
+            set(libc_license_destination third-party-licenses/${libc})
+        endif()
+        while(libc_license_sources)
+            list(POP_FRONT libc_license_sources source_file destination_name)
+            install(
+                FILES ${source_file}
+                DESTINATION ${libc_license_destination}
+                COMPONENT llvm-toolchain-third-party-licenses
+                RENAME ${destination_name}
+            )
+        endwhile()
+    endif()
+    unset(libc_license_sources)
+endforeach()
 
 # Install samples
 if(WIN32 OR LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
@@ -941,10 +1094,9 @@ add_dependencies(
     clear-unpack-directory
 )
 
-
 add_custom_target(check-llvm-toolchain)
-add_dependencies(check-llvm-toolchain check-${LLVM_TOOLCHAIN_C_LIBRARY})
-add_dependencies(check-llvm-toolchain check-compiler-rt)
+add_dependencies(check-llvm-toolchain ${LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS})
+add_dependencies(check-llvm-toolchain ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS})
 add_subdirectory(test)
 add_dependencies(check-llvm-toolchain check-llvm-toolchain-lit)
 add_subdirectory(packagetest)
