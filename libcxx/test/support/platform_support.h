@@ -41,7 +41,7 @@
 #   include <fcntl.h> // _O_EXCL, ...
 #   include <sys/stat.h> // _S_IREAD, ...
 // Downstream issue: #375 (Enable fstream independently of filesystem)
-#elif defined(_NEWLIB_VERSION)
+#elif _LIBCPP_LIBC_NEWLIB
 // No need to include extra headers for the get_temp_file_name() implementation
 // below: tmpnam() is defined in <stdio.h>
 #elif __has_include(<unistd.h>)
@@ -75,7 +75,7 @@ inline std::string get_temp_file_name() {
     abort();
   }
 // Downstream issue: #375 (Enable fstream independently of filesystem)
-#elif defined(_NEWLIB_VERSION)
+#elif _LIBCPP_LIBC_NEWLIB
   char tmp_name[L_tmpnam];
   char *ret = tmpnam(tmp_name);
   if (ret == NULL) {
