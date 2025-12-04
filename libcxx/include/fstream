@@ -192,7 +192,7 @@ typedef basic_fstream<wchar_t> wfstream;
 #  include <__config>
 
 // Downstream issue: #375 (Enable fstream independently of filesystem)
-#  if _LIBCPP_HAS_FILESYSTEM && _LIBCPP_HAS_LOCALIZATION || defined(_LIBCPP_LIBC_NEWLIB)
+#  if _LIBCPP_HAS_FILESYSTEM && _LIBCPP_HAS_LOCALIZATION || defined(_NEWLIB_VERSION)
 
 #    include <__algorithm/max.h>
 #    include <__assert>
