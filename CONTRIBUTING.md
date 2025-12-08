@@ -49,6 +49,21 @@ If the issue is in Arm Toolchain itself, or if you are not sure, please create a
 Please attach any support files to the issue itself,
 see [Attaching files](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/attaching-files).
 
+### Reviewing Patches
+
+All contributions to Arm Toolchain are reviewed through GitHub Pull Requests.
+If you are asked to review a patch, or would like to understand the review process, please follow the guidance below.
+
+How to Review a Pull Request
+
+When reviewing a PR, you can provide feedback, approve the changes, or request updates using GitHub’s standard review options:
+* Comment – leave feedback without blocking the merge.
+* Approve – Approve merging the changes proposed in the PR.
+* Request changes – block the merge until required updates are made.
+
+For full guidance on how to review patches and use these options, please refer to GitHub’s documentation:
+see [Reviewing Proposed Changes in a PR](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request)
+
 ### Submit a fix
 
 For a small change, please create a Pull Request as described in
