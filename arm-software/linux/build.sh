@@ -438,7 +438,6 @@ package() {
       cp "${LIBRARIES_DIR}/libamath.so" \
           "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     fi
-    cp ${ATFL_DIR}/include/flang/omp* "${ATFL_DIR}/include"
     cp "${ATFL_DIR}/share/man/man1/clang.1" "${ATFL_DIR}/share/man/man1/armclang.1"
     sed -i "s/clang /armclang /g" "${ATFL_DIR}/share/man/man1/armclang.1"
     sed -i "s/Bclang/Barmclang/g" "${ATFL_DIR}/share/man/man1/armclang.1"
