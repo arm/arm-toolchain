@@ -14,7 +14,12 @@ import sys
 def run(args):
     # Some picolibc tests expect argv[0] to be literally "program-name", not
     # the actual program name.
-    argv = ["program-name"] + args.arguments
+    argv = ["program-name"]
+    if args.args:
+        # The arguments from the picolibc tests will come as a string
+        # rather than a list, so append to the first element and let the
+        # semihosting library handle the splitting.
+        argv[0] += " " + args.args
     if args.qemu_command:
         return run_qemu(
             args.qemu_command,
@@ -91,13 +96,11 @@ def main():
         help="Print verbose output. This may affect test result, as the output "
         "will be added to the output of the test.",
     )
-    parser.add_argument("image", help="image file to execute")
     parser.add_argument(
-        "arguments",
-        nargs=argparse.REMAINDER,
-        default=[],
-        help="optional arguments for the image",
+        "--args",
+        help="String containing optional arguments for the image",
     )
+    parser.add_argument("image", help="image file to execute")
     args = parser.parse_args()
     ret_code = run(args)
     sys.exit(ret_code)
