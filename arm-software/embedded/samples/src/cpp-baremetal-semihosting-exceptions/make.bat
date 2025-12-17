@@ -36,6 +36,7 @@ if exist hello.elf del /q hello.elf
 if exist hello.hex del /q hello.hex
 if exist hello-exn.elf del /q hello-exn.elf
 if exist hello-exn.hex del /q hello-exn.hex
+if exist microbit.ld del /q microbit.ld
 @exit /B
 
 :bin_path_empty
@@ -43,11 +44,12 @@ if exist hello-exn.hex del /q hello-exn.hex
 @exit /B 1
 
 :build_fn
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -print-multi-directory -g -T ..\..\ldscripts\microbit.ld -o hello.elf hello.cpp
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -g -T ..\..\ldscripts\microbit.ld -o hello.elf hello.cpp
+%BIN_PATH%\clang.exe -E -P -x c -DLIBC_LD_FILE=picolibcpp.ld ..\..\ldscripts\microbit.ld.in -o microbit.ld
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -print-multi-directory -g -T microbit.ld -o hello.elf hello.cpp
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti -g -T microbit.ld -o hello.elf hello.cpp
 %BIN_PATH%\llvm-objcopy.exe -O ihex hello.elf hello.hex
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -print-multi-directory -g -T ..\..\ldscripts\microbit.ld -o hello-exn.elf hello-exn.cpp
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -g -T ..\..\ldscripts\microbit.ld -o hello-exn.elf hello-exn.cpp
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -print-multi-directory -g -T microbit.ld -o hello-exn.elf hello-exn.cpp
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -g -T microbit.ld -o hello-exn.elf hello-exn.cpp
 %BIN_PATH%\llvm-objcopy.exe -O ihex hello-exn.elf hello-exn.hex
 @exit /B
 

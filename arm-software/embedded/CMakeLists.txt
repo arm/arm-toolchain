@@ -399,13 +399,6 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
         DESTINATION .
         COMPONENT llvm-toolchain-llvmlibc-configs
     )
-
-    install(
-      DIRECTORY
-      ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/
-      DESTINATION samples
-      COMPONENT llvm-toolchain-llvmlibc-configs
-    )
 endif()
 
 get_directory_property(LLVM_VERSION_MAJOR DIRECTORY ${llvmproject_src_dir}/llvm DEFINITION LLVM_VERSION_MAJOR)
@@ -840,9 +833,9 @@ endwhile()
 
 # Install samples
 if(WIN32 OR LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
-    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|ld|md|bat)")
+    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|ld|md|in|bat)")
 else()
-    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|ld|md)")
+    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|ld|md|in)")
 endif()
 install(
     DIRECTORY samples

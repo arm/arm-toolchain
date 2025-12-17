@@ -64,8 +64,17 @@ clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles 
 
 ## Samples
 
-The overlay package installs a llvmlibc directory in the samples/src
-directory containing sample programs that use LLVM libc.
+To use the sample programs provided by Arm Toolchain for Embedded with LLVM libc,
+set the `LIBC` environment variable to `llvmlibc`, for example:
+```
+$ LIBC=llvmlibc make build
+```
+> [!WARNING]
+> On Windows MSYS2 is required, `make.bat` does not support this option.
+
+> [!WARNING]
+> C++ samples have limitations described below when used with LLVM libc.
+
 
 ## Limitations of LLVM libc in Arm Toolchain for Embedded
 

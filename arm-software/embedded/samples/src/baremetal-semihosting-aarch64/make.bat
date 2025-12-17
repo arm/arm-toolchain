@@ -33,6 +33,7 @@ qemu-system-aarch64.exe -M raspi3b -semihosting -nographic -kernel hello.img
 :clean
 if exist hello.elf del /q hello.elf
 if exist hello.img del /q hello.img
+if exist raspi3b.ld del /q raspi3b.ld
 @exit /B
 
 :bin_path_empty
@@ -40,6 +41,7 @@ if exist hello.img del /q hello.img
 @exit /B 1
 
 :build_fn
-%BIN_PATH%\clang.exe --target=aarch64-none-elf -nostartfiles -lcrt0-semihost -lsemihost -Wl,--pic-veneer -mno-unaligned-access -g -T ..\..\ldscripts\raspi3b.ld -o hello.elf hello.c
+%BIN_PATH%\clang.exe -E -P -x c -DLIBC_LD_FILE=picolibcpp.ld ..\..\ldscripts\raspi3b.ld.in -o raspi3b.ld
+%BIN_PATH%\clang.exe --target=aarch64-none-elf -nostartfiles -lcrt0-semihost -lsemihost -Wl,--pic-veneer -mno-unaligned-access -g -T raspi3b.ld -o hello.elf hello.c
 %BIN_PATH%\llvm-objcopy.exe -O binary hello.elf hello.img
 @exit /B

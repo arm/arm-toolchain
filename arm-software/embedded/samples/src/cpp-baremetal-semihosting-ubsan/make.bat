@@ -39,6 +39,7 @@ qemu-system-arm.exe -M microbit -semihosting -nographic -device loader,file=hell
 :clean
 if exist hello.elf del /q hello.elf
 if exist hello.hex del /q hello.hex
+if exist microbit.ld del /q microbit.ld
 @exit /B
 
 :bin_path_empty
@@ -46,11 +47,13 @@ if exist hello.hex del /q hello.hex
 @exit /B 1
 
 :build_fn
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti --std=c++17 -fsanitize=undefined -fsanitize-minimal-runtime -g -T ../../ldscripts/microbit.ld -o hello.elf *.cpp
+%BIN_PATH%\clang.exe -E -P -x c -DLIBC_LD_FILE=picolibcpp.ld ..\..\ldscripts\microbit.ld.in -o microbit.ld
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti --std=c++17 -fsanitize=undefined -fsanitize-minimal-runtime -g -T microbit.ld -o hello.elf *.cpp
 %BIN_PATH%\llvm-objcopy.exe -O ihex hello.elf hello.hex
 @exit /B
 
 :build_trap_fn
-%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti --std=c++17 -fsanitize=undefined -fsanitize-trap=all -g -T ../../ldscripts/microbit.ld -o hello.elf *.cpp
+%BIN_PATH%\clang.exe -E -P -x c -DLIBC_LD_FILE=picolibcpp.ld ..\..\ldscripts\microbit.ld.in -o microbit.ld
+%BIN_PATH%\clang++.exe --target=armv6m-none-eabi -mfloat-abi=soft -march=armv6m -mfpu=none -nostartfiles -lcrt0-semihost -lsemihost -fno-exceptions -fno-rtti --std=c++17 -fsanitize=undefined -fsanitize-trap=all -g -T microbit.ld -o hello.elf *.cpp
 %BIN_PATH%\llvm-objcopy.exe -O ihex hello.elf hello.hex
 @exit /B

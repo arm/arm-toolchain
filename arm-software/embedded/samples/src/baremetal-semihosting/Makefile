@@ -10,7 +10,8 @@ include ../../Makefile.conf
 build: hello.elf
 
 hello.elf: *.c
-	$(BIN_PATH)/clang $(MICROBIT_TARGET) $(CRT_SEMIHOST) -g -T ../../ldscripts/microbit.ld -o hello.elf $^
+	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) ../../ldscripts/microbit.ld.in -o microbit.ld
+	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_TARGET) $(CRT_SEMIHOST) $(MATH_LIB) -g -T microbit.ld -o hello.elf $^
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@
@@ -22,6 +23,6 @@ debug: hello.hex
 	qemu-system-arm -M microbit -semihosting -nographic -device loader,file=$< -s -S
 
 clean:
-	rm -f *.elf *.hex
+	rm -f *.elf *.hex *.ld
 
 .PHONY: clean run debug
