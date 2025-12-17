@@ -15,7 +15,7 @@ The build scripts support four different environments:
 * Linux
 * macOS
 * Windows
-* Windows + [MSYS2](https://www.msys2.org/)
+* Windows + [MSYS2](https://www.msys2.org/) (recommended)
 
 ## Prerequisites
 
@@ -75,6 +75,13 @@ use the following commands to build, run or debug the sample:
   ```
 * ``$ make clean`` to delete the generated ``.elf`` and ``.hex`` files
 
+Use ``LIBC`` variable with the Makefile to set the C standard library to use,
+for example:
+```
+$ LIBC=llvmlibc make build
+```
+The default is ``picolibc``.
+
 ### Windows
 
 If you plan to run the compiled samples, ensure that the path of the directory
@@ -86,4 +93,4 @@ sample (e.g. ``src\baremetal-uart``) and use the following commands to build or
 run the sample:
 * ``> make.bat build`` to build the sample.
 * ``> make.bat run`` to run the sample with QEMU emulator.
-* ``> make.bat clean`` to delete the generated ``.elf`` and ``.hex`` files.
+* ``> make.bat clean`` to delete the generated binary and intermediate files.

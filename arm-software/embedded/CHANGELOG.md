@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 ### Changed
+- ATfE samples updated to work with LLVM libc, separate set of LLVM libc samples
+removed.
 ### Deprecated
 ### Removed
 ### Fixed
