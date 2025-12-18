@@ -354,7 +354,7 @@ def main():
             testnames=[
                 "semihost-seek.test",
                 "test-fread-fwrite.test",
-                "posix-io.test",
+                "test-posix-io.test",
             ],
             result=NewResult.XFAILED,
             project="picolibc",
