@@ -1,0 +1,251 @@
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -marm | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -mthumb | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv9.5-a | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv8.2-a+fp16 | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv8.5-a+nodotprod | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -marm -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -mthumb -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv9.5-a -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv8.2-a+fp16 -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv8.5-a+nodotprod -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED
+# CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED: arm-none-eabi/armv7a_soft_nofp_exn_rtti_unaligned{{$}}
+# CHECK-SOFT-NOFP-EXNRTTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -marm | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -mthumb | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv9.5-a | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv8.2-a+fp16 | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv8.5-a+nodotprod | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -marm -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -mthumb -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv9.5-a -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv8.2-a+fp16 -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv8.5-a+nodotprod -munaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-UNALIGNED
+# CHECK-SOFT-NOFP-UNALIGNED: arm-none-eabi/armv7a_soft_nofp_unaligned{{$}}
+# CHECK-SOFT-NOFP-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -marm -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -mthumb -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv9.5-a -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv8.2-a+fp16 -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv8.5-a+nodotprod -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -marm -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -mthumb -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv9.5-a -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv8.2-a+fp16 -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=none -march=armv8.5-a+nodotprod -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-EXNRTTI-BE
+# CHECK-SOFT-NOFP-EXNRTTI-BE: arm-none-eabi/armebv7a_soft_nofp_exn_rtti{{$}}
+# CHECK-SOFT-NOFP-EXNRTTI-BE-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -marm -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -mthumb -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv9.5-a -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv8.2-a+fp16 -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv8.5-a+nodotprod -mbig-endian | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -marm -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -mthumb -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv9.5-a -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv8.2-a+fp16 -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=none -march=armv8.5-a+nodotprod -mbig-endian -mno-unaligned-access | FileCheck %s --check-prefix=CHECK-SOFT-NOFP-BE
+# CHECK-SOFT-NOFP-BE: arm-none-eabi/armebv7a_soft_nofp{{$}}
+# CHECK-SOFT-NOFP-BE-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-d16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=neon-vfpv3 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-d16-fp16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-fp16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv4-d16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv4 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=neon-fp16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=neon-vfpv4 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-d16 -marm | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-d16 -mthumb | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=fp-armv8 -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=fp-armv8 -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=fp-armv8 -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-d16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=neon-vfpv3 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-d16-fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv4-d16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv4 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=neon-fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=neon-vfpv4 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-d16 -marm -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=vfpv3-d16 -mthumb -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=fp-armv8 -march=armv9.5-a -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=fp-armv8 -march=armv8.2-a+fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mfpu=fp-armv8 -march=armv8.5-a+nodotprod -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-UNALIGNED %s
+# CHECK-VFPV3-EXNRTTI-UNALIGNED: arm-none-eabi/armv7a_hard_vfpv3_d16_exn_rtti_unaligned{{$}}
+# CHECK-VFPV3-EXNRTTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=neon-vfpv3 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-d16-fp16 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-fp16 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv4-d16 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv4 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=neon-fp16 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=neon-vfpv4 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -marm | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mthumb | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=neon-vfpv3 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-d16-fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv4-d16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv4 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=neon-fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=neon-vfpv4 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -marm -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mthumb -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv9.5-a -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv8.2-a+fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv8.5-a+nodotprod -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-UNALIGNED %s
+# CHECK-VFPV3-UNALIGNED: arm-none-eabi/armv7a_hard_vfpv3_d16_unaligned{{$}}
+# CHECK-VFPV3-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=vfpv3-d16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=neon-vfpv3 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=vfpv3 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=vfpv3-d16-fp16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=vfpv3-fp16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=vfpv4-d16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=vfpv4 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=neon-fp16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=neon-vfpv4 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=vfpv3-d16 -marm | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=vfpv3-d16 -mthumb | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=fp-armv8 -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=fp-armv8 -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -mfpu=fp-armv8 -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-EXNRTTI-BE %s
+# CHECK-VFPV3-EXNRTTI-BE: arm-none-eabi/armebv7a_hard_vfpv3_d16_exn_rtti{{$}}
+# CHECK-VFPV3-EXNRTTI-BE-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=neon-vfpv3 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16-fp16 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-fp16 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv4-d16 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv4 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=neon-fp16 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=neon-vfpv4 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -marm | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mthumb | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabihf -mbig-endian -fno-exceptions -fno-rtti -mfpu=fp-armv8 -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-BE %s
+# CHECK-VFPV3-BE: arm-none-eabi/armebv7a_hard_vfpv3_d16{{$}}
+# CHECK-VFPV3-BE-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=neon-vfpv3 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-d16-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv4-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv4 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=neon-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=neon-vfpv4 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-d16 -mfloat-abi=softfp -marm | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-d16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=neon-vfpv3 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-d16-fp16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-fp16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv4-d16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv4 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=neon-fp16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=neon-vfpv4 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-d16 -mfloat-abi=softfp -marm -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv9.5-a -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.2-a+fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.5-a+nodotprod -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED %s
+# CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED: arm-none-eabi/armv7a_soft_vfpv3_d16_exn_rtti_unaligned{{$}}
+# CHECK-VFPV3-SOFTFP-EXNRTTI-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=neon-vfpv3 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-d16-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv4-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv4 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=neon-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=neon-vfpv4 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp -marm | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=neon-vfpv3 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-d16-fp16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-fp16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv4-d16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv4 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=neon-fp16 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=neon-vfpv4 -mfloat-abi=softfp -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp -marm -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv9.5-a -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.2-a+fp16 -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.5-a+nodotprod -munaligned-access | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-UNALIGNED %s
+# CHECK-VFPV3-SOFTFP-UNALIGNED: arm-none-eabi/armv7a_soft_vfpv3_d16_unaligned{{$}}
+# CHECK-VFPV3-SOFTFP-UNALIGNED-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=neon-vfpv3 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=vfpv3 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=vfpv3-d16-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=vfpv3-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=vfpv4-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=vfpv4 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=neon-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=neon-vfpv4 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -mfloat-abi=softfp -marm | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-EXNRTTI-BE %s
+# CHECK-VFPV3-SOFTFP-EXNRTTI-BE: arm-none-eabi/armebv7a_soft_vfpv3_d16_exn_rtti{{$}}
+# CHECK-VFPV3-SOFTFP-EXNRTTI-BE-EMPTY:
+
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=neon-vfpv3 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv4-d16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv4 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=neon-fp16 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=neon-vfpv4 -mfloat-abi=softfp | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp -marm | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv9.5-a | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.2-a+fp16 | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# RUN: %clang -print-multi-directory --target=armv8a-none-eabi -mbig-endian -fno-exceptions -fno-rtti -mfpu=fp-armv8 -mfloat-abi=softfp -march=armv8.5-a+nodotprod | FileCheck --check-prefix=CHECK-VFPV3-SOFTFP-BE %s
+# CHECK-VFPV3-SOFTFP-BE: arm-none-eabi/armebv7a_soft_vfpv3_d16{{$}}
+# CHECK-VFPV3-SOFTFP-BE-EMPTY:

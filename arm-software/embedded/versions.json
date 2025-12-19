@@ -1,0 +1,20 @@
+{
+  "comment": [
+    "Release branches of Arm Toolchain for Embedded will use",
+    "specific revisions of the repos it depends on. This file provides",
+    "a single source of truth for which revisions to use that can be",
+    "queried by CMake and other automation software."
+  ],
+  "repos": {
+    "picolibc": {
+      "url": "https://github.com/picolibc/picolibc.git",
+      "tagType": "branch",
+      "tag": "main"
+    },
+    "newlib": {
+      "url": "https://github.com/bminor/newlib.git",
+      "tagType": "tag",
+      "tag": "newlib-4.5.0"
+    }
+  }
+}

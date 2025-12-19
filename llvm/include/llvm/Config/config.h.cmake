@@ -302,4 +302,7 @@
 
 #cmakedefine HAVE_GETAUXVAL ${HAVE_GETAUXVAL}
 
+/* Downstream change issue: #124 (Arm Toolchain ID) */
+#cmakedefine ARM_TOOLCHAIN_ID "${ARM_TOOLCHAIN_ID}"
+
 #endif

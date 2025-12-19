@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+ATFL_VERSION="%ATFL_VERSION%"
+ATFL_BUILD="%ATFL_BUILD%"
+ATFL_INSTALL_PREFIX="%ATFL_INSTALL_PREFIX%"
+
+mkdir -p "modulefiles/atfl"
+(
+cat <<EOT
+#%Module1.0################################################################
+##
+##         ATfL
+##
+##
+##  Copyright 2015-2025 Arm Limited. All rights reserved.
+##
+
+###########################################################################
+# Module description                                                      #
+###########################################################################
+
+proc ModulesHelp { } {
+  puts stderr " "
+  puts stderr "This module loads the ATfL toolchain."
+  puts stderr "\nVersion ${ATFL_VERSION}\n"
+}
+
+module-whatis "Name: ATfL"
+module-whatis "Version: ${ATFL_VERSION}"
+module-whatis "Category: compiler, runtime support"
+module-whatis "Description: This module loads the ATfL toolchain, providing armclang, armclang++, and armflang."
+
+###########################################################################
+# Variable definitions                                                    #
+###########################################################################
+
+# Base install directory of ATfL
+set install_prefix ${ATFL_INSTALL_PREFIX}
+
+# Base module directory of ATfL
+#   This is worked out dynamically so that the modulefiles can be moved
+#   from the install directory
+set module_prefix [file dirname \$ModulesCurrentModulefile]/../..
+
+###########################################################################
+# Helper Functions                                                      #
+###########################################################################
+proc is-lmod {} {
+  global env
+  if { [info exists env(LMOD_VERSION_MAJOR)] } {
+       return true
+  }
+  return false
+}
+
+###########################################################################
+# Main section                                                            #
+###########################################################################
+
+# Install directory of this package
+set package_prefix   \$install_prefix
+
+# Arm-specific environment variables
+   setenv ARM_LINUX_COMPILER_DIR \$package_prefix
+   setenv ARM_LINUX_COMPILER_BUILD ${ATFL_BUILD}
+
+# Standard environment variables
+   prepend-path PATH \$package_prefix/bin
+   prepend-path CPATH \$package_prefix/include
+   prepend-path LIBRARY_PATH \$package_prefix/lib
+   append-path LIBRARY_PATH \$package_prefix/lib/aarch64-unknown-linux-gnu
+   prepend-path MANPATH \$package_prefix/share/man
+
+# Source the bash-autocomplete.sh
+set SHELL [module-info shell]
+switch -- \$SHELL {
+  {sh} - {bash} {
+    if { [is-lmod] } {
+      local autocomplete_file = pathJoin(package_prefix, "/share/clang/bash-autocomplete.sh")
+      execute{cmd="source " .. autocomplete_file, modeA={"load"}}
+      ## Lmod can't figure out how to unsource files without help, so we undo it here
+      execute{cmd="complete -r armclang armflang armclang++", modeA={"unload"}}
+      execute{cmd="unset -f _clang", modeA={"unload"}}
+    } else {
+      set autocomplete_file \$package_prefix/share/clang/bash-autocomplete.sh
+      if { [file exists \$autocomplete_file] } {
+        puts "source \$autocomplete_file"
+      }
+    }
+  }
+}
+EOT
+) > "modulefiles/atfl/${ATFL_VERSION}"

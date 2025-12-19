@@ -1,0 +1,431 @@
+From 8e46182db50f6a8ee0b67354887e606344303b7c Mon Sep 17 00:00:00 2001
+From: Lucas Prates <lucas.prates@arm.com>
+Date: Mon, 11 Nov 2024 16:37:04 +0000
+Subject: Add support for strict-align/no-unaligned-access in AArch64
+
+---
+ newlib/libc/machine/aarch64/memchr-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/memchr.S         | 2 +-
+ newlib/libc/machine/aarch64/memcmp-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/memcmp.S         | 2 +-
+ newlib/libc/machine/aarch64/memcpy-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/memcpy.S         | 2 +-
+ newlib/libc/machine/aarch64/memmove-stub.c   | 2 +-
+ newlib/libc/machine/aarch64/memrchr-stub.c   | 2 +-
+ newlib/libc/machine/aarch64/memrchr.S        | 2 +-
+ newlib/libc/machine/aarch64/memset-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/memset.S         | 2 +-
+ newlib/libc/machine/aarch64/rawmemchr-stub.c | 2 +-
+ newlib/libc/machine/aarch64/rawmemchr.S      | 2 +-
+ newlib/libc/machine/aarch64/stpcpy-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/strchr-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/strchr.S         | 2 +-
+ newlib/libc/machine/aarch64/strchrnul-stub.c | 2 +-
+ newlib/libc/machine/aarch64/strchrnul.S      | 2 +-
+ newlib/libc/machine/aarch64/strcmp-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/strcmp.S         | 2 +-
+ newlib/libc/machine/aarch64/strcpy-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/strcpy.S         | 2 +-
+ newlib/libc/machine/aarch64/strlen-stub.c    | 2 +-
+ newlib/libc/machine/aarch64/strlen.S         | 2 +-
+ newlib/libc/machine/aarch64/strncmp-stub.c   | 2 +-
+ newlib/libc/machine/aarch64/strncmp.S        | 2 +-
+ newlib/libc/machine/aarch64/strnlen-stub.c   | 2 +-
+ newlib/libc/machine/aarch64/strnlen.S        | 2 +-
+ newlib/libc/machine/aarch64/strrchr-stub.c   | 2 +-
+ newlib/libc/machine/aarch64/strrchr.S        | 2 +-
+ 30 files changed, 30 insertions(+), 30 deletions(-)
+
+diff --git a/newlib/libc/machine/aarch64/memchr-stub.c b/newlib/libc/machine/aarch64/memchr-stub.c
+index c2fabf07f..e688cf166 100644
+--- a/newlib/libc/machine/aarch64/memchr-stub.c
++++ b/newlib/libc/machine/aarch64/memchr-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ # include "../../string/memchr.c"
+ #else
+ /* See memchr.S  */
+diff --git a/newlib/libc/machine/aarch64/memchr.S b/newlib/libc/machine/aarch64/memchr.S
+index da1163221..dd5dec477 100644
+--- a/newlib/libc/machine/aarch64/memchr.S
++++ b/newlib/libc/machine/aarch64/memchr.S
+@@ -7,7 +7,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See memchr-stub.c  */
+ #else
+ /* Assumptions:
+diff --git a/newlib/libc/machine/aarch64/memcmp-stub.c b/newlib/libc/machine/aarch64/memcmp-stub.c
+index 74518257b..8b3e2b374 100644
+--- a/newlib/libc/machine/aarch64/memcmp-stub.c
++++ b/newlib/libc/machine/aarch64/memcmp-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ # include "../../string/memcmp.c"
+ #else
+ /* See memcmp.S  */
+diff --git a/newlib/libc/machine/aarch64/memcmp.S b/newlib/libc/machine/aarch64/memcmp.S
+index afe78fee3..9ca75c447 100644
+--- a/newlib/libc/machine/aarch64/memcmp.S
++++ b/newlib/libc/machine/aarch64/memcmp.S
+@@ -6,7 +6,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See memcmp-stub.c  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/memcpy-stub.c b/newlib/libc/machine/aarch64/memcpy-stub.c
+index 6702a67dc..5ac7ca914 100644
+--- a/newlib/libc/machine/aarch64/memcpy-stub.c
++++ b/newlib/libc/machine/aarch64/memcpy-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined (__ARM_FEATURE_UNALIGNED)
+ # include "../../string/memcpy.c"
+ #else
+ /* See memcpy.S  */
+diff --git a/newlib/libc/machine/aarch64/memcpy.S b/newlib/libc/machine/aarch64/memcpy.S
+index 7ba3fe347..6ac4ea577 100644
+--- a/newlib/libc/machine/aarch64/memcpy.S
++++ b/newlib/libc/machine/aarch64/memcpy.S
+@@ -13,7 +13,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See memcpy-stub.c  */
+ #else
+ #include "asmdefs.h"
+diff --git a/newlib/libc/machine/aarch64/memmove-stub.c b/newlib/libc/machine/aarch64/memmove-stub.c
+index 8b9154ffd..70e342a2c 100644
+--- a/newlib/libc/machine/aarch64/memmove-stub.c
++++ b/newlib/libc/machine/aarch64/memmove-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_FEATURE_UNALIGNED)
+ # include "../../string/memmove.c"
+ #else
+ /* See memcpy.S  */
+diff --git a/newlib/libc/machine/aarch64/memrchr-stub.c b/newlib/libc/machine/aarch64/memrchr-stub.c
+index 6d659d4d7..eea39c7ec 100644
+--- a/newlib/libc/machine/aarch64/memrchr-stub.c
++++ b/newlib/libc/machine/aarch64/memrchr-stub.c
+@@ -6,7 +6,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ #include "../../string/memrchr.c"
+ #else
+ /* See memrchr.S */
+diff --git a/newlib/libc/machine/aarch64/memrchr.S b/newlib/libc/machine/aarch64/memrchr.S
+index b0afa4eea..5c78cfb14 100644
+--- a/newlib/libc/machine/aarch64/memrchr.S
++++ b/newlib/libc/machine/aarch64/memrchr.S
+@@ -13,7 +13,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See memrchr-stub.c */
+ #else
+ #include "asmdefs.h"
+diff --git a/newlib/libc/machine/aarch64/memset-stub.c b/newlib/libc/machine/aarch64/memset-stub.c
+index a11c74573..c29cb0dae 100644
+--- a/newlib/libc/machine/aarch64/memset-stub.c
++++ b/newlib/libc/machine/aarch64/memset-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ # include "../../string/memset.c"
+ #else
+ /* See memset.S  */
+diff --git a/newlib/libc/machine/aarch64/memset.S b/newlib/libc/machine/aarch64/memset.S
+index 51ea476e3..7db2e3a85 100644
+--- a/newlib/libc/machine/aarch64/memset.S
++++ b/newlib/libc/machine/aarch64/memset.S
+@@ -13,7 +13,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See memset-stub.c  */
+ #else
+ #include "asmdefs.h"
+diff --git a/newlib/libc/machine/aarch64/rawmemchr-stub.c b/newlib/libc/machine/aarch64/rawmemchr-stub.c
+index 88d1e9472..3c379bfc4 100644
+--- a/newlib/libc/machine/aarch64/rawmemchr-stub.c
++++ b/newlib/libc/machine/aarch64/rawmemchr-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_FEATURE_UNALIGNED)
+ # include "../../string/rawmemchr.c"
+ #else
+ /* See rawmemchr.S.  */
+diff --git a/newlib/libc/machine/aarch64/rawmemchr.S b/newlib/libc/machine/aarch64/rawmemchr.S
+index 03e3b7525..9ed0464bf 100644
+--- a/newlib/libc/machine/aarch64/rawmemchr.S
++++ b/newlib/libc/machine/aarch64/rawmemchr.S
+@@ -32,7 +32,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See rawmemchr-stub.c.  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/stpcpy-stub.c b/newlib/libc/machine/aarch64/stpcpy-stub.c
+index 0166c6785..9dd10b2a4 100644
+--- a/newlib/libc/machine/aarch64/stpcpy-stub.c
++++ b/newlib/libc/machine/aarch64/stpcpy-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined (__ARM_FEATURE_UNALIGNED)
+ # include "../../string/stpcpy.c"
+ #else
+ /* See stpcpy.S  */
+diff --git a/newlib/libc/machine/aarch64/strchr-stub.c b/newlib/libc/machine/aarch64/strchr-stub.c
+index 0dcb5ca54..e187fcb4e 100644
+--- a/newlib/libc/machine/aarch64/strchr-stub.c
++++ b/newlib/libc/machine/aarch64/strchr-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined (__ARM_FEATURE_UNALIGNED)
+ # include "../../string/strchr.c"
+ #else
+ /* See strchr.S  */
+diff --git a/newlib/libc/machine/aarch64/strchr.S b/newlib/libc/machine/aarch64/strchr.S
+index 2d79a3911..c22509df6 100644
+--- a/newlib/libc/machine/aarch64/strchr.S
++++ b/newlib/libc/machine/aarch64/strchr.S
+@@ -28,7 +28,7 @@
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  */
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See strchr-stub.c  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/strchrnul-stub.c b/newlib/libc/machine/aarch64/strchrnul-stub.c
+index 407b949a6..7065c42b5 100644
+--- a/newlib/libc/machine/aarch64/strchrnul-stub.c
++++ b/newlib/libc/machine/aarch64/strchrnul-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ # include "../../string/strchrnul.c"
+ #else
+ /* See strchrnul.S  */
+diff --git a/newlib/libc/machine/aarch64/strchrnul.S b/newlib/libc/machine/aarch64/strchrnul.S
+index 5999c6d68..fff1102bd 100644
+--- a/newlib/libc/machine/aarch64/strchrnul.S
++++ b/newlib/libc/machine/aarch64/strchrnul.S
+@@ -28,7 +28,7 @@
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  */
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See strchrnul-stub.c  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/strcmp-stub.c b/newlib/libc/machine/aarch64/strcmp-stub.c
+index 77177bfe0..f74140acd 100644
+--- a/newlib/libc/machine/aarch64/strcmp-stub.c
++++ b/newlib/libc/machine/aarch64/strcmp-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined (__ARM_FEATURE_UNALIGNED)
+ # include "../../string/strcmp.c"
+ #else
+ /* See strcmp.S  */
+diff --git a/newlib/libc/machine/aarch64/strcmp.S b/newlib/libc/machine/aarch64/strcmp.S
+index 0c8371d22..ae52d3e0e 100644
+--- a/newlib/libc/machine/aarch64/strcmp.S
++++ b/newlib/libc/machine/aarch64/strcmp.S
+@@ -7,7 +7,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See strcmp-stub.c  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/strcpy-stub.c b/newlib/libc/machine/aarch64/strcpy-stub.c
+index af2e1dd3c..5adc53f76 100644
+--- a/newlib/libc/machine/aarch64/strcpy-stub.c
++++ b/newlib/libc/machine/aarch64/strcpy-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined (__ARM_FEATURE_UNALIGNED)
+ # include "../../string/strcpy.c"
+ #else
+ /* See strcpy.S  */
+diff --git a/newlib/libc/machine/aarch64/strcpy.S b/newlib/libc/machine/aarch64/strcpy.S
+index 5429c5c10..95987d4b3 100644
+--- a/newlib/libc/machine/aarch64/strcpy.S
++++ b/newlib/libc/machine/aarch64/strcpy.S
+@@ -28,7 +28,7 @@
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  */
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See strcpy-stub.c  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/strlen-stub.c b/newlib/libc/machine/aarch64/strlen-stub.c
+index 59b1289ff..2f7aa7305 100644
+--- a/newlib/libc/machine/aarch64/strlen-stub.c
++++ b/newlib/libc/machine/aarch64/strlen-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ # include "../../string/strlen.c"
+ #else
+ /* See strlen.S  */
+diff --git a/newlib/libc/machine/aarch64/strlen.S b/newlib/libc/machine/aarch64/strlen.S
+index 8837c954b..f3b54c677 100644
+--- a/newlib/libc/machine/aarch64/strlen.S
++++ b/newlib/libc/machine/aarch64/strlen.S
+@@ -25,7 +25,7 @@
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See strlen-stub.c  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/strncmp-stub.c b/newlib/libc/machine/aarch64/strncmp-stub.c
+index 2202cb79e..caca7fa83 100644
+--- a/newlib/libc/machine/aarch64/strncmp-stub.c
++++ b/newlib/libc/machine/aarch64/strncmp-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined (__ARM_FEATURE_UNALIGNED)
+ # include "../../string/strncmp.c"
+ #else
+ /* See strncmp.S  */
+diff --git a/newlib/libc/machine/aarch64/strncmp.S b/newlib/libc/machine/aarch64/strncmp.S
+index ba7b89313..3b64978bf 100644
+--- a/newlib/libc/machine/aarch64/strncmp.S
++++ b/newlib/libc/machine/aarch64/strncmp.S
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See strncmp-stub.c  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/strnlen-stub.c b/newlib/libc/machine/aarch64/strnlen-stub.c
+index c4428f4f6..1e45ef066 100644
+--- a/newlib/libc/machine/aarch64/strnlen-stub.c
++++ b/newlib/libc/machine/aarch64/strnlen-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ # include "../../string/strnlen.c"
+ #else
+ /* See strnlen.S  */
+diff --git a/newlib/libc/machine/aarch64/strnlen.S b/newlib/libc/machine/aarch64/strnlen.S
+index f186fc13f..529e10276 100644
+--- a/newlib/libc/machine/aarch64/strnlen.S
++++ b/newlib/libc/machine/aarch64/strnlen.S
+@@ -28,7 +28,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See strnlen-stub.c  */
+ #else
+ 
+diff --git a/newlib/libc/machine/aarch64/strrchr-stub.c b/newlib/libc/machine/aarch64/strrchr-stub.c
+index 0ec573222..4dfedee46 100644
+--- a/newlib/libc/machine/aarch64/strrchr-stub.c
++++ b/newlib/libc/machine/aarch64/strrchr-stub.c
+@@ -26,7 +26,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined (__ARM_FEATURE_UNALIGNED)
+ # include "../../string/strrchr.c"
+ #else
+ /* See strrchr.S  */
+diff --git a/newlib/libc/machine/aarch64/strrchr.S b/newlib/libc/machine/aarch64/strrchr.S
+index a3ef3f8fe..f5ba3ad76 100644
+--- a/newlib/libc/machine/aarch64/strrchr.S
++++ b/newlib/libc/machine/aarch64/strrchr.S
+@@ -29,7 +29,7 @@
+ 
+ #include <picolibc.h>
+ 
+-#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON)
++#if (defined (__OPTIMIZE_SIZE__) || defined (__PREFER_SIZE_OVER_SPEED)) || !defined(__LP64__) || !defined(__ARM_NEON) || !defined(__ARM_FEATURE_UNALIGNED)
+ /* See strrchr-stub.c  */
+ #else
+ 
+-- 
+2.43.0
+

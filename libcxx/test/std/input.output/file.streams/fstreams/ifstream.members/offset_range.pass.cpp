@@ -26,6 +26,9 @@
 // meaning it can represent file sizes up to 2GB (2^31 bytes) only.
 //
 // UNSUPPORTED: target=armv7-unknown-linux-gnueabihf
+// Downstream issue: #375 (Enable fstream independently of filesystem)
+// UNSUPPORTED: baremetal
+
 
 #include <fstream>
 #include <iostream>
