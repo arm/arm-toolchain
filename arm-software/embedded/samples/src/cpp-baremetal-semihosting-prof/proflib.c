@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Callsbacks into the profile runtime
+// Callbacks into the profile runtime
 extern uint64_t __llvm_profile_get_size_for_buffer(void);
 extern int __llvm_profile_write_buffer(char *buffer);
 
