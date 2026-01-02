@@ -308,16 +308,9 @@ if(NOT C_LIBRARY STREQUAL "llvmlibc")
   )
 endif()
 
-ExternalProject_Add(
-    compiler_rt
-    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
-    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
-    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
-    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
-    SOURCE_DIR ${llvmproject_src_dir}/runtimes
-    INSTALL_DIR compiler-rt/install
-    CMAKE_ARGS
-    ${compiler_launcher_cmake_args}
+# Common compiler_rt flags used by both builtins and profile builds
+set(
+    compiler_rt_common_flags
     -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
     -DCMAKE_ASM_COMPILER_TARGET=${target_triple}
     -DCMAKE_ASM_FLAGS=${lib_compile_flags}
@@ -334,17 +327,31 @@ ExternalProject_Add(
     -DCMAKE_RANLIB=${LLVM_BINARY_DIR}/bin/llvm-ranlib${CMAKE_EXECUTABLE_SUFFIX}
     -DCMAKE_SYSTEM_NAME=Generic
     -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-    ${compiler_rt_cmake_args}
     -DCOMPILER_RT_BAREMETAL_BUILD=ON
     -DCOMPILER_RT_BUILD_LIBFUZZER=OFF
-    -DCOMPILER_RT_BUILD_PROFILE=OFF
     -DCOMPILER_RT_BUILD_SANITIZERS=OFF
     -DCOMPILER_RT_BUILD_XRAY=OFF
     -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON
     -DLLVM_ENABLE_RUNTIMES=compiler-rt
     -DRUNTIME_VARIANT_NAME=${VARIANT}
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
+)
+
+ExternalProject_Add(
+    compiler_rt
+    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
+    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
+    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
+    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
+    SOURCE_DIR ${llvmproject_src_dir}/runtimes
+    INSTALL_DIR compiler-rt/install
+    CMAKE_ARGS
+    ${compiler_rt_common_flags}
+    ${compiler_launcher_cmake_args}
+    ${compiler_rt_cmake_args}
     ${compiler_rt_test_cmake_args}
+    -DCOMPILER_RT_BUILD_BUILTINS=ON
+    -DCOMPILER_RT_BUILD_PROFILE=OFF
     STEP_TARGETS configure build install
     USES_TERMINAL_CONFIGURE TRUE
     USES_TERMINAL_BUILD TRUE
@@ -398,35 +405,12 @@ ExternalProject_Add(
     INSTALL_DIR compiler-rt-profile/install
     DEPENDS compiler_rt-install clib-install
     CMAKE_ARGS
+    ${compiler_rt_common_flags}
     ${compiler_launcher_cmake_args}
-    -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
-    -DCMAKE_ASM_COMPILER_TARGET=${target_triple}
-    -DCMAKE_ASM_FLAGS=${lib_compile_flags}
-    -DCMAKE_BUILD_TYPE=${LIBRARY_CMAKE_BUILD_TYPE}
-    -DCMAKE_CXX_COMPILER=${LLVM_BINARY_DIR}/bin/clang++${CMAKE_EXECUTABLE_SUFFIX}
-    -DCMAKE_CXX_COMPILER_TARGET=${target_triple}
-    -DCMAKE_CXX_FLAGS=${lib_compile_flags}
-    -DCMAKE_C_COMPILER=${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX}
-    -DCMAKE_C_COMPILER_TARGET=${target_triple}
-    -DCMAKE_C_FLAGS=${lib_compile_flags}
-    -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
-    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-    -DCMAKE_NM=${LLVM_BINARY_DIR}/bin/llvm-nm${CMAKE_EXECUTABLE_SUFFIX}
-    -DCMAKE_RANLIB=${LLVM_BINARY_DIR}/bin/llvm-ranlib${CMAKE_EXECUTABLE_SUFFIX}
-    -DCMAKE_SYSTEM_NAME=Generic
-    -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
     ${compiler_rt_cmake_args}
-    -DCOMPILER_RT_BAREMETAL_BUILD=ON
     -DCOMPILER_RT_BUILD_BUILTINS=OFF
-    -DCOMPILER_RT_BUILD_LIBFUZZER=OFF
     -DCOMPILER_RT_BUILD_PROFILE=ON
     -DCOMPILER_RT_PROFILE_BAREMETAL=ON
-    -DCOMPILER_RT_BUILD_SANITIZERS=OFF
-    -DCOMPILER_RT_BUILD_XRAY=OFF
-    -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON
-    -DLLVM_ENABLE_RUNTIMES=compiler-rt
-    -DRUNTIME_VARIANT_NAME=${VARIANT}
-    -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
     STEP_TARGETS configure build install
     USES_TERMINAL_CONFIGURE TRUE
     USES_TERMINAL_BUILD TRUE
