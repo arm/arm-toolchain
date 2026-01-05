@@ -410,6 +410,20 @@ if(C_LIBRARY STREQUAL picolibc)
         set(newlib_nano_malloc "false")
     endif()
 
+    # Older picolibc revisions expose -Dnewlib-nano-malloc while newer ones have
+    # removed the toggle entirely. Only pass the option when we can detect it in
+    # the picolibc meson options file to keep compatibility with both layouts.
+    set(picolibc_newlib_nano_option "")
+    set(picolibc_meson_options_file ${picolibc_SOURCE_DIR}/meson_options.txt)
+    if(EXISTS ${picolibc_meson_options_file})
+        file(STRINGS ${picolibc_meson_options_file} picolibc_meson_options REGEX "newlib-nano-malloc")
+        if(picolibc_meson_options)
+            set(picolibc_newlib_nano_option -Dnewlib-nano-malloc=${newlib_nano_malloc})
+        else()
+            message(STATUS "picolibc option -Dnewlib-nano-malloc not found; using upstream default")
+        endif()
+    endif()
+
     # TODO: xfail these tests instead of disabling.
     if(target_triple MATCHES "^aarch64")
         set(enable_picolibc_long_double_test false)
@@ -457,7 +471,7 @@ if(C_LIBRARY STREQUAL picolibc)
             -Dtests-enable-stack-protector=false
             -Dtest-long-double=${enable_picolibc_long_double_test}
             -Dtest-machine=${TEST_EXECUTOR}
-            -Dnewlib-nano-malloc=${newlib_nano_malloc}
+            ${picolibc_newlib_nano_option}
             -Dtests=false
             --prefix <INSTALL_DIR>
             --cross-file ${CMAKE_CURRENT_BINARY_DIR}/meson-cross-build.txt

@@ -1,45 +1,45 @@
-From 6083c5d72d52163e69f686002e25876d4c68763c Mon Sep 17 00:00:00 2001
-From: Hugo Silva <hugsan02@e142605.arm.com>
-Date: Fri, 2 Jan 2026 15:10:26 +0000
+From bc625c0fcae61accb89f2016fba2c50f380d39fb Mon Sep 17 00:00:00 2001
+From: Hugo Silva <hugo.silva@arm.com>
+Date: Mon, 5 Jan 2026 10:56:53 +0000
 Subject: [PATCH] Add support for strict-align/no-unaligned access
 
 ---
- newlib/libc/machine/aarch64/memchr-stub.c    | 2 +-
- newlib/libc/machine/aarch64/memchr.S         | 2 +-
- newlib/libc/machine/aarch64/memcmp-stub.c    | 2 +-
- newlib/libc/machine/aarch64/memcmp.S         | 2 +-
- newlib/libc/machine/aarch64/memcpy-stub.c    | 2 +-
- newlib/libc/machine/aarch64/memcpy.S         | 2 +-
- newlib/libc/machine/aarch64/memmove-stub.c   | 2 +-
- newlib/libc/machine/aarch64/memrchr-stub.c   | 2 +-
- newlib/libc/machine/aarch64/memrchr.S        | 2 +-
- newlib/libc/machine/aarch64/memset-stub.c    | 2 +-
- newlib/libc/machine/aarch64/memset.S         | 2 +-
- newlib/libc/machine/aarch64/rawmemchr-stub.c | 2 +-
- newlib/libc/machine/aarch64/rawmemchr.S      | 2 +-
- newlib/libc/machine/aarch64/stpcpy-stub.c    | 2 +-
- newlib/libc/machine/aarch64/strchr-stub.c    | 2 +-
- newlib/libc/machine/aarch64/strchr.S         | 2 +-
- newlib/libc/machine/aarch64/strchrnul-stub.c | 2 +-
- newlib/libc/machine/aarch64/strchrnul.S      | 2 +-
- newlib/libc/machine/aarch64/strcmp-stub.c    | 2 +-
- newlib/libc/machine/aarch64/strcmp.S         | 2 +-
- newlib/libc/machine/aarch64/strcpy-stub.c    | 2 +-
- newlib/libc/machine/aarch64/strcpy.S         | 2 +-
- newlib/libc/machine/aarch64/strlen-stub.c    | 2 +-
- newlib/libc/machine/aarch64/strlen.S         | 2 +-
- newlib/libc/machine/aarch64/strncmp-stub.c   | 2 +-
- newlib/libc/machine/aarch64/strncmp.S        | 2 +-
- newlib/libc/machine/aarch64/strnlen-stub.c   | 2 +-
- newlib/libc/machine/aarch64/strnlen.S        | 2 +-
- newlib/libc/machine/aarch64/strrchr-stub.c   | 2 +-
- newlib/libc/machine/aarch64/strrchr.S        | 2 +-
+ libc/machine/aarch64/memchr-stub.c    | 2 +-
+ libc/machine/aarch64/memchr.S         | 2 +-
+ libc/machine/aarch64/memcmp-stub.c    | 2 +-
+ libc/machine/aarch64/memcmp.S         | 2 +-
+ libc/machine/aarch64/memcpy-stub.c    | 2 +-
+ libc/machine/aarch64/memcpy.S         | 2 +-
+ libc/machine/aarch64/memmove-stub.c   | 2 +-
+ libc/machine/aarch64/memrchr-stub.c   | 2 +-
+ libc/machine/aarch64/memrchr.S        | 2 +-
+ libc/machine/aarch64/memset-stub.c    | 2 +-
+ libc/machine/aarch64/memset.S         | 2 +-
+ libc/machine/aarch64/rawmemchr-stub.c | 2 +-
+ libc/machine/aarch64/rawmemchr.S      | 2 +-
+ libc/machine/aarch64/stpcpy-stub.c    | 2 +-
+ libc/machine/aarch64/strchr-stub.c    | 2 +-
+ libc/machine/aarch64/strchr.S         | 2 +-
+ libc/machine/aarch64/strchrnul-stub.c | 2 +-
+ libc/machine/aarch64/strchrnul.S      | 2 +-
+ libc/machine/aarch64/strcmp-stub.c    | 2 +-
+ libc/machine/aarch64/strcmp.S         | 2 +-
+ libc/machine/aarch64/strcpy-stub.c    | 2 +-
+ libc/machine/aarch64/strcpy.S         | 2 +-
+ libc/machine/aarch64/strlen-stub.c    | 2 +-
+ libc/machine/aarch64/strlen.S         | 2 +-
+ libc/machine/aarch64/strncmp-stub.c   | 2 +-
+ libc/machine/aarch64/strncmp.S        | 2 +-
+ libc/machine/aarch64/strnlen-stub.c   | 2 +-
+ libc/machine/aarch64/strnlen.S        | 2 +-
+ libc/machine/aarch64/strrchr-stub.c   | 2 +-
+ libc/machine/aarch64/strrchr.S        | 2 +-
  30 files changed, 30 insertions(+), 30 deletions(-)
 
-diff --git a/newlib/libc/machine/aarch64/memchr-stub.c b/newlib/libc/machine/aarch64/memchr-stub.c
+diff --git a/libc/machine/aarch64/memchr-stub.c b/libc/machine/aarch64/memchr-stub.c
 index bb6d2e10b..a643f1a5d 100644
---- a/newlib/libc/machine/aarch64/memchr-stub.c
-+++ b/newlib/libc/machine/aarch64/memchr-stub.c
+--- a/libc/machine/aarch64/memchr-stub.c
++++ b/libc/machine/aarch64/memchr-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -49,10 +49,10 @@ index bb6d2e10b..a643f1a5d 100644
  #include "../../string/memchr.c"
  #else
  /* See memchr.S  */
-diff --git a/newlib/libc/machine/aarch64/memchr.S b/newlib/libc/machine/aarch64/memchr.S
+diff --git a/libc/machine/aarch64/memchr.S b/libc/machine/aarch64/memchr.S
 index da1163221..dd5dec477 100644
---- a/newlib/libc/machine/aarch64/memchr.S
-+++ b/newlib/libc/machine/aarch64/memchr.S
+--- a/libc/machine/aarch64/memchr.S
++++ b/libc/machine/aarch64/memchr.S
 @@ -7,7 +7,7 @@
  
  #include <picolibc.h>
@@ -62,10 +62,10 @@ index da1163221..dd5dec477 100644
  /* See memchr-stub.c  */
  #else
  /* Assumptions:
-diff --git a/newlib/libc/machine/aarch64/memcmp-stub.c b/newlib/libc/machine/aarch64/memcmp-stub.c
+diff --git a/libc/machine/aarch64/memcmp-stub.c b/libc/machine/aarch64/memcmp-stub.c
 index f8b363f63..93f1a59f5 100644
---- a/newlib/libc/machine/aarch64/memcmp-stub.c
-+++ b/newlib/libc/machine/aarch64/memcmp-stub.c
+--- a/libc/machine/aarch64/memcmp-stub.c
++++ b/libc/machine/aarch64/memcmp-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -75,10 +75,10 @@ index f8b363f63..93f1a59f5 100644
  #include "../../string/memcmp.c"
  #else
  /* See memcmp.S  */
-diff --git a/newlib/libc/machine/aarch64/memcmp.S b/newlib/libc/machine/aarch64/memcmp.S
+diff --git a/libc/machine/aarch64/memcmp.S b/libc/machine/aarch64/memcmp.S
 index afe78fee3..9ca75c447 100644
---- a/newlib/libc/machine/aarch64/memcmp.S
-+++ b/newlib/libc/machine/aarch64/memcmp.S
+--- a/libc/machine/aarch64/memcmp.S
++++ b/libc/machine/aarch64/memcmp.S
 @@ -6,7 +6,7 @@
  
  #include <picolibc.h>
@@ -88,10 +88,10 @@ index afe78fee3..9ca75c447 100644
  /* See memcmp-stub.c  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/memcpy-stub.c b/newlib/libc/machine/aarch64/memcpy-stub.c
+diff --git a/libc/machine/aarch64/memcpy-stub.c b/libc/machine/aarch64/memcpy-stub.c
 index 4ad9e05bd..56a683dfc 100644
---- a/newlib/libc/machine/aarch64/memcpy-stub.c
-+++ b/newlib/libc/machine/aarch64/memcpy-stub.c
+--- a/libc/machine/aarch64/memcpy-stub.c
++++ b/libc/machine/aarch64/memcpy-stub.c
 @@ -26,7 +26,7 @@
  
  #include <picolibc.h>
@@ -101,10 +101,10 @@ index 4ad9e05bd..56a683dfc 100644
  #include "../../string/memcpy.c"
  #else
  /* See memcpy.S  */
-diff --git a/newlib/libc/machine/aarch64/memcpy.S b/newlib/libc/machine/aarch64/memcpy.S
+diff --git a/libc/machine/aarch64/memcpy.S b/libc/machine/aarch64/memcpy.S
 index 7ba3fe347..6ac4ea577 100644
---- a/newlib/libc/machine/aarch64/memcpy.S
-+++ b/newlib/libc/machine/aarch64/memcpy.S
+--- a/libc/machine/aarch64/memcpy.S
++++ b/libc/machine/aarch64/memcpy.S
 @@ -13,7 +13,7 @@
  
  #include <picolibc.h>
@@ -114,10 +114,10 @@ index 7ba3fe347..6ac4ea577 100644
  /* See memcpy-stub.c  */
  #else
  #include "asmdefs.h"
-diff --git a/newlib/libc/machine/aarch64/memmove-stub.c b/newlib/libc/machine/aarch64/memmove-stub.c
+diff --git a/libc/machine/aarch64/memmove-stub.c b/libc/machine/aarch64/memmove-stub.c
 index 49f62901f..527671e67 100644
---- a/newlib/libc/machine/aarch64/memmove-stub.c
-+++ b/newlib/libc/machine/aarch64/memmove-stub.c
+--- a/libc/machine/aarch64/memmove-stub.c
++++ b/libc/machine/aarch64/memmove-stub.c
 @@ -26,7 +26,7 @@
  
  #include <picolibc.h>
@@ -127,10 +127,10 @@ index 49f62901f..527671e67 100644
  #include "../../string/memmove.c"
  #else
  /* See memcpy.S  */
-diff --git a/newlib/libc/machine/aarch64/memrchr-stub.c b/newlib/libc/machine/aarch64/memrchr-stub.c
+diff --git a/libc/machine/aarch64/memrchr-stub.c b/libc/machine/aarch64/memrchr-stub.c
 index 090bfb53a..cc3be3a59 100644
---- a/newlib/libc/machine/aarch64/memrchr-stub.c
-+++ b/newlib/libc/machine/aarch64/memrchr-stub.c
+--- a/libc/machine/aarch64/memrchr-stub.c
++++ b/libc/machine/aarch64/memrchr-stub.c
 @@ -7,7 +7,7 @@
  #include <picolibc.h>
  
@@ -140,10 +140,10 @@ index 090bfb53a..cc3be3a59 100644
  #include "../../string/memrchr.c"
  #else
  /* See memrchr.S */
-diff --git a/newlib/libc/machine/aarch64/memrchr.S b/newlib/libc/machine/aarch64/memrchr.S
+diff --git a/libc/machine/aarch64/memrchr.S b/libc/machine/aarch64/memrchr.S
 index b0afa4eea..5c78cfb14 100644
---- a/newlib/libc/machine/aarch64/memrchr.S
-+++ b/newlib/libc/machine/aarch64/memrchr.S
+--- a/libc/machine/aarch64/memrchr.S
++++ b/libc/machine/aarch64/memrchr.S
 @@ -13,7 +13,7 @@
  
  #include <picolibc.h>
@@ -153,10 +153,10 @@ index b0afa4eea..5c78cfb14 100644
  /* See memrchr-stub.c */
  #else
  #include "asmdefs.h"
-diff --git a/newlib/libc/machine/aarch64/memset-stub.c b/newlib/libc/machine/aarch64/memset-stub.c
+diff --git a/libc/machine/aarch64/memset-stub.c b/libc/machine/aarch64/memset-stub.c
 index e1f28c81c..34d2b191c 100644
---- a/newlib/libc/machine/aarch64/memset-stub.c
-+++ b/newlib/libc/machine/aarch64/memset-stub.c
+--- a/libc/machine/aarch64/memset-stub.c
++++ b/libc/machine/aarch64/memset-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -166,10 +166,10 @@ index e1f28c81c..34d2b191c 100644
  #include "../../string/memset.c"
  #else
  /* See memset.S  */
-diff --git a/newlib/libc/machine/aarch64/memset.S b/newlib/libc/machine/aarch64/memset.S
+diff --git a/libc/machine/aarch64/memset.S b/libc/machine/aarch64/memset.S
 index 51ea476e3..7db2e3a85 100644
---- a/newlib/libc/machine/aarch64/memset.S
-+++ b/newlib/libc/machine/aarch64/memset.S
+--- a/libc/machine/aarch64/memset.S
++++ b/libc/machine/aarch64/memset.S
 @@ -13,7 +13,7 @@
  
  #include <picolibc.h>
@@ -179,10 +179,10 @@ index 51ea476e3..7db2e3a85 100644
  /* See memset-stub.c  */
  #else
  #include "asmdefs.h"
-diff --git a/newlib/libc/machine/aarch64/rawmemchr-stub.c b/newlib/libc/machine/aarch64/rawmemchr-stub.c
+diff --git a/libc/machine/aarch64/rawmemchr-stub.c b/libc/machine/aarch64/rawmemchr-stub.c
 index 9e866d9d1..b62bab4ed 100644
---- a/newlib/libc/machine/aarch64/rawmemchr-stub.c
-+++ b/newlib/libc/machine/aarch64/rawmemchr-stub.c
+--- a/libc/machine/aarch64/rawmemchr-stub.c
++++ b/libc/machine/aarch64/rawmemchr-stub.c
 @@ -26,7 +26,7 @@
  
  #include <picolibc.h>
@@ -192,10 +192,10 @@ index 9e866d9d1..b62bab4ed 100644
  #include "../../string/rawmemchr.c"
  #else
  /* See rawmemchr.S.  */
-diff --git a/newlib/libc/machine/aarch64/rawmemchr.S b/newlib/libc/machine/aarch64/rawmemchr.S
+diff --git a/libc/machine/aarch64/rawmemchr.S b/libc/machine/aarch64/rawmemchr.S
 index 03e3b7525..9ed0464bf 100644
---- a/newlib/libc/machine/aarch64/rawmemchr.S
-+++ b/newlib/libc/machine/aarch64/rawmemchr.S
+--- a/libc/machine/aarch64/rawmemchr.S
++++ b/libc/machine/aarch64/rawmemchr.S
 @@ -32,7 +32,7 @@
  
  #include <picolibc.h>
@@ -205,10 +205,10 @@ index 03e3b7525..9ed0464bf 100644
  /* See rawmemchr-stub.c.  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/stpcpy-stub.c b/newlib/libc/machine/aarch64/stpcpy-stub.c
+diff --git a/libc/machine/aarch64/stpcpy-stub.c b/libc/machine/aarch64/stpcpy-stub.c
 index 98a963788..6683371d6 100644
---- a/newlib/libc/machine/aarch64/stpcpy-stub.c
-+++ b/newlib/libc/machine/aarch64/stpcpy-stub.c
+--- a/libc/machine/aarch64/stpcpy-stub.c
++++ b/libc/machine/aarch64/stpcpy-stub.c
 @@ -26,7 +26,7 @@
  
  #include <picolibc.h>
@@ -218,10 +218,10 @@ index 98a963788..6683371d6 100644
  #include "../../string/stpcpy.c"
  #else
  /* See stpcpy.S  */
-diff --git a/newlib/libc/machine/aarch64/strchr-stub.c b/newlib/libc/machine/aarch64/strchr-stub.c
+diff --git a/libc/machine/aarch64/strchr-stub.c b/libc/machine/aarch64/strchr-stub.c
 index ae3a741ad..f50977a16 100644
---- a/newlib/libc/machine/aarch64/strchr-stub.c
-+++ b/newlib/libc/machine/aarch64/strchr-stub.c
+--- a/libc/machine/aarch64/strchr-stub.c
++++ b/libc/machine/aarch64/strchr-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -231,10 +231,10 @@ index ae3a741ad..f50977a16 100644
  #include "../../string/strchr.c"
  #else
  /* See strchr.S  */
-diff --git a/newlib/libc/machine/aarch64/strchr.S b/newlib/libc/machine/aarch64/strchr.S
+diff --git a/libc/machine/aarch64/strchr.S b/libc/machine/aarch64/strchr.S
 index 2d79a3911..c22509df6 100644
---- a/newlib/libc/machine/aarch64/strchr.S
-+++ b/newlib/libc/machine/aarch64/strchr.S
+--- a/libc/machine/aarch64/strchr.S
++++ b/libc/machine/aarch64/strchr.S
 @@ -28,7 +28,7 @@
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  */
  #include <picolibc.h>
@@ -244,10 +244,10 @@ index 2d79a3911..c22509df6 100644
  /* See strchr-stub.c  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/strchrnul-stub.c b/newlib/libc/machine/aarch64/strchrnul-stub.c
+diff --git a/libc/machine/aarch64/strchrnul-stub.c b/libc/machine/aarch64/strchrnul-stub.c
 index 34bdc51e6..3a425ffc2 100644
---- a/newlib/libc/machine/aarch64/strchrnul-stub.c
-+++ b/newlib/libc/machine/aarch64/strchrnul-stub.c
+--- a/libc/machine/aarch64/strchrnul-stub.c
++++ b/libc/machine/aarch64/strchrnul-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -257,10 +257,10 @@ index 34bdc51e6..3a425ffc2 100644
  #include "../../string/strchrnul.c"
  #else
  /* See strchrnul.S  */
-diff --git a/newlib/libc/machine/aarch64/strchrnul.S b/newlib/libc/machine/aarch64/strchrnul.S
+diff --git a/libc/machine/aarch64/strchrnul.S b/libc/machine/aarch64/strchrnul.S
 index 5999c6d68..fff1102bd 100644
---- a/newlib/libc/machine/aarch64/strchrnul.S
-+++ b/newlib/libc/machine/aarch64/strchrnul.S
+--- a/libc/machine/aarch64/strchrnul.S
++++ b/libc/machine/aarch64/strchrnul.S
 @@ -28,7 +28,7 @@
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  */
  #include <picolibc.h>
@@ -270,10 +270,10 @@ index 5999c6d68..fff1102bd 100644
  /* See strchrnul-stub.c  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/strcmp-stub.c b/newlib/libc/machine/aarch64/strcmp-stub.c
+diff --git a/libc/machine/aarch64/strcmp-stub.c b/libc/machine/aarch64/strcmp-stub.c
 index b5e961fce..3f714c702 100644
---- a/newlib/libc/machine/aarch64/strcmp-stub.c
-+++ b/newlib/libc/machine/aarch64/strcmp-stub.c
+--- a/libc/machine/aarch64/strcmp-stub.c
++++ b/libc/machine/aarch64/strcmp-stub.c
 @@ -26,7 +26,7 @@
  
  #include <picolibc.h>
@@ -283,10 +283,10 @@ index b5e961fce..3f714c702 100644
  #include "../../string/strcmp.c"
  #else
  /* See strcmp.S  */
-diff --git a/newlib/libc/machine/aarch64/strcmp.S b/newlib/libc/machine/aarch64/strcmp.S
+diff --git a/libc/machine/aarch64/strcmp.S b/libc/machine/aarch64/strcmp.S
 index 0c8371d22..ae52d3e0e 100644
---- a/newlib/libc/machine/aarch64/strcmp.S
-+++ b/newlib/libc/machine/aarch64/strcmp.S
+--- a/libc/machine/aarch64/strcmp.S
++++ b/libc/machine/aarch64/strcmp.S
 @@ -7,7 +7,7 @@
  
  #include <picolibc.h>
@@ -296,10 +296,10 @@ index 0c8371d22..ae52d3e0e 100644
  /* See strcmp-stub.c  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/strcpy-stub.c b/newlib/libc/machine/aarch64/strcpy-stub.c
+diff --git a/libc/machine/aarch64/strcpy-stub.c b/libc/machine/aarch64/strcpy-stub.c
 index 1e58b30f8..c3974f281 100644
---- a/newlib/libc/machine/aarch64/strcpy-stub.c
-+++ b/newlib/libc/machine/aarch64/strcpy-stub.c
+--- a/libc/machine/aarch64/strcpy-stub.c
++++ b/libc/machine/aarch64/strcpy-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -309,10 +309,10 @@ index 1e58b30f8..c3974f281 100644
  #include "../../string/strcpy.c"
  #else
  /* See strcpy.S  */
-diff --git a/newlib/libc/machine/aarch64/strcpy.S b/newlib/libc/machine/aarch64/strcpy.S
+diff --git a/libc/machine/aarch64/strcpy.S b/libc/machine/aarch64/strcpy.S
 index 5429c5c10..95987d4b3 100644
---- a/newlib/libc/machine/aarch64/strcpy.S
-+++ b/newlib/libc/machine/aarch64/strcpy.S
+--- a/libc/machine/aarch64/strcpy.S
++++ b/libc/machine/aarch64/strcpy.S
 @@ -28,7 +28,7 @@
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  */
  #include <picolibc.h>
@@ -322,10 +322,10 @@ index 5429c5c10..95987d4b3 100644
  /* See strcpy-stub.c  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/strlen-stub.c b/newlib/libc/machine/aarch64/strlen-stub.c
+diff --git a/libc/machine/aarch64/strlen-stub.c b/libc/machine/aarch64/strlen-stub.c
 index 9cb61badd..9b9ef76ed 100644
---- a/newlib/libc/machine/aarch64/strlen-stub.c
-+++ b/newlib/libc/machine/aarch64/strlen-stub.c
+--- a/libc/machine/aarch64/strlen-stub.c
++++ b/libc/machine/aarch64/strlen-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -335,10 +335,10 @@ index 9cb61badd..9b9ef76ed 100644
  #include "../../string/strlen.c"
  #else
  /* See strlen.S  */
-diff --git a/newlib/libc/machine/aarch64/strlen.S b/newlib/libc/machine/aarch64/strlen.S
+diff --git a/libc/machine/aarch64/strlen.S b/libc/machine/aarch64/strlen.S
 index 8837c954b..f3b54c677 100644
---- a/newlib/libc/machine/aarch64/strlen.S
-+++ b/newlib/libc/machine/aarch64/strlen.S
+--- a/libc/machine/aarch64/strlen.S
++++ b/libc/machine/aarch64/strlen.S
 @@ -25,7 +25,7 @@
     OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
  #include <picolibc.h>
@@ -348,10 +348,10 @@ index 8837c954b..f3b54c677 100644
  /* See strlen-stub.c  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/strncmp-stub.c b/newlib/libc/machine/aarch64/strncmp-stub.c
+diff --git a/libc/machine/aarch64/strncmp-stub.c b/libc/machine/aarch64/strncmp-stub.c
 index ae017bec9..98c248075 100644
---- a/newlib/libc/machine/aarch64/strncmp-stub.c
-+++ b/newlib/libc/machine/aarch64/strncmp-stub.c
+--- a/libc/machine/aarch64/strncmp-stub.c
++++ b/libc/machine/aarch64/strncmp-stub.c
 @@ -26,7 +26,7 @@
  
  #include <picolibc.h>
@@ -361,10 +361,10 @@ index ae017bec9..98c248075 100644
  #include "../../string/strncmp.c"
  #else
  /* See strncmp.S  */
-diff --git a/newlib/libc/machine/aarch64/strncmp.S b/newlib/libc/machine/aarch64/strncmp.S
+diff --git a/libc/machine/aarch64/strncmp.S b/libc/machine/aarch64/strncmp.S
 index ba7b89313..3b64978bf 100644
---- a/newlib/libc/machine/aarch64/strncmp.S
-+++ b/newlib/libc/machine/aarch64/strncmp.S
+--- a/libc/machine/aarch64/strncmp.S
++++ b/libc/machine/aarch64/strncmp.S
 @@ -26,7 +26,7 @@
  
  #include <picolibc.h>
@@ -374,10 +374,10 @@ index ba7b89313..3b64978bf 100644
  /* See strncmp-stub.c  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/strnlen-stub.c b/newlib/libc/machine/aarch64/strnlen-stub.c
+diff --git a/libc/machine/aarch64/strnlen-stub.c b/libc/machine/aarch64/strnlen-stub.c
 index 7b06ab48e..769883c9f 100644
---- a/newlib/libc/machine/aarch64/strnlen-stub.c
-+++ b/newlib/libc/machine/aarch64/strnlen-stub.c
+--- a/libc/machine/aarch64/strnlen-stub.c
++++ b/libc/machine/aarch64/strnlen-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -387,10 +387,10 @@ index 7b06ab48e..769883c9f 100644
  #include "../../string/strnlen.c"
  #else
  /* See strnlen.S  */
-diff --git a/newlib/libc/machine/aarch64/strnlen.S b/newlib/libc/machine/aarch64/strnlen.S
+diff --git a/libc/machine/aarch64/strnlen.S b/libc/machine/aarch64/strnlen.S
 index f186fc13f..529e10276 100644
---- a/newlib/libc/machine/aarch64/strnlen.S
-+++ b/newlib/libc/machine/aarch64/strnlen.S
+--- a/libc/machine/aarch64/strnlen.S
++++ b/libc/machine/aarch64/strnlen.S
 @@ -28,7 +28,7 @@
  
  #include <picolibc.h>
@@ -400,10 +400,10 @@ index f186fc13f..529e10276 100644
  /* See strnlen-stub.c  */
  #else
  
-diff --git a/newlib/libc/machine/aarch64/strrchr-stub.c b/newlib/libc/machine/aarch64/strrchr-stub.c
+diff --git a/libc/machine/aarch64/strrchr-stub.c b/libc/machine/aarch64/strrchr-stub.c
 index 06e148a8f..1079b3915 100644
---- a/newlib/libc/machine/aarch64/strrchr-stub.c
-+++ b/newlib/libc/machine/aarch64/strrchr-stub.c
+--- a/libc/machine/aarch64/strrchr-stub.c
++++ b/libc/machine/aarch64/strrchr-stub.c
 @@ -27,7 +27,7 @@
  #include <picolibc.h>
  
@@ -413,10 +413,10 @@ index 06e148a8f..1079b3915 100644
  #include "../../string/strrchr.c"
  #else
  /* See strrchr.S  */
-diff --git a/newlib/libc/machine/aarch64/strrchr.S b/newlib/libc/machine/aarch64/strrchr.S
+diff --git a/libc/machine/aarch64/strrchr.S b/libc/machine/aarch64/strrchr.S
 index a3ef3f8fe..f5ba3ad76 100644
---- a/newlib/libc/machine/aarch64/strrchr.S
-+++ b/newlib/libc/machine/aarch64/strrchr.S
+--- a/libc/machine/aarch64/strrchr.S
++++ b/libc/machine/aarch64/strrchr.S
 @@ -29,7 +29,7 @@
  
  #include <picolibc.h>
