@@ -1030,6 +1030,11 @@ else ()
                               CXX_STANDARD 17
                               PARENT_TARGET builtins)
 
+      if(LLVM_ENABLE_PER_TARGET_RUNTIME_DIR AND COMPILER_RT_DEFAULT_TARGET_ONLY
+          AND NOT TARGET clang_rt.builtins)
+        add_library(clang_rt.builtins ALIAS clang_rt.builtins-${arch})
+      endif()
+
       # Write out the sources that were used to compile the builtins so that tests can be run in
       # an independent compiler-rt build (see: compiler-rt/test/builtins/CMakeLists.txt)
       set_output_name(BUILTIN_LIB_TARGET_NAME clang_rt.builtins ${arch})
