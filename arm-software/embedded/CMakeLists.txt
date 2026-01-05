@@ -822,16 +822,12 @@ endif()
 
 while(third_party_license_files)
     list(POP_FRONT third_party_license_files source_file destination_name)
-    if(EXISTS ${source_file})
-        install(
-            FILES ${source_file}
-            DESTINATION ${third_party_license_files_install_dir}
-            COMPONENT llvm-toolchain-third-party-licenses
-            RENAME ${destination_name}
-        )
-    else()
-        message(WARNING "Skipping missing third-party license file: ${source_file}")
-    endif()
+    install(
+        FILES ${source_file}
+        DESTINATION ${third_party_license_files_install_dir}
+        COMPONENT llvm-toolchain-third-party-licenses
+        RENAME ${destination_name}
+    )
 endwhile()
 
 # Install samples
