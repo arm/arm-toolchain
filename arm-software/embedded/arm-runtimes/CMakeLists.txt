@@ -404,12 +404,6 @@ if(C_LIBRARY STREQUAL picolibc)
         set(MESON_INSTALL_QUIET "--quiet")
     endif()
 
-    if(LIBRARY_BUILD_TYPE MATCHES "minsizerelease")
-        set(newlib_nano_malloc "true")
-    else()
-        set(newlib_nano_malloc "false")
-    endif()
-
     # TODO: xfail these tests instead of disabling.
     if(target_triple MATCHES "^aarch64")
         set(enable_picolibc_long_double_test false)
@@ -457,7 +451,6 @@ if(C_LIBRARY STREQUAL picolibc)
             -Dtests-enable-stack-protector=false
             -Dtest-long-double=${enable_picolibc_long_double_test}
             -Dtest-machine=${TEST_EXECUTOR}
-            -Dnewlib-nano-malloc=${newlib_nano_malloc}
             -Dtests=false
             --prefix <INSTALL_DIR>
             --cross-file ${CMAKE_CURRENT_BINARY_DIR}/meson-cross-build.txt
