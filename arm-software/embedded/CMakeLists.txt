@@ -804,13 +804,6 @@ set(third_party_license_files
     ${llvmproject_src_dir}/libunwind/LICENSE.TXT     LIBUNWIND-LICENSE.txt
 )
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc)
-    if(EXISTS ${picolibc_SOURCE_DIR}/COPYING.NEWLIB)
-        list(APPEND third_party_license_files
-            ${picolibc_SOURCE_DIR}/COPYING.NEWLIB       COPYING.NEWLIB
-        )
-    else()
-        message(WARNING "picolibc source tree does not include COPYING.NEWLIB; skipping install of this license file")
-    endif()
     list(APPEND third_party_license_files
         ${picolibc_SOURCE_DIR}/COPYING.picolibc         COPYING.picolibc
     )
@@ -829,12 +822,16 @@ endif()
 
 while(third_party_license_files)
     list(POP_FRONT third_party_license_files source_file destination_name)
-    install(
-        FILES ${source_file}
-        DESTINATION ${third_party_license_files_install_dir}
-        COMPONENT llvm-toolchain-third-party-licenses
-        RENAME ${destination_name}
-    )
+    if(EXISTS ${source_file})
+        install(
+            FILES ${source_file}
+            DESTINATION ${third_party_license_files_install_dir}
+            COMPONENT llvm-toolchain-third-party-licenses
+            RENAME ${destination_name}
+        )
+    else()
+        message(WARNING "Skipping missing third-party license file: ${source_file}")
+    endif()
 endwhile()
 
 # Install samples
