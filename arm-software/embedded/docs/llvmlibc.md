@@ -62,6 +62,24 @@ For example:
 clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles -lcrt0 -lsemihost -T llvmlibc.ld -o hello hello.c
 ```
 
+> [!TIP]
+> For easier migration from picolibc to LLVM libc, use the following startup
+> libraries:
+> * `-lcrt0` the default startup library that provides semihosting support.
+> * `-lcrt0-semihost` same as `-lcrt0`.
+> * `-lcrt0-none` an empty library, you have to provide the `_start` symbol.
+
+## I/O retargeting
+
+See the baremetal version of
+[io.h](../../../libc/src/__support/OSUtil/baremetal/io.h) for the LLVM libc
+I/O retargeting interface that should be implemented in your application to
+redirect standard I/O streams.
+
+Example implementations are provided for:
+* Semihosting: [semihost.cpp](../llvmlibc-support/semihost/semihost.cpp)
+* UART output: [samples](../samples/src/baremetal-uart/hello.c).
+
 ## Samples
 
 To use the sample programs provided by Arm Toolchain for Embedded with LLVM libc,
