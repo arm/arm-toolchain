@@ -894,7 +894,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_THREADS=OFF
             -DLIBCXX_ENABLE_WIDE_CHARACTERS=OFF
             -DLIBCXX_ENABLE_FILESYSTEM=OFF
-            -DLIBCXX_ENABLE_LOCALIZATION=OFF
+            -DLIBCXX_ENABLE_LOCALIZATION=ON
             -DLIBCXX_ENABLE_UNICODE=OFF
             -DLIBUNWIND_ENABLE_THREADS=OFF
             -DLIBCXXABI_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
@@ -903,7 +903,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
             -DRUNTIMES_USE_LIBC=system # llvm-libc logic in HandleLibC.cmake is not compatible with ATfE now
             )
-            set(lib_compile_flags "${lib_compile_flags} -D_LIBCPP_PRINT=1")
+            set(lib_compile_flags "${lib_compile_flags} -D_LIBCPP_PRINT=1 -D__LLVM_LIBC__=1")
     elseif(C_LIBRARY MATCHES "^newlib")
         set(cxxlibs_extra_cmake_options
             -DLIBCXXABI_ENABLE_THREADS=OFF
