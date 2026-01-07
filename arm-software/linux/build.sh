@@ -34,7 +34,16 @@ INTERACTIVE=false
 ##########################
 
 RELEASE_FLAGS=${RELEASE_FLAGS:-"false"}
-ATFL_VERSION=${ATFL_VERSION:-"0.0"}
+LLVM_VERSION_MAJOR=$(cat ../../cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_MAJOR | grep -o '[0-9]\+')
+LLVM_VERSION_MINOR=$(cat ../../cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_MINOR | grep -o '[0-9]\+')
+LLVM_VERSION_PATCH=$(cat ../../cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_PATCH | grep -o '[0-9]\+')
+TOOLCHAIN_VERSION="${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH}"
+ATFL_GIT_BRANCH=$(git branch --show-current)
+if [[ "${ATFL_GIT_BRANCH}" == "arm-software" ]]
+then
+  TOOLCHAIN_VERSION="0.0"
+fi
+ATFL_VERSION=${ATFL_VERSION:-"${TOOLCHAIN_VERSION}"}
 OS_NAME=${OS_NAME:-"linux"}
 TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-`uname -m`.tar.gz"}
 ATFL_ASSERTIONS=${ATFL_ASSERTIONS:-"ON"}
@@ -116,8 +125,8 @@ COMPILER_CMAKE_FLAGS=(
     -DLIBOMP_OMPT_SUPPORT=ON
     -DLIBOMP_OMPD_GDB_SUPPORT=OFF
     -DARM_TOOLCHAIN_ID="${ARM_TOOLCHAIN_ID}"
-    -DCLANG_VENDOR="Arm Toolchain for Linux ${ATFL_VERSION}"
-    -DFLANG_VENDOR="Arm Toolchain for Linux ${ATFL_VERSION}"
+    -DCLANG_VENDOR="Arm Toolchain for Linux ${TOOLCHAIN_VERSION}"
+    -DFLANG_VENDOR="Arm Toolchain for Linux ${TOOLCHAIN_VERSION}"
     -DLLVM_VERSION_SUFFIX=""
 )
 LIBUNWIND_SHARED_CMAKE_FLAGS=(
@@ -426,7 +435,7 @@ package() {
     cp "${MKMODULEDIRS_PATH}" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     mkdir -p "${ATFL_DIR}/docs"
     cp "${DOCS_DIR}"/*.md "${ATFL_DIR}/docs"
-    sed -i "s/%ATFL_VERSION%/${ATFL_VERSION}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
+    sed -i "s/%ATFL_VERSION%/${TOOLCHAIN_VERSION}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_BUILD%/${BUILD_NUMBER:-"unknown"}/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     sed -i "s/%ATFL_INSTALL_PREFIX%/\$\(dirname \$\(dirname \`realpath \$BASH_SOURCE\`\)\)/g" "${ATFL_DIR}/arm/mkmoduledirs.sh"
     chmod 0755 ${ATFL_DIR}/arm/mkmoduledirs.sh
@@ -453,7 +462,7 @@ package() {
     sed -i "s/Xarmflang/Xflang/g" "${ATFL_DIR}/share/man/man1/armflang.1"
     echo 'export PATH="$(dirname `realpath $BASH_SOURCE`)/bin:$PATH"' >"${ATFL_DIR}/env.bash"
     echo 'export MANPATH="$(dirname `realpath $BASH_SOURCE`)/share/man:$MANPATH"' >>"${ATFL_DIR}/env.bash"
-    echo "export PS1=\"(ATfL ${ATFL_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
+    echo "export PS1=\"(ATfL ${TOOLCHAIN_VERSION}) \$PS1\"" >>"${ATFL_DIR}/env.bash"
     cd "${ATFL_DIR}/bin"
     ln -sf clang armclang
     ln -sf clang++ armclang++
@@ -497,7 +506,7 @@ main() {
     cat <<SPACK_EOF >$OUTPUT_DIR/compilers.yaml
 compilers:
 - compiler:
-    spec: arm@=${ATFL_VERSION}
+    spec: arm@=${TOOLCHAIN_VERSION}
     paths:
       cc: ${ATFL_DIR}/bin/armclang
       cxx: ${ATFL_DIR}/bin/armclang++
