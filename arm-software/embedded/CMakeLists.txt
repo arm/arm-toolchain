@@ -433,12 +433,17 @@ foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
             COMPONENT ${libc_component}
         )
 
-        install(
-          DIRECTORY
-          ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/
-          DESTINATION samples
-          COMPONENT ${libc_component}
-        )
+        set(_llvmlibc_samples_dir ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples)
+        if(EXISTS ${_llvmlibc_samples_dir})
+            install(
+              DIRECTORY
+              ${_llvmlibc_samples_dir}/
+              DESTINATION samples
+              COMPONENT ${libc_component}
+            )
+        else()
+            message(WARNING "llvmlibc samples directory not found at ${_llvmlibc_samples_dir}; skipping sample installation.")
+        endif()
 
         # LLVM libc lacks a configuration for AArch64, but the AArch32 one works
         # fine. However, setting the configuration for both architectures to the
@@ -954,10 +959,24 @@ endwhile()
 
 foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
     if(libc STREQUAL picolibc)
-        set(libc_license_sources
-            ${picolibc_SOURCE_DIR}/COPYING.NEWLIB           COPYING.NEWLIB
-            ${picolibc_SOURCE_DIR}/COPYING.picolibc         COPYING.picolibc
-        )
+        set(libc_license_sources "")
+        set(_picolibc_newlib_license ${picolibc_SOURCE_DIR}/COPYING.NEWLIB)
+        if(EXISTS ${_picolibc_newlib_license})
+            list(APPEND libc_license_sources
+                ${_picolibc_newlib_license}                  COPYING.NEWLIB
+            )
+        elseif(DEFINED newlib_SOURCE_DIR AND EXISTS ${newlib_SOURCE_DIR}/COPYING.NEWLIB)
+            list(APPEND libc_license_sources
+                ${newlib_SOURCE_DIR}/COPYING.NEWLIB         COPYING.NEWLIB
+            )
+        else()
+            message(WARNING "COPYING.NEWLIB was not found for picolibc; skipping installation of this license file.")
+        endif()
+        if(EXISTS ${picolibc_SOURCE_DIR}/COPYING.picolibc)
+            list(APPEND libc_license_sources
+                ${picolibc_SOURCE_DIR}/COPYING.picolibc     COPYING.picolibc
+            )
+        endif()
     elseif(libc MATCHES "^newlib")
         set(libc_license_sources
             ${newlib_SOURCE_DIR}/COPYING.NEWLIB             COPYING.NEWLIB
