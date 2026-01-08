@@ -227,9 +227,9 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
     list(JOIN lit_test_executor " " lit_test_executor)
 endif()
 
-set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS} --sysroot ${TEMP_LIB_DIR}")
+set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS} --sysroot ${TEMP_LIB_DIR} -I${TEMP_LIB_DIR}/include")
 # Compiling the libraries benefits from some extra optimization
-# flags, and requires a sysroot.
+# flags, and requires a sysroot or include folder for LLVM libc build.
 set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident")
 
 # Generic target names for the C library.
@@ -901,7 +901,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
-            -DRUNTIMES_USE_LIBC=system # llvm-libc logic in HandleLibC.cmake is not compatible with ATfE now
+            -DRUNTIMES_USE_LIBC=llvm-libc
             )
             set(lib_compile_flags "${lib_compile_flags} -D_LIBCPP_PRINT=1 -D__LLVM_LIBC__=1")
     elseif(C_LIBRARY MATCHES "^newlib")
