@@ -38,7 +38,7 @@ LLVM_VERSION_MAJOR=$(cat ${SOURCES_DIR}/cmake/Modules/LLVMVersion.cmake | grep -
 LLVM_VERSION_MINOR=$(cat ${SOURCES_DIR}/cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_MINOR | grep -o '[0-9]\+')
 LLVM_VERSION_PATCH=$(cat ${SOURCES_DIR}/cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_PATCH | grep -o '[0-9]\+')
 TOOLCHAIN_VERSION="${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH}"
-ATFL_GIT_BRANCH=$(git branch --show-current)
+ATFL_GIT_BRANCH="$(git -C "${BASE_DIR}" branch --show-current)"
 if [[ "${ATFL_GIT_BRANCH}" == "arm-software" ]]
 then
   TOOLCHAIN_VERSION="0.0"
