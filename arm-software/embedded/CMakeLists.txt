@@ -93,7 +93,7 @@
 # can be building the libraries since each one is configured separately.
 # To work around this, the variants that get built can be limited using
 # the LLVM_TOOLCHAIN_LIBRARY_VARIANTS option e.g.:
-#   cmake . '-DLLVM_TOOLCHAIN_LIBRARY_VARIANTS=aarch64;armv6m_soft_nofp'
+#   cmake . '-DLLVM_TOOLCHAIN_LIBRARY_VARIANTS=aarch64;armv6m_soft_nofp_size'
 
 
 # CONFIGURE_HANDLED_BY_BUILD was introduced in CMake 3.20 and it
@@ -120,6 +120,10 @@ set(LLVM_TOOLCHAIN_LIBRARY_VARIANTS
     "all" CACHE STRING
     "Build only the specified library variants, or \"all\"."
 )
+# Allow callers to provide URL-encoded semicolons (\"%3B\") so that lists can
+# be passed through shell commands without extra escaping.
+string(REPLACE "%3B" ";" LLVM_TOOLCHAIN_LIBRARY_VARIANTS "${LLVM_TOOLCHAIN_LIBRARY_VARIANTS}")
+string(REPLACE "%3b" ";" LLVM_TOOLCHAIN_LIBRARY_VARIANTS "${LLVM_TOOLCHAIN_LIBRARY_VARIANTS}")
 option(
     LIBS_DEPEND_ON_TOOLS
     "Automatically ensure tools like clang are up to date before building libraries.
@@ -771,7 +775,7 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
             -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=${FETCHCONTENT_SOURCE_DIR_PICOLIBC}
             -DFETCHCONTENT_SOURCE_DIR_NEWLIB=${FETCHCONTENT_SOURCE_DIR_NEWLIB}
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-            -DPROJECT_PREFIX=${multilib_prefix}
+            -DPROJECT_PREFIX=${multilib_prefix}/${libc}
             -DNUMERICAL_BUILD_NAMES=${SHORT_BUILD_PATHS}
             USES_TERMINAL_CONFIGURE TRUE
             USES_TERMINAL_BUILD TRUE
