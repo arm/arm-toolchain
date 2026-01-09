@@ -11,19 +11,19 @@ build: hello.elf
 
 hello.elf: *.cpp
 	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) ../../ldscripts/microbit.ld.in -o microbit.ld
-	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_TARGET) -g -c proflib.c
-	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_TARGET) $(CRT_SEMIHOST) $(CPP_FLAGS) -g -T microbit.ld -fprofile-instr-generate -fcoverage-mapping -o hello.elf hello.cpp proflib.o
+	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) -g -c proflib.c
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) $(CPP_FLAGS) -g -T microbit.ld -fprofile-instr-generate -fcoverage-mapping -o hello.elf hello.cpp proflib.o
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@
 
 run: hello.hex
-	qemu-system-arm -M microbit -semihosting -nographic -device loader,file=$<
+	qemu-system-arm -M microbit $(QEMU_SEMIHOSTING) -device loader,file=$<
 	$(BIN_PATH)/llvm-profdata merge -sparse default.profraw -o hello.profdata
 	$(BIN_PATH)/llvm-cov show hello.elf -instr-profile=hello.profdata
 
 debug: hello.hex
-	qemu-system-arm -M microbit -semihosting -nographic -device loader,file=$< -s -S
+	qemu-system-arm -M microbit $(QEMU_SEMIHOSTING) -device loader,file=$< -s -S
 
 clean:
 	rm -f *.elf *.hex *.profraw *.profdata *.o *.ld

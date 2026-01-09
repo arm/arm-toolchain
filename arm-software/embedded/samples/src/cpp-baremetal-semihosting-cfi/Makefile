@@ -14,21 +14,21 @@ microbit.ld:
 	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) ../../ldscripts/microbit.ld.in -o microbit.ld
 
 hello.elf: *.cpp microbit.ld
-	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_TARGET) $(CPP_FLAGS) -flto -fsanitize=cfi -fvisibility=hidden -fno-sanitize-ignorelist -g -c $^
-	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_TARGET) $(CRT_SEMIHOST) $(CPP_FLAGS) -flto -T microbit.ld -g -o hello.elf hello.o
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CPP_FLAGS) -flto -fsanitize=cfi -fvisibility=hidden -fno-sanitize-ignorelist -g -c $^
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) $(CPP_FLAGS) -flto -T microbit.ld -g -o hello.elf hello.o
 
 hello-no-cfi.elf: *.cpp microbit.ld
-	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_TARGET) $(CPP_FLAGS) -flto -g -c $^
-	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_TARGET) $(CRT_SEMIHOST) $(CPP_FLAGS) -flto -T microbit.ld -g -o hello.elf hello.o
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CPP_FLAGS) -flto -g -c $^
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) $(CPP_FLAGS) -flto -T microbit.ld -g -o hello.elf hello.o
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@
 
 run: hello.hex
-	-qemu-system-arm -M microbit -semihosting -nographic -device loader,file=$<
+	-qemu-system-arm -M microbit $(QEMU_SEMIHOSTING) -device loader,file=$<
 
 debug: hello.hex
-	qemu-system-arm -M microbit -semihosting -nographic -device loader,file=$< -s -S
+	qemu-system-arm -M microbit $(QEMU_SEMIHOSTING) -device loader,file=$< -s -S
 
 clean:
 	rm -f *.o *.elf *.hex *.ld

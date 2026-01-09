@@ -17,10 +17,10 @@ hello.elf: *.c
 	$(BIN_PATH)/llvm-objcopy -O binary $< $@
 
 run: hello.img
-	qemu-system-aarch64 -M raspi3b -semihosting -nographic -kernel $<
+	qemu-system-aarch64 -M raspi3b $(QEMU_SEMIHOSTING) -kernel $<
 
 debug: hello.img
-	qemu-system-aarch64 -M raspi3b -semihosting -nographic -kernel $< -s -S
+	qemu-system-aarch64 -M raspi3b $(QEMU_SEMIHOSTING) -kernel $< -s -S
 
 clean:
 	rm -f *.elf *.img *.ld
