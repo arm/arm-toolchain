@@ -5,6 +5,3 @@ and use it to show code coverage.
 
 Use `make run` to build with instrumentation, run and collect the raw profile data,
 then output a visualization of the code coverage.
-
-NOTE: The upstream runtime implementation changes regularly,
-thus `proflib.c` file needs to be updated to keep in sync.
