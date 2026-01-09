@@ -1,11 +1,9 @@
-// Copyright (c) 2023-2025, Arm Limited and affiliates.
+// Copyright (c) 2023-2026, Arm Limited and affiliates.
 
-// This file is derived from various files in compiler-rt of the llvm-project,
-// see https://github.com/llvm/llvm-project/tree/main/compiler-rt/lib/profile
-
-// This C file should be compiled without -fprofile-instr-generate.
-// It will provide enough of the runtime for files compiled with
-// -fprofile-instr-generate and, optionally, -fcoverage-mapping
+// This file uses the libclang_rt.profile library and semihosting IO to produce
+// a raw profile file that can be processed by the llvm tools
+// such as llvm-profdata. 
+// See https://clang.llvm.org/docs/UsersManual.html#profiling-with-instrumentation
 
 #include <stdint.h>
 #include <stdio.h>
