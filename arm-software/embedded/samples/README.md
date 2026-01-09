@@ -48,7 +48,7 @@ Debugging is only supported on Linux and macOS.
 The Makefiles of the code samples need the location of the installed Arm
 Toolchain for Embedded.
 
-If you are using Linux or MSYS2 and running the samples directly from the
+If you are running the samples directly from the
 installation directory the Makefiles will determine the correct location
 automatically.
 
@@ -57,7 +57,12 @@ to the ``bin`` directory of the toolchain.
 
 ## Compiling, running and debugging the samples
 
-### Linux, macOS and MSYS2
+> [!NOTE]
+> Install [MSYS2](https://www.msys2.org/) to run samples on Windows.
+> 
+> If you plan to run the compiled samples, ensure that the path of the directory
+> containing QEMU (specifically, the ``qemu-system-arm.exe`` file) is present in
+> the ``PATH`` environment variable.
 
 Change to the directory of a specific sample (e.g. ``src/baremetal-uart``) and
 use the following commands to build, run or debug the sample:
@@ -81,16 +86,3 @@ for example:
 $ LIBC=llvmlibc make build
 ```
 The default is ``picolibc``.
-
-### Windows
-
-If you plan to run the compiled samples, ensure that the path of the directory
-containing QEMU (specifically, the ``qemu-system-arm.exe`` file) is present in
-the ``PATH`` environment variable.
-
-Start a Command Prompt (``cmd.exe``), change to the directory of a specific
-sample (e.g. ``src\baremetal-uart``) and use the following commands to build or
-run the sample:
-* ``> make.bat build`` to build the sample.
-* ``> make.bat run`` to run the sample with QEMU emulator.
-* ``> make.bat clean`` to delete the generated binary and intermediate files.
