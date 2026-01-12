@@ -45,17 +45,22 @@ void __llvm_libc_exit(int status) {
   __builtin_unreachable(); /* semihosting call doesn't return */
 }
 
+struct __llvm_libc_stdio_cookie __llvm_libc_stdin_cookie;
+struct __llvm_libc_stdio_cookie __llvm_libc_stdout_cookie;
+struct __llvm_libc_stdio_cookie __llvm_libc_stderr_cookie;
+
 ssize_t __llvm_libc_stdio_read(struct __llvm_libc_stdio_cookie *cookie,
-                               const char *buf, size_t size) {
-  size_t args[4];
-  args[0] = static_cast<size_t>(cookie->handle);
-  args[1] = reinterpret_cast<size_t>(buf);
-  args[2] = size;
-  args[3] = 0;
-  ssize_t retval = semihosting_call(SYS_READ, args);
-  if (retval >= 0)
-    retval = size - retval;
-  return retval;
+                               char *buf, size_t size) {
+  if (cookie != &__llvm_libc_stdin_cookie)
+    return -1;
+  
+  for (size_t i = 0; i < size; ++i) {
+    long ch = semihosting_call(SYS_READC, nullptr);
+    buf[i] = static_cast<char>(ch & 0xff);
+    if (buf[i] == '\r')
+      buf[i] = '\n';
+  }
+  return size;
 }
 
 ssize_t __llvm_libc_stdio_write(struct __llvm_libc_stdio_cookie *cookie,
@@ -69,10 +74,6 @@ ssize_t __llvm_libc_stdio_write(struct __llvm_libc_stdio_cookie *cookie,
     retval = size - retval;
   return retval;
 }
-
-struct __llvm_libc_stdio_cookie __llvm_libc_stdin_cookie;
-struct __llvm_libc_stdio_cookie __llvm_libc_stdout_cookie;
-struct __llvm_libc_stdio_cookie __llvm_libc_stderr_cookie;
 
 bool __llvm_libc_timespec_get_active(struct timespec *ts) {
   long retval = semihosting_call(SYS_CLOCK, 0);
