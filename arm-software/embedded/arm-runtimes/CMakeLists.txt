@@ -308,16 +308,9 @@ if(NOT C_LIBRARY STREQUAL "llvmlibc")
   )
 endif()
 
-ExternalProject_Add(
-    compiler_rt
-    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
-    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
-    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
-    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
-    SOURCE_DIR ${llvmproject_src_dir}/runtimes
-    INSTALL_DIR compiler-rt/install
-    CMAKE_ARGS
-    ${compiler_launcher_cmake_args}
+# Common compiler_rt flags used by both builtins and profile builds
+set(
+    compiler_rt_common_flags
     -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
     -DCMAKE_ASM_COMPILER_TARGET=${target_triple}
     -DCMAKE_ASM_FLAGS=${lib_compile_flags}
@@ -334,17 +327,31 @@ ExternalProject_Add(
     -DCMAKE_RANLIB=${LLVM_BINARY_DIR}/bin/llvm-ranlib${CMAKE_EXECUTABLE_SUFFIX}
     -DCMAKE_SYSTEM_NAME=Generic
     -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-    ${compiler_rt_cmake_args}
     -DCOMPILER_RT_BAREMETAL_BUILD=ON
     -DCOMPILER_RT_BUILD_LIBFUZZER=OFF
-    -DCOMPILER_RT_BUILD_PROFILE=OFF
     -DCOMPILER_RT_BUILD_SANITIZERS=OFF
     -DCOMPILER_RT_BUILD_XRAY=OFF
     -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON
     -DLLVM_ENABLE_RUNTIMES=compiler-rt
     -DRUNTIME_VARIANT_NAME=${VARIANT}
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
+)
+
+ExternalProject_Add(
+    compiler_rt
+    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
+    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
+    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
+    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
+    SOURCE_DIR ${llvmproject_src_dir}/runtimes
+    INSTALL_DIR compiler-rt/install
+    CMAKE_ARGS
+    ${compiler_rt_common_flags}
+    ${compiler_launcher_cmake_args}
+    ${compiler_rt_cmake_args}
     ${compiler_rt_test_cmake_args}
+    -DCOMPILER_RT_BUILD_BUILTINS=ON
+    -DCOMPILER_RT_BUILD_PROFILE=OFF
     STEP_TARGETS configure build install
     USES_TERMINAL_CONFIGURE TRUE
     USES_TERMINAL_BUILD TRUE
@@ -386,6 +393,37 @@ if(ENABLE_COMPILER_RT_TESTS)
     )
     add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
 endif()
+
+# Build compiler-rt profile library after the C library is available.
+ExternalProject_Add(
+    compiler_rt_profile
+    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/stamp
+    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/build
+    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/dl
+    TMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/tmp
+    SOURCE_DIR ${llvmproject_src_dir}/runtimes
+    INSTALL_DIR compiler-rt-profile/install
+    DEPENDS compiler_rt-install clib-install
+    CMAKE_ARGS
+    ${compiler_rt_common_flags}
+    ${compiler_launcher_cmake_args}
+    ${compiler_rt_cmake_args}
+    -DCOMPILER_RT_BUILD_BUILTINS=OFF
+    -DCOMPILER_RT_BUILD_PROFILE=ON
+    -DCOMPILER_RT_PROFILE_BAREMETAL=ON
+    STEP_TARGETS configure build install
+    USES_TERMINAL_CONFIGURE TRUE
+    USES_TERMINAL_BUILD TRUE
+    USES_TERMINAL_INSTALL TRUE
+    LIST_SEPARATOR ,
+    CONFIGURE_HANDLED_BY_BUILD TRUE
+    INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+    COMMAND
+        ${CMAKE_COMMAND}
+        -E copy_directory
+        <INSTALL_DIR>/lib/${normalized_target_triple}
+        "${TEMP_LIB_DIR}/lib"
+)
 
 ###############################################################################
 # picolibc
