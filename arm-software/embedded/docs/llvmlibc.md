@@ -88,9 +88,6 @@ set the `LIBC` environment variable to `llvmlibc`, for example:
 $ LIBC=llvmlibc make build
 ```
 > [!WARNING]
-> On Windows MSYS2 is required, `make.bat` does not support this option.
-
-> [!WARNING]
 > C++ samples have limitations described below when used with LLVM libc.
 
 
