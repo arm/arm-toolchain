@@ -11,6 +11,7 @@
 
 #include <stddef.h>
 #include <time.h>
+#include <stdlib.h>
 
 namespace {
 
@@ -60,7 +61,6 @@ struct __llvm_libc_stdio_cookie __llvm_libc_stderr_cookie;
 // For other files SYS_READ should be used as SYS_READC is intended for console
 // input and may block indefinitely in QEMU.
 // TODO: Extend to handle regular files when implemented in LLVM libc.
-
 ssize_t __llvm_libc_stdio_read(struct __llvm_libc_stdio_cookie *cookie,
                                char *buf, size_t size) {
   if (cookie != &__llvm_libc_stdin_cookie)
