@@ -11,6 +11,7 @@
 
 #include <stddef.h>
 #include <time.h>
+#include <stdlib.h>
 
 namespace {
 
@@ -43,6 +44,13 @@ void __llvm_libc_exit(int status) {
 #endif
 
   __builtin_unreachable(); /* semihosting call doesn't return */
+}
+
+void abort() {
+  // Cleanly exit via semihosting
+  // instead of trapping in the default abort() implementation
+  exit(1);
+  __builtin_unreachable();
 }
 
 ssize_t __llvm_libc_stdio_read(struct __llvm_libc_stdio_cookie *cookie,
