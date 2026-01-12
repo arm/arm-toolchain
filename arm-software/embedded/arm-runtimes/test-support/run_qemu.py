@@ -71,8 +71,11 @@ def run_qemu(
     if verbose:
         print("running: {}".format(" ".join(command)))
 
+    # Setting stdin to /dev/null prevents qemu from fiddling with the echo bit of
+    # the parent terminal.
     result = subprocess.run(
         command,
+        stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=sys.stderr,
         timeout=timeout,
