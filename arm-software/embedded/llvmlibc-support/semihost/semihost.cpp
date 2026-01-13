@@ -26,7 +26,7 @@ void stdio_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
 
 extern "C" {
 
-void __llvm_libc_exit(int status) {
+void semihosting_call_exit(int status) {
 
 #if defined(__ARM_64BIT_STATE) && __ARM_64BIT_STATE
   size_t block[2];
@@ -46,10 +46,15 @@ void __llvm_libc_exit(int status) {
   __builtin_unreachable(); /* semihosting call doesn't return */
 }
 
+void __llvm_libc_exit(int status) {
+  // TODO: Implement cleanup required by exit(): destructors, atexit, etc
+  semihosting_call_exit(status);
+}
+
 void abort() {
   // Cleanly exit via semihosting
   // instead of trapping in the default abort() implementation
-  __llvm_libc_exit(1);
+  semihosting_call_exit(1);
   __builtin_unreachable();
 }
 
