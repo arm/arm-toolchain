@@ -462,6 +462,7 @@ def main():
             name="picolibc_serial_test",
             testnames=[
                 "test-hello-raw.test",
+                "test-hello-raw-no-flash.test",
             ],
             result=NewResult.EXCLUDE,
             project="picolibc",
