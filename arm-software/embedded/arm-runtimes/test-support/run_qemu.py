@@ -27,6 +27,7 @@ def run_qemu(
     working_directory,
     verbose,
     trace,
+    stdin=None,
 ):
     """Execute the program using QEMU and return the subprocess return code."""
     qemu_params = ["-M", qemu_machine]
@@ -71,11 +72,9 @@ def run_qemu(
     if verbose:
         print("running: {}".format(" ".join(command)))
 
-    # Setting stdin to /dev/null prevents qemu from fiddling with the echo bit of
-    # the parent terminal.
     result = subprocess.run(
         command,
-        stdin=subprocess.DEVNULL,
+        stdin=stdin,
         stdout=subprocess.PIPE,
         stderr=sys.stderr,
         timeout=timeout,

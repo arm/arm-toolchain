@@ -8,6 +8,7 @@ from run_qemu import run_qemu
 from run_fvp import run_fvp
 import argparse
 import pathlib
+import subprocess
 import sys
 
 
@@ -32,6 +33,11 @@ def run(args):
             pathlib.Path.cwd(),
             args.verbose,
             args.trace,
+            # Setting stdin to /dev/null prevents qemu from fiddling with
+            # the echo bit of the parent terminal when meson runs multiple
+            # tests in parallel. stdin is only tested by picolibc when
+            # test-stdin=true, which is not the default.
+            stdin=subprocess.DEVNULL,
         )
     else:
         return run_fvp(
