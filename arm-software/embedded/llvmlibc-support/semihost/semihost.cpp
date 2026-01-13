@@ -49,7 +49,7 @@ void __llvm_libc_exit(int status) {
 void abort() {
   // Cleanly exit via semihosting
   // instead of trapping in the default abort() implementation
-  exit(1);
+  __llvm_libc_exit(1);
   __builtin_unreachable();
 }
 
