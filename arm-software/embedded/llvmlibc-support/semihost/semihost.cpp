@@ -26,7 +26,7 @@ void stdio_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
 
 extern "C" {
 
-void semihosting_call_exit(int status) {
+static void semihosting_call_exit(int status) {
 
 #if defined(__ARM_64BIT_STATE) && __ARM_64BIT_STATE
   size_t block[2];
