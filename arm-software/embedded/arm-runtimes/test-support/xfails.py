@@ -313,22 +313,22 @@ def main():
                 "armv4t_size",
                 "armv5te_exn_rtti_size",
                 "armv5te_size",
-                "armv6m_soft_nofp_exn_rtti_size"
-                "armv6m_soft_nofp_size"
-                "armv7m_hard_fpv4_sp_d16_exn_rtti_size"
-                "armv7m_hard_fpv4_sp_d16_exn_rtti_unaligned_size"
-                "armv7m_hard_fpv4_sp_d16_size"
-                "armv7m_hard_fpv4_sp_d16_unaligned_size"
-                "armv7m_hard_fpv5_d16_exn_rtti_unaligned_size"
-                "armv7m_hard_fpv5_d16_unaligned_size"
-                "armv7m_soft_fpv4_sp_d16_exn_rtti_size"
-                "armv7m_soft_fpv4_sp_d16_exn_rtti_unaligned_size"
-                "armv7m_soft_fpv4_sp_d16_size"
-                "armv7m_soft_fpv4_sp_d16_unaligned_size"
-                "armv7m_soft_nofp_exn_rtti_size"
-                "armv7m_soft_nofp_exn_rtti_unaligned_size"
-                "armv7m_soft_nofp_size"
-                "armv7m_soft_nofp_unaligned_size"
+                "armv6m_soft_nofp_exn_rtti_size",
+                "armv6m_soft_nofp_size",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_unaligned_size",
+                "armv7m_hard_fpv4_sp_d16_size",
+                "armv7m_hard_fpv4_sp_d16_unaligned_size",
+                "armv7m_hard_fpv5_d16_exn_rtti_unaligned_size",
+                "armv7m_hard_fpv5_d16_unaligned_size",
+                "armv7m_soft_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_fpv4_sp_d16_exn_rtti_unaligned_size",
+                "armv7m_soft_fpv4_sp_d16_size",
+                "armv7m_soft_fpv4_sp_d16_unaligned_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_unaligned_size",
+                "armv7m_soft_nofp_size",
+                "armv7m_soft_nofp_unaligned_size",
             ],
             description="target lacks hardware CAS for non-power-of-two atomic object sizes",
         ),
