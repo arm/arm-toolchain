@@ -13,6 +13,10 @@
 
 # Script does not exit, when the command in the script exits with a non-zero status.
 # Also, print the line of the script being executed.
+
+# Disable CCACHE
+export CCACHE_DISABLE=1
+
 set -vx
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )

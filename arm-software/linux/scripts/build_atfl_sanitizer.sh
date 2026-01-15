@@ -15,6 +15,9 @@
 # The script creates a build of the toolchain in the 'build_sanitizer' directory, inside
 # the repository tree.
 
+# Disable CCACHE
+export CCACHE_DISABLE=1
+
 set -vex
 
 # Flag to link AddressSanitizer runtime before other libraries
