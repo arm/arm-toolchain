@@ -51,13 +51,6 @@ void __llvm_libc_exit(int status) {
   semihosting_call_exit(status);
 }
 
-void abort() {
-  // Cleanly exit via semihosting
-  // instead of trapping in the default abort() implementation
-  semihosting_call_exit(1);
-  __builtin_unreachable();
-}
-
 struct __llvm_libc_stdio_cookie __llvm_libc_stdin_cookie;
 struct __llvm_libc_stdio_cookie __llvm_libc_stdout_cookie;
 struct __llvm_libc_stdio_cookie __llvm_libc_stderr_cookie;
