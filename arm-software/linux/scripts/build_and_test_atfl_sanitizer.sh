@@ -86,7 +86,9 @@ cmake -G Ninja ../llvm \
   -DLLVM_TARGETS_TO_BUILD=AArch64 \
   -DLLVM_ENABLE_PROJECTS="clang;llvm;lld" \
   -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
-  -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=OFF
+  -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=OFF \
+  -DCOMPILER_RT_TEST_COMPILER_CFLAGS="-fmacro-prefix-map=${REPO_ROOT}=." \
+  -DCOMPILER_RT_TEST_COMPILER_CXXFLAGS="-fmacro-prefix-map=${REPO_ROOT}=."
 
 ninja
 echo "==> Stage 3: Completed building clang (sanitized)"
