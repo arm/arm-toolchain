@@ -47,7 +47,8 @@ static void semihosting_call_exit(int status) {
 }
 
 void __llvm_libc_exit(int status) {
-  // TODO: Implement cleanup required by exit(): destructors, atexit, etc
+  // Application state cleanup is done in libc exit() that calls internal::exit()
+  // that calls this handler in turn.
   semihosting_call_exit(status);
 }
 
