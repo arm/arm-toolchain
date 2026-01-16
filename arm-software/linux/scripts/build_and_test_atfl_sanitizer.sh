@@ -21,7 +21,7 @@ set -vex
 export CCACHE_DISABLE=1
 
 # Flag to link AddressSanitizer runtime before other libraries
-export ASAN_OPTIONS=verify_asan_link_order=1
+export ASAN_OPTIONS=verify_asan_link_order=1:detect_write_exec=0
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
@@ -66,7 +66,7 @@ cd "${REPO_ROOT}"/build_sanitizer
 export LD_LIBRARY_PATH="${REPO_ROOT}"/build_libcxx/lib:$LD_LIBRARY_PATH
 
 # Flag to disable LeakSanitizer (memory leaks detection) in AddressSanitizer.
-export ASAN_OPTIONS=verify_asan_link_order=1
+export ASAN_OPTIONS=verify_asan_link_order=1:detect_write_exec=0
 
 # Have chosen Address Sanitizer and Undefined Sanitizer to build and test.
 # These sanitizers are most commonly used and relatively easy to set-up.
@@ -81,7 +81,7 @@ cmake -G Ninja ../llvm \
   -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
   -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++" \
   -DLLVM_LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml \
-  --param=env='ASAN_OPTIONS=verify_asan_link_order=1'" \
+  --param=env='ASAN_OPTIONS=verify_asan_link_order=1:detect_write_exec=0'" \
   -DCMAKE_INSTALL_PREFIX=../stage3.install \
   -DLLVM_TARGETS_TO_BUILD=AArch64 \
   -DLLVM_ENABLE_PROJECTS="clang;llvm;lld" \
@@ -135,16 +135,18 @@ export LSAN_OPTIONS="${SYMBOLIZER_OPTS}:${LSAN_OPTIONS:-}"
 # Upstream clang and LLVM tests do not generate the junit xml results file by default.
 # Additionally setting the --xunit-xml-output option store the
 # results.
-export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=verify_asan_link_order=1'"
+export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=verify_asan_link_order=1:detect_write_exec=0'"
 
 # Provide the suppression file in the lit working dir so the
 # compiler-rt test `suppressions-exec-relative-location.cpp` can find it.
 SUPPRESSION_FILE="${REPO_ROOT}/build_sanitizer/bin/supp.txt"
 echo "interceptor_via_fun:crash_function" > "${SUPPRESSION_FILE}"
 
-ninja -v check-compiler-rt
+ASAN_OPTIONS="verify_asan_link_order=1:detect_write_exec=0" ninja -v check-compiler-rt
+
 ninja -v check-llvm
 ninja -v check-clang
 ninja -v check-cxx
 ninja -v check-cxxabi
 ninja -v check-unwind
+
