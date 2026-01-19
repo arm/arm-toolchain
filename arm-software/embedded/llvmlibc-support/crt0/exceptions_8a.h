@@ -198,7 +198,7 @@ EXFN_ATTR void exception_handler() {
   }
 
   // Stop execution
-  abort();
+  __llvm_libc_exit(1);
 }
 
 // The AArch64 exception vector table has 16 entries, each of which is 128
