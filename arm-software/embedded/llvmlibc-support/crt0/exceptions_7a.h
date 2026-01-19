@@ -40,7 +40,7 @@ static bool is_in_hyp_mode() {
 
 EXFN_ATTR void handle_reset() {
   print_str("CPU Exception: Reset\n");
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void handle_undefined() {
@@ -56,7 +56,7 @@ EXFN_ATTR void handle_undefined() {
   print_str("  Instruction (second half word) = ");
   print_hex(half_word1);
   print_str("\n");
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void handle_svc_hyp_smc() {
@@ -64,7 +64,7 @@ EXFN_ATTR void handle_svc_hyp_smc() {
   print_str("  PC = ");
   print_hex(GET_LR_VALUE());
   print_str("\n");
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void handle_prefetch_abort() {
@@ -74,7 +74,7 @@ EXFN_ATTR void handle_prefetch_abort() {
   print_str("\n");
   print_str("  IFSR = 0x%08x\n");
   print_str("  IFAR = 0x%08x\n");
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void handle_data_abort() {
@@ -84,7 +84,7 @@ EXFN_ATTR void handle_data_abort() {
   print_str("\n");
   print_str("  DFSR = 0x%08x\n");
   print_str("  DFAR = 0x%08x\n");
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void handle_hyp_trap() {
@@ -93,7 +93,7 @@ EXFN_ATTR void handle_hyp_trap() {
   print_hex(GET_LR_VALUE());
   print_str("\n");
   print_str("  HSR = 0x%08x\n");
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void handle_irq() {
@@ -101,7 +101,7 @@ EXFN_ATTR void handle_irq() {
   print_str("  PC = ");
   print_hex(GET_LR_VALUE());
   print_str("\n");
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void handle_fiq() {
@@ -109,7 +109,7 @@ EXFN_ATTR void handle_fiq() {
   print_str("  PC = ");
   print_hex(GET_LR_VALUE());
   print_str("\n");
-  abort();
+  __llvm_libc_exit(1);
 }
 
 // The AArch32 exception vector table has 8 entries, each of which is 4

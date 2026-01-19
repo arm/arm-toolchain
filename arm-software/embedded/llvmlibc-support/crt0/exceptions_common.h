@@ -70,4 +70,7 @@ EXFN_ATTR inline void print_hex(T val, bool print_leading_zeros = true) {
 } // namespace exceptions
 } // namespace bootcode
 
+// LLVM libc defined platform specific exit handler
+extern "C" [[noreturn]] void __llvm_libc_exit(int status);
+
 #endif // BOOTCODE_EXCEPTIONS_COMMON_H
