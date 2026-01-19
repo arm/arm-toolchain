@@ -80,8 +80,7 @@ cmake -G Ninja ../llvm \
   -DLLVM_ENABLE_ASSERTIONS=ON \
   -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
   -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++" \
-  -DLLVM_LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml \
-  --param=env='ASAN_OPTIONS=verify_asan_link_order=1:detect_write_exec=0'" \
+  -DLLVM_LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml" \
   -DCMAKE_INSTALL_PREFIX=../stage3.install \
   -DLLVM_TARGETS_TO_BUILD=AArch64 \
   -DLLVM_ENABLE_PROJECTS="clang;llvm;lld" \
@@ -139,7 +138,7 @@ export HWASAN_OPTIONS="detect_write_exec=0"
 # Upstream clang and LLVM tests do not generate the junit xml results file by default.
 # Additionally setting the --xunit-xml-output option store the
 # results.
-export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=verify_asan_link_order=1:detect_write_exec=0'"
+export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 
 # Provide the suppression file in the lit working dir so the
 # compiler-rt test `suppressions-exec-relative-location.cpp` can find it.
