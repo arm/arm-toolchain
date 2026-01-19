@@ -272,6 +272,11 @@ apply_patches() {
     echo_bold "Applying patches...done"
 }
 
+bootstrap_compiler_default_config() {
+    echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
+    echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
+}
+
 bootstrap_compiler_build() {
     mkdir -p "${BUILD_DIR}/stage/bootstrap_compiler"
     cd "${BUILD_DIR}/stage/bootstrap_compiler"
@@ -313,14 +318,14 @@ bootstrap_compiler_build() {
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BUILD_DIR}/bootstrap_compiler/bin:$PATH"
-    echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
-    echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
+    bootstrap_compiler_default_config
     run_command ninja ${NINJA_ARGS} check-all 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
 }
 
 libcpp_build() {
     mkdir -p "${BUILD_DIR}/stage/libcpp_build"
     cd "${BUILD_DIR}/stage/libcpp_build"
+    bootstrap_compiler_default_config
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/runtimes" \
         -DBUILD_SHARED_LIBS=False \
         -DCMAKE_CXX_FLAGS="-D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT" \
@@ -376,6 +381,7 @@ product_build() {
 
     mkdir -p "${BUILD_DIR}/stage/product_build"
     cd "${BUILD_DIR}/stage/product_build"
+    bootstrap_compiler_default_config
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
         -DBUILD_SHARED_LIBS=False \
         -DLIBOMP_ENABLE_SHARED=True \
@@ -386,7 +392,9 @@ product_build() {
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     cp -d ${ATFL_DIR}/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" >> ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
+    bootstrap_compiler_default_config
 }
 
 shared_lib_build() {
@@ -404,6 +412,7 @@ shared_lib_build() {
 
     mkdir -p "${BUILD_DIR}/stage/shared_lib_build"
     cd "${BUILD_DIR}/stage/shared_lib_build"
+    bootstrap_compiler_default_config
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
         -DBUILD_SHARED_LIBS=True \
         -DLIBOMP_ENABLE_SHARED=False \
@@ -423,7 +432,9 @@ shared_lib_build() {
     rm -r "${ATFL_DIR}.libs"
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
     echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" >> ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
+    bootstrap_compiler_default_config
 }
 
 package() {
