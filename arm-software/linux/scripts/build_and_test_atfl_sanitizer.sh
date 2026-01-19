@@ -124,9 +124,13 @@ export UBSAN_SYMBOLIZER_PATH="${SYMBOLIZER_BIN}"
 export LSAN_SYMBOLIZER_PATH="${SYMBOLIZER_BIN}"
 SYMBOLIZER_OPTS="external_symbolizer_path=${SYMBOLIZER_BIN}:symbolize=1"
 
-# Use common options so LSAN tests that override LSAN_OPTIONS still get symbolization.
-export SANITIZER_COMMON_OPTIONS="${SYMBOLIZER_OPTS}"
-export LSAN_OPTIONS="${SYMBOLIZER_OPTS}:${LSAN_OPTIONS:-}"
+# Disable W+X detection across sanitizers on this platform; mmap_write_exec.cpp
+# is expected to run without emitting sanitizer reports.
+export SANITIZER_COMMON_OPTIONS="detect_write_exec=0:${SYMBOLIZER_OPTS}"
+export LSAN_OPTIONS="${SANITIZER_COMMON_OPTIONS}:${LSAN_OPTIONS:-}"
+export TSAN_OPTIONS="detect_write_exec=0"
+export MSAN_OPTIONS="detect_write_exec=0"
+export HWASAN_OPTIONS="detect_write_exec=0"
 
 # If a test fails, lit will ordinarily return a non-zero result,
 # which prevents further testing. Setting the --ignore-fail option
