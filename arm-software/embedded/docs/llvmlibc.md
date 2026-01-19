@@ -38,7 +38,7 @@ following command line options, in addition to `--target`, `-march` or
 
 * `-nostartfiles` to not include the currently non-existent `crt0.o`
 
-* `-lcrt0` to include a library defining the `_start` symbol (or else
+* `-lcrt0-semihost` to include a library defining the `_start` symbol (or else
   provide that symbol yourself)
 
 * `-lsemihost` to include a library that implements porting functions
@@ -59,14 +59,17 @@ following command line options, in addition to `--target`, `-march` or
 For example:
 
 ```
-clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles -lcrt0 -lsemihost -T llvmlibc.ld -o hello hello.c
+clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles -lcrt0-semihost -lsemihost -T llvmlibc.ld -o hello hello.c
 ```
 
 > [!TIP]
 > For easier migration from picolibc to LLVM libc, use the following startup
 > libraries:
-> * `-lcrt0` the default startup library that provides semihosting support.
-> * `-lcrt0-semihost` same as `-lcrt0`.
+> * `-lcrt0` the default startup library that provides initialization and exit
+> for not hosted environments. You can override `void _platform_init()` and/or
+> `void __llvm_libc_exit(int status)` in your application.
+> * `-lcrt0-semihost` startup library to be used with the semihosting library
+> `-lsemihost`.
 > * `-lcrt0-none` an empty library, you have to provide the `_start` symbol.
 
 ## I/O retargeting
