@@ -55,7 +55,7 @@ STAGES=(
     "bootstrap_compiler_build"
     "libcpp_build"
     "product_build"
-    "shared_lib_build"
+    "static_libomp_build"
 )
 ZLIB_STATIC_PATH=${ZLIB_STATIC_PATH:-"/usr/lib/`uname -m`-linux-gnu/libz.a"}
 COMMON_LINKER_FLAGS="-Wl,--build-id"
@@ -119,14 +119,24 @@ COMPILER_CMAKE_FLAGS=(
     -DCOMPILER_RT_LIBRARY_atomic_${ATFL_TARGET_TRIPLE}="-rtlib=compiler-rt"
     -DFLANG_RT_ENABLE_SHARED=ON
     -DFLANG_RT_ENABLE_STATIC=ON
-    -DLIBOMP_COPY_EXPORTS=False
-    -DLIBOMP_USE_HWLOC=False
-    -DLIBOMP_OMPT_SUPPORT=ON
-    -DLIBOMP_OMPD_GDB_SUPPORT=OFF
     -DARM_TOOLCHAIN_ID="${ARM_TOOLCHAIN_ID}"
     -DCLANG_VENDOR="Arm Toolchain for Linux ${TOOLCHAIN_VERSION}"
     -DFLANG_VENDOR="Arm Toolchain for Linux ${TOOLCHAIN_VERSION}"
     -DLLVM_VERSION_SUFFIX=""
+)
+LIBOMP_SHARED_CMAKE_FLAGS=(
+    -DLIBOMP_ENABLE_SHARED=True
+    -DLIBOMP_OMPT_SUPPORT=ON
+    -DLIBOMP_COPY_EXPORTS=False
+    -DLIBOMP_USE_HWLOC=False
+    -DLIBOMP_OMPD_GDB_SUPPORT=OFF
+)
+LIBOMP_NOSHARED_CMAKE_FLAGS=(
+    -DLIBOMP_ENABLE_SHARED=False
+    -DLIBOMP_OMPT_SUPPORT=OFF
+    -DLIBOMP_COPY_EXPORTS=False
+    -DLIBOMP_USE_HWLOC=False
+    -DLIBOMP_OMPD_GDB_SUPPORT=OFF
 )
 LIBUNWIND_SHARED_CMAKE_FLAGS=(
     -DLIBUNWIND_USE_COMPILER_RT=ON
@@ -384,9 +394,8 @@ product_build() {
     bootstrap_compiler_default_config
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
         -DBUILD_SHARED_LIBS=False \
-        -DLIBOMP_ENABLE_SHARED=True \
         -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS};-DCMAKE_MODULE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS};-DCMAKE_SHARED_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
+        "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBOMP_SHARED_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
         tee "${LOGS_DIR}/product.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
@@ -397,44 +406,36 @@ product_build() {
     bootstrap_compiler_default_config
 }
 
-shared_lib_build() {
-    local extra_flags=""
-    if ! bolttests_present; then
-        echo "Bolt tests not present, external Bolt tests will not be executed."
-    else
-        extra_flags="${extra_flags} -DLLVM_EXTERNAL_PROJECTS=bolttests -DLLVM_EXTERNAL_BOLTTESTS_SOURCE_DIR=${BOLTTESTS_DIR}"
-    fi
-    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
-        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=OFF"
-    else
-        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=ON"
-    fi
-
-    mkdir -p "${BUILD_DIR}/stage/shared_lib_build"
-    cd "${BUILD_DIR}/stage/shared_lib_build"
+static_libomp_build() {
+    mkdir -p "${BUILD_DIR}/stage/static_libomp_build"
+    cd "${BUILD_DIR}/stage/static_libomp_build"
     bootstrap_compiler_default_config
-    run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
-        -DBUILD_SHARED_LIBS=True \
-        -DLIBOMP_ENABLE_SHARED=False \
-        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS};-DCMAKE_MODULE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS};-DCMAKE_SHARED_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        "${COMMON_CMAKE_FLAGS[@]}" -DLLVM_ENABLE_ZSTD=OFF "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" -DLIBOMP_OMPT_SUPPORT=OFF "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
-        tee "${LOGS_DIR}/shared_lib.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
+    run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/openmp" \
+        -DBUILD_SHARED_LIBS=False \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
+        -DCMAKE_LINKER="${ATFL_DIR}/bin/ld.lld" \
+        -DCMAKE_CXX_FLAGS="-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT" \
+        -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
+        -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
+        -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
+        -DOPENMP_TEST_C_COMPILER="${ATFL_DIR}//bin/clang" \
+        -DOPENMP_TEST_CXX_COMPILER="${ATFL_DIR}/bin/clang++" \
+        -DOPENMP_TEST_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
+        -DOPENMP_LLVM_LIT_EXECUTABLE="${BUILD_DIR}/stage/product_build/bin/llvm-lit" \
+        -DOPENMP_FILECHECK_EXECUTABLE="${BUILD_DIR}/stage/product_build/bin/FileCheck" \
+        "${PRODUCT_CMAKE_FLAGS[@]}" "${LIBOMP_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
+        tee "${LOGS_DIR}/static_libomp.txt"
+    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
     rm -rf "${ATFL_DIR}.keep" "${ATFL_DIR}.libs"
     mv "${ATFL_DIR}" "${ATFL_DIR}.keep"
-    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/shared_lib.txt"
+    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
     mv "${ATFL_DIR}" "${ATFL_DIR}.libs"
     mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
-    cp "${ATFL_DIR}.libs/lib/${ATFL_TARGET_TRIPLE}/libomp.a" \
-        "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
-    cp -d ${ATFL_DIR}.libs/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
+    cp ${ATFL_DIR}.libs/lib/lib*.a \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
-    echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang.cfg
-    echo '-L<CFGDIR>/../runtimes/runtimes-bins/openmp/runtime/src $-Wl,--push-state $-Wl,--as-needed $-lomp $-ldl $-Wl,--pop-state' >bin/clang++.cfg
-    echo "-Wl,-rpath=${ATFL_DIR}/lib" >> ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
-    run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/shared_lib.txt"
-    bootstrap_compiler_default_config
+    run_command ninja ${NINJA_ARGS} check-openmp | tee -a "${LOGS_DIR}/static_libomp.txt"
 }
 
 package() {
