@@ -66,11 +66,10 @@ export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 SUPPRESSION_FILE="${REPO_ROOT}/build_sanitizer/bin/supp.txt"
 echo "interceptor_via_fun:crash_function" > "${SUPPRESSION_FILE}"
 
-LIT_FILTER_OUT='(MemorySanitizer-AARCH64 :: TestCases/(Linux/reexec_unlimited_stack)|SanitizerCommon-(asan|hwasan|msan|tsan)-aarch64-Linux :: TestCases/(Posix/mmap_write_exec.cpp))' ASAN_OPTIONS="verify_asan_link_order=1" ninja -v check-compiler-rt
+LIT_FILTER_OUT='(MemorySanitizer-AARCH64 :: (TestCases/)?Linux/reexec_unlimited_stack.cpp|SanitizerCommon-(asan|hwasan|msan|tsan)-aarch64-Linux :: (TestCases/)?Posix/mmap_write_exec.cpp)' ASAN_OPTIONS="verify_asan_link_order=1" ninja -v check-compiler-rt
 
 ninja -v check-llvm
 ninja -v check-clang
 ninja -v check-cxx
 ninja -v check-cxxabi
 ninja -v check-unwind
-
