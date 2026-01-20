@@ -45,20 +45,14 @@ if [[ ! -x "${SYMBOLIZER_BIN}" ]]; then
   exit 1
 fi
 
-# Flag to link AddressSanitizer runtime before other libraries
-export ASAN_OPTIONS=verify_asan_link_order=1
-
-dir="$(dirname "${SYMBOLIZER_BIN}")"
-export PATH="${dir}:${PATH}"
+export PATH="$(dirname "${SYMBOLIZER_BIN}"):${PATH}"
 export LLVM_SYMBOLIZER_PATH="${SYMBOLIZER_BIN}"
 export ASAN_SYMBOLIZER_PATH="${SYMBOLIZER_BIN}"
 export UBSAN_SYMBOLIZER_PATH="${SYMBOLIZER_BIN}"
 export LSAN_SYMBOLIZER_PATH="${SYMBOLIZER_BIN}"
 SYMBOLIZER_OPTS="external_symbolizer_path=${SYMBOLIZER_BIN}:symbolize=1"
 
-# Use common options so LSAN tests that override LSAN_OPTIONS still get symbolization.
-export SANITIZER_COMMON_OPTIONS="${SYMBOLIZER_OPTS}"
-export LSAN_OPTIONS="${SYMBOLIZER_OPTS}:${LSAN_OPTIONS:-}"
+LIT_FILTER_OUT='(MemorySanitizer-AARCH64 :: TestCases/(Linux/reexec_unlimited_stack)|SanitizerCommon-(asan|hwasan|msan|tsan)-aarch64-Linux :: TestCases/(Posix/mmap_write_exec.cpp))' ninja -v check-compiler-rt
 
 # If a test fails, lit will ordinarily return a non-zero result,
 # which prevents further testing. Setting the --ignore-fail option
@@ -67,16 +61,18 @@ export LSAN_OPTIONS="${SYMBOLIZER_OPTS}:${LSAN_OPTIONS:-}"
 # Upstream clang and LLVM tests do not generate the junit xml results file by default.
 # Additionally setting the --xunit-xml-output option store the
 # results.
-export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml --param=env='ASAN_OPTIONS=verify_asan_link_order=1'"
+export LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 
 # Provide the suppression file in the lit working dir so the
 # compiler-rt test `suppressions-exec-relative-location.cpp` can find it.
 SUPPRESSION_FILE="${REPO_ROOT}/build_sanitizer/bin/supp.txt"
 echo "interceptor_via_fun:crash_function" > "${SUPPRESSION_FILE}"
 
+ASAN_OPTIONS="verify_asan_link_order=1" ninja -v check-compiler-rt
+
 ninja -v check-llvm
 ninja -v check-clang
 ninja -v check-cxx
 ninja -v check-cxxabi
-ninja -v check-compiler-rt
 ninja -v check-unwind
+

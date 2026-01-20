@@ -65,6 +65,9 @@ cd "${REPO_ROOT}"/build_sanitizer
 
 export LD_LIBRARY_PATH="${REPO_ROOT}"/build_libcxx/lib:$LD_LIBRARY_PATH
 
+# Flag to disable LeakSanitizer (memory leaks detection) in AddressSanitizer.
+export ASAN_OPTIONS=verify_asan_link_order=1
+
 # Have chosen Address Sanitizer and Undefined Sanitizer to build and test.
 # These sanitizers are most commonly used and relatively easy to set-up.
 # These sanitizers will help to detect runtime issues related to use after free, 
@@ -77,13 +80,14 @@ cmake -G Ninja ../llvm \
   -DLLVM_ENABLE_ASSERTIONS=ON \
   -DCMAKE_C_COMPILER="${REPO_ROOT}/build_llvm/bin/clang" \
   -DCMAKE_CXX_COMPILER="${REPO_ROOT}/build_llvm/bin/clang++" \
-  -DLLVM_LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml \
-  --param=env='ASAN_OPTIONS=verify_asan_link_order=1'" \
+  -DLLVM_LIT_ARGS="--ignore-fail --xunit-xml-output=lit_results.junit.xml" \
   -DCMAKE_INSTALL_PREFIX=../stage3.install \
   -DLLVM_TARGETS_TO_BUILD=AArch64 \
   -DLLVM_ENABLE_PROJECTS="clang;llvm;lld" \
   -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
-  -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=OFF
+  -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=OFF \
+  -DCOMPILER_RT_TEST_COMPILER_CFLAGS="-fmacro-prefix-map=${REPO_ROOT}=." \
+  -DCOMPILER_RT_TEST_COMPILER_CXXFLAGS="-fmacro-prefix-map=${REPO_ROOT}=."
 
 ninja
 echo "==> Stage 3: Completed building clang (sanitized)"
