@@ -13,8 +13,8 @@
     },
     "newlib": {
       "url": "https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git",
-      "tagType": "tag",
-      "tag": "newlib-4.5.0"
+      "tagType": "commithash",
+      "tag": "5e5e51f1dc56a99eb4648c28e00d73b6ea44a8b0"
     }
   }
 }
