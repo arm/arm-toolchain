@@ -66,21 +66,23 @@ int uart_putc(char ch, FILE* file)
   void* __llvm_libc_stderr_cookie;
 
   void _platform_init(void) {
-  }
+    // Initialize cookies here
+    __llvm_libc_stdin_cookie = NULL;
+    __llvm_libc_stdout_cookie = NULL;
+    __llvm_libc_stderr_cookie = NULL;
+}
 
   ssize_t __llvm_libc_stdio_read(void *cookie, char *buf, size_t size) {
-    return -1;  // not implemented and not used in this sample
+    return -1;  // Not implemented and not used in this sample
   }
 
   ssize_t __llvm_libc_stdio_write(void *cookie, const char *buf, size_t size) {
+    (void) cookie; // Check for specific cookies here as needed
+
     for(size_t i = 0; i < size; i++) {
       uart_putc(buf[i], NULL);
     }
     return size;
-  }
-
-  void __llvm_libc_exit(int status) {
-    while (1);  // hang at the end
   }
 
 #else

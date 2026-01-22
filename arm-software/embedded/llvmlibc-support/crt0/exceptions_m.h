@@ -42,7 +42,7 @@ EXFN_ATTR void __print_faulting_instruction(unsigned short *ptr) {
     print_hex(first);
     print_str("\n");
   }
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void __hardfault_handler() {
@@ -126,7 +126,7 @@ EXFN_ATTR void __securefault_handler() {
 extern "C" unsigned int __systick_count = 0;
 EXFN_ATTR void __systick_handler() { __systick_count += 1; }
 
-EXFN_ATTR void __exception_handler() { abort(); }
+EXFN_ATTR void __exception_handler() { __llvm_libc_exit(1); }
 
 // Architecturally the bottom 7 bits of VTOR are zero, meaning the vector table
 // has to be 128-byte aligned, however an implementation can require more bits
@@ -177,7 +177,7 @@ void setup() {
     VTOR = reinterpret_cast<unsigned long>(&vector_table);
     if (VTOR != reinterpret_cast<unsigned long>(&vector_table)) {
       print_str("Bootcode failed to set VTOR\n");
-      abort();
+      __llvm_libc_exit(1);
     }
   }
 
