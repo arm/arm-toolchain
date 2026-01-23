@@ -8,9 +8,10 @@ installed, you can use the
 [`get_fvps.sh`](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/fvp/get_fvps.sh)
 script from the ATfE repository to install this and other FVPs.
 
-The sample requires `FVP_INSTALL_DIR` environment variable to be set to find
-the FVP. By default, it assumes that ATfE source tree is checked out and the
-FVPs are installed using the `get_fvps.sh` script above.
+The sample requires the `FVP_INSTALL_DIR` variable to be set in the environment
+or on the make command line, to find the FVP. By default, it assumes that the
+ATfE source tree is checked out and the FVPs are installed using the
+`get_fvps.sh` script above.
 
 The sample makes use of ATfE multilib variants
 [JSON files](https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded/arm-multilib/json/variants)
