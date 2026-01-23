@@ -14,17 +14,47 @@ ifndef FVP_INSTALL_DIR
     FVP_INSTALL_DIR=../../../fvp/install
 endif
 
-# From https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/armebv6m_soft_nofp_size.json#L12
-# For A-profile example, see https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/aarch64a_be.json#L12
-# For R-profile example, see https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/aarch64r_be.json#L12
+# Check if the sample is run from ATfE source tree, thus the files are available
+IN_TREE_FVP_CONFIG_DIR:=../../../fvp/config
+ifneq ($(wildcard $(IN_TREE_FVP_CONFIG_DIR)),)
+    FVP_CONFIG_DIR:=$(IN_TREE_FVP_CONFIG_DIR)
+else
+    FVP_CONFIG_DIR:=.
+endif
+
+IN_TREE_FVP_CONFIG_NAME:=../../../fvp/config/cortex-m85.cfg
+ifneq ($(wildcard $(IN_TREE_FVP_CONFIG_NAME)),)
+    FVP_CONFIG_NAME:=$(IN_TREE_FVP_CONFIG_NAME)
+else
+    FVP_CONFIG_NAME:=cortex-m85.cfg
+endif
+
+IN_TREE_LIT_EXEC_FVP:=../../../arm-runtimes/test-support/lit-exec-fvp.py
+ifneq ($(wildcard $(IN_TREE_LIT_EXEC_FVP)),)
+    LIT_EXEC_FVP:=$(IN_TREE_LIT_EXEC_FVP)
+else
+    LIT_EXEC_FVP:=lit-exec-fvp.py
+endif
+
+IN_TREE_RUN_FVP:=../../../arm-runtimes/test-support/run_fvp.py
+ifneq ($(wildcard $(IN_TREE_RUN_FVP)),)
+    RUN_FVP:=$(IN_TREE_RUN_FVP)
+else
+    RUN_FVP:=run_fvp.py
+endif
+
+# From https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/armebv6m_soft_nofp_size.json
+# see BOOT_FLASH_ADDRESS, BOOT_FLASH_SIZE, etc properties.
+# For A-profile example, see https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/aarch64a_be.json
+# For R-profile example, see https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/aarch64r_be.json
 CORSTONE_FVP_MEMORY_MAP=\
--Wl,--defsym=__boot_flash=0x01000000 \
--Wl,--defsym=__boot_flash_size=2M \
--Wl,--defsym=__flash=0x60000000 \
--Wl,--defsym=__flash_size=0x1000000 \
--Wl,--defsym=__ram=0x61000000 \
--Wl,--defsym=__ram_size=0x1000000 \
--Wl,--defsym=__stack_size=4K
+	-Wl,--defsym=__boot_flash=0x01000000 \
+	-Wl,--defsym=__boot_flash_size=2M \
+	-Wl,--defsym=__flash=0x60000000 \
+	-Wl,--defsym=__flash_size=0x1000000 \
+	-Wl,--defsym=__ram=0x61000000 \
+	-Wl,--defsym=__ram_size=0x1000000 \
+	-Wl,--defsym=__stack_size=4K
 
 build: hello.elf
 
@@ -32,24 +62,28 @@ hello.elf: *.c
 	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) $(MATH_LIB) -g $(CORSTONE_FVP_MEMORY_MAP) -T $(LIBC_LD_FILE) -o hello.elf $^
 
 setup:
-	# Download helper files and scripts if missing
-	@if [ ! -f lit-exec-fvp.py ]; then \
+	# Download helper files and scripts to current folder if missing:
+	# - Not available in tree, and
+	# - Not yet downloaded to the current folder.
+	@if [ ! -f $(LIT_EXEC_FVP) ]; then \
 		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/arm-runtimes/test-support/lit-exec-fvp.py; \
 	fi
-	@if [ ! -f run_fvp.py ]; then \
+	@if [ ! -f $(RUN_FVP) ]; then \
 		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/arm-runtimes/test-support/run_fvp.py; \
 	fi
-	@if [ ! -f cortex-m85.cfg ]; then \
+	@if [ ! -f $(FVP_CONFIG_NAME) ]; then \
 		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/fvp/config/cortex-m85.cfg; \
 	fi
 
 run: setup hello.elf
-# From https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/armebv6m_soft_nofp_size.json#L10
-# In case of ATfE tree checkout, set --fvp-config-dir=$(FVP_INSTALL_DIR)/../config to use existing config files.
-	python3 lit-exec-fvp.py --verbose --fvp-install-dir=$(FVP_INSTALL_DIR) --fvp-config-dir=. \
---fvp-model=corstone-310 \
---fvp-config=cortex-m85 \
-hello.elf
+# From https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/armebv6m_soft_nofp_size.json
+# see FVP_MODEL and FVP_CONFIG properties.
+	python3 $(LIT_EXEC_FVP) --verbose \
+		--fvp-install-dir=$(FVP_INSTALL_DIR) \
+		--fvp-config-dir=$(FVP_CONFIG_DIR) \
+		--fvp-model=corstone-310 \
+		--fvp-config=cortex-m85 \
+		hello.elf
 
 clean:
 	rm -f *.elf
@@ -59,4 +93,4 @@ clean:
 	rm -f :semihosting-features
 	rm -fr __pycache__
 
-.PHONY: clean run debug
+.PHONY: clean setup run
