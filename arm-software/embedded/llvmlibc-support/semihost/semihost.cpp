@@ -114,4 +114,11 @@ void _platform_init(void) {
   stdio_open(&__llvm_libc_stdout_cookie, OPENMODE_W);
   stdio_open(&__llvm_libc_stderr_cookie, OPENMODE_W);
 }
+
+// Debug output
+void _platform_debug_putc(int c) {
+  unsigned char ch = (unsigned char)c;
+
+  __llvm_libc_stdio_write(&__llvm_libc_stderr_cookie, (const char *)&ch, 1);
+}
 } // extern "C"

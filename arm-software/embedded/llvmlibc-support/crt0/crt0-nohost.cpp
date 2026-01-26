@@ -11,6 +11,9 @@ extern "C" {
 // Do nothing for platform initialization
 [[gnu::weak]] void _platform_init() {}
 
+// Do nothing for debug output
+[[gnu::weak]] void _platform_debug_putc(int c) { (void)c; }
+
 // Go into busy infinite loop on exit
 [[gnu::weak, noreturn]] void __llvm_libc_exit(int status) {
   (void)status;
