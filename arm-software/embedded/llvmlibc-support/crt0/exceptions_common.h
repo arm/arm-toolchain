@@ -24,26 +24,11 @@ namespace exceptions {
 // not yet be initialized at the time an exception occurs, or the exception
 // could be a result of an error in stdio itself.
 
-EXFN_ATTR inline void print_char(unsigned int c) {
-#ifdef __ARM_ARCH_ISA_A64
-#define REG "x"
-#define INSTR "hlt 0xf000"
-#else
-#define REG "r"
-#if __ARM_ARCH_PROFILE == 'M'
-#define INSTR "bkpt 0xab"
-#elif defined(__thumb__)
-#define INSTR "svc 0xab"
-#else
-#define INSTR "svc 0x123456"
-#endif
-#endif
-  register long v __asm__(REG "0") = 3; // SYS_WRITEC
-  register const void *p __asm__(REG "1") = &c;
-  __asm__ __volatile__(INSTR : "+r"(v), "+r"(p) : : "memory", "cc");
-#undef REG
-#undef INSTR
-}
+// The output is delegated to the platform specific handler:
+
+extern "C" void _platform_debug_putc(int c);
+
+EXFN_ATTR inline void print_char(int c) { _platform_debug_putc(c); }
 
 EXFN_ATTR inline void print_str(const char *str) {
   for (const char *p = str; *p; ++p)
