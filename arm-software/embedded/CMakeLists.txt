@@ -445,18 +445,6 @@ foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
             message(WARNING "llvmlibc samples directory not found at ${_llvmlibc_samples_dir}; skipping sample installation.")
         endif()
 
-        # LLVM libc lacks a configuration for AArch64, but the AArch32 one works
-        # fine. However, setting the configuration for both architectures to the
-        # arm config directory means the baremetal config.json is never loaded,
-        # as it resides in the directory above. To ensure both are used, copy
-        # them to the same location and point libc to that.
-        set(LIBC_CFG_DIR ${CMAKE_BINARY_DIR}/llvmlibc-config)
-        file(COPY
-            ${llvmproject_src_dir}/libc/config/baremetal/config.json
-            ${llvmproject_src_dir}/libc/config/baremetal/arm/.
-            DESTINATION
-            ${LIBC_CFG_DIR}
-        )
     endif()
 endforeach()
 list(REMOVE_DUPLICATES LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS)
