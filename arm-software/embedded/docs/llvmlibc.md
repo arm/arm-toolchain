@@ -73,6 +73,7 @@ clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles 
 >   * `void _platform_setup_arch_extensions()`
 >   * `void _platform_init()`
 >   * `void _platform_debug_putc(int c)`
+>   * `int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv, int max_argv)`
 >   * `void __llvm_libc_exit(int status)`
 > * `-lcrt0-semihost` startup library to be used with the semihosting library
 > `-lsemihost`.
