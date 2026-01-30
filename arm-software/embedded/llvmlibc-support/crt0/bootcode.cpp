@@ -40,7 +40,13 @@ void do_start() {
 
   __libc_init_array();
   _platform_init();
-  exit(main(0, 0));
+
+  char cmdline[256];
+  const char *argv[8];
+  int argc = _platform_get_argv(cmdline, sizeof(cmdline), argv,
+                                sizeof(argv) / sizeof(argv[0]));
+
+  exit(main(argc, argv));
 }
 } // namespace
 
