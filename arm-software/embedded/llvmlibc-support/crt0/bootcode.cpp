@@ -45,6 +45,9 @@ using namespace bootcode;
 int main(int argc, const char **argv);
 extern "C" void __libc_init_array();
 extern "C" void _platform_init();
+extern "C" void _platform_setup_exceptions();
+extern "C" void _platform_setup_memory();
+extern "C" void _platform_setup_arch_extensions();
 
 extern char __data_source[];
 extern char __data_start[];
@@ -60,9 +63,9 @@ namespace {
 [[gnu::target("branch-protection=none")]]
 #endif
 void do_start() {
-  exceptions::setup();
-  memory::setup();
-  misc::setup();
+  _platform_setup_exceptions();
+  _platform_setup_memory();
+  _platform_setup_arch_extensions();
 
   // Perform the equivalent of scatterloading
   memcpy(__data_start, __data_source, reinterpret_cast<size_t>(__data_size));

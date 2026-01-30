@@ -154,7 +154,7 @@ const vtable_t vector_table[] = {
     __systick_handler,                    // SysTick
 };
 
-void setup() {
+extern "C" [[gnu::weak]] void _platform_setup_exceptions() {
   // It's implementation-defined whether VTOR is writable, and if it is
   // writeable then it's implementation-defined how many of the bottom bits are
   // zero (though it must be at least 7). First try setting the top bit to see

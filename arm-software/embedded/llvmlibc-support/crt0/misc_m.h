@@ -18,7 +18,7 @@ namespace misc {
 
 using namespace sysreg;
 
-void setup() {
+extern "C" [[gnu::weak]] void _platform_setup_arch_extensions() {
 #ifdef __ARM_FP
   // CPACR enable access to vfp and simd
   CPACR.CP10 = 0x3;
@@ -35,7 +35,6 @@ void setup() {
 
   // Enable low-overhead-branch cache (does nothing if there's no LOB)
   CCR.LOB = 1;
-
 }
 
 } // namespace misc

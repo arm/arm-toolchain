@@ -66,9 +66,14 @@ clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles 
 > For easier migration from picolibc to LLVM libc, use the following startup
 > libraries:
 > * `-lcrt0` the default startup library that provides initialization and exit
-> for not hosted environments. You can override `void _platform_init()`,
-> `void _platform_debug_putc(int c)` and/or
-> `void __llvm_libc_exit(int status)` in your application.
+>   for not hosted environments. You can override one or more of the following
+>   functions in your application:
+>   * `void _platform_setup_exceptions()`
+>   * `void _platform_setup_memory()`
+>   * `void _platform_setup_arch_extensions()`
+>   * `void _platform_init()`
+>   * `void _platform_debug_putc(int c)`
+>   * `void __llvm_libc_exit(int status)`
 > * `-lcrt0-semihost` startup library to be used with the semihosting library
 > `-lsemihost`.
 > * `-lcrt0-none` an empty library, you have to provide the `_start` symbol.
