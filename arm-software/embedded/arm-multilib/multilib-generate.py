@@ -212,6 +212,17 @@ def generate_fpus(args):
     print()
 
 
+def get_target_list(clang):
+    output = subprocess.check_output([clang, "-print-targets"], stderr=subprocess.STDOUT).decode()
+
+    targets = []
+    for line in output.split("\n"):
+        parts = line.split(maxsplit=2)
+        if len(parts) == 2 and parts[1] == "-":
+            targets.append(parts[0])
+    return targets
+
+
 def get_extension_list(clang, triple):
     """Extract the list of architecture extension flags from clang, by running
     it with the --print-supported-extensions option."""
@@ -336,15 +347,16 @@ All available -march extensions for AArch64
 
 
 def generate_extensions(args):
-    aarch64_features = get_extension_list(args.clang, "aarch64-none-eabi")
-    aarch32_features = get_extension_list(args.clang, "arm-none-eabi")
-    all_features = list(aarch64_features)
-    # Combine the aarch64 and aarch32 lists without duplication.
-    # Casting to sets and merging would be simpler, but creates
-    # non-deterministic output.
-    all_features.extend(
-        feat for feat in list(aarch32_features) if feat not in all_features
-    )
+    all_features = []
+    supported_targets = get_target_list(args.clang)
+    for target in ["arm", "aarch64"]:
+        if target in supported_targets:
+            # Combine the aarch64 and aarch32 lists without duplication.
+            # Casting to sets and merging would be simpler, but creates
+            # non-deterministic output.
+            for feat in get_extension_list(args.clang, target + "-none-eabi"):
+                if feat not in all_features:
+                    all_features.append(feat)
 
     print("# Expand -march=...+[no]feature... into individual options we can match")
     print("# on. We use 'armvX' to represent a feature applied to any architecture, so")

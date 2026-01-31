@@ -117,7 +117,7 @@ set(LLVM_TOOLCHAIN_MULTILIB_JSON
     "JSON file defining the multilib."
 )
 set(LLVM_TOOLCHAIN_LIBRARY_VARIANTS
-    "all" CACHE STRING
+    "armv7m_hard_fpv4_sp_d16_unaligned" CACHE STRING
     "Build only the specified library variants, or \"all\"."
 )
 option(
@@ -150,8 +150,8 @@ set(PARALLEL_LIB_BUILD_LEVELS
 )
 option(
     ENABLE_QEMU_TESTING
-    "Enable tests that use QEMU. This option is ON by default."
-    ON
+    "Enable tests that use QEMU. This option is OFF by default because Rocky Linux 8 does not come with qemu-system-arm installed."
+    OFF
 )
 option(
     ENABLE_FVP_TESTING
@@ -277,21 +277,20 @@ if(LLVM_TOOLCHAIN_ENABLED_LIBCS_COUNT GREATER 1)
     set(LLVM_TOOLCHAIN_MULTI_LIB_BUILD ON)
 endif()
 
-set(BUG_REPORT_URL "https://github.com/arm/arm-toolchain/issues" CACHE STRING "")
+set(BUG_REPORT_URL "https://github.com/fprime-community/fprime-vorago/issues" CACHE STRING "")
 set(LLVM_DISTRIBUTION_COMPONENTS
     clang-resource-headers
     clang
-    clangd
-    clang-check
     clang-format
-    clang-scan-deps
     dsymutil
     elf2bin
     lld
     llvm-ar
+    llvm-as
     llvm-config
     llvm-cov
     llvm-cxxfilt
+    llvm-dis
     llvm-dwarfdump
     llvm-mc
     llvm-nm
@@ -317,14 +316,16 @@ set(LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS
     CACHE STRING "Components defined by this CMakeLists that should be
 installed by the install-llvm-toolchain target"
 )
-set(LLVM_ENABLE_PROJECTS clang;clang-tools-extra;lld CACHE STRING "")
-set(LLVM_TARGETS_TO_BUILD AArch64;ARM CACHE STRING "")
-set(LLVM_DEFAULT_TARGET_TRIPLE aarch64-unknown-linux-gnu CACHE STRING "")
+set(LLVM_ENABLE_PROJECTS clang;lld CACHE STRING "")
+set(LLVM_TARGETS_TO_BUILD ARM CACHE STRING "")
+set(LLVM_DEFAULT_TARGET_TRIPLE thumbv7m-unknown-none-eabi CACHE STRING "")
 set(LLVM_APPEND_VC_REV OFF CACHE BOOL "")
 set(LLVM_ENABLE_TERMINFO OFF CACHE BOOL "")
 set(LLVM_ENABLE_ZSTD OFF CACHE BOOL "")
 set(LLVM_ENABLE_LIBXML2 OFF CACHE BOOL "")
 set(CLANG_DEFAULT_LINKER lld CACHE STRING "")
+set(CLANG_DEFAULT_RTLIB compiler-rt CACHE STRING "")
+set(CLANG_DEFAULT_CXX_STDLIB libc++ CACHE STRING "")
 
 # Default to a release build
 # (CMAKE_BUILD_TYPE is a special CMake variable so if you want to set
@@ -333,7 +334,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE BOOL "" FORCE)
 endif()
 
-set(CMAKE_OSX_ARCHITECTURES arm64;x86_64 CACHE STRING "")
+# FIXME: If we set CMAKE_OS_ARCHITECTURES, our C++ toolchain will be asked to
+# use AVX512 instructions on ARM64, which does not make any sense... so empty
+# this string for now.
+set(CMAKE_OSX_ARCHITECTURES "" CACHE STRING "")
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
@@ -503,12 +507,12 @@ get_directory_property(LLVM_VERSION_PATCH DIRECTORY ${llvmproject_src_dir}/llvm 
 project(
     ArmToolchainForEmbedded
     VERSION ${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH}
-    DESCRIPTION "Arm Toolchain for Embedded"
-    HOMEPAGE_URL "https://github.com/arm/arm-toolchain"
+    DESCRIPTION "JPL distribution of the LLVM Arm Toolchain for Embedded"
+    HOMEPAGE_URL "https://github.com/fprime-community/llvm-vorago-arm-toolchain"
 )
 
 # Set package name for shorter archive file name
-set(SHORT_PACKAGE_NAME "ATfE")
+set(SHORT_PACKAGE_NAME "LVAT")
 
 # Set directory name containing CFI ignore file
 set(TARGET_CFI_DIR
@@ -602,12 +606,7 @@ if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
     list(GET LLVM_TOOLCHAIN_ENABLED_LIBCS 0 _overlay_package_libc)
     set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${_overlay_package_libc}-overlay-${PACKAGE_VERSION})
 else()
-    if(LLVM_TOOLCHAIN_MULTI_LIB_BUILD OR LLVM_TOOLCHAIN_PRIMARY_LIBC STREQUAL "picolibc")
-        set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
-    else()
-        string(JOIN "+" LLVM_TOOLCHAIN_LIBC_SET ${LLVM_TOOLCHAIN_ENABLED_LIBCS})
-        set(PACKAGE_FILE_NAME ${PACKAGE_NAME}_${LLVM_TOOLCHAIN_LIBC_SET}-${PACKAGE_VERSION}-${CPACK_SYSTEM_NAME})
-    endif()
+    set(PACKAGE_FILE_NAME ${PACKAGE_NAME}-${CPACK_SYSTEM_NAME})
 endif()
 set(CPACK_PACKAGE_FILE_NAME ${PACKAGE_FILE_NAME})
 

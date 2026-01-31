@@ -1,20 +1,22 @@
-# Arm Toolchain
+# F Prime ARM Vorago Toolchain
 
-Welcome to the Arm Toolchain project!
+This repository contains the fork of the Arm Toolchain project for the
+[F Prime Vorago support package][1], intended to help build software
+for the VA41630 microcontroller. The Arm Toolchain project is a fork of
+the LLVM project.
 
-This repository contains the source code for the Arm Toolchain
-project, a fork of the LLVM project containing build scripts and
-auxiliary material for building LLVM based toolchains targeting
-Arm for bare-metal or native AArch64 Linux environments.
+ [1]: https://github.com/fprime-community/fprime-vorago
 
-## Goal
+The binaries built under this project are compatible with RHEL 8.
 
-This project aims to provide an LLVM based platform containing
-the necessary libraries and tools for building C and C++ toolchains
-for:
-* Bare-metal: [Arm Toolchain for Embedded](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/README.md)
-* Native AArch64 Linux: [Arm Toolchain for Linux](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/linux/README.md)
+# Limitations
 
-## Quick Links
+For compactness, this toolchain supports only armv7m_hard_fpv4_sp_d16_unaligned
+and not any other ARM variants. Other variants will need to be added to
+LLVM_TOOLCHAIN_LIBRARY_VARIANTS in arm-software/embedded/CMakeLists.txt.
 
-Getting binary [releases](https://github.com/arm/arm-toolchain/releases) • Getting started for [Embedded](arm-software/embedded/README.md#getting-started) and [Linux](arm-software/linux/README.md#usage) • Reporting [issues](CONTRIBUTING.md#report-an-issue) • [Contributing](CONTRIBUTING.md)
+# Reporting Issues
+
+Please report issues under [fprime-community/fprime-vorago][2].
+
+ [2]: https://github.com/fprime-community/fprime-vorago/issues

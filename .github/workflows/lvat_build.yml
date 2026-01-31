@@ -1,0 +1,49 @@
+name: LVAT Build
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build-toolchain:
+    name: Build for ${{ matrix.host }}
+    runs-on: ${{ matrix.runner }}
+    if: github.repository == 'fprime-community/llvm-vorago-arm-toolchain'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            host: x86_64
+          - runner: ubuntu-24.04-arm
+            host: arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Apply llvm-project patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project
+
+      - name: Apply llvm-project-perf patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
+
+      - name: Apply picolibc patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --repo_dir picolibc --method apply arm-software/embedded/patches/picolibc
+
+      - name: Build Dockerfile
+        run: docker build -t local .
+
+      - name: Build Toolchain
+        run: docker run -v .:/src -w /src local ./lvat_build.sh
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: LVAT-${{ matrix.host }}
+          path: |
+            build/LVAT-*.tar.xz
