@@ -18,6 +18,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - Core clang tools (`clang-check`, `clang-format`) and `clang-scan-deps` added
 to the package.
+- A new sample to show how to target and run code with an Arm FVP
+(Fixed Virtual Platform).
 
 ### Changed
 - LLVM libc added to the main ATfE package.
