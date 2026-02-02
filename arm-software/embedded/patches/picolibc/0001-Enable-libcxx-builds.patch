@@ -1,4 +1,4 @@
-From a59afdaf3697da7a1cfc62e0f957be780d6ae11a Mon Sep 17 00:00:00 2001
+From 16cdfded8054ebc099bce628292c1530aaba01b1 Mon Sep 17 00:00:00 2001
 From: Simi Pallipurath <simi.pallipurath@arm.com>
 Date: Thu, 14 Nov 2024 10:07:08 +0000
 Subject: Enable libcxx builds
@@ -11,10 +11,10 @@ libc++ builds.
  2 files changed, 15 insertions(+)
 
 diff --git a/meson.build b/meson.build
-index f33d011b2..2c653de02 100644
+index 37bdf8b407..3026dac4ae 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -1340,6 +1340,18 @@ NEWLIB_MAJOR_VERSION=4
+@@ -1545,6 +1545,18 @@ NEWLIB_MAJOR_VERSION=4
  NEWLIB_MINOR_VERSION=3
  NEWLIB_PATCHLEVEL_VERSION=0
  
@@ -34,10 +34,10 @@ index f33d011b2..2c653de02 100644
  	      cc.has_argument('-fno-tree-loop-distribute-patterns'),
  	      description: 'Compiler flag to prevent detecting memcpy/memset patterns')
 diff --git a/picolibc.ld.in b/picolibc.ld.in
-index 0bcfe4ca8..c3055c49e 100644
+index 25bced6eee..f05195c119 100644
 --- a/picolibc.ld.in
 +++ b/picolibc.ld.in
-@@ -69,6 +69,9 @@ SECTIONS
+@@ -70,6 +70,9 @@ SECTIONS
  		*(.literal.startup .text.startup .literal.startup.* .text.startup.*)
  		*(SORT(.text.sorted.*))
  		*(.literal .text .literal.* .text.* .opd .opd.* .branch_lt .branch_lt.* @EXTRA_TEXT_SECTIONS@)
