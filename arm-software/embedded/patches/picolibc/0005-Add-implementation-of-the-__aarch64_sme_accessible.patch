@@ -1,8 +1,7 @@
-From 328e99571dc59093dd0dfd7a73707abd651f69ad Mon Sep 17 00:00:00 2001
+From 47e627b5b34f8c5dc44c81e7bcb6773428601464 Mon Sep 17 00:00:00 2001
 From: Amilendra Kodithuwakku <amilendra.kodithuwakku@arm.com>
 Date: Thu, 29 Jan 2026 09:19:13 +0000
-Subject: [PATCH] [picolibc][SME] Add implementation of the
- __aarch64_sme_accessible
+Subject: Add implementation of the __aarch64_sme_accessible
 
 compiler-rt relies on the the __aarch64_sme_accessible support
 function to emit SME ABI support routines calls [1].
@@ -15,10 +14,10 @@ enabled in the underlying hardware.
  1 file changed, 8 insertions(+)
 
 diff --git a/picocrt/machine/aarch64/crt0.c b/picocrt/machine/aarch64/crt0.c
-index 41b90545f..95d37a323 100644
+index f0c864c7e0..1bf22b1123 100644
 --- a/picocrt/machine/aarch64/crt0.c
 +++ b/picocrt/machine/aarch64/crt0.c
-@@ -60,6 +60,14 @@ _set_tls(void *tls)
+@@ -61,6 +61,14 @@ _set_tls(void *tls)
      __asm__ volatile("msr tpidr_el0, %x0" : : "r"(tls - TP_OFFSET));
  }
  
@@ -34,5 +33,5 @@ index 41b90545f..95d37a323 100644
  
  /* Defined in crt0.S */
 -- 
-2.34.1
+2.43.0
 
