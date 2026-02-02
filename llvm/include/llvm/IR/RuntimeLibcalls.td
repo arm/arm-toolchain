@@ -540,6 +540,12 @@ def AEABI_MEMSET8 : RuntimeLibcall;
 def AEABI_MEMCLR : RuntimeLibcall;
 def AEABI_MEMCLR4 : RuntimeLibcall;
 def AEABI_MEMCLR8 : RuntimeLibcall;
+// Downstream change issue: #727 (AEABI Unaligned helpers)
+def AEABI_UREAD4 : RuntimeLibcall;
+def AEABI_UREAD8 : RuntimeLibcall;
+def AEABI_UWRITE4 : RuntimeLibcall;
+def AEABI_UWRITE8 : RuntimeLibcall;
+// End downstream change: #727
 
 // Hexagon calls
 def HEXAGON_MEMCPY_LIKELY_ALIGNED_MIN32BYTES_MULT8BYTES : RuntimeLibcall;
@@ -2296,6 +2302,15 @@ def __aeabi_ddiv : RuntimeLibcallImpl<DIV_F64>; // CallingConv::ARM_AAPCS
 def __aeabi_dmul : RuntimeLibcallImpl<MUL_F64>; // CallingConv::ARM_AAPCS
 def __aeabi_dsub : RuntimeLibcallImpl<SUB_F64>; // CallingConv::ARM_AAPCS
 
+// Downstream change issue: #727 (AEABI Unaligned helpers)
+// Unaligned memory access helper functions
+// RTABI chapter 5.3.3
+def __aeabi_uread4  : RuntimeLibcallImpl<AEABI_UREAD4>;  // CallingConv::ARM_AAPCS
+def __aeabi_uread8  : RuntimeLibcallImpl<AEABI_UREAD8>;  // CallingConv::ARM_AAPCS
+def __aeabi_uwrite4 : RuntimeLibcallImpl<AEABI_UWRITE4>; // CallingConv::ARM_AAPCS
+def __aeabi_uwrite8 : RuntimeLibcallImpl<AEABI_UWRITE8>; // CallingConv::ARM_AAPCS
+// End downstream change: #727
+
 defvar AEABIOverrides = [
   __eqsf2, __eqdf2,
   __nesf2, __nedf2,
@@ -2610,6 +2625,17 @@ def AEABI45MemCalls : LibcallImpls<
   let CallingConv = ARM_AAPCS;
 }
 
+// Downstream change issue: #727 (AEABI Unaligned helpers)
+// Unaligned Memory read/write operations
+// RTABI chapter 5.3.3
+def AEABIUnalignedMemCalls : LibcallImpls<
+  (add __aeabi_uread4,  __aeabi_uread8,
+       __aeabi_uwrite4, __aeabi_uwrite8),
+  RuntimeLibcallPredicate<[{hasAEABILibcalls(TT) && isAAPCS_ABI(TT, ABIName)}]>> {
+  let CallingConv = ARM_AAPCS;
+}
+// End downstream change: #727
+
 def isARMOrThumb : RuntimeLibcallPredicate<"TT.isARM() || TT.isThumb()">;
 
 def ARMSystemLibrary
@@ -2632,6 +2658,9 @@ def ARMSystemLibrary
 
            AEABICalls,
            AEABI45MemCalls,
+           // Downstream change issue: #727 (AEABI Unaligned helpers)
+           AEABIUnalignedMemCalls,
+           // End downstream change: #727
            ARMLibgccHalfConvertCalls,
            EABIHalfConvertCalls,
            GNUEABIHalfConvertCalls,
