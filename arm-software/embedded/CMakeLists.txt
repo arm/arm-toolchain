@@ -120,10 +120,6 @@ set(LLVM_TOOLCHAIN_LIBRARY_VARIANTS
     "all" CACHE STRING
     "Build only the specified library variants, or \"all\"."
 )
-# Allow callers to provide URL-encoded semicolons (\"%3B\") so that lists can
-# be passed through shell commands without extra escaping.
-string(REPLACE "%3B" ";" LLVM_TOOLCHAIN_LIBRARY_VARIANTS "${LLVM_TOOLCHAIN_LIBRARY_VARIANTS}")
-string(REPLACE "%3b" ";" LLVM_TOOLCHAIN_LIBRARY_VARIANTS "${LLVM_TOOLCHAIN_LIBRARY_VARIANTS}")
 option(
     LIBS_DEPEND_ON_TOOLS
     "Automatically ensure tools like clang are up to date before building libraries.
