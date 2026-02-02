@@ -105,6 +105,7 @@ extern "C" [[gnu::weak]] void _platform_setup_memory() {
   // Enable alignment checks when unaligned accesses are disabled
   SCTLR.A = 1;
 #endif
+  enable_cache();
 }
 
 } // namespace memory

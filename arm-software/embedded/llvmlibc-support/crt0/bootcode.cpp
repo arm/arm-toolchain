@@ -71,7 +71,6 @@ void do_start() {
   memcpy(__data_start, __data_source, reinterpret_cast<size_t>(__data_size));
   memset(__bss_start, '\0', reinterpret_cast<size_t>(__bss_size));
 
-  memory::enable_cache();
   __libc_init_array();
   _platform_init();
   exit(main(0, 0));
