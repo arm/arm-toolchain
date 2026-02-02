@@ -864,7 +864,7 @@ set(LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES "")
 foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
     if(libc STREQUAL picolibc)
         set(_libc_display_name "Picolibc")
-        set(_libc_license_names COPYING.NEWLIB COPYING.picolibc)
+        set(_libc_license_names COPYING.picolibc)
     elseif(libc STREQUAL llvmlibc)
         set(_libc_display_name "LLVM libc")
         set(_libc_license_names LIBC-LICENSE.TXT)
@@ -944,18 +944,6 @@ endwhile()
 foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
     if(libc STREQUAL picolibc)
         set(libc_license_sources "")
-        set(_picolibc_newlib_license ${picolibc_SOURCE_DIR}/COPYING.NEWLIB)
-        if(EXISTS ${_picolibc_newlib_license})
-            list(APPEND libc_license_sources
-                ${_picolibc_newlib_license}                  COPYING.NEWLIB
-            )
-        elseif(DEFINED newlib_SOURCE_DIR AND EXISTS ${newlib_SOURCE_DIR}/COPYING.NEWLIB)
-            list(APPEND libc_license_sources
-                ${newlib_SOURCE_DIR}/COPYING.NEWLIB         COPYING.NEWLIB
-            )
-        else()
-            message(WARNING "COPYING.NEWLIB was not found for picolibc; skipping installation of this license file.")
-        endif()
         if(EXISTS ${picolibc_SOURCE_DIR}/COPYING.picolibc)
             list(APPEND libc_license_sources
                 ${picolibc_SOURCE_DIR}/COPYING.picolibc     COPYING.picolibc
