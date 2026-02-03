@@ -16,7 +16,7 @@ ATfL supports quadruple precision real and complex types. ACfL does not.
 |Compiler                      |Version|
 |------------------------------|-------|
 |Arm Compiler for Linux (ACfL) |24.10  |
-|Arm Toolchain for Linux (ATfL)|21.1   |
+|Arm Toolchain for Linux (ATfL)|23.0.0 |
 
 ## ArmPL integration
 
@@ -60,16 +60,16 @@ differences in Fortran support between the two toolchains.
 
 ### Difference in Fortran features
 
-|Feature                   |ACfL                                                                                         |ATfL                                                                                                                                                                         |
-|--------------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|Base Fortran standard     |Fortran 2008                                                                                 |Fortran 2018                                                                                                                                                                 |
-|Base OpenMP Specification |OpenMP 4.0                                                                                   |OpenMP 3.1                                                                                                                                                                   |
-|Parameterized Derived Type|Supported                                                                                    |PDT Kind - Supported<br>PDT Length - Not supported                                                                                                                           |
-|Preprocessor              |Use `-cpp` to switch ON                                                                      |Always ON<br>Use `-cpp` to switch ON processing of predefined macros and macros from the command line                                                                        |
-|Directives                |`ivdep`, `prefetch`, `unroll`, `nounroll`, `vector always`, `vector vectorlength`, `novector`|`unroll`, `unroll_and_jam`, `nounroll`, `nounroll_and_jam`, `vector always`, `novector`, `fixed`, `free`, `ignore_tkr`, `assume_aligned`, `inline`, `forceinline`, `noinline`|
-|Line length               |2100                                                                                         |Unlimited                                                                                                                                                                    |
-|Recursive functions       |Use `-frecursive`                                                                            |Default                                                                                                                                                                      |
-|Main function             |Is a library linked at link-time                                                             |Is generated in the object file containing the program statement                                                                                                             |
+|Feature                   |ACfL                                                                                         |ATfL                                                                                                                                                                                                                     |
+|--------------------------|---------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|Base Fortran standard     |Fortran 2008                                                                                 |Fortran 2018                                                                                                                                                                                                             |
+|Base OpenMP Specification |OpenMP 4.0                                                                                   |OpenMP 3.1                                                                                                                                                                                                               |
+|Parameterized Derived Type|Supported                                                                                    |PDT Kind - Supported<br>PDT Length - Not supported                                                                                                                                                                       |
+|Preprocessor              |Use `-cpp` to switch ON                                                                      |Always ON<br>Use `-cpp` to switch ON processing of predefined macros and macros from the command line                                                                                                                    |
+|Directives                |`ivdep`, `prefetch`, `unroll`, `nounroll`, `vector always`, `vector vectorlength`, `novector`|`ivdep`, `prefetch`, `unroll`, `unroll_and_jam`, `nounroll`, `nounroll_and_jam`, `vector always`, `vector vectorlength`, `novector`, `fixed`, `free`, `ignore_tkr`, `assume_aligned`, `inline`, `forceinline`, `noinline`|
+|Line length               |2100                                                                                         |Unlimited                                                                                                                                                                                                                |
+|Recursive functions       |Use `-frecursive`                                                                            |Default                                                                                                                                                                                                                  |
+|Main function             |Is a library linked at link-time                                                             |Is generated in the object file containing the program statement                                                                                                                                                         |
 
 ### Difference in command-line flags
 
@@ -96,8 +96,8 @@ The following table summarises the macros predefined in the
 |`__aarch64__`         |`__arch64__`          |`1`          |Selection of architecture dependent source at compile time|
 |`__ARM_ARCH`          |N/A                   |`8`          |Selection of architecture dependent source at compile time|
 |`__ARM_ARCH__`        |N/A                   |`8`          |Selection of architecture dependent source at compile time|
-|`__armflang_major__`  |`__flang_major__`     |`24`/`21`    |Underlying LLVM version details                           |
-|`__armflang_minor__`  |`__flang_minor__`     |`10`/`1`     |Underlying LLVM version details                           |
+|`__armflang_major__`  |`__flang_major__`     |`24`/`23`    |Underlying LLVM version details                           |
+|`__armflang_minor__`  |`__flang_minor__`     |`10`/`0`     |Underlying LLVM version details                           |
 |`__armflang_version__`|`__flang_patchlevel__`|`24.10.1`/`0`|Underlying LLVM version details                           |
 |`__linux__`           |`__linux__`           |`1`          |Targeted Operating System                                 |
 |`__linux`             |`__linux__`           |`1`          |Targeted Operating System                                 |
