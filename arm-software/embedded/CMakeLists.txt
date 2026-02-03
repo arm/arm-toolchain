@@ -208,6 +208,8 @@ set(BUG_REPORT_URL "https://github.com/arm/arm-toolchain/issues" CACHE STRING ""
 set(LLVM_DISTRIBUTION_COMPONENTS
     clang-resource-headers
     clang
+    clang-check
+    clang-format
     clang-scan-deps
     dsymutil
     elf2bin
