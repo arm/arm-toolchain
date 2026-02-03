@@ -12,6 +12,7 @@
 #include <stddef.h>
 #include <time.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 namespace {
 
@@ -125,29 +126,47 @@ void _platform_debug_putc(int c) {
 // Provide command line options (argc/argv) for the main function
 
 // Supported features:
-// - Dummy program name is provided as argv[0].
 // - Arguments are split by whitespace.
 // - Quoted text is copied as-is: "a b c " or 'a b c ' will keep all spaces.
 //   Not closed quote will run till the end of the provided line.
 // - Escape sequences: \\, \' , \" and \  to put \, ', " and space respectively.
 
-static int is_space(char c) {
-  return (c == ' ' || c == '\t' || c == '\r' || c == '\n');
+static int estimate_cmdline_argc(const char *cmdline) {
+  if (!cmdline)
+    return -1;
+
+  int argc = 0;
+  const char *p = cmdline;
+
+  while (*p != '\0') {
+    // Skip leading whitespace
+    while (*p != '\0' && isspace(*p))
+      ++p;
+
+    if (*p == '\0')
+      break;
+
+    // Found start of an argument
+    ++argc;
+
+    // Skip non-whitespace until next whitespace separator
+    while (*p != '\0' && !isspace(*p))
+      ++p;
+  }
+
+  return argc + 1;
 }
 
-static int parse_cmdline_buf(char *buf, const char **argv, int max_args) {
-  if (!buf || !argv || max_args <= 0)
+static int parse_cmdline_buf(char *buf, const char **argv, int max_argv) {
+  if (!buf || !argv || max_argv <= 0)
     return 0;
 
-  // Provide a dummy program name
-  argv[0] = "program";
-  int argc = 1;
-
+  int argc = 0;
   char *p = buf;
-  while (is_space(*p))
+  while (isspace(*p))
     ++p;
 
-  while (*p != '\0' && argc < max_args - 1) {
+  while (*p != '\0' && argc < max_argv - 1) {
     // Start of token
     argv[argc++] = p;
 
@@ -168,8 +187,8 @@ static int parse_cmdline_buf(char *buf, const char **argv, int max_args) {
       } else if (quote && c == quote) {
         quote = '\0'; // End quoted section
         continue;
-      } else if (!quote && is_space(c)) {
-        break; // end of token
+      } else if (!quote && isspace(c)) {
+        break; // End of token
       }
 
       *w++ = c;
@@ -177,23 +196,23 @@ static int parse_cmdline_buf(char *buf, const char **argv, int max_args) {
 
     *w = '\0'; // Null-terminate token
 
-    while (is_space(*p))
+    while (isspace(*p))
       ++p;
   }
 
-  argv[argc] = NULL;
+  argv[argc] = nullptr;
   return argc;
 }
 
+// Parse the command line into argc/argv for the main function
+// Return estimated number of arguments if argv == nullptr
 int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv,
-                       int max_args) {
-  if (!argv || max_args <= 0)
-    return 0;
-
-  argv[0] = nullptr;
-
+                       int max_argv) {
   if (!cmdline || max_cmdline <= 0)
-    return 0;
+    return -1;
+
+  if (argv && max_argv <= 0)
+    return -1;
 
   struct {
     char *buf;
@@ -201,15 +220,11 @@ int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv,
   } get_cmdline_args = {cmdline, max_cmdline};
 
   if (semihosting_call(SYS_GET_CMDLINE, &get_cmdline_args) != 0)
-    return 0;
+    return -1;
 
-  int len = get_cmdline_args.len;
-  if (len < 0)
-    len = 0;
-  if (len >= max_cmdline)
-    len = max_cmdline - 1;
-  cmdline[len] = '\0';
+  if (argv == nullptr)
+    return estimate_cmdline_argc(cmdline);
 
-  return parse_cmdline_buf(cmdline, argv, max_args);
+  return parse_cmdline_buf(cmdline, argv, max_argv);
 }
 } // extern "C"

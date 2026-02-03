@@ -41,12 +41,50 @@ void do_start() {
   __libc_init_array();
   _platform_init();
 
-  char cmdline[256];
-  const char *argv[8];
-  int argc = _platform_get_argv(cmdline, sizeof(cmdline), argv,
-                                sizeof(argv) / sizeof(argv[0]));
+  // Provide command line options (argc/argv) for the main function
+  char *cmdline = nullptr;
+  int max_cmdline = 256; // Arm semihosting requires at least 80 bytes
+                         // There is no API to get the actual size of the line
+  const char **argv = nullptr;
+  int max_argv = 0;
+  int argc = 0;
+  int status = 1; // Report error on early returns
 
-  exit(main(argc, argv));
+  // Allocate the buffer for the command line
+  cmdline = static_cast<char *>(malloc(static_cast<size_t>(max_cmdline)));
+  if (!cmdline) {
+    exceptions::print_str(
+        "ERROR: libc cannot allocate memory for command line options.\n");
+    goto free_and_exit;
+  }
+
+  // Probe for number of arguments and allocate the buffer for argv[]
+  max_argv = _platform_get_argv(cmdline, max_cmdline, nullptr, 0);
+  if (max_argv <= 0) {
+    exceptions::print_str(
+        "ERROR: _platform_get_argv failed, command line may be too long.\n");
+    goto free_and_exit;
+  }
+  argv = static_cast<const char **>(
+      malloc(sizeof(*argv) * static_cast<size_t>(max_argv)));
+  if (!argv) {
+    exceptions::print_str("ERROR: libc cannot allocate memory for argv[].\n");
+    goto free_and_exit;
+  }
+
+  // Finally, parse the comand line into argc/argv[]
+  argc = _platform_get_argv(cmdline, max_cmdline, argv, max_argv);
+  if (argc < 0) {
+    exceptions::print_str("ERROR: libc cannot parse the command line.\n");
+    goto free_and_exit;
+  }
+
+  status = main(argc, argv);
+
+free_and_exit:
+  free(cmdline);
+  free(argv);
+  exit(status);
 }
 } // namespace
 
