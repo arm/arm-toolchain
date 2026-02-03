@@ -238,23 +238,26 @@ endif()
 list(REMOVE_DUPLICATES LLVM_TOOLCHAIN_ENABLED_LIBCS)
 
 if(NOT LLVM_TOOLCHAIN_ENABLED_LIBCS)
-    message(FATAL_ERROR
-        "At least one C library must be enabled. Set LLVM_TOOLCHAIN_ENABLE_PICOLIBC, "
-        "LLVM_TOOLCHAIN_ENABLE_NEWLIB or LLVM_TOOLCHAIN_ENABLE_LLVMLIBC to ON.")
+    message(WARNING
+        "No C libraries are enabled. Only the compiler will be built. "
+        "Set LLVM_TOOLCHAIN_ENABLE_PICOLIBC, LLVM_TOOLCHAIN_ENABLE_NEWLIB "
+        "or LLVM_TOOLCHAIN_ENABLE_LLVMLIBC to ON to build runtimes.")
 endif()
 
-list(GET LLVM_TOOLCHAIN_ENABLED_LIBCS 0 LLVM_TOOLCHAIN_PRIMARY_LIBC)
-set(LLVM_TOOLCHAIN_C_LIBRARY ${LLVM_TOOLCHAIN_PRIMARY_LIBC} CACHE STRING "" FORCE)
+if(LLVM_TOOLCHAIN_ENABLED_LIBCS)
+    list(GET LLVM_TOOLCHAIN_ENABLED_LIBCS 0 LLVM_TOOLCHAIN_PRIMARY_LIBC)
+    set(LLVM_TOOLCHAIN_C_LIBRARY ${LLVM_TOOLCHAIN_PRIMARY_LIBC} CACHE STRING "" FORCE)
 
-if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
-    list(LENGTH LLVM_TOOLCHAIN_ENABLED_LIBCS _overlay_libc_count)
-    if(NOT _overlay_libc_count EQUAL 1)
-        message(FATAL_ERROR
-            "Overlay builds require exactly one enabled C library. "
-            "Enable a single LLVM_TOOLCHAIN_ENABLE_* option when using overlays.")
-    endif()
-    if(LLVM_TOOLCHAIN_PRIMARY_LIBC STREQUAL "picolibc")
-        message(FATAL_ERROR "LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL is only permitted for C libraries other than the default picolibc")
+    if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
+        list(LENGTH LLVM_TOOLCHAIN_ENABLED_LIBCS _overlay_libc_count)
+        if(NOT _overlay_libc_count EQUAL 1)
+            message(FATAL_ERROR
+                "Overlay builds require exactly one enabled C library. "
+                "Enable a single LLVM_TOOLCHAIN_ENABLE_* option when using overlays.")
+        endif()
+        if(LLVM_TOOLCHAIN_PRIMARY_LIBC STREQUAL "picolibc")
+            message(FATAL_ERROR "LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL is only permitted for C libraries other than the default picolibc")
+        endif()
     endif()
 endif()
 list(LENGTH LLVM_TOOLCHAIN_ENABLED_LIBCS LLVM_TOOLCHAIN_ENABLED_LIBCS_COUNT)
