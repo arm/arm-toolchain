@@ -172,26 +172,27 @@ set(LLVM_TOOLCHAIN_C_LIBRARY
 set_property(CACHE LLVM_TOOLCHAIN_C_LIBRARY
     PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
-set(_enable_picolibc_default ON)
+option(LLVM_TOOLCHAIN_ENABLE_PICOLIBC "Enable building picolibc runtime" ON)
+option(LLVM_TOOLCHAIN_ENABLE_NEWLIB "Enable building newlib runtime" OFF)
+option(LLVM_TOOLCHAIN_ENABLE_LLVMLIBC "Enable building LLVM libc runtime" OFF)
+
 if(LLVM_TOOLCHAIN_C_LIBRARY)
     message(WARNING
         "LLVM_TOOLCHAIN_C_LIBRARY is deprecated; set LLVM_TOOLCHAIN_ENABLE_PICOLIBC/NEWLIB/LLVMLIBC instead.")
+    if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "picolibc")
+        set(LLVM_TOOLCHAIN_ENABLE_PICOLIBC ON CACHE BOOL "" FORCE)
+        set(LLVM_TOOLCHAIN_ENABLE_NEWLIB OFF CACHE BOOL "" FORCE)
+        set(LLVM_TOOLCHAIN_ENABLE_LLVMLIBC OFF CACHE BOOL "" FORCE)
+    elseif(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
+        set(LLVM_TOOLCHAIN_ENABLE_PICOLIBC OFF CACHE BOOL "" FORCE)
+        set(LLVM_TOOLCHAIN_ENABLE_NEWLIB ON CACHE BOOL "" FORCE)
+        set(LLVM_TOOLCHAIN_ENABLE_LLVMLIBC OFF CACHE BOOL "" FORCE)
+    elseif(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "llvmlibc")
+        set(LLVM_TOOLCHAIN_ENABLE_PICOLIBC OFF CACHE BOOL "" FORCE)
+        set(LLVM_TOOLCHAIN_ENABLE_NEWLIB OFF CACHE BOOL "" FORCE)
+        set(LLVM_TOOLCHAIN_ENABLE_LLVMLIBC ON CACHE BOOL "" FORCE)
+    endif()
 endif()
-if(LLVM_TOOLCHAIN_C_LIBRARY AND NOT LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "picolibc")
-    set(_enable_picolibc_default OFF)
-endif()
-set(_enable_newlib_default OFF)
-if(LLVM_TOOLCHAIN_C_LIBRARY AND LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
-    set(_enable_newlib_default ON)
-endif()
-set(_enable_llvmlibc_default OFF)
-if(LLVM_TOOLCHAIN_C_LIBRARY AND LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "llvmlibc")
-    set(_enable_llvmlibc_default ON)
-endif()
-
-option(LLVM_TOOLCHAIN_ENABLE_PICOLIBC "Enable building picolibc runtime" ${_enable_picolibc_default})
-option(LLVM_TOOLCHAIN_ENABLE_NEWLIB "Enable building newlib runtime" ${_enable_newlib_default})
-option(LLVM_TOOLCHAIN_ENABLE_LLVMLIBC "Enable building LLVM libc runtime" ${_enable_llvmlibc_default})
 
 option(
     SHORT_BUILD_PATHS
