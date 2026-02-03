@@ -166,22 +166,26 @@ set(
 )
 set(FVP_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/fvp/config")
 set(LLVM_TOOLCHAIN_C_LIBRARY
-    "picolibc" CACHE STRING
-    "Legacy compatibility hook for selecting a single C library."
+    "" CACHE STRING
+    "Deprecated legacy hook for selecting a single C library. Use LLVM_TOOLCHAIN_ENABLE_PICOLIBC, LLVM_TOOLCHAIN_ENABLE_NEWLIB, or LLVM_TOOLCHAIN_ENABLE_LLVMLIBC instead."
 )
 set_property(CACHE LLVM_TOOLCHAIN_C_LIBRARY
     PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
 set(_enable_picolibc_default ON)
-if(NOT LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "picolibc")
+if(LLVM_TOOLCHAIN_C_LIBRARY)
+    message(WARNING
+        "LLVM_TOOLCHAIN_C_LIBRARY is deprecated; set LLVM_TOOLCHAIN_ENABLE_PICOLIBC/NEWLIB/LLVMLIBC instead.")
+endif()
+if(LLVM_TOOLCHAIN_C_LIBRARY AND NOT LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "picolibc")
     set(_enable_picolibc_default OFF)
 endif()
 set(_enable_newlib_default OFF)
-if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
+if(LLVM_TOOLCHAIN_C_LIBRARY AND LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
     set(_enable_newlib_default ON)
 endif()
 set(_enable_llvmlibc_default OFF)
-if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "llvmlibc")
+if(LLVM_TOOLCHAIN_C_LIBRARY AND LLVM_TOOLCHAIN_C_LIBRARY STREQUAL "llvmlibc")
     set(_enable_llvmlibc_default ON)
 endif()
 
