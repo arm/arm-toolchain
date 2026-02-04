@@ -129,46 +129,30 @@ void _platform_debug_putc(int c) {
 // - Arguments are split by whitespace.
 // - Quoted text is copied as-is: "a b c " or 'a b c ' will keep all spaces.
 //   Not closed quote will run till the end of the provided line.
-// - Escape sequences: \\, \' , \" and \  to put \, ', " and space respectively.
+// - Escape sequences: \ copies next char as-is unless inside ' quotes
+//   or at the end of the string.
 
-static int estimate_cmdline_argc(const char *cmdline) {
-  if (!cmdline)
-    return -1;
-
-  int argc = 0;
-  const char *p = cmdline;
-
-  while (*p != '\0') {
-    // Skip leading whitespace
-    while (*p != '\0' && isspace(*p))
-      ++p;
-
-    if (*p == '\0')
-      break;
-
-    // Found start of an argument
-    ++argc;
-
-    // Skip non-whitespace until next whitespace separator
-    while (*p != '\0' && !isspace(*p))
-      ++p;
-  }
-
-  return argc + 1;
+static inline void skip_spaces(char *&p) {
+  while (isspace(static_cast<unsigned char>(*p)))
+    ++p;
 }
 
 static int parse_cmdline_buf(char *buf, const char **argv, int max_argv) {
-  if (!buf || !argv || max_argv <= 0)
-    return 0;
+  if (!buf)
+    return -1;
+  if (argv && max_argv <= 0)
+    return -1;
 
   int argc = 0;
   char *p = buf;
-  while (isspace(*p))
-    ++p;
+  skip_spaces(p);
 
-  while (*p != '\0' && argc < max_argv - 1) {
+  while (*p != '\0' && (argc < max_argv - 1 || argv == nullptr)) {
     // Start of token
-    argv[argc++] = p;
+    // If argv == nullptr count arguments only, do not change buf or argv
+    if (argv)
+      argv[argc] = p;
+    argc++;
 
     char *w = p;
     char quote = '\0';
@@ -176,32 +160,35 @@ static int parse_cmdline_buf(char *buf, const char **argv, int max_argv) {
       char c = *p++;
 
       if (c == '\\') {
-        char esc = *p; // Handle escape
-        if (esc == '\\' || esc == '"' || esc == '\'' || esc == ' ') {
-          ++p;
-          c = esc;
-        }
+        // Handle escape: copy next symbol unless inside ' quote or at the end
+        if (quote != '\'' && *p != '\0')
+          c = *p++;
       } else if (!quote && (c == '"' || c == '\'')) {
         quote = c; // Begin quoted section
         continue;
       } else if (quote && c == quote) {
         quote = '\0'; // End quoted section
         continue;
-      } else if (!quote && isspace(c)) {
+      } else if (!quote && isspace(static_cast<unsigned char>(c))) {
         break; // End of token
       }
 
-      *w++ = c;
+      if (argv)
+        *w++ = c;
     }
 
-    *w = '\0'; // Null-terminate token
+    if (argv)
+      *w = '\0'; // Null-terminate token
 
-    while (isspace(*p))
-      ++p;
+    skip_spaces(p);
   }
 
-  argv[argc] = nullptr;
-  return argc;
+  if (argv) {
+    argv[argc] = nullptr;
+    return argc;
+  }
+
+  return argc + 1; // Extra slot for the terminating nullptr in argv
 }
 
 // Parse the command line into argc/argv for the main function
@@ -221,9 +208,6 @@ int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv,
 
   if (semihosting_call(SYS_GET_CMDLINE, &get_cmdline_args) != 0)
     return -1;
-
-  if (argv == nullptr)
-    return estimate_cmdline_argc(cmdline);
 
   return parse_cmdline_buf(cmdline, argv, max_argv);
 }

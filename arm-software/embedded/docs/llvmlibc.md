@@ -154,6 +154,9 @@ following rules:
   of the provided command line will be treated as one argument.
 * To pass a quotation mark or backslash, use escape sequences: `\"`, `\'`
   and `\\` to put `"`, `'` and `\` respectively.
+  In general, `\` is treated as escape and copies the next character unless
+  inside a single quotation `'` or at the end of the provided string then it
+  does not have special meaning.
 
 When using `crt0` in a no-host environment, you can provide your own
 implementation of
@@ -166,8 +169,8 @@ to provide `argc` and `argv` to the main function:
     request the estimation of the size required for this buffer.
   * `int max_argv` - the size of `argv` array.
 * `_platform_get_argv` returns the following:
-  * Estimated required size of `argv` array including one extra space for the
-    terminator if the provided `argv` is `nullptr`.
+  * Required size of `argv` array including one extra space for the
+    terminator if the provided `argv` is `nullptr` (`max_argv` is ignored).
   * The actual number of parsed arguments - `argc` - if the provided `argv` is
     not `nullptr`.
   * `-1` in case of an error.
