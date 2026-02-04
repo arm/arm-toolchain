@@ -57,6 +57,13 @@ extern char __bss_size[];
 [[gnu::weak]] extern char __stack;
 
 namespace {
+
+extern "C" [[gnu::weak]] void _platform_init_data_segments() {
+  // Copy read-write data and clear the BSS region
+  memcpy(__data_start, __data_source, reinterpret_cast<size_t>(__data_size));
+  memset(__bss_start, '\0', reinterpret_cast<size_t>(__bss_size));
+}
+
 #ifdef __ARM_FEATURE_PAUTH
 // Disable pointer authentication, as it isn't enabled until misc::setup meaning
 // the PAC at the beginning would do nothing so the AUT at the end would fail.
@@ -67,9 +74,7 @@ void do_start() {
   _platform_setup_memory();
   _platform_setup_arch_extensions();
 
-  // Perform the equivalent of scatterloading
-  memcpy(__data_start, __data_source, reinterpret_cast<size_t>(__data_size));
-  memset(__bss_start, '\0', reinterpret_cast<size_t>(__bss_size));
+  _platform_init_data_segments();
 
   __libc_init_array();
   _platform_init();
