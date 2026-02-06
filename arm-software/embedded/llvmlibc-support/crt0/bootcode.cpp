@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h> // for exit()
 
+#include "exceptions_common.h"
 #include "platform.h"
 
 #if __ARM_ARCH_PROFILE == 'A' || __ARM_ARCH_PROFILE == 'R'
@@ -24,6 +25,8 @@ int main(int argc, const char **argv);
 extern "C" void __libc_init_array();
 
 [[gnu::weak]] extern char __stack;
+
+using namespace bootcode::exceptions;
 
 namespace {
 #ifdef __ARM_FEATURE_PAUTH
@@ -53,29 +56,28 @@ void do_start() {
   // Allocate the buffer for the command line
   cmdline = static_cast<char *>(malloc(static_cast<size_t>(max_cmdline)));
   if (!cmdline) {
-    exceptions::print_str(
-        "ERROR: libc cannot allocate memory for command line options.\n");
+    print_str("ERROR: libc cannot allocate memory for command line options.\n");
     goto free_and_exit;
   }
 
   // Probe for number of arguments and allocate the buffer for argv[]
   max_argv = _platform_get_argv(cmdline, max_cmdline, nullptr, 0) + 1;
   if (max_argv <= 0) {
-    exceptions::print_str(
+    print_str(
         "ERROR: _platform_get_argv failed, command line may be too long.\n");
     goto free_and_exit;
   }
   argv = static_cast<const char **>(
       malloc(sizeof(*argv) * static_cast<size_t>(max_argv)));
   if (!argv) {
-    exceptions::print_str("ERROR: libc cannot allocate memory for argv[].\n");
+    print_str("ERROR: libc cannot allocate memory for argv[].\n");
     goto free_and_exit;
   }
 
   // Finally, parse the comand line into argc/argv[]
   argc = _platform_get_argv(cmdline, max_cmdline, argv, max_argv);
   if (argc < 0) {
-    exceptions::print_str("ERROR: libc cannot parse the command line.\n");
+    print_str("ERROR: libc cannot parse the command line.\n");
     goto free_and_exit;
   }
 
