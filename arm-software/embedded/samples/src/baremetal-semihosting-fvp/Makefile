@@ -29,6 +29,13 @@ else
     FVP_CONFIG_NAME:=cortex-m85.cfg
 endif
 
+IN_TREE_FVP_CONFIG_NAME_AARCH64:=../../../fvp/config/v8a-aarch64.cfg
+ifneq ($(wildcard $(IN_TREE_FVP_CONFIG_NAME_AARCH64)),)
+    FVP_CONFIG_NAME_AARCH64:=$(IN_TREE_FVP_CONFIG_NAME_AARCH64)
+else
+    FVP_CONFIG_NAME_AARCH64:=v8a-aarch64.cfg
+endif
+
 IN_TREE_LIT_EXEC_FVP:=../../../arm-runtimes/test-support/lit-exec-fvp.py
 ifneq ($(wildcard $(IN_TREE_LIT_EXEC_FVP)),)
     LIT_EXEC_FVP:=$(IN_TREE_LIT_EXEC_FVP)
@@ -74,6 +81,9 @@ setup:
 	@if [ ! -f $(FVP_CONFIG_NAME) ]; then \
 		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/fvp/config/cortex-m85.cfg; \
 	fi
+	@if [ ! -f $(FVP_CONFIG_NAME_AARCH64) ]; then \
+		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/fvp/config/v8a-aarch64.cfg; \
+	fi
 
 run: setup hello.elf
 # From https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/armebv6m_soft_nofp_size.json
@@ -85,12 +95,37 @@ run: setup hello.elf
 		--fvp-config=cortex-m85 \
 		hello.elf
 
+# AArch64 build and run command
+
+AARCH64_FVP_MEMORY_MAP=\
+	-Wl,--defsym=__boot_flash=0x80000000 \
+	-Wl,--defsym=__boot_flash_size=0x8000 \
+	-Wl,--defsym=__flash=0x80008000 \
+	-Wl,--defsym=__flash_size=0xff8000 \
+	-Wl,--defsym=__ram=0x81000000 \
+	-Wl,--defsym=__ram_size=0x1000000 \
+	-Wl,--defsym=__stack_size=8K
+
+hello-aarch64.elf: *.c
+	$(BIN_PATH)/clang $(CFG_FILE) $(AARCH64_TARGET) $(CRT_SEMIHOST) -Wl,--pic-veneer -mno-unaligned-access -g $(AARCH64_FVP_MEMORY_MAP) -T $(LIBC_LD_FILE) -o hello-aarch64.elf $^
+
+build-aarch64: hello-aarch64.elf
+
+run-aarch64: setup build-aarch64
+	python3 $(LIT_EXEC_FVP) --verbose \
+		--fvp-install-dir=$(FVP_INSTALL_DIR) \
+		--fvp-config-dir=$(FVP_CONFIG_DIR) \
+		--fvp-model=aem-a \
+		--fvp-config=v8a-aarch64 \
+		hello-aarch64.elf
+
 clean:
 	rm -f *.elf
 	rm -f lit-exec-fvp.py
 	rm -f run_fvp.py
 	rm -f cortex-m85.cfg
+	rm -f v8a-aarch64.cfg
 	rm -f :semihosting-features
 	rm -fr __pycache__
 
-.PHONY: clean setup run
+.PHONY: clean setup run run-aarch64
