@@ -66,11 +66,64 @@ clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles 
 > For easier migration from picolibc to LLVM libc, use the following startup
 > libraries:
 > * `-lcrt0` the default startup library that provides initialization and exit
-> for not hosted environments. You can override `void _platform_init()` and/or
-> `void __llvm_libc_exit(int status)` in your application.
+>   for not hosted environments. You can override one or more of the following
+>   functions in your application:
+>   * `void _platform_setup_exceptions()`
+>   * `void _platform_setup_memory()`
+>   * `void _platform_setup_arch_extensions()`
+>   * `void _platform_init()`
+>   * `void _platform_debug_putc(int c)`
+>   * `void __llvm_libc_exit(int status)`
 > * `-lcrt0-semihost` startup library to be used with the semihosting library
 > `-lsemihost`.
 > * `-lcrt0-none` an empty library, you have to provide the `_start` symbol.
+
+## LLVM libc initialization
+
+When used with ATfE provided `crt0` startup code, LLVM libc calls the following
+functions in this order:
+1. `void _platform_setup_exceptions()`
+1. `void _platform_setup_memory()`
+1. `void _platform_setup_arch_extensions()`
+1. `void _platform_init_data_segments()`
+1. `void _platform_init()`
+
+You can override any of these functions in your application to customize.
+The expected behavior is as follows:
+
+* `void _platform_setup_exceptions()` - Set up the exceptions table and enable
+relevant interrupts.
+* `void _platform_setup_memory()` - Set up the Memory Management Unit and caches.
+* `void _platform_setup_arch_extensions()` - Set up architecture extensions
+that require special initialization, for example, security features that require
+a cryptographic key.
+* `void _platform_init_data_segments()` - Relocate read-write data into its
+  runtime memory and clear the BSS (uninitialized static storage) region.
+  By default, the following linker script symbols are used:
+  * `__data_source` - the load address of the start of the read-write data
+    image in ROM/flash.
+  * `__data_start` - the destination address of the start of the read-write
+    segment.
+  * `__data_size` - the size of the read-write data segment to be copied.
+  * `__bss_start` - the address of the start of the BSS region.
+  * `__bss_size` - the size of the BSS region to be cleared.
+* `void _platform_init()` - Any other initialization right before the main
+function is called, for example, setup standard I/O streams.
+
+Without ATfE provided `crt0` startup code you have to handle the following in
+your own startup code:
+* Initialize all relevant aspects of the hardware.
+* Copy read-write and zero-initialized data.
+* Call `__libc_init_array()` to run constructors.
+* Call the main function.
+
+## LLVM libc finalization
+
+LLVM libc performs required clean up like calling destructors, then calls
+`void __llvm_libc_exit(int status)` to finish execution in a way appropriate
+for the platform.
+
+The default ATfE provided `crt0` handler is an infinite loop.
 
 ## I/O retargeting
 

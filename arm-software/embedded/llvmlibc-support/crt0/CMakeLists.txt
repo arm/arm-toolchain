@@ -5,9 +5,19 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
-# crt0 with nohost implementation of platform init and exit
-add_library(crt0 STATIC
+set(CRT0_COMMON_SOURCES
   bootcode.cpp
+  data_segments.cpp
+  exceptions.cpp
+  memory.cpp
+  misc.cpp
+  system_registers_a.cpp
+  system_registers_m.cpp
+)
+
+# crt0 with nohost implementation of platform initialization and finalization
+add_library(crt0 STATIC
+  ${CRT0_COMMON_SOURCES}
   crt0-nohost.cpp
 )
 
@@ -16,9 +26,10 @@ target_include_directories(crt0 PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
-# crt0 depending on semihosting implementation of platform init and exit
+# crt0 depending on semihosting implementation of platform initialization and
+# finalization
 add_library(crt0-semihost STATIC
-  bootcode.cpp
+  ${CRT0_COMMON_SOURCES}
 )
 
 target_include_directories(crt0-semihost PRIVATE

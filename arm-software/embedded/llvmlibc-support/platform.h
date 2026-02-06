@@ -19,11 +19,25 @@
 extern "C" {
 #endif
 
-// libcrt0.a will call this function after the stack pointer is
+// libcrt0.a will call these functions after the stack pointer is
 // initialized. If any setup specific to the libc porting layer is
-// needed, this is where to do it. For example, in semihosting, the
-// standard I/O handles must be opened via the SYS_OPEN operation, and
-// this function is where libsemihost.a does it.
+// needed, this is where to do it.
+
+// Set up the exceptions table and enable relevant interrupts.
+void _platform_setup_exceptions(void);
+
+// Set up the Memory Management Unit and caches.
+void _platform_setup_memory(void);
+
+// Set up architecture extensions that require special initialization.
+void _platform_setup_arch_extensions(void);
+
+// Relocate read-write data into its runtime memory and clear the BSS region.
+void _platform_init_data_segments(void);
+
+// Any other initialization right before the main function is called,
+// for example, in semihosting, the standard I/O handles must be opened
+// via the SYS_OPEN operation, and this function is where libsemihost.a does it.
 void _platform_init(void);
 
 #ifdef __cplusplus

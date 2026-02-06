@@ -28,7 +28,8 @@ using namespace sysreg;
 // Floating-point instructions aren't enabled yet
 [[gnu::target("no-fpregs")]]
 #endif
-void setup() {
+extern "C" [[gnu::weak]] void
+_platform_setup_exceptions() {
 #if __ARM_ARCH_PROFILE == 'A'
   VBAR = reinterpret_cast<unsigned long>(&vector_table);
 #elif __ARM_ARCH_PROFILE == 'R'

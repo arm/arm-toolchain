@@ -132,8 +132,12 @@ EXFN_ATTR void __exception_handler() { __llvm_libc_exit(1); }
 // has to be 128-byte aligned, however an implementation can require more bits
 // to be zero and cortex-m23 can require up to 10, so 1024-byte align the vector
 // table.
-extern "C" [[gnu::weak]] extern char __stack;
+extern "C" {
+[[gnu::weak]] extern char __stack;
+}
+
 using vtable_t = void (*)(void);
+// Placed in .text.init.enter; retained when referenced by default setup.
 [[gnu::section(".text.init.enter"), gnu::aligned(1024)]]
 const vtable_t vector_table[] = {
     reinterpret_cast<vtable_t>(&__stack), // SP
@@ -154,7 +158,7 @@ const vtable_t vector_table[] = {
     __systick_handler,                    // SysTick
 };
 
-void setup() {
+extern "C" [[gnu::weak]] void _platform_setup_exceptions() {
   // It's implementation-defined whether VTOR is writable, and if it is
   // writeable then it's implementation-defined how many of the bottom bits are
   // zero (though it must be at least 7). First try setting the top bit to see
