@@ -17,9 +17,6 @@ extern "C" {
 // No command line options provided
 [[gnu::weak]] int _platform_get_argv(char *cmdline, int max_cmdline,
                                      const char **argv, int max_argv) {
-  if (argv == nullptr)
-    return 1; // Provide the size for argv to hold the terminating nullptr
-
   if (cmdline && max_cmdline > 0)
     cmdline[0] = '\0';
   if (argv && max_argv > 0)

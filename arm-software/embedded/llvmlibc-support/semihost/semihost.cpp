@@ -132,7 +132,7 @@ void _platform_debug_putc(int c) {
 // - Escape sequences: \ copies next char as-is unless inside ' quotes
 //   or at the end of the string.
 
-static inline void skip_spaces(char *&p) {
+static inline void skip_spaces(const char *&p) {
   while (isspace(static_cast<unsigned char>(*p)))
     ++p;
 }
@@ -144,17 +144,17 @@ static int parse_cmdline_buf(char *buf, const char **argv, int max_argv) {
     return -1;
 
   int argc = 0;
-  char *p = buf;
+  const char *p = buf;
+  char *w = buf;
   skip_spaces(p);
 
   while (*p != '\0' && (argc < max_argv - 1 || argv == nullptr)) {
     // Start of token
     // If argv == nullptr count arguments only, do not change buf or argv
     if (argv)
-      argv[argc] = p;
+      argv[argc] = w;
     argc++;
 
-    char *w = p;
     char quote = '\0';
     while (*p != '\0') {
       char c = *p++;
@@ -178,17 +178,15 @@ static int parse_cmdline_buf(char *buf, const char **argv, int max_argv) {
     }
 
     if (argv)
-      *w = '\0'; // Null-terminate token
+      *w++ = '\0'; // Null-terminate token
 
     skip_spaces(p);
   }
 
-  if (argv) {
+  if (argv)
     argv[argc] = nullptr;
-    return argc;
-  }
 
-  return argc + 1; // Extra slot for the terminating nullptr in argv
+  return argc;
 }
 
 // Parse the command line into argc/argv for the main function

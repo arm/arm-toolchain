@@ -59,7 +59,7 @@ void do_start() {
   }
 
   // Probe for number of arguments and allocate the buffer for argv[]
-  max_argv = _platform_get_argv(cmdline, max_cmdline, nullptr, 0);
+  max_argv = _platform_get_argv(cmdline, max_cmdline, nullptr, 0) + 1;
   if (max_argv <= 0) {
     exceptions::print_str(
         "ERROR: _platform_get_argv failed, command line may be too long.\n");
