@@ -79,7 +79,7 @@ void enable_cache() {
   __isb(0xf);
 }
 
-void setup() {
+extern "C" [[gnu::weak]] void _platform_setup_memory() {
   invalidate_cache();
 #if __ARM_ARCH_PROFILE == 'A'
   // Put the page table in the .init section so it doesn't later get
@@ -105,6 +105,7 @@ void setup() {
   // Enable alignment checks when unaligned accesses are disabled
   SCTLR.A = 1;
 #endif
+  enable_cache();
 }
 
 } // namespace memory

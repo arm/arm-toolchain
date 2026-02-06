@@ -18,7 +18,7 @@ namespace misc {
 
 using namespace sysreg;
 
-void setup() {
+extern "C" [[gnu::weak]] void _platform_setup_arch_extensions() {
 #ifdef __ARM_FEATURE_PAUTH
   // Set all of the pointer authentication keys to different values. In
   // reality these would be set to random values to prevent attackers from
