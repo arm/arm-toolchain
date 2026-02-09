@@ -24,11 +24,12 @@ namespace exceptions {
 
 using namespace sysreg;
 
+extern "C" {
 #ifndef __ARM_ARCH_ISA_A64
 // Floating-point instructions aren't enabled yet
 [[gnu::target("no-fpregs")]]
 #endif
-extern "C" [[gnu::weak]] void
+[[gnu::weak]] void
 _platform_setup_exceptions() {
 #if __ARM_ARCH_PROFILE == 'A'
   VBAR = reinterpret_cast<unsigned long>(&vector_table);
@@ -44,6 +45,7 @@ _platform_setup_exceptions() {
         (reinterpret_cast<unsigned int *>(vector_table))[i];
   }
 #endif
+}
 }
 
 } // namespace exceptions
