@@ -9,10 +9,11 @@
 #include "semihost.h"
 #include "platform.h"
 
-#include <stddef.h>
-#include <time.h>
-#include <stdlib.h>
 #include <ctype.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 namespace {
 
@@ -137,10 +138,8 @@ static inline void skip_spaces(const char *&p) {
     ++p;
 }
 
-static int parse_cmdline_buf(char *buf, const char **argv, int max_argv) {
+static int parse_cmdline_buf(char *buf) {
   if (!buf)
-    return -1;
-  if (argv && max_argv <= 0)
     return -1;
 
   int argc = 0;
@@ -148,11 +147,8 @@ static int parse_cmdline_buf(char *buf, const char **argv, int max_argv) {
   char *w = buf;
   skip_spaces(p);
 
-  while (*p != '\0' && (argc < max_argv - 1 || argv == nullptr)) {
+  while (*p != '\0') {
     // Start of token
-    // If argv == nullptr count arguments only, do not change buf or argv
-    if (argv)
-      argv[argc] = w;
     argc++;
 
     char quote = '\0';
@@ -173,24 +169,32 @@ static int parse_cmdline_buf(char *buf, const char **argv, int max_argv) {
         break; // End of token
       }
 
-      if (argv)
-        *w++ = c;
+      *w++ = c;
     }
 
-    if (argv)
-      *w++ = '\0'; // Null-terminate token
+    *w++ = '\0'; // Null-terminate token
 
     skip_spaces(p);
   }
 
-  if (argv)
-    argv[argc] = nullptr;
-
   return argc;
 }
 
-// Parse the command line into argc/argv for the main function
-// Return estimated number of arguments if argv == nullptr
+static int fill_argv_from_parsed_buf(const char *buf, const char **argv,
+                                     int argc) {
+  for (int i = 0; i < argc; i++) {
+    argv[i] = buf;
+    buf += strlen(buf) + 1;
+  }
+  argv[argc] = nullptr;
+  return argc;
+}
+
+// Parse the command line into argc/argv for the main function.
+//
+// Must be called with argv == nullptr first to get the number of arguments,
+// then with allocated argv and the number of arguments from the first call
+// to fill in the argv.
 int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv,
                        int max_argv) {
   if (!cmdline || max_cmdline <= 0)
@@ -198,6 +202,9 @@ int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv,
 
   if (argv && max_argv <= 0)
     return -1;
+
+  if (argv)
+    return fill_argv_from_parsed_buf(cmdline, argv, max_argv - 1);
 
   struct {
     char *buf;
@@ -207,6 +214,6 @@ int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv,
   if (semihosting_call(SYS_GET_CMDLINE, &get_cmdline_args) != 0)
     return -1;
 
-  return parse_cmdline_buf(cmdline, argv, max_argv);
+  return parse_cmdline_buf(cmdline);
 }
 } // extern "C"
