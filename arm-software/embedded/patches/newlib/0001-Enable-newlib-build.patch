@@ -1,23 +1,7 @@
-From 24fb12a2a1a46d759221b3d59b41502021cc877b Mon Sep 17 00:00:00 2001
-From: Volodymyr Turanskyy <volodymyr.turanskyy@arm.com>
-Date: Thu, 2 Jan 2025 16:23:27 +0000
-Subject: [PATCH] Update patch for newlib-4.5.0 tag
+Update patch for newlib-4.5.0 tag
 
-Change-Id: Iec24f4305ad35a3a6df1672bb14555bf81249130
----
- libgloss/Makefile.in               |   2 +-
- libgloss/aarch64/syscalls.c        |   6 ++
- libgloss/arm/cpu-init/rdimon-aem.S | 107 +++++++++++++++--------------
- libgloss/arm/crt0.S                |   2 +-
- libgloss/arm/linux-crt0.c          |   2 +-
- libgloss/arm/syscalls.c            |   6 +-
- libgloss/arm/trap.S                |   2 +-
- newlib/libc/include/sys/features.h |   3 +
- newlib/libc/machine/arm/setjmp.S   |   4 +-
- newlib/libc/string/wcwidth.c       |   2 +-
- newlib/libc/sys/arm/crt0.S         |   2 +-
- newlib/libc/sys/arm/trap.S         |   2 +-
- 12 files changed, 75 insertions(+), 65 deletions(-)
+Now stripped down for newlib-4.6.0 tag. Many of the original patches
+have been upstreamed.
 
 Now stripped down for newlib-4.6.0 tag. Many of the original patches
 have been upstreamed.
