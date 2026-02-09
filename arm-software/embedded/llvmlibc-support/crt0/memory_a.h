@@ -36,6 +36,13 @@ void invalidate_cache() {
   __dmb(0xf);
 
   // Invalidate caches
+#if defined(__ARM_ARCH_ISA_A64)
+  bool use64BitCCSIDR = ID_AA64MMFR2.CCIDX;
+#else
+  bool use64BitCCSIDR = false;
+  // TODO: Add support for CCSIDR2
+#endif
+
   unsigned coherence = CLIDR.LoC;
   for (unsigned level = 0; level < coherence; ++level) {
     // We only need to invalidate if we have a data cache at this level
@@ -47,8 +54,10 @@ void invalidate_cache() {
 
       // Clean and invalidate by set/way
       unsigned int log2_line_size = CCSIDR.LineSize + 4;
-      unsigned int sets = CCSIDR.NumSets + 1;
-      unsigned int ways = CCSIDR.Associativity + 1;
+      unsigned int sets =
+          (use64BitCCSIDR ? CCSIDR.NumSets64 : CCSIDR.NumSets) + 1;
+      unsigned int ways =
+          (use64BitCCSIDR ? CCSIDR.Associativity64 : CCSIDR.Associativity) + 1;
       unsigned way_offset = __builtin_clz(ways); // 32-log2(number of ways)
       for (int set = 0; set < sets; ++set) {
         for (int way = 0; way < ways; ++way) {

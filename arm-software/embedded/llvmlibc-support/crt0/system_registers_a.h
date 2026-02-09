@@ -39,7 +39,8 @@ namespace sysreg {
   REGNAME(APDBKeyLo, "NO_REGISTER")                                            \
   REGNAME(APDBKeyHi, "NO_REGISTER")                                            \
   REGNAME(APGAKeyLo, "NO_REGISTER")                                            \
-  REGNAME(APGAKeyHi, "NO_REGISTER")
+  REGNAME(APGAKeyHi, "NO_REGISTER")                                            \
+  REGNAME(ID_AA64MMFR2, "p15:3:c0:c7:2")
 
 // Registers that (in AArch64) have both an EL2 and an EL3 version. When these
 // are accessed we choose the appropriate version based on CurrentEL.
@@ -200,6 +201,8 @@ public:
   Field<0, 2> LineSize;
   Field<3, 12> Associativity;
   Field<13, 27> NumSets;
+  Field<3, 23> Associativity64;
+  Field<32, 55> NumSets64;
 };
 
 class CPTR_Class : public SysReg<SysRegName::CPTR> {
@@ -273,6 +276,11 @@ public:
   Field<28, 31> TraceFilt;
 };
 
+class ID_AA64MMFR2_Class : public SysReg<SysRegName::ID_AA64MMFR2> {
+public:
+  Field<20, 23> CCIDX;
+};
+
 extern SCTLR_Class SCTLR;
 extern CLIDR_Class CLIDR;
 extern CCSIDR_Class CCSIDR;
@@ -282,6 +290,7 @@ extern DACR_Class DACR;
 extern CPACR_Class CPACR;
 extern PMCCFILTR_Class PMCCFILTR;
 extern ID_DFR0_Class ID_DFR0;
+extern ID_AA64MMFR2_Class ID_AA64MMFR2;
 extern SysReg<SysRegName::VBAR> VBAR;
 extern SysReg<SysRegName::ESR> ESR;
 extern SysReg<SysRegName::ELR> ELR;
