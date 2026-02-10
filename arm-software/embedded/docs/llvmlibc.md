@@ -73,6 +73,7 @@ clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles 
 >   * `void _platform_setup_arch_extensions()`
 >   * `void _platform_init()`
 >   * `void _platform_debug_putc(int c)`
+>   * `int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv, int max_argv)`
 >   * `void __llvm_libc_exit(int status)`
 > * `-lcrt0-semihost` startup library to be used with the semihosting library
 > `-lsemihost`.
@@ -135,6 +136,47 @@ redirect standard I/O streams.
 Example implementations are provided for:
 * Semihosting: [semihost.cpp](../llvmlibc-support/semihost/semihost.cpp)
 * UART output: [samples](../samples/src/baremetal-uart/hello.c).
+
+## Providing command line options
+
+`crt0-semihost` supports getting command line options via semihosting and
+passing them as `argc` and `argv` to the main function.
+
+Semihosting passes the options as one line parsed by `crt0-semihost` using the
+following rules:
+* Arguments are split by a whitespace.
+* No special handling for the program name: `argv[0]` will contain the first
+  argument provided by semihosting.
+* To pass an argument with a space in it, use quotation marks, for example,
+  `"a b c "` or `'a b c '` will keep all spaces. Alternatively, use `\` to
+  escape the space, for example, `a\ b\ c\ `.
+  Note that if the closing quotation mark is missing then all text till the end
+  of the provided command line will be treated as one argument.
+* To pass a quotation mark or backslash, use escape sequences: `\"`, `\'`
+  and `\\` to put `"`, `'` and `\` respectively.
+  In general, `\` is treated as escape and copies the next character unless
+  inside a single quotation `'` or at the end of the provided string then it
+  does not have special meaning.
+
+When using `crt0` in a no-host environment, you can provide your own
+implementation of
+`int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv, int max_argv)`
+to provide `argc` and `argv` to the main function:
+* `_platform_get_argv` accepts the following parameters:
+  * `char *cmdline` - the buffer to put the command line into.
+  * `int max_cmdline` - the size of the `cmdline` buffer.
+  * `const char **argv` - the buffer to put the arguments into or `nullptr` to
+    request the estimation of the size required for this buffer.
+  * `int max_argv` - the size of `argv` array.
+* `_platform_get_argv` returns the following:
+  * Number of arguments in the command line string if the provided `argv` is
+    `nullptr` (`max_argv` is ignored in this case).
+    The `argv` array must provide one extra space for the terminator.
+  * The number of parsed arguments - `argc` - if the provided `argv` is
+    not `nullptr`.
+  * `-1` in case of an error.
+
+The maximum accepted command line length is 255 characters.
 
 ## Samples
 
