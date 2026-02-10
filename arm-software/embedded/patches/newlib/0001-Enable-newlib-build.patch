@@ -1,10 +1,6 @@
-Update patch for newlib-4.5.0 tag
+Update patch for newlib-4.6.0 tag
 
-Now stripped down for newlib-4.6.0 tag. Many of the original patches
-have been upstreamed.
-
-Now stripped down for newlib-4.6.0 tag. Many of the original patches
-have been upstreamed.
+Many of the original patches have been upstreamed.
 
 diff --git a/libgloss/Makefile.in b/libgloss/Makefile.in
 index 5146a7880..895da03c2 100644
