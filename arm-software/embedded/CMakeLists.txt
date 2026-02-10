@@ -362,8 +362,7 @@ include(ProcessorCount)
 if(LLVM_TOOLCHAIN_ENABLE_PICOLIBC)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_picolibc.cmake)
 endif()
-if("newlib" IN_LIST LLVM_TOOLCHAIN_ENABLED_LIBCS
-        OR "newlib-nano" IN_LIST LLVM_TOOLCHAIN_ENABLED_LIBCS)
+if(LLVM_TOOLCHAIN_ENABLE_NEWLIB)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fetch_newlib.cmake)
 endif()
 
