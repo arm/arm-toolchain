@@ -1,6 +1,18 @@
-Update patch for newlib-4.6.0 tag
+From 0e6f71752d4f5c84be7562a567d80a5be38c8b75 Mon Sep 17 00:00:00 2001
+From: Mark Murray <mark.murray@arm.com>
+Date: Tue, 10 Feb 2026 14:35:01 +0000
+Subject: Update patch for newlib-4.6.0 tag
 
-Many of the original patches have been upstreamed.
+Many of the patches for the 4.5.0 release have been merged.
+---
+ libgloss/Makefile.in               | 2 +-
+ libgloss/aarch64/syscalls.c        | 6 ++++++
+ libgloss/arm/cpu-init/rdimon-aem.S | 2 +-
+ libgloss/arm/linux-crt0.c          | 2 +-
+ libgloss/arm/syscalls.c            | 6 +++---
+ newlib/libc/include/sys/features.h | 3 +++
+ newlib/libc/string/wcwidth.c       | 2 +-
+ 7 files changed, 16 insertions(+), 7 deletions(-)
 
 diff --git a/libgloss/Makefile.in b/libgloss/Makefile.in
 index 5146a7880..895da03c2 100644
@@ -115,3 +127,6 @@ index 8348eefe8..65604c061 100644
  {
    wint_t wi = wc;
  
+-- 
+2.34.1
+
