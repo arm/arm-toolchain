@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h> // for exit()
 
+#include "exceptions_common.h"
 #include "platform.h"
 
 #if __ARM_ARCH_PROFILE == 'A' || __ARM_ARCH_PROFILE == 'R'
@@ -25,6 +26,8 @@ extern "C" void __libc_init_array();
 
 [[gnu::weak]] extern char __stack;
 
+using namespace bootcode::exceptions;
+
 namespace {
 #ifdef __ARM_FEATURE_PAUTH
 // Disable pointer authentication, as it isn't enabled until misc::setup meaning
@@ -40,7 +43,50 @@ void do_start() {
 
   __libc_init_array();
   _platform_init();
-  exit(main(0, 0));
+
+  // Provide command line options (argc/argv) for the main function
+  char *cmdline = nullptr;
+  int max_cmdline = 256; // Arm semihosting requires at least 80 bytes
+                         // There is no API to get the actual size of the line
+  const char **argv = nullptr;
+  int max_argv = 0;
+  int argc = 0;
+  int status = 1; // Report error on early returns
+
+  // Allocate the buffer for the command line
+  cmdline = static_cast<char *>(malloc(static_cast<size_t>(max_cmdline)));
+  if (!cmdline) {
+    print_str("ERROR: libc cannot allocate memory for command line options.\n");
+    goto free_and_exit;
+  }
+
+  // Probe for number of arguments and allocate the buffer for argv[]
+  max_argv = _platform_get_argv(cmdline, max_cmdline, nullptr, 0) + 1;
+  if (max_argv <= 0) {
+    print_str(
+        "ERROR: _platform_get_argv failed, command line may be too long.\n");
+    goto free_and_exit;
+  }
+  argv = static_cast<const char **>(
+      malloc(sizeof(*argv) * static_cast<size_t>(max_argv)));
+  if (!argv) {
+    print_str("ERROR: libc cannot allocate memory for argv[].\n");
+    goto free_and_exit;
+  }
+
+  // Finally, parse the comand line into argc/argv[]
+  argc = _platform_get_argv(cmdline, max_cmdline, argv, max_argv);
+  if (argc < 0) {
+    print_str("ERROR: libc cannot parse the command line.\n");
+    goto free_and_exit;
+  }
+
+  status = main(argc, argv);
+
+free_and_exit:
+  free(cmdline);
+  free(argv);
+  exit(status);
 }
 } // namespace
 

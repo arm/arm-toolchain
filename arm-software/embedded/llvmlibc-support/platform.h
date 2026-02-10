@@ -40,6 +40,13 @@ void _platform_init_data_segments(void);
 // via the SYS_OPEN operation, and this function is where libsemihost.a does it.
 void _platform_init(void);
 
+// Output one character to the debug console to report bootcode errors
+void _platform_debug_putc(int c);
+
+// Get command line options (argc/argv) for the main function
+int _platform_get_argv(char *cmdline, int max_cmdline,
+                                  const char **argv, int max_argv);
+
 #ifdef __cplusplus
 }
 #endif
