@@ -146,9 +146,10 @@ With `crt0-semihost` the output is directed to `stderr` using semihosting.
 
 With `crt0` the output is discarded. You can implement
 `void _platform_debug_putc(int c)` in your application to redirect it,
-for example, to an UART. The implementation must be safe to be called with
+for example, to a UART. The implementation must be safe to be called with
 only the assumption that the stack pointer is setup: it must not use heap or
-other LLVM libc functions.
+other LLVM libc functions. It must not access any code or data that is
+initialized by `_platform_init_data_segments()`.
 
 ## Providing command line options
 
