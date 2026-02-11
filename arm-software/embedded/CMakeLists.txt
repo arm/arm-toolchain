@@ -397,23 +397,31 @@ install(
 set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 set(LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS "")
 foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
-    set(LLVM_TOOLCHAIN_CFG_LIBC_NAME ${libc})
-    set(LLVM_TOOLCHAIN_CFG_LIBC_SUBDIR ${libc})
-    set(libc_cfg_path ${CMAKE_CURRENT_BINARY_DIR}/${libc}.cfg)
-
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/libc-config.cfg.in
-        ${libc_cfg_path}
-        @ONLY
-    )
-
     set(libc_component llvm-toolchain-${libc}-configs)
     list(APPEND LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS ${libc_component})
-    install(
-        FILES ${libc_cfg_path}
-        DESTINATION bin
-        COMPONENT ${libc_component}
-    )
+
+    set(needs_libc_config TRUE)
+    if(NOT LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL AND libc STREQUAL LLVM_TOOLCHAIN_PRIMARY_LIBC)
+        set(needs_libc_config FALSE)
+    endif()
+
+    if(needs_libc_config)
+        set(LLVM_TOOLCHAIN_CFG_LIBC_NAME ${libc})
+        set(LLVM_TOOLCHAIN_CFG_LIBC_SUBDIR ${libc})
+        set(libc_cfg_path ${CMAKE_CURRENT_BINARY_DIR}/${libc}.cfg)
+
+        configure_file(
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/libc-config.cfg.in
+            ${libc_cfg_path}
+            @ONLY
+        )
+
+        install(
+            FILES ${libc_cfg_path}
+            DESTINATION bin
+            COMPONENT ${libc_component}
+        )
+    endif()
 
     if(libc MATCHES "^newlib")
         install(
@@ -742,7 +750,10 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
 
     foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
         set(multilib_project multilib-${libc})
-        set(libc_install_dir ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR}/${libc})
+        set(libc_install_dir ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR})
+        if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL OR NOT libc STREQUAL LLVM_TOOLCHAIN_PRIMARY_LIBC)
+            string(APPEND libc_install_dir "/${libc}")
+        endif()
         set(libc_check_target check-${libc})
         set(libc_check_targets ${libc_check_target} ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS})
 
