@@ -694,10 +694,14 @@ set(LLVM_DEFAULT_EXTERNAL_LIT "${LLVM_BINARY_DIR}/bin/llvm-lit")
 add_custom_target(check-llvm-toolchain-runtimes)
 set(LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS "")
 foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
-    set(_libc_check_target check-${libc})
+    set(_libc_multilib_name multilib-${libc})
+    set(_libc_check_target check-${_libc_multilib_name}-libc)
     add_custom_target(${_libc_check_target})
     list(APPEND LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS ${_libc_check_target})
+    add_custom_target(check-${libc})
 endforeach()
+add_custom_target(check-libc)
+add_dependencies(check-libc ${LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS})
 add_custom_target(check-compiler-rt)
 add_custom_target(check-cxx)
 add_custom_target(check-cxxabi)
@@ -721,7 +725,7 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
 
     add_dependencies(
         check-llvm-toolchain-runtimes
-        ${LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS}
+        check-libc
         ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS}
     )
 
@@ -755,6 +759,7 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
             string(APPEND libc_install_dir "/${libc}")
         endif()
         set(libc_check_target check-${libc})
+        set(libc_public_check_target check-${multilib_project}-libc)
         set(libc_check_targets ${libc_check_target} ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS})
 
         ExternalProject_Add(
@@ -815,6 +820,9 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
             )
             add_dependencies(${check_target} ${multilib_project}-${check_target})
         endforeach()
+        if(TARGET ${libc_public_check_target})
+            add_dependencies(${libc_public_check_target} ${libc_check_target})
+        endif()
 
         foreach(lib_idx RANGE ${lib_count_dec})
             string(JSON lib_def GET ${multilib_defs} ${lib_idx})
@@ -1109,7 +1117,7 @@ add_dependencies(
 )
 
 add_custom_target(check-llvm-toolchain)
-add_dependencies(check-llvm-toolchain ${LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS})
+add_dependencies(check-llvm-toolchain check-libc)
 add_dependencies(check-llvm-toolchain ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS})
 add_subdirectory(test)
 add_dependencies(check-llvm-toolchain check-llvm-toolchain-lit)
