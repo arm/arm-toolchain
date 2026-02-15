@@ -1,19 +1,11 @@
-FROM rockylinux/rockylinux:8
+# Need to use the just-built dev image as a base
+ARG dev_image
+FROM ${dev_image}
+ARG lvat_package
 
-RUN dnf install -y epel-release && \
-    dnf upgrade -y && \
-    crb enable && \
-    dnf install -y \
-        xz \
-        git \
-        cmake \
-        ninja-build \
-        bzip2 \
-        gcc-c++ \
-        python39 \
-        qemu-kvm \
-        meson \
-        patch \
-        glibc-headers && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf
+# Install built toolchain in container
+RUN --mount=type=bind,source=.,destination=/src \
+    tar -C /usr/local -Jx -f /src/build/${lvat_package}.tar.xz --strip-components=1 \
+        ${lvat_package}/bin \
+        ${lvat_package}/include \
+        ${lvat_package}/lib

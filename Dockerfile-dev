@@ -1,0 +1,96 @@
+# Base image compatible with RHEL 8
+FROM rockylinux/rockylinux:8
+
+# Update /etc/yum.repos.d/Rocky-AppStream.repo to not use the RockyLinux mirror
+# list, which as of October 2025 can cause `dnf` commands to fail. See this for
+# details:
+#   https://forums.rockylinux.org/t/mirror-list-mirrors-rockylinux-org-is-serving-out-of-sync-repositories-for-both-rl9-and-rl8/19756/8
+RUN sed -i 's/mirrorlist/#mirrorlist/' /etc/yum.repos.d/Rocky-AppStream.repo
+RUN sed -i 's/#baseurl/baseurl/' /etc/yum.repos.d/Rocky-AppStream.repo
+
+# Install useful/required Rocky Linux packages
+RUN dnf install -y epel-release && \
+    dnf upgrade -y && \
+    crb enable && \
+    dnf install -y \
+        bzip2 \
+        cmake \
+        diffutils \
+        elfutils \
+        file \
+        findutils \
+        fuse-sshfs \
+        gcc-c++ \
+        gdb \
+        git \
+        glibc-headers \
+        graphviz \
+        htop \
+        iproute \
+        jq \
+        kernel-headers \
+        libasan \
+        libubsan \
+        man \
+        man-pages \
+        meson \
+        nano \
+        ncurses-compat-libs \
+        netcat \
+        ninja-build \
+        nss_wrapper-libs \
+        patch \
+        plantuml \
+        procps-ng \
+        python39 \
+        python39-pip \
+        python39-devel \
+        qemu-kvm \
+        ripgrep \
+        socat \
+        strace \
+        which \
+        xz \
+        zip \
+        zlib-devel \
+    && \
+    dnf clean all && \
+    alternatives --set python3 /usr/bin/python3.9 && \
+    rm -rf /var/cache/dnf
+
+# Install useful/required Python packages
+RUN pip3 install --no-cache-dir --upgrade \
+        black \
+        cxxheaderparser \
+        fprime-bootstrap \
+        mapfile_parser==2.11.0 \
+        mike \
+        mkdocs-material[imaging] \
+        mkdocs-to-pdf \
+        mkdocs-macros-plugin \
+        pip \
+        plantuml-markdown \
+        pyelftools \
+        pyyaml \
+        WeasyPrint==52.5
+
+# Install Google's addlicense tool to help with copyright headers
+RUN curl -L --fail \
+        https://github.com/google/addlicense/releases/download/v1.1.1/addlicense_1.1.1_Linux_x86_64.tar.gz | \
+    tar -C /usr/local/bin/ -zx \
+        addlicense
+
+# Download and unpack regular Arm toolchain to get binutils and other useful programs.
+# But remove GCC, because we don't want to accidentally use it instead of Clang.
+RUN curl -L --fail \
+        https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi.tar.xz | \
+    tar -C /usr/local -Jx --strip-components=1 \
+        arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/bin \
+        arm-gnu-toolchain-13.3.rel1-x86_64-arm-none-eabi/share && \
+    rm /usr/local/bin/arm-none-eabi-gcc* /usr/local/bin/arm-none-eabi-c++ /usr/local/bin/arm-none-eabi-g++
+
+# Set default editor
+ENV EDITOR=nano
+
+# Set working directory
+WORKDIR /workspaces

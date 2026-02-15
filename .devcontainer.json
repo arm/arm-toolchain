@@ -1,6 +1,24 @@
 {
-    "name": "Rocky Linux 8 Image",
-    "build": {
-        "dockerfile": "Dockerfile"
-    }
+	"name": "Rocky Linux 8 Image",
+	"image": "ghcr.io/fprime-community/llvm-vorago-arm-toolchain-dev:jpl-toolchain",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools-themes",
+				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-extension-pack",
+				"twxs.cmake",
+				"ms-vscode.cmake-tools",
+				"GitHub.vscode-pull-request-github",
+				"xaver.clang-format",
+				"ZixuanWang.linkerscript",
+				"RReverser.llvm",
+				"iliazeus.vscode-ansi",
+				"XiaofanSun.vscode-llvm",
+				"thegtproject.hoverhex",
+				"ms-azuretools.vscode-docker",
+				"github.vscode-github-actions"
+			]
+		}
+	}
 }

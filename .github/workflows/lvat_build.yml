@@ -3,27 +3,65 @@ name: LVAT Build
 on:
   workflow_dispatch:
   push:
+  release:
+    types: [created]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DEV_IMAGE_NAME: ${{ github.repository }}-dev
 
 jobs:
   build-toolchain:
-    name: Build for ${{ matrix.host }}
+    name: Build ${{ matrix.package }}
     runs-on: ${{ matrix.runner }}
     if: github.repository == 'fprime-community/llvm-vorago-arm-toolchain'
+
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
 
     strategy:
       fail-fast: false
       matrix:
         include:
           - runner: ubuntu-24.04
-            host: x86_64
+            package: LVAT-Linux-x86_64
           - runner: ubuntu-24.04-arm
-            host: arm64
+            package: LVAT-Linux-AArch64
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           submodules: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+        with:
+          version: v0.31.1
+          driver-opts: image=moby/buildkit:v0.27.1
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Extract metadata (tags, labels) for Docker Dev Container
+        id: meta_dev
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
 
       - name: Apply llvm-project patches
         run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project
@@ -34,16 +72,129 @@ jobs:
       - name: Apply picolibc patches
         run: python3 arm-software/embedded/cmake/patch_repo.py --repo_dir picolibc --method apply arm-software/embedded/patches/picolibc
 
-      - name: Build Dockerfile
-        run: docker build -t local .
+      - name: Build and push development Docker image
+        id: build_dev
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          file: Dockerfile-dev
+          tags: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
+          labels: ${{ steps.meta_dev.outputs.labels }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=build_dev
+          cache-to: type=gha,mode=max,scope=build_dev
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
+          subject-digest: ${{ steps.build_dev.outputs.digest }}
+          push-to-registry: true
 
       - name: Build Toolchain
-        run: docker run -v .:/src -w /src local ./lvat_build.sh
+        run: docker run -v .:/src -w /src "${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}@${{ steps.build_dev.outputs.digest }}" ./lvat_build.sh
 
-      - name: Upload built packages
+      - name: Upload built tarball
         uses: actions/upload-artifact@v4
-        if: success()
         with:
-          name: LVAT-${{ matrix.host }}
-          path: |
-            build/LVAT-*.tar.xz
+          name: ${{ matrix.package }}
+          path: build/${{ matrix.package }}.tar.xz
+
+      - name: Build and push toolchain Docker image
+        id: build
+        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            lvat_package=${{ matrix.package }}
+            dev_image=${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}@${{ steps.build_dev.outputs.digest }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=build
+          cache-to: type=gha,mode=max,scope=build
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Release built tarball
+        if: success() && github.event_name == 'release'
+        run: gh release upload --repo "${{ github.repository }}" "${{ github.ref_name }}" "build/${{ matrix.package }}.tar.xz"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests/build ${{ runner.temp }}/digests/build_dev
+          digest_dev="${{ steps.build_dev.outputs.digest }}"
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/build_dev/${digest_dev#sha256:}" "${{ runner.temp }}/digests/build/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.package }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  push-containers:
+    name: Push multi-platform Docker manifest
+    runs-on: ubuntu-24.04
+
+    permissions:
+      packages: write
+
+    if: github.repository == 'fprime-community/llvm-vorago-arm-toolchain'
+    needs:
+      - build-toolchain
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+        with:
+          version: v0.31.1
+          driver-opts: image=moby/buildkit:v0.27.1
+
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Extract metadata (tags, labels) for Docker Dev Container
+        id: meta_dev
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}
+
+      - name: Create manifest list, inspect, and push
+        working-directory: ${{ runner.temp }}/digests
+        run: |
+          docker buildx imagetools create \
+            $(sed 's/^/-t /g' <<< "${{ steps.meta.outputs.tags }}") \
+            $(cd build && printf '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+          docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+
+          docker buildx imagetools create \
+            $(sed 's/^/-t /g' <<< "${{ steps.meta_dev.outputs.tags }}") \
+            $(cd build_dev && printf '${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}@sha256:%s ' *)
+          docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}:${{ steps.meta_dev.outputs.version }}
