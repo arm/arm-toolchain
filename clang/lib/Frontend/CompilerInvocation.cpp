@@ -2048,6 +2048,11 @@ bool CompilerInvocation::ParseCodeGenArgs(CodeGenOptions &Opts, ArgList &Args,
     }
   }
 
+  Opts.InstrumentFunctionExclusionsFunctions
+    = Args.getAllArgValues(OPT_finstrument_functions_exclude_function_list);
+  Opts.InstrumentFunctionExclusionsPathSegments
+    = Args.getAllArgValues(OPT_finstrument_functions_exclude_file_list);
+
   auto XRayInstrBundles =
       Args.getAllArgValues(OPT_fxray_instrumentation_bundle);
   if (XRayInstrBundles.empty())

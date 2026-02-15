@@ -728,6 +728,9 @@ private:
   // The list is sorted for binary-searching.
   std::vector<std::string> MSHotPatchFunctions;
 
+  /// Mapping from SourceLocation to PresumedLoc FileName
+  llvm::DenseMap<unsigned, const char *> SourceLocToFileNameMap;
+
 public:
   CodeGenModule(ASTContext &C, IntrusiveRefCntPtr<llvm::vfs::FileSystem> FS,
                 const HeaderSearchOptions &headersearchopts,
@@ -1832,6 +1835,11 @@ public:
   /// \param T is the LLVM type of the null pointer.
   /// \param QT is the clang QualType of the null pointer.
   llvm::Constant *getNullPointer(llvm::PointerType *T, QualType QT);
+
+  /// Get SourceLoc to FileName map cache
+  llvm::DenseMap<unsigned, const char *> &GetSourceLocToFileNameMap() {
+    return SourceLocToFileNameMap;
+  }
 
   CharUnits getNaturalTypeAlignment(QualType T,
                                     LValueBaseInfo *BaseInfo = nullptr,

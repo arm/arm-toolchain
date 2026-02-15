@@ -352,6 +352,12 @@ public:
   /// A list of dependent libraries.
   std::vector<std::string> DependentLibraries;
 
+  /// Functions to exclude from function instrumentation.
+  std::vector<std::string> InstrumentFunctionExclusionsFunctions;
+
+  /// Path segments to exclude from function instrumentation, eg, '/bits'
+  std::vector<std::string> InstrumentFunctionExclusionsPathSegments;
+
   /// A list of linker options to embed in the object file.
   std::vector<std::string> LinkerOptions;
 

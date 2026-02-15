@@ -2580,7 +2580,7 @@ public:
 
   /// ShouldInstrumentFunction - Return true if the current function should be
   /// instrumented with __cyg_profile_func_* calls
-  bool ShouldInstrumentFunction();
+  bool ShouldInstrumentFunction(const llvm::Function *Fn);
 
   /// ShouldSkipSanitizerInstrumentation - Return true if the current function
   /// should not be instrumented with sanitizers.

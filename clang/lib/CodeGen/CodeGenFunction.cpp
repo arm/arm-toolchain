@@ -33,10 +33,12 @@
 #include "clang/Basic/Builtins.h"
 #include "clang/Basic/CodeGenOptions.h"
 #include "clang/Basic/DiagnosticFrontend.h"
+#include "clang/Basic/SourceManager.h"
 #include "clang/Basic/TargetBuiltins.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/CodeGen/CGFunctionInfo.h"
 #include "llvm/ADT/ArrayRef.h"
+#include "llvm/ADT/DenseMap.h"
 #include "llvm/ADT/ScopeExit.h"
 #include "llvm/Frontend/OpenMP/OMPIRBuilder.h"
 #include "llvm/IR/DataLayout.h"
@@ -421,7 +423,7 @@ void CodeGenFunction::FinishFunction(SourceLocation EndLoc) {
   // Emit function epilog (to return).
   llvm::DebugLoc Loc = EmitReturnBlock();
 
-  if (ShouldInstrumentFunction()) {
+  if (ShouldInstrumentFunction(CurFn)) {
     if (CGM.getCodeGenOpts().InstrumentFunctions)
       CurFn->addFnAttr("instrument-function-exit", "__cyg_profile_func_exit");
     if (CGM.getCodeGenOpts().InstrumentFunctionsAfterInlining)
@@ -564,13 +566,67 @@ void CodeGenFunction::FinishFunction(SourceLocation EndLoc) {
 
 /// ShouldInstrumentFunction - Return true if the current function should be
 /// instrumented with __cyg_profile_func_* calls
-bool CodeGenFunction::ShouldInstrumentFunction() {
+bool CodeGenFunction::ShouldInstrumentFunction(const llvm::Function *Fn) {
   if (!CGM.getCodeGenOpts().InstrumentFunctions &&
       !CGM.getCodeGenOpts().InstrumentFunctionsAfterInlining &&
       !CGM.getCodeGenOpts().InstrumentFunctionEntryBare)
     return false;
   if (!CurFuncDecl || CurFuncDecl->hasAttr<NoInstrumentFunctionAttr>())
     return false;
+
+  // Inline functions that are not externally visible mustn't be instrumented.
+  // They create a named reference to the inlined function, as the first
+  // parameter to __cyg_profile_* functions, which a linker will never be able
+  // to resolve.
+  const auto *ActualFuncDecl = dyn_cast<FunctionDecl>(CurFuncDecl);
+  if (ActualFuncDecl &&
+      ActualFuncDecl->isInlined() &&
+      !ActualFuncDecl->isInlineDefinitionExternallyVisible()) {
+    return false;
+  }
+
+  SourceLocation SLoc = CurFuncDecl->getLocation();
+
+  if (SLoc.isFileID()) {
+    unsigned Key = SLoc.getRawEncoding();
+    auto &Cache = CGM.GetSourceLocToFileNameMap();
+    if (Cache.find(Key) == Cache.end()) {
+      const ASTContext &CTX = CurFuncDecl->getASTContext();
+      const SourceManager &SM = CTX.getSourceManager();
+
+      PresumedLoc PLoc = SM.getPresumedLoc(SLoc);
+      Cache[Key] = PLoc.getFilename();
+    }
+    std::string FunctionDeclPath = Cache[Key];
+
+    const std::vector<std::string> &PathSearch =
+      CGM.getCodeGenOpts().InstrumentFunctionExclusionsPathSegments;
+
+    for (const auto &FileMatch : PathSearch) {
+      if (FunctionDeclPath.find(FileMatch) != std::string::npos) {
+        return false;
+      }
+    }
+  }
+
+  StringRef FunctionName(Fn->getName());
+  // For CPP files, use user-visible symbol name, not mangled name
+  // Skip if marked extern "C"
+  if (ActualFuncDecl && !ActualFuncDecl->isExternC()) {
+    std::string DemangledName = PredefinedExpr::ComputeName(
+      PredefinedIdentKind::PrettyFunctionNoVirtual, CurFuncDecl);
+    StringRef DemangledNameRef(DemangledName);
+    FunctionName = DemangledNameRef;
+  }
+
+  const std::vector<std::string> &FunctionSearch =
+    CGM.getCodeGenOpts().InstrumentFunctionExclusionsFunctions;
+  for (const auto &FuncMatch : FunctionSearch) {
+    if (FunctionName.find(FuncMatch) != std::string::npos) {
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -1154,7 +1210,7 @@ void CodeGenFunction::StartFunction(GlobalDecl GD, QualType RetTy,
                           CurFuncIsThunk);
   }
 
-  if (ShouldInstrumentFunction()) {
+  if (ShouldInstrumentFunction(CurFn)) {
     if (CGM.getCodeGenOpts().InstrumentFunctions)
       CurFn->addFnAttr("instrument-function-entry", "__cyg_profile_func_enter");
     if (CGM.getCodeGenOpts().InstrumentFunctionsAfterInlining)

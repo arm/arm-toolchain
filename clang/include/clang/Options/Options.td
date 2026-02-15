@@ -3221,6 +3221,15 @@ def finstrument_function_entry_bare : Flag<["-"], "finstrument-function-entry-ba
   Visibility<[ClangOption, CC1Option]>,
   HelpText<"Instrument function entry only, after inlining, without arguments to the instrumentation call">,
   MarshallingInfoFlag<CodeGenOpts<"InstrumentFunctionEntryBare">>;
+def finstrument_functions_exclude_function_list : CommaJoined<["-"],
+  "finstrument-functions-exclude-function-list=">, Group<f_Group>,
+  Visibility<[ClangOption, CC1Option]>,
+  HelpText<"Exclude given (demangled, if C++) functions from function instrumentation.">;
+def finstrument_functions_exclude_file_list : CommaJoined<["-"],
+  "finstrument-functions-exclude-file-list=">, Group<f_Group>,
+  Visibility<[ClangOption, CC1Option]>,
+  HelpText<"Exclude given path segments from function instrumentation.">;
+
 def fcf_protection_EQ : Joined<["-"], "fcf-protection=">,
   Visibility<[ClangOption, CLOption, CC1Option]>, Group<f_Group>,
   HelpText<"Instrument control-flow architecture protection">, Values<"return,branch,full,none">;

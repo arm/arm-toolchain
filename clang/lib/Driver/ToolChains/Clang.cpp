@@ -6702,6 +6702,11 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   Args.AddLastArg(CmdArgs, options::OPT_finstrument_functions,
                   options::OPT_finstrument_functions_after_inlining,
                   options::OPT_finstrument_function_entry_bare);
+  Args.AddAllArgs(CmdArgs,
+                  options::OPT_finstrument_functions_exclude_file_list);
+  Args.AddAllArgs(CmdArgs,
+                  options::OPT_finstrument_functions_exclude_function_list);
+
   Args.AddLastArg(CmdArgs, options::OPT_fconvergent_functions,
                   options::OPT_fno_convergent_functions);
 
