@@ -902,7 +902,7 @@ foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
         set(_libc_display_name "Newlib")
         set(_libc_license_names COPYING.NEWLIB COPYING.LIBGLOSS)
     else()
-        unset(_libc_license_names)
+        message(FATAL_ERROR "Unsupported libc '${libc}' for license summary.")
     endif()
 
     if(_libc_license_names)
