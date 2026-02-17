@@ -741,8 +741,6 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
     # LIST_SEPARATOR option will handle switching it back.
     string(REPLACE ";" "," ENABLE_VARIANTS_PASSTHROUGH "${LLVM_TOOLCHAIN_LIBRARY_VARIANTS}")
 
-    set(multilib_prefix ${CMAKE_BINARY_DIR}/multilib-builds)
-
     # Read the json to generate variant specific target names for convenience.
     file(READ ${LLVM_TOOLCHAIN_MULTILIB_JSON} multilib_json_str)
     string(JSON multilib_defs GET ${multilib_json_str} "libs")
@@ -750,6 +748,8 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
     math(EXPR lib_count_dec "${lib_count} - 1")
 
     foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
+        # Use a per-libc prefix to avoid subproject build dir conflicts.
+        set(multilib_prefix ${CMAKE_BINARY_DIR}/multilib-builds/${libc})
         set(multilib_project multilib-${libc})
         set(libc_install_dir ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR})
         if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL OR NOT libc STREQUAL LLVM_TOOLCHAIN_PRIMARY_LIBC)
@@ -762,10 +762,10 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         ExternalProject_Add(
             ${multilib_project}
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arm-multilib
-            STAMP_DIR ${multilib_prefix}/multilib/${libc}-stamp
-            BINARY_DIR ${multilib_prefix}/multilib/${libc}-build
-            DOWNLOAD_DIR ${multilib_prefix}/multilib/${libc}-dl
-            TMP_DIR ${multilib_prefix}/multilib/${libc}-tmp
+            STAMP_DIR ${multilib_prefix}/stamp
+            BINARY_DIR ${multilib_prefix}/build
+            DOWNLOAD_DIR ${multilib_prefix}/dl
+            TMP_DIR ${multilib_prefix}/tmp
             INSTALL_DIR ${libc_install_dir}
             DEPENDS ${lib_tool_dependencies}
             CMAKE_ARGS
@@ -785,7 +785,7 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
             -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=${FETCHCONTENT_SOURCE_DIR_PICOLIBC}
             -DFETCHCONTENT_SOURCE_DIR_NEWLIB=${FETCHCONTENT_SOURCE_DIR_NEWLIB}
             -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-            -DPROJECT_PREFIX=${multilib_prefix}/${libc}
+            -DPROJECT_PREFIX=${multilib_prefix}
             -DNUMERICAL_BUILD_NAMES=${SHORT_BUILD_PATHS}
             USES_TERMINAL_CONFIGURE TRUE
             USES_TERMINAL_BUILD TRUE
