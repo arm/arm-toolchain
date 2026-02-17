@@ -640,15 +640,8 @@ add_custom_target(
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_version_txt.cmake
     BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
 )
-set(_version_rename OFF)
 if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
     list(GET LLVM_TOOLCHAIN_ENABLED_LIBCS 0 _version_libc_name)
-    set(_version_rename ON)
-elseif(NOT LLVM_TOOLCHAIN_MULTI_LIB_BUILD AND NOT (LLVM_TOOLCHAIN_PRIMARY_LIBC STREQUAL "picolibc"))
-    set(_version_libc_name ${LLVM_TOOLCHAIN_PRIMARY_LIBC})
-    set(_version_rename ON)
-endif()
-if(_version_rename)
     install(
         FILES "${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt"
         DESTINATION .
