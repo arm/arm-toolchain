@@ -56,10 +56,20 @@ If you are asked to review a patch, or would like to understand the review proce
 
 How to Review a Pull Request
 
-When reviewing a PR, you can provide feedback, approve the changes, or request updates using GitHub’s standard review options:
+When reviewing a PR, you can provide feedback, approve the PR (if you have the required permissions), or request changes
+using GitHub’s standard review options:
 * Comment – leave feedback without blocking the merge.
-* Approve – Approve merging the changes proposed in the PR.
-* Request changes – block the merge until required updates are made.
+* Approve – Approve merging the changes proposed in the PR provided you have the necessary permissions.
+* Request changes – If a reviewer selects this option, the identified issues must be fixed before the PR can move forward.
+  The reviewer who requested changes should re-review the PR after updates are made. The PR should not be merged until the concerns
+  are resolved and the review is either approved or dismissed. If the original reviewer is unavailable, another authorized reviewer may   approve or dismiss a blocking review if needed with proper justification to allow the PR to merge.
+
+Resolving review conversations
+
+The author may directly resolve minor comments such as nits, formatting adjustments or other trivial issues.
+For substantive comments, the author should notify the reviewer after making the required changes. The reviewer
+should provide explict confirmation or perform a re-review before making the conversation as resolved. This ensures
+that all meaningful feedback is properly addressed and prevents premature closure of important discussions.
 
 For full guidance on how to review patches and use these options, please refer to GitHub’s documentation:
 see [Reviewing Proposed Changes in a PR](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/reviewing-proposed-changes-in-a-pull-request)
