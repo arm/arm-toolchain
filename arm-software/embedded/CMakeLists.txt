@@ -881,6 +881,7 @@ install(
 )
 
 set(LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES "")
+set(LLVM_TOOLCHAIN_LICENSE_FOOTER_LINES "")
 foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
     if(libc STREQUAL picolibc)
         set(_libc_display_name "Picolibc")
@@ -915,15 +916,19 @@ foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
     endif()
     unset(_libc_license_names)
 endforeach()
+if(LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES)
+    set(LLVM_TOOLCHAIN_LICENSE_FOOTER_LINES
+        "Libc licenses refer to their source files. Sources are identified in VERSION.txt.")
+endif()
 
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
     set(_mingw_license_dir third-party-licenses)
     set(LLVM_TOOLCHAIN_MINGW_LICENSE_LINES
-        "\n - MinGW runtime DLLs: ${_mingw_license_dir}/COPYING.MinGW-w64-runtime.txt, ${_mingw_license_dir}/COPYING3.GCC, ${_mingw_license_dir}/COPYING.RUNTIME")
+        " - MinGW runtime DLLs: ${_mingw_license_dir}/COPYING.MinGW-w64-runtime.txt, ${_mingw_license_dir}/COPYING3.GCC, ${_mingw_license_dir}/COPYING.RUNTIME\n")
 else()
     set(LLVM_TOOLCHAIN_MINGW_LICENSE_LINES "")
 endif()
-configure_file(cmake/THIRD-PARTY-LICENSES.txt.in THIRD-PARTY-LICENSES.txt)
+configure_file(cmake/THIRD-PARTY-LICENSES.txt.in THIRD-PARTY-LICENSES.txt @ONLY)
 unset(_mingw_license_dir)
 
 if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
