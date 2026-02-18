@@ -400,8 +400,11 @@ foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
     list(APPEND LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS ${libc_component})
 
     set(needs_libc_config TRUE)
-    if(NOT LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL AND libc STREQUAL LLVM_TOOLCHAIN_PRIMARY_LIBC)
-        set(needs_libc_config FALSE)
+    if(libc STREQUAL LLVM_TOOLCHAIN_PRIMARY_LIBC)
+        # Overlays always live under lib/clang-runtimes/<libc>, so they still need a sysroot config.
+        if(NOT LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
+            set(needs_libc_config FALSE)
+        endif()
     endif()
 
     if(needs_libc_config)
