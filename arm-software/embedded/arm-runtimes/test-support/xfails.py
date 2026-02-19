@@ -381,6 +381,15 @@ def main():
             description="More recent picolibc versions do now support char16_t and char32_t",
         ),
         XFail(
+            name="UID 0 lookup",
+            testnames=[
+                "test-pwd.test",
+            ],
+            result=NewResult.EXCLUDE,
+            project="picolibc",
+            description="UID 0 lookup returning Invalid argument on MacOS",
+        ),
+        XFail(
             name="picolibc_sys_seek",
             testnames=[
                 "semihost-seek.test",
