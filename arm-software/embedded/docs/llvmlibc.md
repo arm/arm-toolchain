@@ -137,6 +137,20 @@ Example implementations are provided for:
 * Semihosting: [semihost.cpp](../llvmlibc-support/semihost/semihost.cpp)
 * UART output: [samples](../samples/src/baremetal-uart/hello.c).
 
+### Debug output
+
+LLVM libc startup code uses `void _platform_debug_putc(int c)` to
+emit debug diagnostic messages, for example, inside exception handlers.
+
+With `crt0-semihost` the output is directed to `stderr` using semihosting.
+
+With `crt0` the output is discarded. You can implement
+`void _platform_debug_putc(int c)` in your application to redirect it,
+for example, to a UART. The implementation must be safe to be called with
+only the assumption that the stack pointer is setup: it must not use heap or
+other LLVM libc functions. It must not access any code or data that is
+initialized by `_platform_init_data_segments()`.
+
 ## Providing command line options
 
 `crt0-semihost` supports getting command line options via semihosting and
