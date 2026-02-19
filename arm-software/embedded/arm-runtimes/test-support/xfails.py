@@ -387,7 +387,7 @@ def main():
             ],
             result=NewResult.EXCLUDE,
             project="picolibc",
-            description="UID 0 lookup returning Invalid argument on MacOS",
+            description="UID 0 lookup returning Null on MacOS",
         ),
         XFail(
             name="picolibc_sys_seek",
