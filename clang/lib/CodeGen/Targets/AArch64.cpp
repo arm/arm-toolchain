@@ -160,6 +160,11 @@ public:
             Attr.BranchProtection, Attr.CPU, BPI, CGM.getLangOpts(), Error);
         assert(Error.empty());
       }
+// Begin downstream change #726
+      if (!Attr.SignReturnAddrHardening.empty())
+        Fn->addFnAttr("sign-return-address-harden",
+                      Attr.SignReturnAddrHardening);
+// End downstream change #726
     }
     setBranchProtectionFnAttributes(BPI, *Fn);
     setPointerAuthFnAttributes(CGM.getCodeGenOpts().PointerAuth, *Fn);

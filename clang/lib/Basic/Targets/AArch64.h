@@ -163,6 +163,10 @@ public:
                                 BranchProtectionInfo &BPI,
                                 const LangOptions &LO,
                                 StringRef &Err) const override;
+// Begin downstream change #726
+  std::optional<LangOptions::SignReturnAddressHardeningKind>
+  validateSignReturnAddressHardening(StringRef Spec) const override;
+// End downstream change #726
 
   bool isValidCPUName(StringRef Name) const override;
   void fillValidCPUList(SmallVectorImpl<StringRef> &Values) const override;

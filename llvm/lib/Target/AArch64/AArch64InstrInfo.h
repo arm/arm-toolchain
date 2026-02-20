@@ -571,6 +571,14 @@ public:
                                                Register TargetReg,
                                                bool FrameSetup) const;
 
+// Begin downstream change #726
+  /// Insert a `PAUTH_EPILOGUE` pseudo before the first terminator in \p MBB to
+  /// authenticate the return address. Adds an implicit def of X16 when the
+  /// branch protection uses PAuthLR but the subtarget lacks PAuthLR
+  /// instructions.
+  void createPauthEpilogueInstr(MachineBasicBlock &MBB, DebugLoc DL) const;
+
+// End downstream change #726
 #define GET_INSTRINFO_HELPER_DECLS
 #include "AArch64GenInstrInfo.inc"
 

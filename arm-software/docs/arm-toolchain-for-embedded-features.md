@@ -15,6 +15,13 @@ change or be removed at any point in the future.
 
 There are no experimental features implemented.
 
+## PAC-RET hardening against the PACMAN attack
+Arm Toolchain for Embedded provides the command line option
+`-mharden-pac-ret=load-return-address`, which can be used to harden the return
+address signing with a load of the return address, effectively reducing the
+attack surface for the PACMAN attack. A function attribute that follows the
+same naming scheme is also introduced.
+
 # Features
 
 ## elf2bin utility

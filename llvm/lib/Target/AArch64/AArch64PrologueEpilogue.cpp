@@ -1774,11 +1774,15 @@ void AArch64EpilogueEmitter::finalizeEpilogue() const {
   if (AFI->shouldSignReturnAddress(MF)) {
     // If pac-ret+leaf is in effect, PAUTH_EPILOGUE pseudo instructions
     // are inserted by emitPacRetPlusLeafHardening().
-    if (!AFL.shouldSignReturnAddressEverywhere(MF)) {
-      BuildMI(MBB, MBB.getFirstTerminator(), DL,
-              TII->get(AArch64::PAUTH_EPILOGUE))
-          .setMIFlag(MachineInstr::FrameDestroy);
-    }
+// Begin downstream change #726
+//     if (!AFL.shouldSignReturnAddressEverywhere(MF)) {
+//       BuildMI(MBB, MBB.getFirstTerminator(), DL,
+//               TII->get(AArch64::PAUTH_EPILOGUE))
+//           .setMIFlag(MachineInstr::FrameDestroy);
+//     }
+    if (!AFL.shouldSignReturnAddressEverywhere(MF))
+      TII->createPauthEpilogueInstr(MBB, DL);
+// End downstream change #726
     // AArch64PointerAuth pass will insert SEH_PACSignLR
     HasWinCFI |= NeedsWinCFI;
   }

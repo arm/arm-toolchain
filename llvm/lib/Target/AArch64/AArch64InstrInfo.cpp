@@ -10041,6 +10041,25 @@ AArch64InstrInfo::getOutliningCandidateInfo(
                                    ->getInfo<AArch64FunctionInfo>()
                                    ->getSignReturnAddressCondition();
   if (RASignCondition != SignReturnAddress::None) {
+// Begin downstream change #726
+    // Candidates that have Return Address Signing Hardening enabled are
+    // discarded.
+    //
+    // In its current form, the machine outliner does not preserve X16/X17
+    // across outlined function calls, even though it should as they are
+    // caller-saved registers. And since the hardening based on load of return
+    // address may clobber one of these registers, if they are alive across a
+    // call their value would be lost due to the hardening mechanism.
+    llvm::erase_if(RepeatedSequenceLocs, [](outliner::Candidate &C) {
+      return C.getMF()
+          ->getInfo<AArch64FunctionInfo>()
+          ->shouldHardenSignReturnAddress();
+    });
+    // If the sequence doesn't have enough candidates left, then we're done.
+    if (RepeatedSequenceLocs.size() < MinRepeats)
+      return std::nullopt;
+
+// End downstream change #726
     // One PAC and one AUT instructions
     NumBytesToCreateFrame += 8;
 
@@ -10413,6 +10432,15 @@ void AArch64InstrInfo::mergeOutliningCandidateAttributes(
     F.addFnAttr(CFn.getFnAttribute("sign-return-address"));
   if (CFn.hasFnAttribute("sign-return-address-key"))
     F.addFnAttr(CFn.getFnAttribute("sign-return-address-key"));
+// Begin downstream change #726
+  // The "sign-return-address-harden" attribute is not included because no
+  // candidate is supposed to have hardening enabled.
+  assert(llvm::none_of(Candidates, [](const outliner::Candidate &C) {
+    return C.getMF()
+        ->getInfo<AArch64FunctionInfo>()
+        ->shouldHardenSignReturnAddress();
+  }));
+// End downstream change #726
 
   AArch64GenInstrInfo::mergeOutliningCandidateAttributes(F, Candidates);
 }
@@ -10752,9 +10780,12 @@ static void signOutlinedFunction(MachineFunction &MF, MachineBasicBlock &MBB,
 
   BuildMI(MBB, MBB.begin(), DebugLoc(), TII->get(AArch64::PAUTH_PROLOGUE))
       .setMIFlag(MachineInstr::FrameSetup);
-  BuildMI(MBB, MBB.getFirstInstrTerminator(), DebugLoc(),
-          TII->get(AArch64::PAUTH_EPILOGUE))
-      .setMIFlag(MachineInstr::FrameDestroy);
+// Begin downstream change #726
+//   BuildMI(MBB, MBB.getFirstInstrTerminator(), DebugLoc(),
+//           TII->get(AArch64::PAUTH_EPILOGUE))
+//       .setMIFlag(MachineInstr::FrameDestroy);
+  TII->createPauthEpilogueInstr(MBB, DebugLoc());
+// End downstream change #726
 }
 
 void AArch64InstrInfo::buildOutlinedFrame(
@@ -11245,6 +11276,19 @@ unsigned llvm::getBLRCallOpcode(const MachineFunction &MF) {
     return AArch64::BLR;
 }
 
+// Begin downstream change #726
+void AArch64InstrInfo::createPauthEpilogueInstr(MachineBasicBlock &MBB,
+                                                DebugLoc DL) const {
+  MachineBasicBlock::iterator InsertPt = MBB.getFirstTerminator();
+  auto Builder = BuildMI(MBB, InsertPt, DL, get(AArch64::PAUTH_EPILOGUE))
+                     .setMIFlag(MachineInstr::FrameDestroy);
+
+  const auto *AFI = MBB.getParent()->getInfo<AArch64FunctionInfo>();
+  if (AFI->branchProtectionPAuthLR() && !Subtarget.hasPAuthLR())
+    Builder.addReg(AArch64::X16, RegState::ImplicitDefine);
+}
+
+// End downstream change #726
 MachineBasicBlock::iterator
 AArch64InstrInfo::probedStackAlloc(MachineBasicBlock::iterator MBBI,
                                    Register TargetReg, bool FrameSetup) const {
