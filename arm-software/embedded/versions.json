@@ -9,7 +9,7 @@
     "picolibc": {
       "url": "https://github.com/picolibc/picolibc.git",
       "tagType": "commithash",
-      "tag": "a742b2d5c5f94ed71458b1f7144e451af597a45b"
+      "tag": "550e106dfe5b8727f35fa4e75784c10fdd8742f5"
     },
     "newlib": {
       "url": "https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git",
