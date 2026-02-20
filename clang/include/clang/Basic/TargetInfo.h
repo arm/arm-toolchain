@@ -62,10 +62,16 @@ struct ParsedTargetAttr {
   StringRef CPU;
   StringRef Tune;
   StringRef BranchProtection;
+// Begin downstream change #726
+  StringRef SignReturnAddrHardening;
+// End downstream change #726
   StringRef Duplicate;
   bool operator ==(const ParsedTargetAttr &Other) const {
     return Duplicate == Other.Duplicate && CPU == Other.CPU &&
            Tune == Other.Tune && BranchProtection == Other.BranchProtection &&
+// Begin downstream change #726
+           SignReturnAddrHardening == Other.SignReturnAddrHardening &&
+// End downstream change #726
            Features == Other.Features;
   }
 };
@@ -1471,6 +1477,9 @@ public:
   public:
     LangOptions::SignReturnAddressScopeKind SignReturnAddr;
     LangOptions::SignReturnAddressKeyKind SignKey;
+// Begin downstream change #726
+    LangOptions::SignReturnAddressHardeningKind SignReturnAddressHardening;
+// End downstream change #726
     bool BranchTargetEnforcement;
     bool BranchProtectionPAuthLR;
     bool GuardedControlStack;
@@ -1497,9 +1506,25 @@ public:
       llvm_unreachable("Unexpected SignReturnAddressKeyKind");
     }
 
+// Begin downstream change #726
+    const char *getSignReturnAddressHardeningStr() const {
+      switch (SignReturnAddressHardening) {
+      case LangOptions::SignReturnAddressHardeningKind::None:
+        return "none";
+      case LangOptions::SignReturnAddressHardeningKind::LoadReturnAddress:
+        return "load-return-address";
+      }
+      llvm_unreachable("Unexpected SignReturnAddressHardeningKind");
+    }
+
+// End downstream change #726
     BranchProtectionInfo()
         : SignReturnAddr(LangOptions::SignReturnAddressScopeKind::None),
           SignKey(LangOptions::SignReturnAddressKeyKind::AKey),
+// Begin downstream change #726
+          SignReturnAddressHardening(
+              LangOptions::SignReturnAddressHardeningKind::None),
+// End downstream change #726
           BranchTargetEnforcement(false), BranchProtectionPAuthLR(false),
           GuardedControlStack(false) {}
 
@@ -1513,6 +1538,9 @@ public:
       SignKey = LangOpts.isSignReturnAddressWithAKey()
                     ? LangOptions::SignReturnAddressKeyKind::AKey
                     : LangOptions::SignReturnAddressKeyKind::BKey;
+// Begin downstream change #726
+      SignReturnAddressHardening = LangOpts.getSignReturnAddressHardening();
+// End downstream change #726
       BranchTargetEnforcement = LangOpts.BranchTargetEnforcement;
       BranchProtectionPAuthLR = LangOpts.BranchProtectionPAuthLR;
       GuardedControlStack = LangOpts.GuardedControlStack;
@@ -1535,6 +1563,14 @@ public:
     return false;
   }
 
+// Begin downstream change #726
+  /// Validate the Return Address Signing Hardening specification
+  virtual std::optional<LangOptions::SignReturnAddressHardeningKind>
+  validateSignReturnAddressHardening(StringRef Spec) const {
+    return std::nullopt;
+  }
+
+// End downstream change #726
   /// Perform initialization based on the user configured
   /// set of features (e.g., +sse4).
   ///

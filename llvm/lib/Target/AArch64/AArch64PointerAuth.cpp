@@ -11,11 +11,17 @@
 #include "AArch64.h"
 #include "AArch64InstrInfo.h"
 #include "AArch64MachineFunctionInfo.h"
+// Begin downstream change #726
+#include "AArch64RegisterInfo.h"
+// End downstream change #726
 #include "AArch64Subtarget.h"
 #include "llvm/CodeGen/CFIInstBuilder.h"
 #include "llvm/CodeGen/MachineBasicBlock.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/CodeGen/MachineModuleInfo.h"
+// Begin downstream change #726
+#include "llvm/CodeGen/RegisterScavenging.h"
+// End downstream change #726
 
 using namespace llvm;
 using namespace llvm::AArch64PAuth;
@@ -43,6 +49,10 @@ private:
   void authenticateLR(MachineFunction &MF,
                       MachineBasicBlock::iterator MBBI) const;
 
+// Begin downstream change #726
+  bool emitSignReturnAddressHardening(MachineFunction &MF);
+
+// End downstream change #726
   bool checkAuthenticatedLR(MachineBasicBlock::iterator TI) const;
 };
 
@@ -177,8 +187,17 @@ void AArch64PointerAuth::authenticateLR(
   // From v8.3a onwards there are optimised authenticate LR and return
   // instructions, namely RETA{A,B}, that can be used instead. In this case the
   // DW_CFA_AARCH64_negate_ra_state can't be emitted.
-  bool TerminatorIsCombinable =
-      TI != MBB.end() && TI->getOpcode() == AArch64::RET;
+// Begin downstream change #726
+//   bool TerminatorIsCombinable =
+//       TI != MBB.end() && TI->getOpcode() == AArch64::RET;
+  //
+  // If the PAC-RET hardening based on load of return address is enabled,
+  // fallback to the use of AUTIASP/AUTIBSP and RET.
+  bool TerminatorIsCombinable = TI != MBB.end() &&
+                                TI->getOpcode() == AArch64::RET &&
+                                !MFnI->shouldHardenSignReturnAddress();
+
+// End downstream change #726
   MCSymbol *PACSym = MFnI->getSigningInstrLabel();
 
   if (Subtarget->hasPAuth() && TerminatorIsCombinable && !NeedsWinCFI &&
@@ -276,5 +295,88 @@ bool AArch64PointerAuth::runOnMachineFunction(MachineFunction &MF) {
     Modified = true;
   }
 
+// Begin downstream change #726
+  Modified |= emitSignReturnAddressHardening(MF);
+
+  return Modified;
+}
+
+bool AArch64PointerAuth::emitSignReturnAddressHardening(MachineFunction &MF) {
+  const auto *FI = MF.getInfo<AArch64FunctionInfo>();
+  assert(FI && "FI can't be null");
+  if (!FI->shouldSignReturnAddress(MF) || !FI->shouldHardenSignReturnAddress())
+    return false;
+  assert(Subtarget && "Subtarget must be initialized");
+
+  RegScavenger RS;
+  bool Modified = false;
+  for (MachineBasicBlock &MBB : MF) {
+    if (!MBB.isReturnBlock())
+      continue;
+
+    MachineBasicBlock::iterator MBBI = MBB.getFirstTerminator();
+
+    if (MBBI == MBB.end() || MBBI->getOpcode() != AArch64::RET)
+      continue;
+
+    RS.enterBasicBlockEnd(*MBBI->getParent());
+    Register XReg = RS.scavengeRegisterBackwards(
+        AArch64::GPR64RegClass, MBBI,
+        /*RestoreAfter=*/false, /*SPAdj=*/0, /*AllowSpill=*/false);
+    if (XReg == AArch64::NoRegister)
+      // Couldn't find a free register to use for the hardening. Skip.
+      continue;
+    RS.setRegUsed(XReg);
+
+    DebugLoc DL = MBBI->getDebugLoc();
+
+    // Register copies are done using ORRXrs directly instead of using the
+    // pseudo-instruction COPY because this function can be called after
+    // pseudo-instruction expansion takes place, for example via the machine
+    // outliner pass.
+    BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrs), XReg)
+        .addUse(AArch64::XZR)
+        .addUse(AArch64::LR)
+        .addImm(0)
+        .setMIFlag(MachineInstr::FrameDestroy);
+
+    // The XPACI instruction is only available with FEAT_PAUTH. So if the
+    // subtarget does not have it, the alternative XPACLRI instruction must be
+    // used instead. The latter is in hint space, therefore can be present even
+    // if FEAT_PAUTH is absent.
+    if (Subtarget->hasPAuth()) {
+      BuildMI(MBB, MBBI, DL, TII->get(AArch64::XPACI), XReg)
+          .addUse(XReg)
+          .setMIFlag(MachineInstr::FrameDestroy);
+      Register WReg =
+          Subtarget->getRegisterInfo()->getSubReg(XReg, AArch64::sub_32);
+      BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRWui), WReg)
+          .addUse(XReg)
+          .addImm(0)
+          .setMIFlag(MachineInstr::FrameDestroy);
+    } else {
+      BuildMI(MBB, MBBI, DL, TII->get(AArch64::XPACLRI))
+          .setMIFlag(MachineInstr::FrameDestroy);
+      BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRWui), AArch64::W30)
+          .addUse(AArch64::LR)
+          .addImm(0)
+          .setMIFlag(MachineInstr::FrameDestroy);
+      BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrs), AArch64::LR)
+          .addUse(AArch64::XZR)
+          .addUse(XReg)
+          .addImm(0)
+          .setMIFlag(MachineInstr::FrameDestroy);
+      if (MBBI != MBB.end() && (MBBI->getOpcode() == AArch64::RET_ReallyLR ||
+                                MBBI->getOpcode() == AArch64::RET)) {
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::RET))
+            .addUse(AArch64::LR)
+            .copyImplicitOps(*MBBI);
+        MBB.erase(MBBI);
+      }
+    }
+    Modified = true;
+  }
+
+// End downstream change #726
   return Modified;
 }

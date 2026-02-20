@@ -1197,8 +1197,11 @@ void AArch64FrameLowering::emitPacRetPlusLeafHardening(
     if (MBBI != MBB.end())
       DL = MBBI->getDebugLoc();
 
-    BuildMI(MBB, MBBI, DL, TII->get(AArch64::PAUTH_EPILOGUE))
-        .setMIFlag(MachineInstr::FrameDestroy);
+// Begin downstream change #726
+//     BuildMI(MBB, MBBI, DL, TII->get(AArch64::PAUTH_EPILOGUE))
+//         .setMIFlag(MachineInstr::FrameDestroy);
+    TII->createPauthEpilogueInstr(MBB, DL);
+// End downstream change #726
   };
 
   // This should be in sync with PEIImpl::calculateSaveRestoreBlocks.
