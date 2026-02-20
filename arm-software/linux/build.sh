@@ -55,7 +55,6 @@ STAGES=(
     "bootstrap_compiler_build"
     "libcpp_build"
     "product_build"
-    "static_libomp_build"
 )
 ZLIB_STATIC_PATH=${ZLIB_STATIC_PATH:-"/usr/lib/`uname -m`-linux-gnu/libz.a"}
 COMMON_LINKER_FLAGS="-Wl,--build-id"
@@ -404,38 +403,6 @@ product_build() {
     echo "-Wl,-rpath=${ATFL_DIR}/lib" >> ${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
     run_command ninja ${NINJA_ARGS} check-all | tee -a "${LOGS_DIR}/product.txt"
     bootstrap_compiler_default_config
-}
-
-static_libomp_build() {
-    mkdir -p "${BUILD_DIR}/stage/static_libomp_build"
-    cd "${BUILD_DIR}/stage/static_libomp_build"
-    bootstrap_compiler_default_config
-    run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/openmp" \
-        -DBUILD_SHARED_LIBS=False \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
-        -DCMAKE_LINKER="${ATFL_DIR}/bin/ld.lld" \
-        -DCMAKE_CXX_FLAGS="-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT" \
-        -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        -DOPENMP_TEST_C_COMPILER="${ATFL_DIR}//bin/clang" \
-        -DOPENMP_TEST_CXX_COMPILER="${ATFL_DIR}/bin/clang++" \
-        -DOPENMP_TEST_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
-        -DOPENMP_LLVM_LIT_EXECUTABLE="${BUILD_DIR}/stage/product_build/bin/llvm-lit" \
-        -DOPENMP_FILECHECK_EXECUTABLE="${BUILD_DIR}/stage/product_build/bin/FileCheck" \
-        "${PRODUCT_CMAKE_FLAGS[@]}" "${LIBOMP_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
-        tee "${LOGS_DIR}/static_libomp.txt"
-    run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
-    rm -rf "${ATFL_DIR}.keep" "${ATFL_DIR}.libs"
-    mv "${ATFL_DIR}" "${ATFL_DIR}.keep"
-    run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
-    mv "${ATFL_DIR}" "${ATFL_DIR}.libs"
-    mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
-    cp ${ATFL_DIR}.libs/lib/lib*.a \
-        "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
-    rm -r "${ATFL_DIR}.libs"
-    run_command ninja ${NINJA_ARGS} check-openmp | tee -a "${LOGS_DIR}/static_libomp.txt"
 }
 
 package() {
