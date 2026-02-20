@@ -932,13 +932,11 @@ endif()
 
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
     set(_mingw_license_dir third-party-licenses)
-    set(LLVM_TOOLCHAIN_MINGW_LICENSE_LINES
+    string(APPEND LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES
         " - MinGW runtime DLLs: ${_mingw_license_dir}/COPYING.MinGW-w64-runtime.txt, ${_mingw_license_dir}/COPYING3.GCC, ${_mingw_license_dir}/COPYING.RUNTIME\n")
-else()
-    set(LLVM_TOOLCHAIN_MINGW_LICENSE_LINES "")
+    unset(_mingw_license_dir)
 endif()
 configure_file(cmake/THIRD-PARTY-LICENSES.txt.in THIRD-PARTY-LICENSES.txt @ONLY)
-unset(_mingw_license_dir)
 
 if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
     set(third_party_license_summary_install_dir third-party-licenses/${LLVM_TOOLCHAIN_PRIMARY_LIBC})
