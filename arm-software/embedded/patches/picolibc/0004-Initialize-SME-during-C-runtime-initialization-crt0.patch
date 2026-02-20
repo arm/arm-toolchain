@@ -1,8 +1,7 @@
-From 4bbe72b4dc2215e1799f3cff9054e3c8bfff253e Mon Sep 17 00:00:00 2001
+From 7afaa0057963dcf584d3e9ef07aa09f4be89c126 Mon Sep 17 00:00:00 2001
 From: Amilendra Kodithuwakku <amilendra.kodithuwakku@arm.com>
 Date: Thu, 29 Jan 2026 16:45:01 +0000
-Subject: [PATCH] [picolibc][SME] Initialize SME during C-runtime
- initialization (crt0)
+Subject: Initialize SME during C-runtime initialization (crt0)
 
 Check if SME or SME2 is enabled and do the following
 
@@ -23,10 +22,10 @@ value of 2048 bits.
  1 file changed, 23 insertions(+)
 
 diff --git a/picocrt/machine/aarch64/crt0.S b/picocrt/machine/aarch64/crt0.S
-index 831a57677..4e4dc5942 100644
+index 8b57ecf697..351c4877c4 100644
 --- a/picocrt/machine/aarch64/crt0.S
 +++ b/picocrt/machine/aarch64/crt0.S
-@@ -40,6 +40,9 @@
+@@ -41,6 +41,9 @@
  
  #define MMU_INVALID_FLAGS       0
  
@@ -36,9 +35,9 @@ index 831a57677..4e4dc5942 100644
    .macro start_page_table
    .section .rodata
    .global __identity_page_table
-@@ -136,6 +139,26 @@ _start:
- #endif
+@@ -149,6 +152,26 @@ _start:
  #endif // __ARM_FP
+ #endif
  
 +	/* Determine if SME or SME2 is available */
 +	mrs     x0, id_aa64pfr1_el1
@@ -64,5 +63,5 @@ index 831a57677..4e4dc5942 100644
  	bl _cstart
    .size _start, .-_start
 -- 
-2.34.1
+2.43.0
 
