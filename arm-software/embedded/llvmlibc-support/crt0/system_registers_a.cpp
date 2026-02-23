@@ -22,6 +22,7 @@ DACR_Class DACR;
 CPACR_Class CPACR;
 PMCCFILTR_Class PMCCFILTR;
 ID_DFR0_Class ID_DFR0;
+ID_AA64MMFR2_Class ID_AA64MMFR2;
 SysReg<SysRegName::VBAR> VBAR;
 SysReg<SysRegName::ESR> ESR;
 SysReg<SysRegName::ELR> ELR;
