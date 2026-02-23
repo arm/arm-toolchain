@@ -674,6 +674,7 @@ static constexpr IntrinsicHandler handlers[]{
        {"order", asBox, handleDynamicOptional}}},
      /*isElemental=*/false},
     {"rrspacing", &I::genRRSpacing},
+    {"rtc", &I::genRtc, {}, /*isElemental=*/false},
     {"same_type_as",
      &I::genSameTypeAs,
      {{{"a", asBox}, {"b", asBox}}},
@@ -7633,6 +7634,14 @@ IntrinsicLibrary::genSecond(std::optional<mlir::Type> resultType,
   if (resultType)
     return fir::LoadOp::create(builder, loc, fir::getBase(result));
   return {};
+}
+
+// RTC
+mlir::Value IntrinsicLibrary::genRtc(mlir::Type resultType,
+                                     llvm::ArrayRef<mlir::Value> args) {
+  assert(args.empty());
+  mlir::Value time = fir::runtime::genTime(builder, loc);
+  return builder.createConvert(loc, resultType, time);
 }
 
 // SELECTED_CHAR_KIND
