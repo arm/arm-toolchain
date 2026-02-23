@@ -28,7 +28,7 @@ to the package.
 C++ console I/O can be used now, but not file I/O yet.
 - ATfE samples updated to work with LLVM libc, the separate set of LLVM libc
 samples removed.
-- LLVM compiler_rt profile library provided for each library variant.
+- LLVM compiler-rt profile library provided for each library variant.
 It replaced the ATfE sample minimal profile runtime library implementation.
 - newlib updated to version 4.6.0
 
