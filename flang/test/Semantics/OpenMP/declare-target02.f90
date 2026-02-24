@@ -41,30 +41,22 @@ program declare_target02
   !$omp declare target link (a1_link)
 
   equivalence(eq_a, eq_b)
-  !ERROR: A variable in a DECLARE TARGET directive cannot appear in an EQUIVALENCE statement
   !$omp declare target (eq_a)
 
   !WARNING: The usage of TO clause on DECLARE TARGET directive has been deprecated. Use ENTER clause instead. [-Wopen-mp-usage]
-  !ERROR: A variable in a DECLARE TARGET directive cannot appear in an EQUIVALENCE statement
   !$omp declare target to (eq_a)
 
-  !ERROR: A variable in a DECLARE TARGET directive cannot appear in an EQUIVALENCE statement
   !$omp declare target enter (eq_a)
 
-  !ERROR: A variable in a DECLARE TARGET directive cannot appear in an EQUIVALENCE statement
   !$omp declare target link (eq_b)
 
-  !ERROR: A variable in a DECLARE TARGET directive cannot appear in an EQUIVALENCE statement
   !$omp declare target (eq_c)
 
   !WARNING: The usage of TO clause on DECLARE TARGET directive has been deprecated. Use ENTER clause instead. [-Wopen-mp-usage]
-  !ERROR: A variable in a DECLARE TARGET directive cannot appear in an EQUIVALENCE statement
   !$omp declare target to (eq_c)
 
-  !ERROR: A variable in a DECLARE TARGET directive cannot appear in an EQUIVALENCE statement
   !$omp declare target enter (eq_c)
 
-  !ERROR: A variable in a DECLARE TARGET directive cannot appear in an EQUIVALENCE statement
   !$omp declare target link (eq_d)
   equivalence(eq_c, eq_d)
 

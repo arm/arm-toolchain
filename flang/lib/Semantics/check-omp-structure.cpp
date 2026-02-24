@@ -1297,10 +1297,6 @@ void OmpStructureChecker::CheckThreadprivateOrDeclareTargetVar(
     context_.Say(name->source,
         "A variable in a %s directive cannot be an element of a common block"_err_en_US,
         ContextDirectiveAsFortran());
-  } else if (FindEquivalenceSet(*name->symbol)) {
-    context_.Say(name->source,
-        "A variable in a %s directive cannot appear in an EQUIVALENCE statement"_err_en_US,
-        ContextDirectiveAsFortran());
   } else if (name->symbol->test(Symbol::Flag::OmpThreadprivate) &&
       directive == llvm::omp::Directive::OMPD_declare_target) {
     context_.Say(name->source,
@@ -1337,19 +1333,10 @@ void OmpStructureChecker::CheckThreadprivateOrDeclareTargetVar(
 
 void OmpStructureChecker::CheckThreadprivateOrDeclareTargetVar(
     const parser::Name &name) {
-  if (!name.symbol) {
-    return;
-  }
-
-  if (auto *cb{name.symbol->detailsIf<CommonBlockDetails>()}) {
-    for (const auto &obj : cb->objects()) {
-      if (FindEquivalenceSet(*obj)) {
-        context_.Say(name.source,
-            "A variable in a %s directive cannot appear in an EQUIVALENCE statement (variable '%s' from common block '/%s/')"_err_en_US,
-            ContextDirectiveAsFortran(), obj->name(), name.symbol->name());
-      }
-    }
-  }
+  // Empty function to satisfy template instantiation below
+  // NOT TO UPSTREAM
+  // Standard violation: allow threadprivate variable in EQUIVALENCE for
+  // customer request.
 }
 
 void OmpStructureChecker::CheckThreadprivateOrDeclareTargetVar(

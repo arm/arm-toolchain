@@ -21,14 +21,11 @@ program threadprivate02
   !$omp threadprivate(a1)
 
   equivalence(eq_a, eq_b)
-  !ERROR: A variable in a THREADPRIVATE directive cannot appear in an EQUIVALENCE statement
   !$omp threadprivate(eq_a)
 
-  !ERROR: A variable in a THREADPRIVATE directive cannot appear in an EQUIVALENCE statement
   !$omp threadprivate(eq_c)
   equivalence(eq_c, eq_d)
 
-  !ERROR: A variable in a THREADPRIVATE directive cannot appear in an EQUIVALENCE statement (variable 'eq_e' from common block '/blk2/')
   !$omp threadprivate(/blk2/)
 
 contains
