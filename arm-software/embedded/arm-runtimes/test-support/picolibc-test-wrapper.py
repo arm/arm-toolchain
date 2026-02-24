@@ -8,13 +8,19 @@ from run_qemu import run_qemu
 from run_fvp import run_fvp
 import argparse
 import pathlib
+import subprocess
 import sys
 
 
 def run(args):
     # Some picolibc tests expect argv[0] to be literally "program-name", not
     # the actual program name.
-    argv = ["program-name"] + args.arguments
+    argv = ["program-name"]
+    if args.args:
+        # The arguments from the picolibc tests will come as a string
+        # rather than a list, so append to the first element and let the
+        # semihosting library handle the splitting.
+        argv[0] += " " + args.args
     if args.qemu_command:
         return run_qemu(
             args.qemu_command,
@@ -26,6 +32,12 @@ def run(args):
             None,
             pathlib.Path.cwd(),
             args.verbose,
+            args.trace,
+            # Setting stdin to /dev/null prevents qemu from fiddling with
+            # the echo bit of the parent terminal when meson runs multiple
+            # tests in parallel. stdin is only tested by picolibc when
+            # test-stdin=true, which is not the default.
+            stdin=subprocess.DEVNULL,
         )
     else:
         return run_fvp(
@@ -79,18 +91,22 @@ def main():
         help="file to wrote tarmac trace to (FVP only)",
     )
     parser.add_argument(
+        "--trace",
+        type=str,
+        default=None,
+        help="File to write execution trace to (QEMU only)",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Print verbose output. This may affect test result, as the output "
         "will be added to the output of the test.",
     )
-    parser.add_argument("image", help="image file to execute")
     parser.add_argument(
-        "arguments",
-        nargs=argparse.REMAINDER,
-        default=[],
-        help="optional arguments for the image",
+        "--args",
+        help="String containing optional arguments for the image",
     )
+    parser.add_argument("image", help="image file to execute")
     args = parser.parse_args()
     ret_code = run(args)
     sys.exit(ret_code)

@@ -12,9 +12,9 @@
       "tag": "main"
     },
     "newlib": {
-      "url": "https://github.com/bminor/newlib.git",
-      "tagType": "tag",
-      "tag": "newlib-4.5.0"
+      "url": "https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git",
+      "tagType": "commithash",
+      "tag": "8ba4275b83ec27529f67e0d477611fa6d8d6e6bd"
     }
   }
 }

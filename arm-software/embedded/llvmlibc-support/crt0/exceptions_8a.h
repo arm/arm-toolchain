@@ -198,7 +198,7 @@ EXFN_ATTR void exception_handler() {
   }
 
   // Stop execution
-  abort();
+  __llvm_libc_exit(1);
 }
 
 // The AArch64 exception vector table has 16 entries, each of which is 128
@@ -206,7 +206,7 @@ EXFN_ATTR void exception_handler() {
 // For our purposes, each entry just contains one branch instruction to the
 // exception reporting function, since we never want to resume after an
 // exception.
-[[gnu::naked, gnu::section(".vectors"), gnu::aligned(2048)]]
+[[gnu::naked, gnu::section(".init.vectors"), gnu::aligned(2048)]]
 void vector_table() {
 #define VECTOR_TABLE_ENTRY                                                     \
   asm(".balign 128");                                                          \

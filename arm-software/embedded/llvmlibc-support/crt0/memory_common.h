@@ -11,8 +11,10 @@
 #ifndef BOOTCODE_MEMORY_COMMON_H
 #define BOOTCODE_MEMORY_COMMON_H
 
+extern "C" {
 [[gnu::weak]] extern char __stack;
 [[gnu::weak]] extern char __heap_start;
+}
 
 namespace bootcode {
 namespace memory {

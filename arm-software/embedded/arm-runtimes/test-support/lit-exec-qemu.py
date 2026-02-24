@@ -57,6 +57,12 @@ def main():
         help="Print verbose output. This may affect test result, as the output "
         "will be added to the output of the test.",
     )
+    parser.add_argument(
+        "--trace",
+        type=str,
+        default=None,
+        help="File to write execution trace to (slows execution significantly)",
+    )
     parser.add_argument("image", help="image file to execute")
     parser.add_argument(
         "arguments",
@@ -75,6 +81,7 @@ def main():
         args.timeout,
         args.execdir,
         args.verbose,
+        args.trace,
     )
     sys.exit(ret_code)
 

@@ -170,8 +170,12 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
         message(FATAL_ERROR "Tests can only be enabled using picolibc or llvmlibc.")
     endif()
 
-    # lit wrapper to be used instead of the LLVM version.
-    set(external_lit_path "${CMAKE_CURRENT_SOURCE_DIR}/test-support/lit-wrapper.py")
+    set(external_lit_path "${LLVM_BINARY_DIR}/bin/llvm-lit")
+    set(default_lit_args "-sv --show-xfail --show-unsupported --show-excluded")
+    if (MSVC OR XCODE)
+        set(default_lit_args "${default_lit_args} --no-progress-bar")
+    endif()
+    set(LLVM_LIT_ARGS "${default_lit_args}" CACHE STRING "Default options for lit")
 
     if(TEST_EXECUTOR STREQUAL qemu)
         if(TARGET_ARCH MATCHES "^aarch64")
@@ -223,9 +227,9 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
     list(JOIN lit_test_executor " " lit_test_executor)
 endif()
 
-set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS} --sysroot ${TEMP_LIB_DIR}")
+set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS} --sysroot ${TEMP_LIB_DIR} -I${TEMP_LIB_DIR}/include")
 # Compiling the libraries benefits from some extra optimization
-# flags, and requires a sysroot.
+# flags, and requires a sysroot or include folder for LLVM libc build.
 set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident")
 
 # Generic target names for the C library.
@@ -271,30 +275,21 @@ Hard-float library with target triple \"${target_triple}\" must end \"-eabihf\""
 endif()
 string(REPLACE "-none-" "-unknown-none-" normalized_target_triple ${target_triple})
 
-# This prevents a test failure due to insufficient available registers.
-# TODO: Which test, can this be fixed upstream?
-if(VARIANT STREQUAL "armv6m_soft_nofp")
-    set(compiler_rt_test_flags "${compiler_rt_test_flags} -fomit-frame-pointer")
-endif()
-
 if(ENABLE_COMPILER_RT_TESTS)
-    # Use the downstream version of lit, which is just a wrapper for the built one.
-    # Pass it the xfail/xfail-not lists.
-    set(compiler_rt_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.xfails")
-    set(compiler_rt_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt.upasses")
-    set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
-    set(compiler_rt_lit_args "${LLVM_LIT_ARGS} --path=${LLVM_BINARY_DIR}/bin --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${compiler_rt_xfails_file_path} --xfails-not-file=${compiler_rt_xfails_not_file_path}"
-    )
+    # Generate xfails for compiler-rt.
+    set(compiler_rt_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_compiler-rt_lit_xfails.txt")
+    set(compiler_rt_lit_args "--path=${LLVM_BINARY_DIR}/bin @${compiler_rt_lit_xfails_path} ${LLVM_LIT_ARGS}")
     add_custom_target(
-        compiler-rt-xfail-files
+        compiler-rt-xfail-lit-args
         COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
             --variant ${VARIANT}
             --project compiler-rt
             --libc ${C_LIBRARY}
-            --xfails_file ${compiler_rt_xfails_file_path}
-            --xfails_not_file ${compiler_rt_xfails_not_file_path}
+            --output-args ${compiler_rt_lit_xfails_path}
     )
+
+    set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
     set(
         compiler_rt_test_cmake_args
         -DCOMPILER_RT_INCLUDE_TESTS=ON
@@ -313,16 +308,9 @@ if(NOT C_LIBRARY STREQUAL "llvmlibc")
   )
 endif()
 
-ExternalProject_Add(
-    compiler_rt
-    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
-    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
-    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
-    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
-    SOURCE_DIR ${llvmproject_src_dir}/runtimes
-    INSTALL_DIR compiler-rt/install
-    CMAKE_ARGS
-    ${compiler_launcher_cmake_args}
+# Common compiler_rt flags used by both builtins and profile builds
+set(
+    compiler_rt_common_flags
     -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
     -DCMAKE_ASM_COMPILER_TARGET=${target_triple}
     -DCMAKE_ASM_FLAGS=${lib_compile_flags}
@@ -339,17 +327,31 @@ ExternalProject_Add(
     -DCMAKE_RANLIB=${LLVM_BINARY_DIR}/bin/llvm-ranlib${CMAKE_EXECUTABLE_SUFFIX}
     -DCMAKE_SYSTEM_NAME=Generic
     -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-    ${compiler_rt_cmake_args}
     -DCOMPILER_RT_BAREMETAL_BUILD=ON
     -DCOMPILER_RT_BUILD_LIBFUZZER=OFF
-    -DCOMPILER_RT_BUILD_PROFILE=OFF
     -DCOMPILER_RT_BUILD_SANITIZERS=OFF
     -DCOMPILER_RT_BUILD_XRAY=OFF
     -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON
     -DLLVM_ENABLE_RUNTIMES=compiler-rt
     -DRUNTIME_VARIANT_NAME=${VARIANT}
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
+)
+
+ExternalProject_Add(
+    compiler_rt
+    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
+    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
+    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
+    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
+    SOURCE_DIR ${llvmproject_src_dir}/runtimes
+    INSTALL_DIR compiler-rt/install
+    CMAKE_ARGS
+    ${compiler_rt_common_flags}
+    ${compiler_launcher_cmake_args}
+    ${compiler_rt_cmake_args}
     ${compiler_rt_test_cmake_args}
+    -DCOMPILER_RT_BUILD_BUILTINS=ON
+    -DCOMPILER_RT_BUILD_PROFILE=OFF
     STEP_TARGETS configure build install
     USES_TERMINAL_CONFIGURE TRUE
     USES_TERMINAL_BUILD TRUE
@@ -387,10 +389,41 @@ if(ENABLE_COMPILER_RT_TESTS)
         check-compiler-rt
         compiler_rt-build
         clib-install
-        compiler-rt-xfail-files
+        compiler-rt-xfail-lit-args
     )
     add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
 endif()
+
+# Build compiler-rt profile library after the C library is available.
+ExternalProject_Add(
+    compiler_rt_profile
+    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/stamp
+    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/build
+    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/dl
+    TMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/tmp
+    SOURCE_DIR ${llvmproject_src_dir}/runtimes
+    INSTALL_DIR compiler-rt-profile/install
+    DEPENDS compiler_rt-install clib-install
+    CMAKE_ARGS
+    ${compiler_rt_common_flags}
+    ${compiler_launcher_cmake_args}
+    ${compiler_rt_cmake_args}
+    -DCOMPILER_RT_BUILD_BUILTINS=OFF
+    -DCOMPILER_RT_BUILD_PROFILE=ON
+    -DCOMPILER_RT_PROFILE_BAREMETAL=ON
+    STEP_TARGETS configure build install
+    USES_TERMINAL_CONFIGURE TRUE
+    USES_TERMINAL_BUILD TRUE
+    USES_TERMINAL_INSTALL TRUE
+    LIST_SEPARATOR ,
+    CONFIGURE_HANDLED_BY_BUILD TRUE
+    INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+    COMMAND
+        ${CMAKE_COMMAND}
+        -E copy_directory
+        <INSTALL_DIR>/lib/${normalized_target_triple}
+        "${TEMP_LIB_DIR}/lib"
+)
 
 ###############################################################################
 # picolibc
@@ -407,12 +440,6 @@ if(C_LIBRARY STREQUAL picolibc)
 
     if(CMAKE_INSTALL_MESSAGE STREQUAL NEVER)
         set(MESON_INSTALL_QUIET "--quiet")
-    endif()
-
-    if(LIBRARY_BUILD_TYPE MATCHES "minsizerelease")
-        set(newlib_nano_malloc "true")
-    else()
-        set(newlib_nano_malloc "false")
     endif()
 
     # TODO: xfail these tests instead of disabling.
@@ -462,7 +489,6 @@ if(C_LIBRARY STREQUAL picolibc)
             -Dtests-enable-stack-protector=false
             -Dtest-long-double=${enable_picolibc_long_double_test}
             -Dtest-machine=${TEST_EXECUTOR}
-            -Dnewlib-nano-malloc=${newlib_nano_malloc}
             -Dtests=false
             --prefix <INSTALL_DIR>
             --cross-file ${CMAKE_CURRENT_BINARY_DIR}/meson-cross-build.txt
@@ -500,11 +526,24 @@ if(C_LIBRARY STREQUAL picolibc)
             compiler_rt-install
         )
 
+        # Timeout multipliers. The actual timeout value used in testing is:
+        # Timeout in seconds (defined in the picolibc's testing specs) x Timeout multiplier
+        # In general, tests execute slower with FVPs compared to qemu. However certain
+        # variants can also be slower due to features enabled, for example: 
+        # * Armv6m big-endian
+        # * Armv7m big-endian
+        # * Armv8.1-M Main PACBTI optimized for code size
+        if(TEST_EXECUTOR STREQUAL fvp)
+            set(timeout_multiplier 2)
+        else()
+            set(timeout_multiplier 1)
+        endif()
+
         # Step target to run the picolibc test via meson.
         ExternalProject_Add_Step(
             picolibc
             check-meson
-            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild
+            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild -t ${timeout_multiplier}
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
@@ -514,10 +553,6 @@ if(C_LIBRARY STREQUAL picolibc)
 
         # Generate lit wrappers for the tests.
         set(picolibc_lit_dir ${CMAKE_CURRENT_BINARY_DIR}/picolibc_lit)
-        set(picolibc_xfails_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.xfails")
-        set(picolibc_xfails_not_file_path "${picolibc_lit_dir}/${VARIANT}_picolibc.upasses")
-        set(picolibc_lit_args -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${picolibc_xfails_file_path} --xfails-not-file=${picolibc_xfails_not_file_path})
-
         ExternalProject_Add_Step(
             picolibc
             gen-lit-tests
@@ -526,6 +561,7 @@ if(C_LIBRARY STREQUAL picolibc)
                 --build <BINARY_DIR>
                 --output ${picolibc_lit_dir}
                 --name picolibc-${variant_xml_name}
+                --timeout-multiplier ${timeout_multiplier}
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             DEPENDEES compile-tests
@@ -533,22 +569,27 @@ if(C_LIBRARY STREQUAL picolibc)
         ExternalProject_Add_StepTargets(picolibc gen-lit-tests)
 
         # Generate xfails for picolibc.
+        set(picolibc_lit_xfails_path "${picolibc_lit_dir}/${VARIANT}_picolibc_lit_xfails.txt")
         add_custom_target(
-            picolibc-xfail-files
+            picolibc-xfail-lit-args
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
                 --variant ${VARIANT}
                 --project picolibc
                 --libc ${C_LIBRARY}
-                --xfails_file ${picolibc_xfails_file_path}
-                --xfails_not_file ${picolibc_xfails_not_file_path}
+                --output-args ${picolibc_lit_xfails_path}
         )
+
+        set(check_lit_cmd "${Python3_EXECUTABLE} ${external_lit_path} ${picolibc_lit_dir} ${LLVM_LIT_ARGS} @${picolibc_lit_xfails_path}")
+        # LLVM_LIT_ARGS has space separated flags, but the
+        # step COMMAND needs a list of arguments.
+        separate_arguments(check_lit_cmd)
 
         # Step target to run the picolibc test via lit.
         ExternalProject_Add_Step(
             picolibc
             check-lit
-            COMMAND ${Python3_EXECUTABLE} ${external_lit_path} ${picolibc_lit_dir} ${picolibc_lit_args}
+            COMMAND ${check_lit_cmd}
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
@@ -558,7 +599,7 @@ if(C_LIBRARY STREQUAL picolibc)
         ExternalProject_Add_StepDependencies(
             picolibc
             check-lit
-            picolibc-xfail-files
+            picolibc-xfail-lit-args
         )
         add_dependencies(check-picolibc picolibc-check-lit)
         add_dependencies(clib-build ${C_LIBRARY}-compile-tests)
@@ -748,7 +789,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_ENABLE_RUNTIMES=libc
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
-        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=-nostartfiles,-lcrt0-semihost,-lsemihost,-T,llvmlibc.ld
+        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=-nostartfiles,-lsemihost,-T,llvmlibc.ld
         -DLIBC_TEST_CMD=${test_cmd}
         -DLIBC_TEST_HERMETIC_ONLY=true
         STEP_TARGETS configure build install
@@ -765,11 +806,11 @@ if(C_LIBRARY STREQUAL llvmlibc)
             -E copy_directory
             <INSTALL_DIR>/lib/${target_triple}
             "${TEMP_LIB_DIR}/lib"
-        # And copy the include directory, which is already arranged right.
+        # Also copy the includes from their target-specific subdirectory.
         COMMAND
             ${CMAKE_COMMAND}
             -E copy_directory
-            <INSTALL_DIR>/include
+            <INSTALL_DIR>/include/${target_triple}
             "${TEMP_LIB_DIR}/include"
     )
 
@@ -802,10 +843,6 @@ if(C_LIBRARY STREQUAL llvmlibc)
     )
 
     if(ENABLE_LIBC_TESTS)
-        if(NOT(TEST_EXECUTOR STREQUAL qemu))
-            message(FATAL_ERROR "LLVM-libc tests are only able to run on QEMU.")
-        endif()
-
         add_custom_target(check-llvmlibc)
         add_dependencies(check-all check-llvmlibc)
 
@@ -854,23 +891,21 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            -DRUNTIMES_USE_LIBC=picolibc
         )
         if(ENABLE_LIBCXX_TESTS)
-            # Use the downstream version of lit, which is just a wrapper for the built one.
-            # Pass it the xfail/xfail-not lists.
-            set(libcxx_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.xfails")
-            set(libcxx_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx.upasses")
-            set(libcxx_lit_args "${LLVM_LIT_ARGS} -sv --real-lit-path=${LLVM_BINARY_DIR}/bin/llvm-lit --xfails-file=${libcxx_xfails_file_path} --xfails-not-file=${libcxx_xfails_not_file_path}"
+            # Generate xfails for libxx.
+            set(libcxx_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx_lit_xfails.txt")
+            set(libcxx_lit_args "@${libcxx_lit_xfails_path} ${LLVM_LIT_ARGS}"
             )
             add_custom_target(
-                libcxx-xfail-files
+                libcxx-xfail-lit-args
                 COMMAND ${Python3_EXECUTABLE}
                     ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
                     --variant ${VARIANT}
                     --project libcxx
                     --libc ${C_LIBRARY}
-                    --xfails_file ${libcxx_xfails_file_path}
-                    --xfails_not_file ${libcxx_xfails_not_file_path}
+                    --output-arg ${libcxx_lit_xfails_path}
             )
             set(cxxlibs_test_cmake_options
                 -DLIBCXX_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++-picolibc.cfg.in
@@ -893,13 +928,14 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_THREADS=OFF
             -DLIBCXX_ENABLE_WIDE_CHARACTERS=OFF
             -DLIBCXX_ENABLE_FILESYSTEM=OFF
-            -DLIBCXX_ENABLE_LOCALIZATION=OFF
+            -DLIBCXX_ENABLE_LOCALIZATION=ON
             -DLIBCXX_ENABLE_UNICODE=OFF
             -DLIBUNWIND_ENABLE_THREADS=OFF
             -DLIBCXXABI_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            -DRUNTIMES_USE_LIBC=llvm-libc
             )
             set(lib_compile_flags "${lib_compile_flags} -D_LIBCPP_PRINT=1")
     elseif(C_LIBRARY MATCHES "^newlib")
@@ -913,6 +949,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
+            -DRUNTIMES_USE_LIBC=newlib
         )
 
         if(C_LIBRARY STREQUAL newlib-nano)
@@ -1015,7 +1052,7 @@ if(ENABLE_CXX_LIBS)
                 cxxlibs
                 ${check_target}
                 cxxlibs-install
-                libcxx-xfail-files
+                libcxx-xfail-lit-args
             )
             add_dependencies(${check_target} cxxlibs-${check_target})
         endforeach()

@@ -8,50 +8,25 @@
 
 #include <stdint.h>
 #include <stdlib.h> // for exit()
-#include <string.h> // for memcpy(), memset()
+
+#include "exceptions_common.h"
+#include "platform.h"
 
 #if __ARM_ARCH_PROFILE == 'A' || __ARM_ARCH_PROFILE == 'R'
-#include "exceptions_a.h"
-#include "memory_a.h"
-#include "misc_a.h"
 #include "system_registers_a.h"
 #elif __ARM_ARCH_PROFILE == 'M'
-#include "exceptions_m.h"
-#include "memory_m.h"
-#include "misc_m.h"
 #include "system_registers_m.h"
 #else
 // ARMv4T
 // TODO: fill in stub functions once we can start testing LLVM-libc
-namespace bootcode {
-namespace exceptions {
-void setup() noexcept {}
-} // namespace exceptions
-
-namespace memory {
-void enable_cache() noexcept {}
-void setup() noexcept {}
-} // namespace memory
-
-namespace misc {
-void setup() noexcept {}
-} // namespace misc
-
-} // namespace bootcode
 #endif
-
-using namespace bootcode;
 
 int main(int argc, const char **argv);
 extern "C" void __libc_init_array();
-extern "C" void _platform_init();
 
-extern char __data_source[];
-extern char __data_start[];
-extern char __data_size[];
-extern char __bss_start[];
-extern char __bss_size[];
 [[gnu::weak]] extern char __stack;
+
+using namespace bootcode::exceptions;
 
 namespace {
 #ifdef __ARM_FEATURE_PAUTH
@@ -60,18 +35,58 @@ namespace {
 [[gnu::target("branch-protection=none")]]
 #endif
 void do_start() {
-  exceptions::setup();
-  memory::setup();
-  misc::setup();
+  _platform_setup_exceptions();
+  _platform_setup_memory();
+  _platform_setup_arch_extensions();
 
-  // Perform the equivalent of scatterloading
-  memcpy(__data_start, __data_source, reinterpret_cast<size_t>(__data_size));
-  memset(__bss_start, '\0', reinterpret_cast<size_t>(__bss_size));
+  _platform_init_data_segments();
 
-  memory::enable_cache();
   __libc_init_array();
   _platform_init();
-  exit(main(0, 0));
+
+  // Provide command line options (argc/argv) for the main function
+  char *cmdline = nullptr;
+  int max_cmdline = 256; // Arm semihosting requires at least 80 bytes
+                         // There is no API to get the actual size of the line
+  const char **argv = nullptr;
+  int max_argv = 0;
+  int argc = 0;
+  int status = 1; // Report error on early returns
+
+  // Allocate the buffer for the command line
+  cmdline = static_cast<char *>(malloc(static_cast<size_t>(max_cmdline)));
+  if (!cmdline) {
+    print_str("ERROR: libc cannot allocate memory for command line options.\n");
+    goto free_and_exit;
+  }
+
+  // Probe for number of arguments and allocate the buffer for argv[]
+  max_argv = _platform_get_argv(cmdline, max_cmdline, nullptr, 0) + 1;
+  if (max_argv <= 0) {
+    print_str(
+        "ERROR: _platform_get_argv failed, command line may be too long.\n");
+    goto free_and_exit;
+  }
+  argv = static_cast<const char **>(
+      malloc(sizeof(*argv) * static_cast<size_t>(max_argv)));
+  if (!argv) {
+    print_str("ERROR: libc cannot allocate memory for argv[].\n");
+    goto free_and_exit;
+  }
+
+  // Finally, parse the comand line into argc/argv[]
+  argc = _platform_get_argv(cmdline, max_cmdline, argv, max_argv);
+  if (argc < 0) {
+    print_str("ERROR: libc cannot parse the command line.\n");
+    goto free_and_exit;
+  }
+
+  status = main(argc, argv);
+
+free_and_exit:
+  free(cmdline);
+  free(argv);
+  exit(status);
 }
 } // namespace
 

@@ -39,7 +39,8 @@ namespace sysreg {
   REGNAME(APDBKeyLo, "NO_REGISTER")                                            \
   REGNAME(APDBKeyHi, "NO_REGISTER")                                            \
   REGNAME(APGAKeyLo, "NO_REGISTER")                                            \
-  REGNAME(APGAKeyHi, "NO_REGISTER")
+  REGNAME(APGAKeyHi, "NO_REGISTER")                                            \
+  REGNAME(ID_AA64MMFR2, "p15:3:c0:c7:2")
 
 // Registers that (in AArch64) have both an EL2 and an EL3 version. When these
 // are accessed we choose the appropriate version based on CurrentEL.
@@ -200,6 +201,8 @@ public:
   Field<0, 2> LineSize;
   Field<3, 12> Associativity;
   Field<13, 27> NumSets;
+  Field<3, 23> Associativity64;
+  Field<32, 55> NumSets64;
 };
 
 class CPTR_Class : public SysReg<SysRegName::CPTR> {
@@ -273,34 +276,40 @@ public:
   Field<28, 31> TraceFilt;
 };
 
-SCTLR_Class SCTLR;
-CLIDR_Class CLIDR;
-CCSIDR_Class CCSIDR;
-CPTR_Class CPTR;
-GCR_Class GCR;
-DACR_Class DACR;
-CPACR_Class CPACR;
-PMCCFILTR_Class PMCCFILTR;
-ID_DFR0_Class ID_DFR0;
-SysReg<SysRegName::VBAR> VBAR;
-SysReg<SysRegName::ESR> ESR;
-SysReg<SysRegName::ELR> ELR;
-SysReg<SysRegName::FAR> FAR;
-SysReg<SysRegName::CSSELR> CSSELR;
-SysReg<SysRegName::TTBR0> TTBR0;
-SysReg<SysRegName::MAIR> MAIR;
-SysReg<SysRegName::ID_AA64PFR1> ID_AA64PFR1;
-SysReg<SysRegName::TCR> TCR;
-SysReg<SysRegName::APIAKeyLo> APIAKeyLo;
-SysReg<SysRegName::APIAKeyHi> APIAKeyHi;
-SysReg<SysRegName::APIBKeyLo> APIBKeyLo;
-SysReg<SysRegName::APIBKeyHi> APIBKeyHi;
-SysReg<SysRegName::APDAKeyLo> APDAKeyLo;
-SysReg<SysRegName::APDAKeyHi> APDAKeyHi;
-SysReg<SysRegName::APDBKeyLo> APDBKeyLo;
-SysReg<SysRegName::APDBKeyHi> APDBKeyHi;
-SysReg<SysRegName::APGAKeyLo> APGAKeyLo;
-SysReg<SysRegName::APGAKeyHi> APGAKeyHi;
+class ID_AA64MMFR2_Class : public SysReg<SysRegName::ID_AA64MMFR2> {
+public:
+  Field<20, 23> CCIDX;
+};
+
+extern SCTLR_Class SCTLR;
+extern CLIDR_Class CLIDR;
+extern CCSIDR_Class CCSIDR;
+extern CPTR_Class CPTR;
+extern GCR_Class GCR;
+extern DACR_Class DACR;
+extern CPACR_Class CPACR;
+extern PMCCFILTR_Class PMCCFILTR;
+extern ID_DFR0_Class ID_DFR0;
+extern ID_AA64MMFR2_Class ID_AA64MMFR2;
+extern SysReg<SysRegName::VBAR> VBAR;
+extern SysReg<SysRegName::ESR> ESR;
+extern SysReg<SysRegName::ELR> ELR;
+extern SysReg<SysRegName::FAR> FAR;
+extern SysReg<SysRegName::CSSELR> CSSELR;
+extern SysReg<SysRegName::TTBR0> TTBR0;
+extern SysReg<SysRegName::MAIR> MAIR;
+extern SysReg<SysRegName::ID_AA64PFR1> ID_AA64PFR1;
+extern SysReg<SysRegName::TCR> TCR;
+extern SysReg<SysRegName::APIAKeyLo> APIAKeyLo;
+extern SysReg<SysRegName::APIAKeyHi> APIAKeyHi;
+extern SysReg<SysRegName::APIBKeyLo> APIBKeyLo;
+extern SysReg<SysRegName::APIBKeyHi> APIBKeyHi;
+extern SysReg<SysRegName::APDAKeyLo> APDAKeyLo;
+extern SysReg<SysRegName::APDAKeyHi> APDAKeyHi;
+extern SysReg<SysRegName::APDBKeyLo> APDBKeyLo;
+extern SysReg<SysRegName::APDBKeyHi> APDBKeyHi;
+extern SysReg<SysRegName::APGAKeyLo> APGAKeyLo;
+extern SysReg<SysRegName::APGAKeyHi> APGAKeyHi;
 
 } // namespace sysreg
 } // namespace bootcode

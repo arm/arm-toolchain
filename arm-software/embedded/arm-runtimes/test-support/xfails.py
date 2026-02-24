@@ -10,6 +10,7 @@ upstream, and why."""
 
 import argparse
 import os
+import re
 import subprocess
 
 from enum import Enum
@@ -21,6 +22,7 @@ class NewResult(Enum):
 
     XFAILED = "FAILED"  # Replace a failure with an expected failure.
     PASSED = "PASSED"  # Replace an unexpected pass with a pass.
+    EXCLUDE = "EXCLUDE"  # Exclude a test, so that it is not run at all.
 
 
 class XFail(NamedTuple):
@@ -59,12 +61,9 @@ def main():
         help="Project to generate xfails for.",
     )
     arg_parser.add_argument(
-        "--xfails_file",
-        help="Save the test list to a file, instead of outputting.",
-    )
-    arg_parser.add_argument(
-        "--xfails_not_file",
-        help="Save the test list to a file, instead of outputting.",
+        "--output-args",
+        help="Write the test lists to a file with --xfail and --xfail-not"
+        "parameters, which can be read directly by lit by prefixing with @.",
     )
     args = arg_parser.parse_args()
 
@@ -102,7 +101,7 @@ def main():
             ],
             result=NewResult.XFAILED,
             conditional=check_frwpi_error,
-            project="llvm",
+            project="clang",
             description="The multilib built by ATfE will generate a configuration error if -frwpi is used. Will pass if run before the multilib is installed.",
         ),
         XFail(
@@ -112,7 +111,7 @@ def main():
             ],
             result=NewResult.XFAILED,
             conditional=check_r52_warning,
-            project="llvm",
+            project="clang",
             description="If the installed default multilib does not have a library available for -mcpu=cortex-r52, this test will fail.",
         ),
         XFail(
@@ -152,6 +151,7 @@ def main():
             name="atomics part 1",
             testnames=[
                 "extensions/libcxx/atomics/atomics.flag/init_bool.pass.cpp",
+                "libcxx/diagnostics/atomic.nodiscard.verify.cpp",
                 "libcxx/thread/thread.stoptoken/intrusive_shared_ptr.pass.cpp",
                 "libcxx/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_from_underaligned_buffer.pass.cpp",
                 "libcxx/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_in_geometric_progression.pass.cpp",
@@ -167,6 +167,7 @@ def main():
                 "std/atomics/atomics.flag/init.pass.cpp",
                 "std/atomics/atomics.flag/test_and_set.pass.cpp",
                 "std/atomics/atomics.general/replace_failure_order.pass.cpp",
+                "std/atomics/atomics.ref/address.pass.cpp",
                 "std/atomics/atomics.ref/ctor.pass.cpp",
                 "std/atomics/atomics.ref/deduction.pass.cpp",
                 "std/atomics/atomics.ref/is_always_lock_free.pass.cpp",
@@ -218,7 +219,7 @@ def main():
                 "std/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_deallocate.pass.cpp",
                 "std/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_from_initial_buffer.pass.cpp",
                 "std/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_from_zero_sized_buffer.pass.cpp",
-                "std/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_in_geometric_progression.pass.cpp",
+                "std/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_mem.pass.cpp",
                 "std/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_overaligned_request.pass.cpp",
                 "std/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/allocate_with_initial_size.pass.cpp",
                 "std/utilities/utility/mem.res/mem.res.monotonic.buffer/mem.res.monotonic.buffer.mem/equality.pass.cpp",
@@ -301,6 +302,37 @@ def main():
             description="pmr missing or incomplete pstl",
         ),
         XFail(
+            name="atomics part 4",
+            testnames=[
+                "std/atomics/atomics.types.generic/cas_non_power_of_2.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "armv4t_exn_rtti_size",
+                "armv4t_size",
+                "armv5te_exn_rtti_size",
+                "armv5te_size",
+                "armv6m_soft_nofp_exn_rtti_size",
+                "armv6m_soft_nofp_size",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_unaligned_size",
+                "armv7m_hard_fpv4_sp_d16_size",
+                "armv7m_hard_fpv4_sp_d16_unaligned_size",
+                "armv7m_hard_fpv5_d16_exn_rtti_unaligned_size",
+                "armv7m_hard_fpv5_d16_unaligned_size",
+                "armv7m_soft_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_fpv4_sp_d16_exn_rtti_unaligned_size",
+                "armv7m_soft_fpv4_sp_d16_size",
+                "armv7m_soft_fpv4_sp_d16_unaligned_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_unaligned_size",
+                "armv7m_soft_nofp_size",
+                "armv7m_soft_nofp_unaligned_size",
+            ],
+            description="target lacks hardware CAS for non-power-of-two atomic object sizes",
+        ),
+        XFail(
             name="alg.exponential",
             testnames=[
                 "std/re/re.alg/re.alg.match/exponential.pass.cpp",
@@ -349,11 +381,20 @@ def main():
             description="More recent picolibc versions do now support char16_t and char32_t",
         ),
         XFail(
+            name="UID 0 lookup",
+            testnames=[
+                "test-pwd.test",
+            ],
+            result=NewResult.EXCLUDE,
+            project="picolibc",
+            description="UID 0 lookup returning Null on MacOS",
+        ),
+        XFail(
             name="picolibc_sys_seek",
             testnames=[
                 "semihost-seek.test",
                 "test-fread-fwrite.test",
-                "posix-io.test",
+                "test-posix-io.test",
             ],
             result=NewResult.XFAILED,
             project="picolibc",
@@ -417,32 +458,8 @@ def main():
             result=NewResult.XFAILED,
             project="picolibc",
             variants=[
-                "aarch64a_be_exn_rtti",
-                "aarch64a_be_soft_nofp_exn_rtti",
-                "aarch64a_be_soft_nofp",
-                "aarch64a_be",
-                "aarch64a_exn_rtti",
-                "aarch64a",
-                "aarch64r_be_exn_rtti",
-                "aarch64r_be_soft_nofp_exn_rtti",
-                "aarch64r_be_soft_nofp",
-                "aarch64r_be",
-                "aarch64r_exn_rtti_unaligned",
-                "aarch64r_exn_rtti",
-                "aarch64r_soft_nofp_exn_rtti_unaligned",
-                "aarch64r_soft_nofp_exn_rtti",
-                "aarch64r_soft_nofp_unaligned",
-                "aarch64r_soft_nofp",
-                "aarch64r_unaligned",
-                "aarch64r",
                 "armebv6m_soft_nofp_exn_rtti_size",
                 "armebv6m_soft_nofp_size",
-                "armebv7a_hard_vfpv3_d16_exn_rtti",
-                "armebv7a_hard_vfpv3_d16",
-                "armebv7a_soft_nofp_exn_rtti",
-                "armebv7a_soft_nofp",
-                "armebv7a_soft_vfpv3_d16_exn_rtti",
-                "armebv7a_soft_vfpv3_d16",
                 "armebv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armebv7m_hard_fpv4_sp_d16_size",
                 "armebv7m_soft_fpv4_sp_d16_exn_rtti_size",
@@ -468,10 +485,40 @@ def main():
             ],
             description="rateInHz port not connected in Corstone-310 FVP (SDDKW-94045).",
         ),
+        XFail(
+            name="string push back",
+            testnames=[
+                "std/strings/basic.string/string.modifiers/string_append/push_back.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "armv7m_hard_fpv5_d16_exn_rtti_unaligned_size",
+                "armv7m_hard_fpv5_d16_unaligned_size",
+            ],
+            description="push_back crashes on a basic_string with an oversized value type",
+        ),
+        XFail(
+            name="picolibc_serial_test",
+            testnames=[
+                "test-hello-raw.test",
+                "test-hello-raw-no-flash.test",
+            ],
+            result=NewResult.EXCLUDE,
+            project="picolibc",
+            variants=[
+                "aarch64a_exn_rtti_unaligned",
+                "aarch64a_soft_nofp",
+                "aarch64a_soft_nofp_exn_rtti",
+                "aarch64a_unaligned",
+            ],
+            description="The test expects serial port activity to end the test and times out without it.",
+        ),
     ]
 
     tests_to_xfail = []
     tests_to_upass = []
+    tests_to_exclude = []
 
     for xfail in xfails:
         if args.project != xfail.project:
@@ -490,29 +537,47 @@ def main():
             tests_to_xfail.extend(xfail.testnames)
         elif xfail.result == NewResult.PASSED:
             tests_to_upass.extend(xfail.testnames)
-        # TODO: allow tests to be skipped and not run at all.
-        # This can be done through the LIT_FILTER environment variable.
-        # Unlike the xfail variables, this takes a regex, so an expression
-        # will need to be constructed to cover the tests.
+        elif xfail.result == NewResult.EXCLUDE:
+            tests_to_exclude.extend(xfail.testnames)
 
     tests_to_xfail.sort()
     tests_to_upass.sort()
+    tests_to_exclude.sort()
 
-    # Save to files for easy consumption by other scripts, or print for users.
-    if args.xfails_file:
-        os.makedirs(os.path.dirname(args.xfails_file), exist_ok=True)
-        with open(args.xfails_file, "w", encoding="utf-8") as f:
+    if args.output_args:
+        os.makedirs(os.path.dirname(args.output_args), exist_ok=True)
+        with open(args.output_args, "w", encoding="utf-8") as f:
+            if len(tests_to_xfail) > 0:
+                # --xfail and --xfail-not expect a comma separated list of test names.
+                f.write("--xfail=")
+                f.write(";".join(tests_to_xfail))
+                f.write("\n")
+            if len(tests_to_upass) > 0:
+                f.write("--xfail-not=")
+                f.write(";".join(tests_to_upass))
+                f.write("\n")
+            if len(tests_to_exclude) > 0:
+                # --filter-out expects a regular expression to match any test names.
+                escaped_testnames = [
+                    re.escape(testname) for testname in tests_to_exclude
+                ]
+                f.write("--filter-out=")
+                f.write("|".join(escaped_testnames))
+                f.write("\n")
+        print(f"xfail list written to {args.output_args}")
+    else:
+        if len(tests_to_xfail) > 0:
+            print("xfailed tests:")
             for testname in tests_to_xfail:
-                f.write(testname + "\n")
-    else:
-        print("LIT_XFAIL=" + ";".join(tests_to_xfail))
-    if args.xfails_not_file:
-        os.makedirs(os.path.dirname(args.xfails_not_file), exist_ok=True)
-        with open(args.xfails_not_file, "w", encoding="utf-8") as f:
+                print(testname)
+        if len(tests_to_upass) > 0:
+            print("xfail removed from tests:")
             for testname in tests_to_upass:
-                f.write(testname + "\n")
-    else:
-        print("LIT_XFAIL_NOT=" + ";".join(tests_to_upass))
+                print(testname)
+        if len(tests_to_exclude) > 0:
+            print("excluded tests:")
+            for testname in tests_to_exclude:
+                print(testname)
 
 
 if __name__ == "__main__":

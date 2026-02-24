@@ -135,11 +135,14 @@ if(ENABLE_PARALLEL_LIB_CONFIG OR ENABLE_PARALLEL_LIB_BUILD)
         compiler_rt-build
         clib-configure
         clib-build
+        compiler_rt_profile-configure
+        compiler_rt_profile-build
         cxxlibs-configure
         cxxlibs-build
     )
+    list(LENGTH subtargets subtarget_count)
     set(subtarget_deps none ${subtargets})
-    list(REMOVE_AT subtarget_deps 6)
+    list(REMOVE_AT subtarget_deps ${subtarget_count})
 
     foreach(subtarget subtarget_dep IN ZIP_LISTS subtargets subtarget_deps)
         add_custom_target(${subtarget}-all)
@@ -264,8 +267,8 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 # Each step should depend on the previous, with the first depending on the pre-defined
                 # 'configure' step, and the pre-defined 'build' step depending on the last.
                 set(subtarget_deps configure ${subtargets} build)
-                list(SUBLIST subtarget_deps 0 6 subtarget_dependees)
-                list(SUBLIST subtarget_deps 2 6 subtarget_dependers)
+                list(SUBLIST subtarget_deps 0 ${subtarget_count} subtarget_dependees)
+                list(SUBLIST subtarget_deps 2 ${subtarget_count} subtarget_dependers)
 
                 # First loop to add the steps and targets.
                 foreach(subtarget subtarget_dependee IN ZIP_LISTS subtargets subtarget_dependees)

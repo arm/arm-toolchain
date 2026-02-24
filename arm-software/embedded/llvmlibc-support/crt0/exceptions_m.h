@@ -42,7 +42,7 @@ EXFN_ATTR void __print_faulting_instruction(unsigned short *ptr) {
     print_hex(first);
     print_str("\n");
   }
-  abort();
+  __llvm_libc_exit(1);
 }
 
 EXFN_ATTR void __hardfault_handler() {
@@ -126,15 +126,19 @@ EXFN_ATTR void __securefault_handler() {
 extern "C" unsigned int __systick_count = 0;
 EXFN_ATTR void __systick_handler() { __systick_count += 1; }
 
-EXFN_ATTR void __exception_handler() { abort(); }
+EXFN_ATTR void __exception_handler() { __llvm_libc_exit(1); }
 
 // Architecturally the bottom 7 bits of VTOR are zero, meaning the vector table
 // has to be 128-byte aligned, however an implementation can require more bits
 // to be zero and cortex-m23 can require up to 10, so 1024-byte align the vector
 // table.
+extern "C" {
 [[gnu::weak]] extern char __stack;
+}
+
 using vtable_t = void (*)(void);
-[[gnu::section(".vectors"), gnu::aligned(1024)]]
+// Placed in .text.init.enter; retained when referenced by default setup.
+[[gnu::section(".text.init.enter"), gnu::aligned(1024)]]
 const vtable_t vector_table[] = {
     reinterpret_cast<vtable_t>(&__stack), // SP
     _start,                               // Reset
@@ -154,7 +158,7 @@ const vtable_t vector_table[] = {
     __systick_handler,                    // SysTick
 };
 
-void setup() {
+extern "C" [[gnu::weak]] void _platform_setup_exceptions() {
   // It's implementation-defined whether VTOR is writable, and if it is
   // writeable then it's implementation-defined how many of the bottom bits are
   // zero (though it must be at least 7). First try setting the top bit to see
@@ -177,7 +181,7 @@ void setup() {
     VTOR = reinterpret_cast<unsigned long>(&vector_table);
     if (VTOR != reinterpret_cast<unsigned long>(&vector_table)) {
       print_str("Bootcode failed to set VTOR\n");
-      abort();
+      __llvm_libc_exit(1);
     }
   }
 

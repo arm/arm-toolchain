@@ -9,7 +9,7 @@
 #include <__config>
 
 // Downstream issue: #375 (Enable fstream independently of filesystem)
-#if _LIBCPP_HAS_FILESYSTEM || defined(_NEWLIB_VERSION)
+#if _LIBCPP_HAS_FILESYSTEM || _LIBCPP_LIBC_NEWLIB
 #  include <fstream>
 #endif
 #include <ostream>

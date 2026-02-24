@@ -242,27 +242,27 @@ public:
   Bit<31> ASPEN;
 };
 
-ICTR_Class ICTR;
-SYST_CSR_Class SYST_CSR;
-SysReg<SysRegName::SYST_RVR> SYST_RVR;
-SysReg<SysRegName::SYST_CVR> SYST_CVR;
-SysReg<SysRegName::SYST_CALIB> SYST_CALIB;
-CPUID_Class CPUID;
-ICSR_Class ICSR;
-SysReg<SysRegName::VTOR> VTOR;
-CCR_Class CCR;
-SHCSR_Class SHCSR;
-CFSR_Class CFSR;
-SysReg<SysRegName::HFSR> HFSR;
-SysReg<SysRegName::MMFAR> MMFAR;
-SysReg<SysRegName::BFAR> BFAR;
-CPACR_Class CPACR;
-NSACR_Class NSACR;
-MPU_CTRL_Class MPU_CTRL;
-SysReg<SysRegName::SFSR> SFSR;
-SysReg<SysRegName::SFAR> SFAR;
-FPCCR_Class FPCCR;
-SysRegSet<SysRegSetName::NVIC_ICERn> NVIC_ICER;
+extern ICTR_Class ICTR;
+extern SYST_CSR_Class SYST_CSR;
+extern SysReg<SysRegName::SYST_RVR> SYST_RVR;
+extern SysReg<SysRegName::SYST_CVR> SYST_CVR;
+extern SysReg<SysRegName::SYST_CALIB> SYST_CALIB;
+extern CPUID_Class CPUID;
+extern ICSR_Class ICSR;
+extern SysReg<SysRegName::VTOR> VTOR;
+extern CCR_Class CCR;
+extern SHCSR_Class SHCSR;
+extern CFSR_Class CFSR;
+extern SysReg<SysRegName::HFSR> HFSR;
+extern SysReg<SysRegName::MMFAR> MMFAR;
+extern SysReg<SysRegName::BFAR> BFAR;
+extern CPACR_Class CPACR;
+extern NSACR_Class NSACR;
+extern MPU_CTRL_Class MPU_CTRL;
+extern SysReg<SysRegName::SFSR> SFSR;
+extern SysReg<SysRegName::SFAR> SFAR;
+extern FPCCR_Class FPCCR;
+extern SysRegSet<SysRegSetName::NVIC_ICERn> NVIC_ICER;
 
 } // namespace sysreg
 } // namespace bootcode

@@ -236,14 +236,16 @@ private:
   Block *GetOrCreateBlock(PdbCompilandSymId block_id);
   lldb::VariableSP GetOrCreateLocalVariable(PdbCompilandSymId scope_id,
                                             PdbCompilandSymId var_id,
-                                            bool is_param);
+                                            bool is_param,
+                                            bool is_constant = false);
   lldb::TypeSP GetOrCreateTypedef(PdbGlobalSymId id);
 
   lldb::FunctionSP CreateFunction(PdbCompilandSymId func_id,
                                   CompileUnit &comp_unit);
   Block *CreateBlock(PdbCompilandSymId block_id);
   lldb::VariableSP CreateLocalVariable(PdbCompilandSymId scope_id,
-                                       PdbCompilandSymId var_id, bool is_param);
+                                       PdbCompilandSymId var_id, bool is_param,
+                                       bool is_constant = false);
   lldb::TypeSP CreateTypedef(PdbGlobalSymId id);
   lldb::CompUnitSP CreateCompileUnit(const CompilandIndexItem &cci);
   lldb::TypeSP CreateType(PdbTypeSymId type_id, CompilerType ct);
@@ -254,6 +256,8 @@ private:
   size_t ParseVariablesForCompileUnit(CompileUnit &comp_unit,
                                       VariableList &variables);
   size_t ParseVariablesForBlock(PdbCompilandSymId block_id);
+
+  void CreateSimpleArgumentListTypes(llvm::codeview::TypeIndex arglist_ti);
 
   llvm::Expected<uint32_t> GetFileIndex(const CompilandIndexItem &cii,
                                         uint32_t file_id);
@@ -275,7 +279,19 @@ private:
   void CacheUdtDeclarations();
   llvm::Expected<Declaration> ResolveUdtDeclaration(PdbTypeSymId type_id);
 
-  std::optional<llvm::StringRef> FindMangledSymbol(SegmentOffset so);
+  /// Find a symbol name at a specific address (`so`).
+  ///
+  /// \param[in] so The segment and offset where the symbol is located.
+  /// \param[in] function_type If the symbol is expected to be a function, this
+  ///     has to be the type of the function. It's used to strip the name of
+  ///     __cdecl functions on x86.
+  /// \returns The mangled symbol name if found, otherwise `std::nullopt`.
+  std::optional<llvm::StringRef> FindMangledSymbol(
+      SegmentOffset so,
+      llvm::codeview::TypeIndex function_type = llvm::codeview::TypeIndex());
+
+  llvm::StringRef StripMangledFunctionName(llvm::StringRef mangled,
+                                           PdbTypeSymId func_ty);
 
   llvm::BumpPtrAllocator m_allocator;
 

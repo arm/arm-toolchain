@@ -208,6 +208,9 @@ set(BUG_REPORT_URL "https://github.com/arm/arm-toolchain/issues" CACHE STRING ""
 set(LLVM_DISTRIBUTION_COMPONENTS
     clang-resource-headers
     clang
+    clang-check
+    clang-format
+    clang-scan-deps
     dsymutil
     elf2bin
     lld
@@ -360,13 +363,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 set(LLVM_EXTERNAL_PROJECTS elf2bin)
 set(LLVM_EXTERNAL_ELF2BIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin)
 
-# Use the downstream version of lit, which is just a wrapper for the built one.
-# Pass it the xfail/xfail-not lists.
-set(llvm_xfails_file_path "${CMAKE_CURRENT_BINARY_DIR}/llvm.xfails")
-set(llvm_xfails_not_file_path "${CMAKE_CURRENT_BINARY_DIR}/llvm.upasses")
-# Set LLVM_DEFAULT_EXTERNAL_LIT and LLVM_LIT_ARGS before including the LLVM subdirectory.
-set(LLVM_DEFAULT_EXTERNAL_LIT "${CMAKE_CURRENT_SOURCE_DIR}/arm-runtimes/test-support/lit-wrapper.py")
-set(LLVM_LIT_ARGS "${LLVM_LIT_ARGS} -sv --real-lit-path=${CMAKE_CURRENT_BINARY_DIR}/llvm/bin/llvm-lit --xfails-file=${llvm_xfails_file_path} --xfails-not-file=${llvm_xfails_not_file_path}" CACHE STRING "")
+set(clang_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/clang_lit_xfails.txt")
+set(CLANG_TEST_EXTRA_ARGS "@${clang_lit_xfails_path}")
 
 set(llvmproject_src_dir ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 add_subdirectory(
@@ -375,21 +373,19 @@ add_subdirectory(
 
 add_dependencies(check-all check-elf2bin)
 
-# Generate a xfail/xfail-not list before running the tests.
+# Update the xfail/xfail-not list before running the tests.
 add_custom_target(
-    llvm-xfail-files
+    clang-xfail-lit-args
     COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/arm-runtimes/test-support/xfails.py
-        --project llvm
+        --project clang
         --clang ${LLVM_BINARY_DIR}/bin/clang
-        --xfails_file ${llvm_xfails_file_path}
-        --xfails_not_file ${llvm_xfails_not_file_path}
+        --output-args ${clang_lit_xfails_path}
     DEPENDS
         clang
 )
-add_dependencies(check-clang llvm-xfail-files)
-add_dependencies(check-llvm llvm-xfail-files)
-add_dependencies(check-all llvm-xfail-files)
+add_dependencies(check-clang clang-xfail-lit-args)
+add_dependencies(check-all clang-xfail-lit-args)
 
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
     install(
@@ -404,26 +400,6 @@ if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)
         ${CMAKE_CURRENT_SOURCE_DIR}/ATfE-SBOM-llvmlibc-overlay.spdx.json
         DESTINATION .
         COMPONENT llvm-toolchain-llvmlibc-configs
-    )
-
-    install(
-      DIRECTORY
-      ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples/
-      DESTINATION samples
-      COMPONENT llvm-toolchain-llvmlibc-configs
-    )
-
-    # LLVM libc lacks a configuration for AArch64, but the AArch32 one works
-    # fine. However, setting the configuration for both architectures to the
-    # arm config directory means the baremetal config.json is never loaded,
-    # as it resides in the directory above. To ensure both are used, copy
-    # them to the same location and point libc to that.
-    set(LIBC_CFG_DIR ${CMAKE_BINARY_DIR}/llvmlibc-config)
-    file(COPY
-        ${llvmproject_src_dir}/libc/config/baremetal/config.json
-        ${llvmproject_src_dir}/libc/config/baremetal/arm/.
-        DESTINATION
-        ${LIBC_CFG_DIR}
     )
 endif()
 
@@ -603,6 +579,11 @@ add_dependencies(
     llvm-toolchain-runtimes
     version_txt
 )
+
+# Set LLVM_DEFAULT_EXTERNAL_LIT to the directory of clang
+# which was build in previous step. This path is not exported
+# by add_subdirectory of llvm project
+set(LLVM_DEFAULT_EXTERNAL_LIT "${LLVM_BINARY_DIR}/bin/llvm-lit")
 
 add_custom_target(check-llvm-toolchain-runtimes)
 add_custom_target(check-${LLVM_TOOLCHAIN_C_LIBRARY})
@@ -826,7 +807,6 @@ set(third_party_license_files
 )
 if(LLVM_TOOLCHAIN_C_LIBRARY STREQUAL picolibc)
     list(APPEND third_party_license_files
-        ${picolibc_SOURCE_DIR}/COPYING.NEWLIB           COPYING.NEWLIB
         ${picolibc_SOURCE_DIR}/COPYING.picolibc         COPYING.picolibc
     )
 endif()
@@ -854,9 +834,9 @@ endwhile()
 
 # Install samples
 if(WIN32 OR LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
-    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|ld|md|bat)")
+    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|ld|md|in|bat)")
 else()
-    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|ld|md)")
+    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|ld|md|in)")
 endif()
 install(
     DIRECTORY samples
@@ -1001,6 +981,9 @@ if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
         -DLLVM_ENABLE_PROJECTS=${LLVM_ENABLE_PROJECTS_comma}
         -DLLVM_TABLEGEN=${LLVM_BINARY_DIR}/bin/llvm-tblgen${CMAKE_EXECUTABLE_SUFFIX}
         -DLLVM_TARGETS_TO_BUILD=${LLVM_TARGETS_TO_BUILD_comma}
+        -DLLVM_DEFAULT_TARGET_TRIPLE=${LLVM_DEFAULT_TARGET_TRIPLE}
+        -DLLVM_EXTERNAL_PROJECTS=elf2bin
+        -DLLVM_EXTERNAL_ELF2BIN_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2bin
         BUILD_COMMAND "" # Let the install command build whatever it needs
         INSTALL_COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target install-distribution
         USES_TERMINAL_CONFIGURE TRUE

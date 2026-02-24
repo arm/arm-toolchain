@@ -5,8 +5,10 @@
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception */
 
 #include <stdio.h>
+#include <math.h>
 
 int main(void) {
   printf("Hello World!\n");
+  printf("pi = %f\n", 4.0f * atanf(1.0f));
   return 0;
 }

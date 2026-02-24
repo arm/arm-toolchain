@@ -51,11 +51,43 @@ int uart_putc(char ch, FILE* file)
   return ch;
 }
 
-/* Redirect sdtio as per https://github.com/picolibc/picolibc/blob/main/doc/os.md */
-static FILE __stdio = FDEV_SETUP_STREAM(uart_putc, NULL, NULL, _FDEV_SETUP_WRITE);
-FILE *const stdin = &__stdio;
-__strong_reference(stdin, stdout);
-__strong_reference(stdin, stderr);
+#if defined(__PICOLIBC_VERSION__) // built with picolibc
+
+  /* Redirect stdio as per https://github.com/picolibc/picolibc/blob/main/doc/os.md */
+  static FILE __stdio = FDEV_SETUP_STREAM(uart_putc, NULL, NULL, _FDEV_SETUP_WRITE);
+  FILE *const stdin = &__stdio;
+  __strong_reference(stdin, stdout);
+  __strong_reference(stdin, stderr);
+
+#elif __LLVM_LIBC__  // built with llvmlibc
+
+  void* __llvm_libc_stdin_cookie;
+  void* __llvm_libc_stdout_cookie;
+  void* __llvm_libc_stderr_cookie;
+
+  void _platform_init(void) {
+    // Initialize cookies here
+    __llvm_libc_stdin_cookie = NULL;
+    __llvm_libc_stdout_cookie = NULL;
+    __llvm_libc_stderr_cookie = NULL;
+}
+
+  ssize_t __llvm_libc_stdio_read(void *cookie, char *buf, size_t size) {
+    return -1;  // Not implemented and not used in this sample
+  }
+
+  ssize_t __llvm_libc_stdio_write(void *cookie, const char *buf, size_t size) {
+    (void) cookie; // Check for specific cookies here as needed
+
+    for(size_t i = 0; i < size; i++) {
+      uart_putc(buf[i], NULL);
+    }
+    return size;
+  }
+
+#else
+  #error "Unsupported C library"
+#endif
 
 int main(void)
 {

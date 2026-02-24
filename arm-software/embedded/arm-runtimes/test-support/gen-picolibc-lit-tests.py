@@ -44,6 +44,9 @@ def main():
         required=True,
         help="Name to give the lit suite.",
     )
+    arg_parser.add_argument(
+        "--timeout-multiplier", type=float, help="Timeout multiplier (float)."
+    )
 
     args = arg_parser.parse_args()
 
@@ -73,9 +76,10 @@ def main():
         ) as f:
             # Invoke meson to run the test.
             # Set --logbase so that each has a unique log name.
-            f.write(
-                f"# RUN: {args.meson} test -C {args.build} {testname} --logbase {testname} --no-rebuild\n"
-            )
+            cmd = f"# RUN: {args.meson} test -C {args.build} {testname} --logbase {testname} --no-rebuild"
+            if args.timeout_multiplier and args.timeout_multiplier != 1:
+                cmd += f" -t {args.timeout_multiplier}"
+            f.write(f"{cmd}\n")
 
     # Simple lit config to run the tests.
     cfg_txt = """import lit.formats
