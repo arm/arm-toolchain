@@ -173,14 +173,35 @@ def process_conflict(
     create_pull_request(git_repo, to_branch)
 
 
-def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str) -> list[str]:
+def get_merge_commit_list(git_repo: Git, from_branch: str, to_branch: str, up_to_tag: str = None) -> list[str]:
     logger.info(
         "Calculating list of commits to be merged from %s to %s", from_branch, to_branch
     )
     merge_base_output = git_repo.run_cmd(["merge-base", from_branch, to_branch])
     merge_base_commit = merge_base_output.strip()
+
+    # Determine the end point for the merge range
+    end_point = from_branch
+    if up_to_tag:
+        # Resolve the tag/commit to a full commit hash
+        resolved_commit = git_repo.run_cmd(["rev-parse", up_to_tag]).strip()
+        logger.info("Resolved '%s' to commit %s", up_to_tag, resolved_commit)
+
+        # Verify that the tag/commit is reachable from from_branch
+        try:
+            git_repo.run_cmd(["merge-base", "--is-ancestor", resolved_commit, from_branch])
+        except subprocess.CalledProcessError:
+            logger.error(
+                "The specified tag/commit '%s' (%s) is not reachable from branch '%s'",
+                up_to_tag, resolved_commit, from_branch
+            )
+            raise ValueError(f"Tag/commit '{up_to_tag}' is not in the history of '{from_branch}'")
+
+        end_point = resolved_commit
+        logger.info("Limiting merge to commits up to and including %s", end_point)
+
     log_output = git_repo.run_cmd(
-        ["log", f"{merge_base_commit}..{from_branch}", "--pretty=format:%H"]
+        ["log", f"{merge_base_commit}..{end_point}", "--pretty=format:%H"]
     )
     commit_list = log_output.strip()
     if not commit_list:
@@ -248,6 +269,11 @@ def main():
         action="store_true",
         help="Print verbose log messages during automerge run",
     )
+    arg_parser.add_argument(
+        "--up-to-tag",
+        metavar="TAG_OR_COMMIT",
+        help="Merge commits only up to and including this tag or commit hash (must be reachable from --from-branch)",
+    )
 
     args = arg_parser.parse_args()
 
@@ -270,7 +296,7 @@ def main():
             ignored_paths = ignored_paths_file.read().splitlines()
 
         merge_commits = get_merge_commit_list(
-            git_repo, args.from_branch, args.to_branch
+            git_repo, args.from_branch, args.to_branch, args.up_to_tag
         )
         for commit_hash in merge_commits:
             merge_commit(
