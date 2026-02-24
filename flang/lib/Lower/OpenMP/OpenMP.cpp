@@ -651,6 +651,18 @@ static void threadPrivatizeVars(lower::AbstractConverter &converter,
                              semantics::Symbol::Flag::OmpThreadprivate,
                              /*collectSymbols=*/true,
                              /*collectHostAssociatedSymbols=*/true);
+
+  // DOWNSTREAM CHANGE:
+  // Pull in symbols that alias a threadprivate object via EQUIVALENCE so they
+  // are treated the same way as the threadprivate base
+  for (const semantics::Symbol *sym :
+       llvm::make_early_inc_range(threadprivateSyms)) {
+    if (const Fortran::semantics::EquivalenceSet *equivSet =
+            semantics::FindEquivalenceSet(sym->GetUltimate())) {
+      for (const semantics::EquivalenceObject &eqObj : *equivSet)
+        threadprivateSyms.insert(&eqObj.symbol.GetUltimate());
+    }
+  }
   std::set<semantics::SourceName> threadprivateSymNames;
 
   // For a COMMON block, the ThreadprivateOp is generated for itself instead of
