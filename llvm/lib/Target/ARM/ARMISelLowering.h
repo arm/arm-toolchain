@@ -601,10 +601,16 @@ class VectorType;
     SDValue LowerSPONENTRY(SDValue Op, SelectionDAG &DAG) const;
     void LowerLOAD(SDNode *N, SmallVectorImpl<SDValue> &Results,
                    SelectionDAG &DAG) const;
+    // Downstream change issue: #727 (AEABI Unaligned helpers)
+    SDValue LowerSTORE(SDValue Op, SelectionDAG &DAG,
+                       const ARMSubtarget *Subtarget) const;
+    std::pair<SDValue, SDValue>
+    LowerAEABIUnalignedLoad(SDValue Op, SelectionDAG &DAG) const;
+    SDValue LowerAEABIUnalignedStore(SDValue Op, SelectionDAG &DAG) const;
+    // End downstream change: #727
     SDValue LowerFP_TO_BF16(SDValue Op, SelectionDAG &DAG) const;
     SDValue LowerCMP(SDValue Op, SelectionDAG &DAG) const;
     SDValue LowerABS(SDValue Op, SelectionDAG &DAG) const;
-
     Register getRegisterByName(const char* RegName, LLT VT,
                                const MachineFunction &MF) const override;
 

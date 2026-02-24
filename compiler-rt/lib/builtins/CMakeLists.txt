@@ -516,6 +516,12 @@ set(arm_EABI_RT_SOURCES
   arm/aeabi_ldivmod.S
   arm/aeabi_uidivmod.S
   arm/aeabi_uldivmod.S
+  # Downstream change issue: #727 (AEABI Unaligned helpers)
+  arm/aeabi_uread4.S
+  arm/aeabi_uread8.S
+  arm/aeabi_uwrite4.S
+  arm/aeabi_uwrite8.S
+  # End downstream change: #727
 )
 
 set(arm_EABI_CLIB_SOURCES
