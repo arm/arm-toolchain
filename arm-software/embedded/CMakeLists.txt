@@ -253,8 +253,11 @@ if(NOT LLVM_TOOLCHAIN_ENABLED_LIBCS)
 endif()
 
 if(LLVM_TOOLCHAIN_ENABLED_LIBCS)
+    # The primary libc is the first entry in LLVM_TOOLCHAIN_ENABLED_LIBCS.
+    # The order is fixed by the append sequence above (picolibc, newlib,
+    # newlib-nano, llvmlibc) and is intentional: picolibc is the default
+    # for ATfE, so it should always be the primary when enabled.
     list(GET LLVM_TOOLCHAIN_ENABLED_LIBCS 0 LLVM_TOOLCHAIN_PRIMARY_LIBC)
-    set(LLVM_TOOLCHAIN_C_LIBRARY ${LLVM_TOOLCHAIN_PRIMARY_LIBC} CACHE STRING "" FORCE)
 
     if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL)
         list(LENGTH LLVM_TOOLCHAIN_ENABLED_LIBCS _overlay_libc_count)
