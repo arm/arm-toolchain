@@ -28,7 +28,7 @@ void enable_cache() {
   __isb(0xf);
 }
 
-void setup() {
+extern "C" [[gnu::weak]] void _platform_setup_memory() {
   // Disable the MPU
   MPU_CTRL.ENABLE = 0;
 
@@ -36,6 +36,7 @@ void setup() {
   // Enable alignment checks when unaligned accesses are disabled
   CCR.UNALIGN_TRP = 1;
 #endif
+  enable_cache();
 }
 
 } // namespace memory

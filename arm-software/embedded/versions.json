@@ -8,13 +8,13 @@
   "repos": {
     "picolibc": {
       "url": "https://github.com/picolibc/picolibc.git",
-      "tagType": "commithash",
-      "tag": "a742b2d5c5f94ed71458b1f7144e451af597a45b"
+      "tagType": "branch",
+      "tag": "main"
     },
     "newlib": {
       "url": "https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git",
       "tagType": "commithash",
-      "tag": "5e5e51f1dc56a99eb4648c28e00d73b6ea44a8b0"
+      "tag": "8ba4275b83ec27529f67e0d477611fa6d8d6e6bd"
     }
   }
 }

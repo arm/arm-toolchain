@@ -410,8 +410,9 @@ static_libomp_build() {
     mkdir -p "${BUILD_DIR}/stage/static_libomp_build"
     cd "${BUILD_DIR}/stage/static_libomp_build"
     bootstrap_compiler_default_config
-    run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/openmp" \
+    run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/runtimes" \
         -DBUILD_SHARED_LIBS=False \
+        -DLLVM_ENABLE_RUNTIMES="openmp" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
         -DCMAKE_LINKER="${ATFL_DIR}/bin/ld.lld" \

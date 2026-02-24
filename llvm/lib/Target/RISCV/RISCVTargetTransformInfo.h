@@ -108,7 +108,8 @@ public:
       unsigned Opcode, Type *InputTypeA, Type *InputTypeB, Type *AccumType,
       ElementCount VF, TTI::PartialReductionExtendKind OpAExtend,
       TTI::PartialReductionExtendKind OpBExtend, std::optional<unsigned> BinOp,
-      TTI::TargetCostKind CostKind) const override;
+      TTI::TargetCostKind CostKind,
+      std::optional<FastMathFlags> FMF) const override;
 
   bool shouldExpandReduction(const IntrinsicInst *II) const override;
   bool supportsScalableVectors() const override {
@@ -138,7 +139,7 @@ public:
 
   bool preferAlternateOpcodeVectorization() const override;
 
-  bool preferEpilogueVectorization() const override {
+  bool preferEpilogueVectorization(ElementCount Iters) const override {
     // Epilogue vectorization is usually unprofitable - tail folding or
     // a smaller VF would have been better.  This a blunt hammer - we
     // should re-examine this once vectorization is better tuned.
@@ -506,6 +507,10 @@ public:
   }
 
   bool shouldTreatInstructionLikeSelect(const Instruction *I) const override;
+
+  bool
+  shouldCopyAttributeWhenOutliningFrom(const Function *Caller,
+                                       const Attribute &Attr) const override;
 };
 
 } // end namespace llvm
