@@ -348,24 +348,7 @@ Linux, see the [Standards support](StandardsSupport.md) section.
 For details on OpenMP support in Arm Toolchain for Linux, see the
 [OpenMP support](OpenMPSupport.md) section.
 
-## Fortran recommendations
 
-### When to use Arm Toolchain for Linux?
-
-* To compile a code with the modern Fortran features (except coarrays/teams/collectives).
-
-* To compile Applications that are standards compliant.
-
-* To compile large scale applications like CP2K.
-
-* To compile applications requiring quadruple precision real/complex type support.
-
-### When not to use Arm Toolchain for Linux?
-
-* Performance is not guaranteed. For the users seeking highest performance, Arm Toolchain for Linux is not recommended.
-
-* OpenMP support is experimental.
-
-* Code containing non-standard features/intrinsics might not work as expected.
+## Compatibility concerns
 
 * CMake versions older than 3.28 are not supported.
