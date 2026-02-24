@@ -8,12 +8,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 ### Changed
-- ATfE samples updated to work with LLVM libc, separate set of LLVM libc samples
-removed.
 ### Deprecated
 ### Removed
 ### Fixed
 ### Security
+
+## [22.1.0]
+
+### Added
+- Core clang tools (`clang-check`, `clang-format`) and `clang-scan-deps` added
+to the package.
+- A new sample to show how to target and run code with an Arm FVP
+(Fixed Virtual Platform).
+
+### Changed
+- LLVM libc added to the main ATfE package.
+- LLVM libc startup code and default linker script provided.
+- Many LLVM libc++ support limitations removed when used with LLVM libc.
+C++ console I/O can be used now, but not file I/O yet.
+- ATfE samples updated to work with LLVM libc, the separate set of LLVM libc
+samples removed.
+- LLVM compiler-rt profile library provided for each library variant.
+It replaced the ATfE sample minimal profile runtime library implementation.
+- newlib updated to version 4.6.0
+
+### Removed
+- `make.bat` files were removed from samples, because of additional logic added
+in make files that was difficult to replicate in batch files. Use MSYS2 or
+similar environment on Windows to run samples via make files.
+- LLVM libc overlay package was removed, because LLVM libc was included into the
+main ATfE package.
+
+### Security
+- AArch64 A-profile's Sign Return Address Hardening against the PACMAN attack
+was implemented, see `-mharden-pac-ret` command line option.
 
 ## [21.1.0]
 
