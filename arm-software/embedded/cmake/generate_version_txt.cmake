@@ -17,25 +17,29 @@ if(NOT ${armtoolchain_COMMIT} MATCHES "^[a-f0-9]+$")
     )
 endif()
 
-if(NOT (LLVM_TOOLCHAIN_C_LIBRARY STREQUAL llvmlibc)) # libc in a separate repo?
-    if(LLVM_TOOLCHAIN_C_LIBRARY MATCHES "^newlib")
-        set(base_library newlib)
+set(LLVM_TOOLCHAIN_LIBC_SOURCE_LINES "")
+foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
+    if(libc STREQUAL llvmlibc)
+        set(libc_url "https://github.com/arm/arm-toolchain/tree/arm-software/libc")
+        set(libc_commit ${armtoolchain_COMMIT})
     else()
-        set(base_library ${LLVM_TOOLCHAIN_C_LIBRARY})
-    endif()
+        if(libc MATCHES "^newlib")
+            set(base_library newlib)
+        else()
+            set(base_library ${libc})
+        endif()
 
-    execute_process(
-        COMMAND git -C ${${base_library}_SOURCE_DIR} rev-parse HEAD
-        OUTPUT_VARIABLE ${base_library}_COMMIT
-        OUTPUT_STRIP_TRAILING_WHITESPACE 
-        COMMAND_ERROR_IS_FATAL ANY
-    )
-    set(LLVM_TOOLCHAIN_C_LIBRARY_URL ${${base_library}_URL})
-    set(LLVM_TOOLCHAIN_C_LIBRARY_COMMIT ${${base_library}_COMMIT})
-else()
-    set(LLVM_TOOLCHAIN_C_LIBRARY_URL "https://github.com/arm/arm-toolchain/tree/arm-software/libc")
-    set(LLVM_TOOLCHAIN_C_LIBRARY_COMMIT ${armtoolchain_COMMIT})
-endif()
+        execute_process(
+            COMMAND git -C ${${base_library}_SOURCE_DIR} rev-parse HEAD
+            OUTPUT_VARIABLE ${base_library}_COMMIT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            COMMAND_ERROR_IS_FATAL ANY
+        )
+        set(libc_url ${${base_library}_URL})
+        set(libc_commit ${${base_library}_COMMIT})
+    endif()
+    string(APPEND LLVM_TOOLCHAIN_LIBC_SOURCE_LINES "* ${libc}: ${libc_url} (commit ${libc_commit})\n")
+endforeach()
 
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/VERSION.txt.in
