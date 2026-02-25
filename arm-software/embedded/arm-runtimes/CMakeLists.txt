@@ -534,7 +534,7 @@ if(C_LIBRARY STREQUAL picolibc)
         # * Armv7m big-endian
         # * Armv8.1-M Main PACBTI optimized for code size
         if(TEST_EXECUTOR STREQUAL fvp)
-            if(VARIANT MATCHES "armebv7a_soft_nofp")
+            if(VARIANT MATCHES "armebv7a")
                 set(timeout_multiplier 3)
             else()
                 set(timeout_multiplier 2)
