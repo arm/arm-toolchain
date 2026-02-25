@@ -2063,6 +2063,11 @@ def PAUTH_PROLOGUE : Pseudo<(outs), (ins), []>, Sched<[]> {
 // Insertion point of LR authentication code.
 // The RET terminator of the containing machine basic block may be replaced
 // with a combined RETA(A|B) instruction when rewriting this Pseudo.
+// Begin downstream change #726
+//
+// In the case where PAuthLR is requested but the subtarget lacks PAuthLR instructions,
+// this pseudo also implicitly defines X16. This is done in C++ code.
+// End downstream change #726
 def PAUTH_EPILOGUE : Pseudo<(outs), (ins), []>, Sched<[]>;
 }
 

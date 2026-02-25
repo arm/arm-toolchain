@@ -299,6 +299,15 @@ public:
     BKey
   };
 
+// Begin downstream change #726
+  enum class SignReturnAddressHardeningKind {
+    /// Regular return address signing.
+    None,
+    /// Hardened return address signing with load of return address.
+    LoadReturnAddress
+  };
+
+// End downstream change #726
   enum class ThreadModelKind {
     /// POSIX Threads.
     POSIX,
@@ -725,6 +734,13 @@ public:
     return getSignReturnAddressScope() == SignReturnAddressScopeKind::All;
   }
 
+// Begin downstream change #726
+  bool hasSignReturnAddressHardening() const {
+    return getSignReturnAddressHardening() !=
+           SignReturnAddressHardeningKind::None;
+  }
+
+// End downstream change #726
   bool isSYCL() const { return SYCLIsDevice || SYCLIsHost; }
 
   bool hasDefaultVisibilityExportMapping() const {
