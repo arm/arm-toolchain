@@ -1135,7 +1135,7 @@ add_dependencies(
 
 add_custom_target(check-llvm-toolchain)
 add_dependencies(check-llvm-toolchain check-libc)
-add_dependencies(check-llvm-toolchain ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS})
+add_dependencies(check-llvm-toolchain check-compiler-rt)
 add_subdirectory(test)
 add_dependencies(check-llvm-toolchain check-llvm-toolchain-lit)
 add_subdirectory(packagetest)
