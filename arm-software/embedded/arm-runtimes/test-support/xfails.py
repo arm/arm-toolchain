@@ -384,7 +384,7 @@ def main():
             name="picolibc_UID0_lookup",
             testnames=[
                 "test-pwd.test",
-                "test-grp.test"
+                "test-grp.test",
             ],
             result=NewResult.EXCLUDE,
             project="picolibc",
@@ -455,7 +455,7 @@ def main():
             name="picolibc_rateInHz",
             testnames=[
                 "semihost-gettimeofday.test",
-                "test-stat.test"
+                "test-stat.test",
             ],
             result=NewResult.XFAILED,
             project="picolibc",
