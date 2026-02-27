@@ -79,6 +79,8 @@ static void emitPACSymOffsetIntoX16(const TargetInstrInfo &TII,
       .addImm(0);
 }
 
+// Begin downstream change #726
+/*
 // Where PAuthLR support is not known at compile time, it is supported using
 // PACM. PACM is in the hint space so has no effect when PAuthLR is not
 // supported by the hardware, but will alter the behaviour of PACI*SP, AUTI*SP
@@ -100,7 +102,8 @@ static void BuildPACM(const AArch64Subtarget &Subtarget, MachineBasicBlock &MBB,
   if (MFnI.branchProtectionPAuthLR() && !Subtarget.hasPAuthLR())
     BuildMI(MBB, MBBI, DL, TII->get(AArch64::PACM)).setMIFlag(Flags);
 }
-
+*/
+// End downstream change #726
 static void emitPACCFI(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
                        MachineInstr::MIFlag Flags, bool EmitCFI) {
   if (!EmitCFI)
@@ -148,9 +151,17 @@ void AArch64PointerAuth::signLR(MachineFunction &MF,
         .setMIFlag(MachineInstr::FrameSetup)
         ->setPreInstrSymbol(MF, MFnI.getSigningInstrLabel());
   } else {
-    BuildPACM(*Subtarget, MBB, MBBI, DL, MachineInstr::FrameSetup);
-    if (MFnI.branchProtectionPAuthLR())
+// Begin downstream change #726
+//    BuildPACM(*Subtarget, MBB, MBBI, DL, MachineInstr::FrameSetup);
+//    if (MFnI.branchProtectionPAuthLR())
+    if (MFnI.branchProtectionPAuthLR()) {
+      BuildMI(MBB, MBBI, DL, TII->get(AArch64::PACM))
+          .setMIFlag(MachineInstr::FrameSetup);
+// End downstream change #726
       emitPACCFI(MBB, MBBI, MachineInstr::FrameSetup, EmitCFI);
+// Begin downstream change #726
+    }
+// End downstream change #726
     BuildMI(MBB, MBBI, DL,
             TII->get(MFnI.shouldSignWithBKey() ? AArch64::PACIBSP
                                                : AArch64::PACIASP))
@@ -204,14 +215,23 @@ void AArch64PointerAuth::authenticateLR(
       !MF.getFunction().hasFnAttribute(Attribute::ShadowCallStack)) {
     if (MFnI->branchProtectionPAuthLR() && Subtarget->hasPAuthLR()) {
       assert(PACSym && "No PAC instruction to refer to");
-      emitPACSymOffsetIntoX16(*TII, MBB, MBBI, DL, PACSym);
+// Begin downstream change #726
+//      emitPACSymOffsetIntoX16(*TII, MBB, MBBI, DL, PACSym);
+// End downstream change #726
       BuildMI(MBB, TI, DL,
               TII->get(UseBKey ? AArch64::RETABSPPCi : AArch64::RETAASPPCi))
           .addSym(PACSym)
           .copyImplicitOps(*MBBI)
           .setMIFlag(MachineInstr::FrameDestroy);
     } else {
-      BuildPACM(*Subtarget, MBB, TI, DL, MachineInstr::FrameDestroy, PACSym);
+// Begin downstream change #726
+//      BuildPACM(*Subtarget, MBB, TI, DL, MachineInstr::FrameDestroy, PACSym);
+      if (MFnI->branchProtectionPAuthLR()) {
+        emitPACSymOffsetIntoX16(*TII, MBB, MBBI, DL, PACSym);
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::PACM))
+            .setMIFlag(MachineInstr::FrameDestroy);
+      }
+// End downstream change #726
       BuildMI(MBB, TI, DL, TII->get(UseBKey ? AArch64::RETAB : AArch64::RETAA))
           .copyImplicitOps(*MBBI)
           .setMIFlag(MachineInstr::FrameDestroy);
@@ -220,16 +240,27 @@ void AArch64PointerAuth::authenticateLR(
   } else {
     if (MFnI->branchProtectionPAuthLR() && Subtarget->hasPAuthLR()) {
       assert(PACSym && "No PAC instruction to refer to");
-      emitPACSymOffsetIntoX16(*TII, MBB, MBBI, DL, PACSym);
+// Begin downstream change #726
+//      emitPACSymOffsetIntoX16(*TII, MBB, MBBI, DL, PACSym);
+// End downstream change #726
       emitPACCFI(MBB, MBBI, MachineInstr::FrameDestroy, EmitAsyncCFI);
       BuildMI(MBB, MBBI, DL,
               TII->get(UseBKey ? AArch64::AUTIBSPPCi : AArch64::AUTIASPPCi))
           .addSym(PACSym)
           .setMIFlag(MachineInstr::FrameDestroy);
     } else {
-      BuildPACM(*Subtarget, MBB, MBBI, DL, MachineInstr::FrameDestroy, PACSym);
-      if (MFnI->branchProtectionPAuthLR())
+// Begin downstream change #726
+//      BuildPACM(*Subtarget, MBB, MBBI, DL, MachineInstr::FrameDestroy, PACSym);
+//      if (MFnI->branchProtectionPAuthLR())
+      if (MFnI->branchProtectionPAuthLR()) {
+        emitPACSymOffsetIntoX16(*TII, MBB, MBBI, DL, PACSym);
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::PACM))
+            .setMIFlag(MachineInstr::FrameDestroy);
+// End downstream change #726
         emitPACCFI(MBB, MBBI, MachineInstr::FrameDestroy, EmitAsyncCFI);
+// Begin downstream change #726
+      }
+// End downstream change #726
       BuildMI(MBB, MBBI, DL,
               TII->get(UseBKey ? AArch64::AUTIBSP : AArch64::AUTIASP))
           .setMIFlag(MachineInstr::FrameDestroy);
