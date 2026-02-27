@@ -140485,94 +140485,144 @@ define inreg <64 x bfloat> @bitcast_v128i8_to_v64bf16_scalar(<128 x i8> inreg %a
 ; VI-NEXT:    buffer_store_dword v61, off, s[0:3], s32 offset:344 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v62, off, s[0:3], s32 offset:340 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v63, off, s[0:3], s32 offset:336 ; 4-byte Folded Spill
-; VI-NEXT:    v_mov_b32_e32 v41, v28
-; VI-NEXT:    v_mov_b32_e32 v31, v1
-; VI-NEXT:    v_mov_b32_e32 v28, v0
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:332
+; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:436 ; 4-byte Folded Spill
+; VI-NEXT:    v_mov_b32_e32 v22, v1
+; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:332
 ; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:8
 ; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_cmp_ne_u32_e32 vcc, 0, v0
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:248
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Spill
+; VI-NEXT:    v_cmp_ne_u32_e32 vcc, 0, v32
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:4
 ; VI-NEXT:    s_and_b64 s[4:5], vcc, exec
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:476 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:244
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:240
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:528 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:236
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:328
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:484 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:232
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:576 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:324
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:532 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:228
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:580 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:320
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:540 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:224
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:560 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:316
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:488 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:220
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:584 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:312
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:216
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:564 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:308
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:460 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:212
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:588 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:304
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:536 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:208
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:572 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:300
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:452 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v57, off, s[0:3], s32 offset:204
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:200
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:568 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:296
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:440 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:196
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:608 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:292
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:464 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:192
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:612 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:288
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:432 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v33, off, s[0:3], s32 offset:188
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:184
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:464 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:284
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:428 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:180
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:616 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:280
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:444 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:176
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:276
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:424 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:172
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:624 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:272
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:168
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:528 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:268
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:420 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v46, off, s[0:3], s32 offset:164
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:160
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:484 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:264
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:416 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v44, off, s[0:3], s32 offset:156
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:152
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:532 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:260
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:584 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:516 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:256
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:536 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:252
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:492 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:248
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:488 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:244
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:520 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:240
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:540 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:236
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:496 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v59, off, s[0:3], s32 offset:232
+; VI-NEXT:    buffer_load_ushort v61, off, s[0:3], s32 offset:228
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:224
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:220
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:508 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v42, off, s[0:3], s32 offset:216
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:212
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:208
+; VI-NEXT:    buffer_load_ushort v62, off, s[0:3], s32 offset:204
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:200
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:456 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:196
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:480 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v58, off, s[0:3], s32 offset:192
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:188
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:472 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:184
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:444 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:180
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:460 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:176
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:440 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:172
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:452 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v57, off, s[0:3], s32 offset:168
+; VI-NEXT:    buffer_load_ushort v33, off, s[0:3], s32 offset:164
+; VI-NEXT:    buffer_load_ushort v44, off, s[0:3], s32 offset:160
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:156
+; VI-NEXT:    buffer_load_ushort v34, off, s[0:3], s32 offset:152
 ; VI-NEXT:    buffer_load_ushort v60, off, s[0:3], s32 offset:148
-; VI-NEXT:    buffer_load_ushort v59, off, s[0:3], s32 offset:144
-; VI-NEXT:    buffer_load_ushort v58, off, s[0:3], s32 offset:140
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:136
+; VI-NEXT:    buffer_load_ushort v46, off, s[0:3], s32 offset:144
+; VI-NEXT:    buffer_load_ushort v41, off, s[0:3], s32 offset:140
+; VI-NEXT:    buffer_load_ushort v35, off, s[0:3], s32 offset:136
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:588 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v42, off, s[0:3], s32 offset:132
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:128
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:592 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v63, off, s[0:3], s32 offset:132
+; VI-NEXT:    buffer_load_ushort v35, off, s[0:3], s32 offset:128
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:592 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:596 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v43, off, s[0:3], s32 offset:124
 ; VI-NEXT:    buffer_load_ushort v45, off, s[0:3], s32 offset:120
 ; VI-NEXT:    buffer_load_ushort v56, off, s[0:3], s32 offset:116
@@ -140588,223 +140638,158 @@ define inreg <64 x bfloat> @bitcast_v128i8_to_v64bf16_scalar(<128 x i8> inreg %a
 ; VI-NEXT:    buffer_load_ushort v52, off, s[0:3], s32 offset:76
 ; VI-NEXT:    buffer_load_ushort v37, off, s[0:3], s32 offset:72
 ; VI-NEXT:    buffer_load_ushort v50, off, s[0:3], s32 offset:68
-; VI-NEXT:    buffer_load_ushort v34, off, s[0:3], s32 offset:64
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:64
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v48, off, s[0:3], s32 offset:60
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:56
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:56
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:596 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v38, off, s[0:3], s32 offset:52
-; VI-NEXT:    buffer_load_ushort v62, off, s[0:3], s32 offset:48
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:48
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:600 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:44
-; VI-NEXT:    buffer_load_ushort v61, off, s[0:3], s32 offset:40
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:36
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:40
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:32
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:416 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:36
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:604 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:28
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:32
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:600 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:24
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:472 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:20
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:328
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v63, off, s[0:3], s32 offset:16
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:12
-; VI-NEXT:    s_waitcnt vmcnt(3)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:568 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:324
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:604 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:28
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:572 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:320
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:420 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:24
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:552 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:316
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:428 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:20
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:576 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:312
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:424 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:16
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:308
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:580 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:304
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:564 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:300
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:560 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:296
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:292
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:616 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:620 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v3, off, s[0:3], s32 offset:624 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v28, off, s[0:3], s32 offset:628 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v5, off, s[0:3], s32 offset:632 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v2, off, s[0:3], s32 offset:636 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v7, off, s[0:3], s32 offset:640 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v4, off, s[0:3], s32 offset:644 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v9, off, s[0:3], s32 offset:648 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v6, off, s[0:3], s32 offset:652 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v11, off, s[0:3], s32 offset:656 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v8, off, s[0:3], s32 offset:660 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v13, off, s[0:3], s32 offset:664 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v10, off, s[0:3], s32 offset:668 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v15, off, s[0:3], s32 offset:672 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v12, off, s[0:3], s32 offset:676 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v17, off, s[0:3], s32 offset:680 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v14, off, s[0:3], s32 offset:684 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v19, off, s[0:3], s32 offset:688 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v16, off, s[0:3], s32 offset:692 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v21, off, s[0:3], s32 offset:696 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v18, off, s[0:3], s32 offset:700 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v23, off, s[0:3], s32 offset:704 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v20, off, s[0:3], s32 offset:708 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v25, off, s[0:3], s32 offset:712 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:716 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v27, off, s[0:3], s32 offset:720 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v24, off, s[0:3], s32 offset:724 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v29, off, s[0:3], s32 offset:728 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v26, off, s[0:3], s32 offset:732 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v41, off, s[0:3], s32 offset:736 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v30, off, s[0:3], s32 offset:740 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:744 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v37, off, s[0:3], s32 offset:748 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v38, off, s[0:3], s32 offset:752 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v48, off, s[0:3], s32 offset:756 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v49, off, s[0:3], s32 offset:760 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v50, off, s[0:3], s32 offset:764 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v54, off, s[0:3], s32 offset:768 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v40, off, s[0:3], s32 offset:772 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:776 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v47, off, s[0:3], s32 offset:780 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v56, off, s[0:3], s32 offset:784 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v59, off, s[0:3], s32 offset:788 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v43, off, s[0:3], s32 offset:792 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v42, off, s[0:3], s32 offset:796 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v39, off, s[0:3], s32 offset:800 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v58, off, s[0:3], s32 offset:804 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v52, off, s[0:3], s32 offset:808 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v53, off, s[0:3], s32 offset:812 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v60, off, s[0:3], s32 offset:816 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v44, off, s[0:3], s32 offset:820 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v46, off, s[0:3], s32 offset:824 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v51, off, s[0:3], s32 offset:828 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v33, off, s[0:3], s32 offset:456 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:492 ; 4-byte Folded Spill
-; VI-NEXT:    s_waitcnt vmcnt(14)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:608 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:288
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:12
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:448 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:284
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:612 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:280
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:500 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:276
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:544 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:272
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:516 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:268
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:468 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:264
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:520 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:260
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:504 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:256
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:524 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:252
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:480 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:432 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:628 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v3, off, s[0:3], s32 offset:632 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v5, off, s[0:3], s32 offset:640 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v2, off, s[0:3], s32 offset:644 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v7, off, s[0:3], s32 offset:648 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v4, off, s[0:3], s32 offset:652 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v9, off, s[0:3], s32 offset:656 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v6, off, s[0:3], s32 offset:660 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v11, off, s[0:3], s32 offset:664 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v8, off, s[0:3], s32 offset:668 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v13, off, s[0:3], s32 offset:672 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v10, off, s[0:3], s32 offset:676 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v15, off, s[0:3], s32 offset:680 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v12, off, s[0:3], s32 offset:684 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v17, off, s[0:3], s32 offset:688 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v14, off, s[0:3], s32 offset:692 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v19, off, s[0:3], s32 offset:696 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v16, off, s[0:3], s32 offset:700 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v21, off, s[0:3], s32 offset:704 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v18, off, s[0:3], s32 offset:708 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v23, off, s[0:3], s32 offset:712 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v20, off, s[0:3], s32 offset:716 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v25, off, s[0:3], s32 offset:720 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v27, off, s[0:3], s32 offset:724 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v24, off, s[0:3], s32 offset:728 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v29, off, s[0:3], s32 offset:732 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v26, off, s[0:3], s32 offset:736 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v28, off, s[0:3], s32 offset:740 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v30, off, s[0:3], s32 offset:744 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:748 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v37, off, s[0:3], s32 offset:752 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v38, off, s[0:3], s32 offset:756 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v48, off, s[0:3], s32 offset:760 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v49, off, s[0:3], s32 offset:764 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v50, off, s[0:3], s32 offset:768 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v54, off, s[0:3], s32 offset:772 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v40, off, s[0:3], s32 offset:776 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:780 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v47, off, s[0:3], s32 offset:784 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v56, off, s[0:3], s32 offset:788 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v46, off, s[0:3], s32 offset:792 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v43, off, s[0:3], s32 offset:796 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v63, off, s[0:3], s32 offset:800 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v39, off, s[0:3], s32 offset:804 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v44, off, s[0:3], s32 offset:808 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v41, off, s[0:3], s32 offset:812 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v52, off, s[0:3], s32 offset:816 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v53, off, s[0:3], s32 offset:820 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:824 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v60, off, s[0:3], s32 offset:828 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:832 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v33, off, s[0:3], s32 offset:836 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v51, off, s[0:3], s32 offset:840 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v58, off, s[0:3], s32 offset:448 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:468 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v42, off, s[0:3], s32 offset:476 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v62, off, s[0:3], s32 offset:504 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v59, off, s[0:3], s32 offset:544 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v61, off, s[0:3], s32 offset:552 ; 4-byte Folded Spill
 ; VI-NEXT:    s_cbranch_scc0 .LBB89_4
 ; VI-NEXT:  ; %bb.1: ; %cmp.false
 ; VI-NEXT:    s_mov_b32 s4, 0xc0c0004
-; VI-NEXT:    v_mov_b32_e32 v57, v61
-; VI-NEXT:    v_mov_b32_e32 v61, v3
-; VI-NEXT:    v_mov_b32_e32 v33, v34
-; VI-NEXT:    v_mov_b32_e32 v34, v2
+; VI-NEXT:    v_perm_b32 v6, v6, v7, s4
+; VI-NEXT:    v_perm_b32 v7, v10, v11, s4
+; VI-NEXT:    buffer_load_dword v10, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v58, v24
+; VI-NEXT:    v_mov_b32_e32 v24, v3
+; VI-NEXT:    v_mov_b32_e32 v42, v2
 ; VI-NEXT:    v_perm_b32 v4, v4, v5, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v4, 16, v4
-; VI-NEXT:    v_perm_b32 v5, v34, v61, s4
+; VI-NEXT:    v_perm_b32 v5, v42, v24, s4
 ; VI-NEXT:    v_or_b32_e32 v4, v5, v4
 ; VI-NEXT:    v_perm_b32 v5, v8, v9, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v5, 16, v5
-; VI-NEXT:    v_perm_b32 v6, v6, v7, s4
 ; VI-NEXT:    v_or_b32_e32 v5, v6, v5
 ; VI-NEXT:    v_perm_b32 v6, v12, v13, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v6, 16, v6
-; VI-NEXT:    v_perm_b32 v7, v10, v11, s4
 ; VI-NEXT:    v_or_b32_e32 v6, v7, v6
 ; VI-NEXT:    v_perm_b32 v7, v16, v17, s4
+; VI-NEXT:    v_mov_b32_e32 v1, s17
+; VI-NEXT:    v_mov_b32_e32 v3, 0xc0c0004
 ; VI-NEXT:    v_lshlrev_b32_e32 v7, 16, v7
 ; VI-NEXT:    v_perm_b32 v8, v14, v15, s4
+; VI-NEXT:    v_perm_b32 v62, s16, v1, v3
+; VI-NEXT:    v_mov_b32_e32 v1, s19
 ; VI-NEXT:    v_or_b32_e32 v7, v8, v7
 ; VI-NEXT:    v_perm_b32 v8, v20, v21, s4
+; VI-NEXT:    v_perm_b32 v1, s18, v1, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v8, 16, v8
 ; VI-NEXT:    v_perm_b32 v9, v18, v19, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v1, 16, v1
 ; VI-NEXT:    v_or_b32_e32 v8, v9, v8
-; VI-NEXT:    v_perm_b32 v9, v24, v25, s4
+; VI-NEXT:    v_perm_b32 v9, v58, v25, s4
+; VI-NEXT:    v_mov_b32_e32 v59, v0
+; VI-NEXT:    buffer_store_dword v34, off, s[0:3], s32 offset:844 ; 4-byte Folded Spill
+; VI-NEXT:    v_mov_b32_e32 v34, v28
+; VI-NEXT:    v_or_b32_e32 v0, v62, v1
 ; VI-NEXT:    v_lshlrev_b32_e32 v9, 16, v9
-; VI-NEXT:    v_perm_b32 v10, v22, v23, s4
-; VI-NEXT:    v_or_b32_e32 v9, v10, v9
-; VI-NEXT:    v_perm_b32 v10, v41, v29, s4
-; VI-NEXT:    v_lshlrev_b32_e32 v10, 16, v10
+; VI-NEXT:    buffer_load_dword v62, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
 ; VI-NEXT:    v_perm_b32 v11, v26, v27, s4
-; VI-NEXT:    v_or_b32_e32 v10, v11, v10
-; VI-NEXT:    buffer_load_dword v11, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
 ; VI-NEXT:    v_perm_b32 v17, v35, v53, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v17, 16, v17
 ; VI-NEXT:    v_perm_b32 v19, v40, v51, s4
-; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
-; VI-NEXT:    v_perm_b32 v16, v48, v33, s4
 ; VI-NEXT:    v_or_b32_e32 v17, v19, v17
-; VI-NEXT:    v_mov_b32_e32 v40, v55
 ; VI-NEXT:    v_perm_b32 v19, v47, v55, s4
-; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    v_perm_b32 v21, v58, v59, s4
-; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v32, v62
-; VI-NEXT:    v_mov_b32_e32 v62, v28
-; VI-NEXT:    v_mov_b32_e32 v28, v31
-; VI-NEXT:    v_perm_b32 v28, v62, v28, s4
-; VI-NEXT:    v_mov_b32_e32 v62, v63
-; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:832 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v28, v59, v22, s4
+; VI-NEXT:    v_mov_b32_e32 v40, v55
+; VI-NEXT:    v_perm_b32 v21, v41, v46, s4
 ; VI-NEXT:    v_perm_b32 v18, v52, v39, s4
-; VI-NEXT:    v_perm_b32 v15, v36, v32, s4
-; VI-NEXT:    v_mov_b32_e32 v3, 0xc0c0004
-; VI-NEXT:    v_mov_b32_e32 v1, s19
+; VI-NEXT:    v_perm_b32 v22, v32, v44, s4
 ; VI-NEXT:    v_mov_b32_e32 v31, s23
-; VI-NEXT:    v_mov_b32_e32 v0, s17
-; VI-NEXT:    v_perm_b32 v1, s18, v1, v3
 ; VI-NEXT:    v_mov_b32_e32 v2, s21
 ; VI-NEXT:    v_perm_b32 v31, s22, v31, v3
-; VI-NEXT:    v_perm_b32 v0, s16, v0, v3
-; VI-NEXT:    v_lshlrev_b32_e32 v1, 16, v1
 ; VI-NEXT:    v_perm_b32 v2, s20, v2, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v31, 16, v31
-; VI-NEXT:    v_or_b32_e32 v0, v0, v1
 ; VI-NEXT:    v_or_b32_e32 v1, v2, v31
 ; VI-NEXT:    v_mov_b32_e32 v31, s27
 ; VI-NEXT:    v_mov_b32_e32 v2, s25
@@ -140816,43 +140801,58 @@ define inreg <64 x bfloat> @bitcast_v128i8_to_v64bf16_scalar(<128 x i8> inreg %a
 ; VI-NEXT:    v_perm_b32 v3, s28, v31, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v28, 16, v28
 ; VI-NEXT:    v_or_b32_e32 v3, v3, v28
+; VI-NEXT:    buffer_load_dword v31, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v35, v45
-; VI-NEXT:    v_mov_b32_e32 v53, v62
-; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v31, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(10)
-; VI-NEXT:    v_perm_b32 v11, v11, v12, s4
+; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:844 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v16, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v46, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(7)
+; VI-NEXT:    v_perm_b32 v10, v10, v23, s4
+; VI-NEXT:    v_or_b32_e32 v9, v10, v9
+; VI-NEXT:    v_perm_b32 v10, v34, v29, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v10, 16, v10
+; VI-NEXT:    v_or_b32_e32 v10, v11, v10
+; VI-NEXT:    buffer_load_dword v11, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
-; VI-NEXT:    v_lshlrev_b32_e32 v11, 16, v11
-; VI-NEXT:    s_waitcnt vmcnt(10)
-; VI-NEXT:    v_mov_b32_e32 v63, v14
-; VI-NEXT:    s_waitcnt vmcnt(9)
-; VI-NEXT:    v_perm_b32 v22, v44, v22, s4
-; VI-NEXT:    s_waitcnt vmcnt(8)
-; VI-NEXT:    v_perm_b32 v20, v43, v55, s4
+; VI-NEXT:    s_waitcnt vmcnt(7)
+; VI-NEXT:    v_perm_b32 v15, v36, v62, s4
 ; VI-NEXT:    s_waitcnt vmcnt(4)
-; VI-NEXT:    v_mov_b32_e32 v43, v41
+; VI-NEXT:    v_perm_b32 v20, v43, v55, s4
+; VI-NEXT:    s_waitcnt vmcnt(3)
+; VI-NEXT:    v_perm_b32 v16, v48, v16, s4
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v11, v12, v11, s4
+; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
+; VI-NEXT:    v_lshlrev_b32_e32 v11, 16, v11
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v12, v30, v12, s4
 ; VI-NEXT:    v_or_b32_e32 v11, v12, v11
-; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v12, v13, v12, s4
+; VI-NEXT:    v_perm_b32 v12, v12, v13, s4
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v12, 16, v12
-; VI-NEXT:    v_perm_b32 v13, v14, v62, s4
-; VI-NEXT:    v_or_b32_e32 v12, v13, v12
-; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v62, v32
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_mov_b32_e32 v53, v61
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v13, v13, v57, s4
-; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v13, v13, v61, s4
+; VI-NEXT:    v_or_b32_e32 v12, v13, v12
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v13, v13, v14, s4
+; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v13, 16, v13
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v14, v61, v57, s4
+; VI-NEXT:    v_perm_b32 v14, v14, v59, s4
 ; VI-NEXT:    v_or_b32_e32 v13, v14, v13
-; VI-NEXT:    v_perm_b32 v14, v38, v41, s4
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v14, v38, v14, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v14, 16, v14
 ; VI-NEXT:    v_or_b32_e32 v14, v15, v14
 ; VI-NEXT:    v_perm_b32 v15, v50, v37, s4
@@ -140862,115 +140862,114 @@ define inreg <64 x bfloat> @bitcast_v128i8_to_v64bf16_scalar(<128 x i8> inreg %a
 ; VI-NEXT:    v_lshlrev_b32_e32 v16, 16, v16
 ; VI-NEXT:    v_or_b32_e32 v16, v18, v16
 ; VI-NEXT:    v_perm_b32 v18, v56, v45, s4
-; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v18, 16, v18
 ; VI-NEXT:    v_or_b32_e32 v18, v19, v18
-; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v34, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v50, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v51, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v54, v63
-; VI-NEXT:    v_mov_b32_e32 v45, v33
+; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v34, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v50, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v51, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(8)
-; VI-NEXT:    v_perm_b32 v19, v42, v56, s4
+; VI-NEXT:    v_perm_b32 v19, v63, v56, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v19, 16, v19
 ; VI-NEXT:    v_or_b32_e32 v19, v20, v19
 ; VI-NEXT:    v_perm_b32 v20, v60, v47, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v20, 16, v20
 ; VI-NEXT:    v_or_b32_e32 v20, v21, v20
-; VI-NEXT:    buffer_load_dword v21, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_perm_b32 v21, v33, v57, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v21, 16, v21
+; VI-NEXT:    v_or_b32_e32 v21, v22, v21
+; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(2)
 ; VI-NEXT:    v_perm_b32 v42, v51, v37, s4
 ; VI-NEXT:    v_mov_b32_e32 v41, v36
 ; VI-NEXT:    v_mov_b32_e32 v32, v50
 ; VI-NEXT:    v_mov_b32_e32 v33, v51
-; VI-NEXT:    v_mov_b32_e32 v60, v31
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v21, v46, v21, s4
-; VI-NEXT:    v_lshlrev_b32_e32 v21, 16, v21
-; VI-NEXT:    v_or_b32_e32 v21, v22, v21
-; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v22, v23, v22, s4
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v22, 16, v22
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v24, v23, s4
 ; VI-NEXT:    v_or_b32_e32 v22, v23, v22
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v24, v23, s4
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v23, 16, v23
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v24, v25, v24, s4
+; VI-NEXT:    v_perm_b32 v24, v24, v25, s4
 ; VI-NEXT:    v_or_b32_e32 v23, v24, v23
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v24, v25, v24, s4
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v24, v24, v25, s4
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v24, 16, v24
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v25, v26, v25, s4
 ; VI-NEXT:    v_or_b32_e32 v24, v25, v24
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v25, v26, v25, s4
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v25, 16, v25
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v26, v27, v26, s4
 ; VI-NEXT:    v_or_b32_e32 v25, v26, v25
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v26, v27, v26, s4
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v26, 16, v26
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v27, v28, v27, s4
 ; VI-NEXT:    v_or_b32_e32 v26, v27, v26
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v27, v28, v27, s4
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v27, 16, v27
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v28, v29, v28, s4
 ; VI-NEXT:    v_or_b32_e32 v27, v28, v27
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_mov_b32_e32 v58, v29
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v28, v29, v28, s4
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v28, 16, v28
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v29, v30, v29, s4
 ; VI-NEXT:    v_or_b32_e32 v28, v29, v28
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_mov_b32_e32 v58, v29
+; VI-NEXT:    v_mov_b32_e32 v44, v30
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v29, v29, v30, s4
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v60, v29
+; VI-NEXT:    v_perm_b32 v29, v30, v29, s4
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v29, 16, v29
+; VI-NEXT:    v_mov_b32_e32 v57, v31
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v30, v31, v30, s4
 ; VI-NEXT:    v_or_b32_e32 v29, v30, v29
@@ -140981,28 +140980,39 @@ define inreg <64 x bfloat> @bitcast_v128i8_to_v64bf16_scalar(<128 x i8> inreg %a
 ; VI-NEXT:    v_perm_b32 v31, v50, v36, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v31, 16, v31
 ; VI-NEXT:    v_or_b32_e32 v31, v42, v31
-; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:832 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v63, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v45, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v36, v34
 ; VI-NEXT:    s_cbranch_execnz .LBB89_3
 ; VI-NEXT:  .LBB89_2: ; %cmp.true
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(14)
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(13)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v32
 ; VI-NEXT:    s_mov_b32 s4, 0xc0c0004
 ; VI-NEXT:    v_perm_b32 v0, v0, v41, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
+; VI-NEXT:    s_waitcnt vmcnt(13)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v33
+; VI-NEXT:    s_waitcnt vmcnt(10)
 ; VI-NEXT:    v_perm_b32 v0, v0, v37, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v36
+; VI-NEXT:    s_waitcnt vmcnt(9)
 ; VI-NEXT:    v_perm_b32 v0, v0, v38, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
-; VI-NEXT:    s_waitcnt vmcnt(14)
+; VI-NEXT:    s_waitcnt vmcnt(9)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v39
+; VI-NEXT:    s_waitcnt vmcnt(4)
 ; VI-NEXT:    v_perm_b32 v21, v0, v49, s4
-; VI-NEXT:    s_waitcnt vmcnt(5)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v58
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v44
+; VI-NEXT:    v_perm_b32 v22, v0, v60, s4
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v57
 ; VI-NEXT:    v_mov_b32_e32 v34, v35
 ; VI-NEXT:    s_add_i32 s28, s28, 3
 ; VI-NEXT:    s_add_i32 s26, s26, 3
@@ -141010,289 +141020,284 @@ define inreg <64 x bfloat> @bitcast_v128i8_to_v64bf16_scalar(<128 x i8> inreg %a
 ; VI-NEXT:    s_add_i32 s22, s22, 3
 ; VI-NEXT:    s_add_i32 s20, s20, 3
 ; VI-NEXT:    s_add_i32 s18, s18, 3
-; VI-NEXT:    v_mov_b32_e32 v63, s19
 ; VI-NEXT:    s_add_i32 s16, s16, 3
 ; VI-NEXT:    v_mov_b32_e32 v18, s17
 ; VI-NEXT:    s_waitcnt vmcnt(3)
-; VI-NEXT:    v_perm_b32 v22, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v60
-; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v58
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v24, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v25, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v26, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v27, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
-; VI-NEXT:    v_add_u32_e32 v27, vcc, 0x300, v27
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v28, v0, v1, s4
 ; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v29, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v25, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v30, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v26, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v27, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
+; VI-NEXT:    v_add_u32_e32 v27, vcc, 0x300, v27
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v28, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v29, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v30, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v31, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v33, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v35, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v36, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v37, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v38, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v20, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:824 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:836 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:824 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v39, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:820 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:832 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:808 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v49, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:816 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:788 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:828 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:792 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v50, v0, v47, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:804 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:812 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v19, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:796 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:812 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:800 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:820 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v51, v0, v56, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:792 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:796 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v32, v0, v55, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:784 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:788 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v0, v0, v34, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:780 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:784 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v34, v0, v40, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:776 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:780 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v10, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:772 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:828 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:776 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:840 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v11, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:768 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:760 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:772 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:764 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v12, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:808 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:800 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:816 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:804 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v13, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:764 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:748 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:768 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:752 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v14, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:756 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:760 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v15, v0, v45, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:752 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:756 ; 4-byte Folded Reload
 ; VI-NEXT:    v_add_u32_e32 v15, vcc, 0x300, v15
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v16, v0, v43, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:744 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:748 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v17, v0, v62, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v48
 ; VI-NEXT:    v_perm_b32 v55, v0, v42, s4
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v63
+; VI-NEXT:    v_perm_b32 v41, v0, v59, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v61
-; VI-NEXT:    v_perm_b32 v41, v0, v57, s4
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v44
 ; VI-NEXT:    v_perm_b32 v42, v0, v52, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v54
 ; VI-NEXT:    v_perm_b32 v43, v0, v53, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v62, s21
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v46
 ; VI-NEXT:    v_perm_b32 v44, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:740 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:728 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:744 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v62, s21
+; VI-NEXT:    v_mov_b32_e32 v63, s19
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    v_perm_b32 v45, v0, v59, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:736 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v45, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:740 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:732 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v54, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:732 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:720 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:736 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:724 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v40, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:724 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:712 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:728 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:720 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v9, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:716 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:704 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:712 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v9, 16, v9
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v46, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:708 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:696 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:716 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:704 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v8, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:700 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:688 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:708 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:696 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v8, 16, v8
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v47, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:692 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:680 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:700 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:688 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v7, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:684 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:672 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:692 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:680 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v7, 16, v7
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v56, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:676 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:664 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:684 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:672 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v6, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:668 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:656 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:676 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:664 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v6, 16, v6
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v57, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:660 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:648 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:668 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:656 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v5, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:652 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:640 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:660 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:648 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v5, 16, v5
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v58, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:644 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:632 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:652 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:640 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v4, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:644 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:632 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v4, 16, v4
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v59, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:628 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:628 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
@@ -141457,32 +141462,35 @@ define inreg <64 x bfloat> @bitcast_v128i8_to_v64bf16_scalar(<128 x i8> inreg %a
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    s_setpc_b64 s[30:31]
 ; VI-NEXT:  .LBB89_4:
-; VI-NEXT:    v_mov_b32_e32 v40, v55
-; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v33, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v42, v61
-; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v60, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v58, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v35, v45
-; VI-NEXT:    v_mov_b32_e32 v53, v63
-; VI-NEXT:    v_mov_b32_e32 v45, v34
+; VI-NEXT:    v_mov_b32_e32 v40, v55
+; VI-NEXT:    buffer_load_dword v46, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v53, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v62, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v63, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v45, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v33, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v58, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v60, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v47, v34
 ; VI-NEXT:    ; implicit-def: $vgpr0_vgpr1_vgpr2_vgpr3_vgpr4_vgpr5_vgpr6_vgpr7_vgpr8_vgpr9_vgpr10_vgpr11_vgpr12_vgpr13_vgpr14_vgpr15
 ; VI-NEXT:    ; implicit-def: $vgpr16_vgpr17_vgpr18_vgpr19_vgpr20_vgpr21_vgpr22_vgpr23_vgpr24_vgpr25_vgpr26_vgpr27_vgpr28_vgpr29_vgpr30_vgpr31
 ; VI-NEXT:    s_branch .LBB89_2
@@ -167430,94 +167438,144 @@ define inreg <64 x half> @bitcast_v128i8_to_v64f16_scalar(<128 x i8> inreg %a, i
 ; VI-NEXT:    buffer_store_dword v61, off, s[0:3], s32 offset:344 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v62, off, s[0:3], s32 offset:340 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v63, off, s[0:3], s32 offset:336 ; 4-byte Folded Spill
-; VI-NEXT:    v_mov_b32_e32 v41, v28
-; VI-NEXT:    v_mov_b32_e32 v31, v1
-; VI-NEXT:    v_mov_b32_e32 v28, v0
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:332
+; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:436 ; 4-byte Folded Spill
+; VI-NEXT:    v_mov_b32_e32 v22, v1
+; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:332
 ; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:8
 ; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_cmp_ne_u32_e32 vcc, 0, v0
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:248
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Spill
+; VI-NEXT:    v_cmp_ne_u32_e32 vcc, 0, v32
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:4
 ; VI-NEXT:    s_and_b64 s[4:5], vcc, exec
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:476 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:244
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:240
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:528 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:236
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:328
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:484 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:232
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:576 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:324
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:532 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:228
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:580 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:320
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:540 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:224
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:560 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:316
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:488 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:220
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:584 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:312
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:216
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:564 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:308
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:460 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:212
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:588 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:304
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:536 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:208
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:572 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:300
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:452 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v57, off, s[0:3], s32 offset:204
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:200
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:568 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:296
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:440 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:196
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:608 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:292
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:464 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:192
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:612 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:288
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:432 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v33, off, s[0:3], s32 offset:188
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:184
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:464 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:284
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:428 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:180
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:616 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:280
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:444 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:176
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:276
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:424 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:172
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:624 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:272
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:168
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:528 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:268
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:420 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v46, off, s[0:3], s32 offset:164
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:160
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:484 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:264
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:416 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v44, off, s[0:3], s32 offset:156
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:152
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:532 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:260
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:584 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:516 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:256
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:536 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:252
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:492 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:248
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:488 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:244
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:520 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:240
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:540 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:236
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:496 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v59, off, s[0:3], s32 offset:232
+; VI-NEXT:    buffer_load_ushort v61, off, s[0:3], s32 offset:228
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:224
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:220
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:508 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v42, off, s[0:3], s32 offset:216
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:212
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:208
+; VI-NEXT:    buffer_load_ushort v62, off, s[0:3], s32 offset:204
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:200
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:456 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:196
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:480 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v58, off, s[0:3], s32 offset:192
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:188
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:472 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:184
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:444 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:180
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:460 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:176
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:440 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:172
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:452 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v57, off, s[0:3], s32 offset:168
+; VI-NEXT:    buffer_load_ushort v33, off, s[0:3], s32 offset:164
+; VI-NEXT:    buffer_load_ushort v44, off, s[0:3], s32 offset:160
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:156
+; VI-NEXT:    buffer_load_ushort v34, off, s[0:3], s32 offset:152
 ; VI-NEXT:    buffer_load_ushort v60, off, s[0:3], s32 offset:148
-; VI-NEXT:    buffer_load_ushort v59, off, s[0:3], s32 offset:144
-; VI-NEXT:    buffer_load_ushort v58, off, s[0:3], s32 offset:140
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:136
+; VI-NEXT:    buffer_load_ushort v46, off, s[0:3], s32 offset:144
+; VI-NEXT:    buffer_load_ushort v41, off, s[0:3], s32 offset:140
+; VI-NEXT:    buffer_load_ushort v35, off, s[0:3], s32 offset:136
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:588 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v42, off, s[0:3], s32 offset:132
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:128
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:592 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v63, off, s[0:3], s32 offset:132
+; VI-NEXT:    buffer_load_ushort v35, off, s[0:3], s32 offset:128
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:592 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:596 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v43, off, s[0:3], s32 offset:124
 ; VI-NEXT:    buffer_load_ushort v45, off, s[0:3], s32 offset:120
 ; VI-NEXT:    buffer_load_ushort v56, off, s[0:3], s32 offset:116
@@ -167533,223 +167591,158 @@ define inreg <64 x half> @bitcast_v128i8_to_v64f16_scalar(<128 x i8> inreg %a, i
 ; VI-NEXT:    buffer_load_ushort v52, off, s[0:3], s32 offset:76
 ; VI-NEXT:    buffer_load_ushort v37, off, s[0:3], s32 offset:72
 ; VI-NEXT:    buffer_load_ushort v50, off, s[0:3], s32 offset:68
-; VI-NEXT:    buffer_load_ushort v34, off, s[0:3], s32 offset:64
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:64
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v48, off, s[0:3], s32 offset:60
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:56
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:56
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:596 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v38, off, s[0:3], s32 offset:52
-; VI-NEXT:    buffer_load_ushort v62, off, s[0:3], s32 offset:48
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:48
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:600 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:44
-; VI-NEXT:    buffer_load_ushort v61, off, s[0:3], s32 offset:40
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:36
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:40
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:32
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:416 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:36
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:604 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:28
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:32
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:600 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:24
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:472 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:20
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:328
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v63, off, s[0:3], s32 offset:16
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:12
-; VI-NEXT:    s_waitcnt vmcnt(3)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:568 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:324
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:604 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:28
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:572 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:320
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:420 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:24
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:552 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:316
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:428 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:20
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:576 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:312
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:424 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:16
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:308
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:580 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:304
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:564 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:300
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:560 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:296
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:292
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:616 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:620 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v3, off, s[0:3], s32 offset:624 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v28, off, s[0:3], s32 offset:628 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v5, off, s[0:3], s32 offset:632 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v2, off, s[0:3], s32 offset:636 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v7, off, s[0:3], s32 offset:640 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v4, off, s[0:3], s32 offset:644 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v9, off, s[0:3], s32 offset:648 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v6, off, s[0:3], s32 offset:652 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v11, off, s[0:3], s32 offset:656 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v8, off, s[0:3], s32 offset:660 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v13, off, s[0:3], s32 offset:664 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v10, off, s[0:3], s32 offset:668 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v15, off, s[0:3], s32 offset:672 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v12, off, s[0:3], s32 offset:676 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v17, off, s[0:3], s32 offset:680 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v14, off, s[0:3], s32 offset:684 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v19, off, s[0:3], s32 offset:688 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v16, off, s[0:3], s32 offset:692 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v21, off, s[0:3], s32 offset:696 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v18, off, s[0:3], s32 offset:700 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v23, off, s[0:3], s32 offset:704 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v20, off, s[0:3], s32 offset:708 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v25, off, s[0:3], s32 offset:712 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:716 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v27, off, s[0:3], s32 offset:720 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v24, off, s[0:3], s32 offset:724 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v29, off, s[0:3], s32 offset:728 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v26, off, s[0:3], s32 offset:732 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v41, off, s[0:3], s32 offset:736 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v30, off, s[0:3], s32 offset:740 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:744 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v37, off, s[0:3], s32 offset:748 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v38, off, s[0:3], s32 offset:752 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v48, off, s[0:3], s32 offset:756 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v49, off, s[0:3], s32 offset:760 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v50, off, s[0:3], s32 offset:764 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v54, off, s[0:3], s32 offset:768 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v40, off, s[0:3], s32 offset:772 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:776 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v47, off, s[0:3], s32 offset:780 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v56, off, s[0:3], s32 offset:784 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v59, off, s[0:3], s32 offset:788 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v43, off, s[0:3], s32 offset:792 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v42, off, s[0:3], s32 offset:796 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v39, off, s[0:3], s32 offset:800 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v58, off, s[0:3], s32 offset:804 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v52, off, s[0:3], s32 offset:808 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v53, off, s[0:3], s32 offset:812 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v60, off, s[0:3], s32 offset:816 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v44, off, s[0:3], s32 offset:820 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v46, off, s[0:3], s32 offset:824 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v51, off, s[0:3], s32 offset:828 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v33, off, s[0:3], s32 offset:456 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:492 ; 4-byte Folded Spill
-; VI-NEXT:    s_waitcnt vmcnt(14)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:608 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:288
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:12
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:448 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:284
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:612 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:280
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:500 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:276
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:544 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:272
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:516 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:268
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:468 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:264
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:520 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:260
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:504 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:256
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:524 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:252
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:480 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:432 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:628 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v3, off, s[0:3], s32 offset:632 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v5, off, s[0:3], s32 offset:640 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v2, off, s[0:3], s32 offset:644 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v7, off, s[0:3], s32 offset:648 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v4, off, s[0:3], s32 offset:652 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v9, off, s[0:3], s32 offset:656 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v6, off, s[0:3], s32 offset:660 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v11, off, s[0:3], s32 offset:664 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v8, off, s[0:3], s32 offset:668 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v13, off, s[0:3], s32 offset:672 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v10, off, s[0:3], s32 offset:676 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v15, off, s[0:3], s32 offset:680 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v12, off, s[0:3], s32 offset:684 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v17, off, s[0:3], s32 offset:688 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v14, off, s[0:3], s32 offset:692 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v19, off, s[0:3], s32 offset:696 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v16, off, s[0:3], s32 offset:700 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v21, off, s[0:3], s32 offset:704 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v18, off, s[0:3], s32 offset:708 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v23, off, s[0:3], s32 offset:712 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v20, off, s[0:3], s32 offset:716 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v25, off, s[0:3], s32 offset:720 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v27, off, s[0:3], s32 offset:724 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v24, off, s[0:3], s32 offset:728 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v29, off, s[0:3], s32 offset:732 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v26, off, s[0:3], s32 offset:736 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v28, off, s[0:3], s32 offset:740 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v30, off, s[0:3], s32 offset:744 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:748 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v37, off, s[0:3], s32 offset:752 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v38, off, s[0:3], s32 offset:756 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v48, off, s[0:3], s32 offset:760 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v49, off, s[0:3], s32 offset:764 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v50, off, s[0:3], s32 offset:768 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v54, off, s[0:3], s32 offset:772 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v40, off, s[0:3], s32 offset:776 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:780 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v47, off, s[0:3], s32 offset:784 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v56, off, s[0:3], s32 offset:788 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v46, off, s[0:3], s32 offset:792 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v43, off, s[0:3], s32 offset:796 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v63, off, s[0:3], s32 offset:800 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v39, off, s[0:3], s32 offset:804 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v44, off, s[0:3], s32 offset:808 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v41, off, s[0:3], s32 offset:812 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v52, off, s[0:3], s32 offset:816 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v53, off, s[0:3], s32 offset:820 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:824 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v60, off, s[0:3], s32 offset:828 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:832 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v33, off, s[0:3], s32 offset:836 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v51, off, s[0:3], s32 offset:840 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v58, off, s[0:3], s32 offset:448 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:468 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v42, off, s[0:3], s32 offset:476 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v62, off, s[0:3], s32 offset:504 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v59, off, s[0:3], s32 offset:544 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v61, off, s[0:3], s32 offset:552 ; 4-byte Folded Spill
 ; VI-NEXT:    s_cbranch_scc0 .LBB93_4
 ; VI-NEXT:  ; %bb.1: ; %cmp.false
 ; VI-NEXT:    s_mov_b32 s4, 0xc0c0004
-; VI-NEXT:    v_mov_b32_e32 v57, v61
-; VI-NEXT:    v_mov_b32_e32 v61, v3
-; VI-NEXT:    v_mov_b32_e32 v33, v34
-; VI-NEXT:    v_mov_b32_e32 v34, v2
+; VI-NEXT:    v_perm_b32 v6, v6, v7, s4
+; VI-NEXT:    v_perm_b32 v7, v10, v11, s4
+; VI-NEXT:    buffer_load_dword v10, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v58, v24
+; VI-NEXT:    v_mov_b32_e32 v24, v3
+; VI-NEXT:    v_mov_b32_e32 v42, v2
 ; VI-NEXT:    v_perm_b32 v4, v4, v5, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v4, 16, v4
-; VI-NEXT:    v_perm_b32 v5, v34, v61, s4
+; VI-NEXT:    v_perm_b32 v5, v42, v24, s4
 ; VI-NEXT:    v_or_b32_e32 v4, v5, v4
 ; VI-NEXT:    v_perm_b32 v5, v8, v9, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v5, 16, v5
-; VI-NEXT:    v_perm_b32 v6, v6, v7, s4
 ; VI-NEXT:    v_or_b32_e32 v5, v6, v5
 ; VI-NEXT:    v_perm_b32 v6, v12, v13, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v6, 16, v6
-; VI-NEXT:    v_perm_b32 v7, v10, v11, s4
 ; VI-NEXT:    v_or_b32_e32 v6, v7, v6
 ; VI-NEXT:    v_perm_b32 v7, v16, v17, s4
+; VI-NEXT:    v_mov_b32_e32 v1, s17
+; VI-NEXT:    v_mov_b32_e32 v3, 0xc0c0004
 ; VI-NEXT:    v_lshlrev_b32_e32 v7, 16, v7
 ; VI-NEXT:    v_perm_b32 v8, v14, v15, s4
+; VI-NEXT:    v_perm_b32 v62, s16, v1, v3
+; VI-NEXT:    v_mov_b32_e32 v1, s19
 ; VI-NEXT:    v_or_b32_e32 v7, v8, v7
 ; VI-NEXT:    v_perm_b32 v8, v20, v21, s4
+; VI-NEXT:    v_perm_b32 v1, s18, v1, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v8, 16, v8
 ; VI-NEXT:    v_perm_b32 v9, v18, v19, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v1, 16, v1
 ; VI-NEXT:    v_or_b32_e32 v8, v9, v8
-; VI-NEXT:    v_perm_b32 v9, v24, v25, s4
+; VI-NEXT:    v_perm_b32 v9, v58, v25, s4
+; VI-NEXT:    v_mov_b32_e32 v59, v0
+; VI-NEXT:    buffer_store_dword v34, off, s[0:3], s32 offset:844 ; 4-byte Folded Spill
+; VI-NEXT:    v_mov_b32_e32 v34, v28
+; VI-NEXT:    v_or_b32_e32 v0, v62, v1
 ; VI-NEXT:    v_lshlrev_b32_e32 v9, 16, v9
-; VI-NEXT:    v_perm_b32 v10, v22, v23, s4
-; VI-NEXT:    v_or_b32_e32 v9, v10, v9
-; VI-NEXT:    v_perm_b32 v10, v41, v29, s4
-; VI-NEXT:    v_lshlrev_b32_e32 v10, 16, v10
+; VI-NEXT:    buffer_load_dword v62, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
 ; VI-NEXT:    v_perm_b32 v11, v26, v27, s4
-; VI-NEXT:    v_or_b32_e32 v10, v11, v10
-; VI-NEXT:    buffer_load_dword v11, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
 ; VI-NEXT:    v_perm_b32 v17, v35, v53, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v17, 16, v17
 ; VI-NEXT:    v_perm_b32 v19, v40, v51, s4
-; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
-; VI-NEXT:    v_perm_b32 v16, v48, v33, s4
 ; VI-NEXT:    v_or_b32_e32 v17, v19, v17
-; VI-NEXT:    v_mov_b32_e32 v40, v55
 ; VI-NEXT:    v_perm_b32 v19, v47, v55, s4
-; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    v_perm_b32 v21, v58, v59, s4
-; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v32, v62
-; VI-NEXT:    v_mov_b32_e32 v62, v28
-; VI-NEXT:    v_mov_b32_e32 v28, v31
-; VI-NEXT:    v_perm_b32 v28, v62, v28, s4
-; VI-NEXT:    v_mov_b32_e32 v62, v63
-; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:832 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v28, v59, v22, s4
+; VI-NEXT:    v_mov_b32_e32 v40, v55
+; VI-NEXT:    v_perm_b32 v21, v41, v46, s4
 ; VI-NEXT:    v_perm_b32 v18, v52, v39, s4
-; VI-NEXT:    v_perm_b32 v15, v36, v32, s4
-; VI-NEXT:    v_mov_b32_e32 v3, 0xc0c0004
-; VI-NEXT:    v_mov_b32_e32 v1, s19
+; VI-NEXT:    v_perm_b32 v22, v32, v44, s4
 ; VI-NEXT:    v_mov_b32_e32 v31, s23
-; VI-NEXT:    v_mov_b32_e32 v0, s17
-; VI-NEXT:    v_perm_b32 v1, s18, v1, v3
 ; VI-NEXT:    v_mov_b32_e32 v2, s21
 ; VI-NEXT:    v_perm_b32 v31, s22, v31, v3
-; VI-NEXT:    v_perm_b32 v0, s16, v0, v3
-; VI-NEXT:    v_lshlrev_b32_e32 v1, 16, v1
 ; VI-NEXT:    v_perm_b32 v2, s20, v2, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v31, 16, v31
-; VI-NEXT:    v_or_b32_e32 v0, v0, v1
 ; VI-NEXT:    v_or_b32_e32 v1, v2, v31
 ; VI-NEXT:    v_mov_b32_e32 v31, s27
 ; VI-NEXT:    v_mov_b32_e32 v2, s25
@@ -167761,43 +167754,58 @@ define inreg <64 x half> @bitcast_v128i8_to_v64f16_scalar(<128 x i8> inreg %a, i
 ; VI-NEXT:    v_perm_b32 v3, s28, v31, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v28, 16, v28
 ; VI-NEXT:    v_or_b32_e32 v3, v3, v28
+; VI-NEXT:    buffer_load_dword v31, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v35, v45
-; VI-NEXT:    v_mov_b32_e32 v53, v62
-; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v31, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(10)
-; VI-NEXT:    v_perm_b32 v11, v11, v12, s4
+; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:844 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v16, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v46, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(7)
+; VI-NEXT:    v_perm_b32 v10, v10, v23, s4
+; VI-NEXT:    v_or_b32_e32 v9, v10, v9
+; VI-NEXT:    v_perm_b32 v10, v34, v29, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v10, 16, v10
+; VI-NEXT:    v_or_b32_e32 v10, v11, v10
+; VI-NEXT:    buffer_load_dword v11, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
-; VI-NEXT:    v_lshlrev_b32_e32 v11, 16, v11
-; VI-NEXT:    s_waitcnt vmcnt(10)
-; VI-NEXT:    v_mov_b32_e32 v63, v14
-; VI-NEXT:    s_waitcnt vmcnt(9)
-; VI-NEXT:    v_perm_b32 v22, v44, v22, s4
-; VI-NEXT:    s_waitcnt vmcnt(8)
-; VI-NEXT:    v_perm_b32 v20, v43, v55, s4
+; VI-NEXT:    s_waitcnt vmcnt(7)
+; VI-NEXT:    v_perm_b32 v15, v36, v62, s4
 ; VI-NEXT:    s_waitcnt vmcnt(4)
-; VI-NEXT:    v_mov_b32_e32 v43, v41
+; VI-NEXT:    v_perm_b32 v20, v43, v55, s4
+; VI-NEXT:    s_waitcnt vmcnt(3)
+; VI-NEXT:    v_perm_b32 v16, v48, v16, s4
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v11, v12, v11, s4
+; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
+; VI-NEXT:    v_lshlrev_b32_e32 v11, 16, v11
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v12, v30, v12, s4
 ; VI-NEXT:    v_or_b32_e32 v11, v12, v11
-; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v12, v13, v12, s4
+; VI-NEXT:    v_perm_b32 v12, v12, v13, s4
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v12, 16, v12
-; VI-NEXT:    v_perm_b32 v13, v14, v62, s4
-; VI-NEXT:    v_or_b32_e32 v12, v13, v12
-; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v62, v32
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_mov_b32_e32 v53, v61
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v13, v13, v57, s4
-; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v13, v13, v61, s4
+; VI-NEXT:    v_or_b32_e32 v12, v13, v12
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v13, v13, v14, s4
+; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v13, 16, v13
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v14, v61, v57, s4
+; VI-NEXT:    v_perm_b32 v14, v14, v59, s4
 ; VI-NEXT:    v_or_b32_e32 v13, v14, v13
-; VI-NEXT:    v_perm_b32 v14, v38, v41, s4
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v14, v38, v14, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v14, 16, v14
 ; VI-NEXT:    v_or_b32_e32 v14, v15, v14
 ; VI-NEXT:    v_perm_b32 v15, v50, v37, s4
@@ -167807,115 +167815,114 @@ define inreg <64 x half> @bitcast_v128i8_to_v64f16_scalar(<128 x i8> inreg %a, i
 ; VI-NEXT:    v_lshlrev_b32_e32 v16, 16, v16
 ; VI-NEXT:    v_or_b32_e32 v16, v18, v16
 ; VI-NEXT:    v_perm_b32 v18, v56, v45, s4
-; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v18, 16, v18
 ; VI-NEXT:    v_or_b32_e32 v18, v19, v18
-; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v34, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v50, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v51, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v54, v63
-; VI-NEXT:    v_mov_b32_e32 v45, v33
+; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v34, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v50, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v51, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(8)
-; VI-NEXT:    v_perm_b32 v19, v42, v56, s4
+; VI-NEXT:    v_perm_b32 v19, v63, v56, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v19, 16, v19
 ; VI-NEXT:    v_or_b32_e32 v19, v20, v19
 ; VI-NEXT:    v_perm_b32 v20, v60, v47, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v20, 16, v20
 ; VI-NEXT:    v_or_b32_e32 v20, v21, v20
-; VI-NEXT:    buffer_load_dword v21, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_perm_b32 v21, v33, v57, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v21, 16, v21
+; VI-NEXT:    v_or_b32_e32 v21, v22, v21
+; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(2)
 ; VI-NEXT:    v_perm_b32 v42, v51, v37, s4
 ; VI-NEXT:    v_mov_b32_e32 v41, v36
 ; VI-NEXT:    v_mov_b32_e32 v32, v50
 ; VI-NEXT:    v_mov_b32_e32 v33, v51
-; VI-NEXT:    v_mov_b32_e32 v60, v31
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v21, v46, v21, s4
-; VI-NEXT:    v_lshlrev_b32_e32 v21, 16, v21
-; VI-NEXT:    v_or_b32_e32 v21, v22, v21
-; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v22, v23, v22, s4
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v22, 16, v22
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v24, v23, s4
 ; VI-NEXT:    v_or_b32_e32 v22, v23, v22
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v24, v23, s4
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v23, 16, v23
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v24, v25, v24, s4
+; VI-NEXT:    v_perm_b32 v24, v24, v25, s4
 ; VI-NEXT:    v_or_b32_e32 v23, v24, v23
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v24, v25, v24, s4
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v24, v24, v25, s4
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v24, 16, v24
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v25, v26, v25, s4
 ; VI-NEXT:    v_or_b32_e32 v24, v25, v24
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v25, v26, v25, s4
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v25, 16, v25
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v26, v27, v26, s4
 ; VI-NEXT:    v_or_b32_e32 v25, v26, v25
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v26, v27, v26, s4
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v26, 16, v26
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v27, v28, v27, s4
 ; VI-NEXT:    v_or_b32_e32 v26, v27, v26
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v27, v28, v27, s4
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v27, 16, v27
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v28, v29, v28, s4
 ; VI-NEXT:    v_or_b32_e32 v27, v28, v27
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_mov_b32_e32 v58, v29
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v28, v29, v28, s4
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v28, 16, v28
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v29, v30, v29, s4
 ; VI-NEXT:    v_or_b32_e32 v28, v29, v28
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_mov_b32_e32 v58, v29
+; VI-NEXT:    v_mov_b32_e32 v44, v30
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v29, v29, v30, s4
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v60, v29
+; VI-NEXT:    v_perm_b32 v29, v30, v29, s4
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v29, 16, v29
+; VI-NEXT:    v_mov_b32_e32 v57, v31
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v30, v31, v30, s4
 ; VI-NEXT:    v_or_b32_e32 v29, v30, v29
@@ -167926,28 +167933,39 @@ define inreg <64 x half> @bitcast_v128i8_to_v64f16_scalar(<128 x i8> inreg %a, i
 ; VI-NEXT:    v_perm_b32 v31, v50, v36, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v31, 16, v31
 ; VI-NEXT:    v_or_b32_e32 v31, v42, v31
-; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:832 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v63, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v45, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v36, v34
 ; VI-NEXT:    s_cbranch_execnz .LBB93_3
 ; VI-NEXT:  .LBB93_2: ; %cmp.true
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(14)
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(13)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v32
 ; VI-NEXT:    s_mov_b32 s4, 0xc0c0004
 ; VI-NEXT:    v_perm_b32 v0, v0, v41, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
+; VI-NEXT:    s_waitcnt vmcnt(13)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v33
+; VI-NEXT:    s_waitcnt vmcnt(10)
 ; VI-NEXT:    v_perm_b32 v0, v0, v37, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v36
+; VI-NEXT:    s_waitcnt vmcnt(9)
 ; VI-NEXT:    v_perm_b32 v0, v0, v38, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
-; VI-NEXT:    s_waitcnt vmcnt(14)
+; VI-NEXT:    s_waitcnt vmcnt(9)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v39
+; VI-NEXT:    s_waitcnt vmcnt(4)
 ; VI-NEXT:    v_perm_b32 v21, v0, v49, s4
-; VI-NEXT:    s_waitcnt vmcnt(5)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v58
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v44
+; VI-NEXT:    v_perm_b32 v22, v0, v60, s4
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v57
 ; VI-NEXT:    v_mov_b32_e32 v34, v35
 ; VI-NEXT:    s_add_i32 s28, s28, 3
 ; VI-NEXT:    s_add_i32 s26, s26, 3
@@ -167955,289 +167973,284 @@ define inreg <64 x half> @bitcast_v128i8_to_v64f16_scalar(<128 x i8> inreg %a, i
 ; VI-NEXT:    s_add_i32 s22, s22, 3
 ; VI-NEXT:    s_add_i32 s20, s20, 3
 ; VI-NEXT:    s_add_i32 s18, s18, 3
-; VI-NEXT:    v_mov_b32_e32 v63, s19
 ; VI-NEXT:    s_add_i32 s16, s16, 3
 ; VI-NEXT:    v_mov_b32_e32 v18, s17
 ; VI-NEXT:    s_waitcnt vmcnt(3)
-; VI-NEXT:    v_perm_b32 v22, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v60
-; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v58
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v24, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v25, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v26, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v27, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
-; VI-NEXT:    v_add_u32_e32 v27, vcc, 0x300, v27
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v28, v0, v1, s4
 ; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v29, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v25, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v30, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v26, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v27, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
+; VI-NEXT:    v_add_u32_e32 v27, vcc, 0x300, v27
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v28, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v29, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v30, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v31, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v33, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v35, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v36, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v37, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v38, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v20, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:824 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:836 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:824 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v39, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:820 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:832 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:808 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v49, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:816 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:788 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:828 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:792 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v50, v0, v47, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:804 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:812 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v19, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:796 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:812 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:800 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:820 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v51, v0, v56, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:792 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:796 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v32, v0, v55, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:784 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:788 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v0, v0, v34, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:780 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:784 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v34, v0, v40, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:776 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:780 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v10, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:772 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:828 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:776 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:840 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v11, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:768 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:760 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:772 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:764 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v12, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:808 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:800 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:816 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:804 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v13, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:764 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:748 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:768 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:752 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v14, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:756 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:760 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v15, v0, v45, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:752 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:756 ; 4-byte Folded Reload
 ; VI-NEXT:    v_add_u32_e32 v15, vcc, 0x300, v15
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v16, v0, v43, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:744 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:748 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v17, v0, v62, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v48
 ; VI-NEXT:    v_perm_b32 v55, v0, v42, s4
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v63
+; VI-NEXT:    v_perm_b32 v41, v0, v59, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v61
-; VI-NEXT:    v_perm_b32 v41, v0, v57, s4
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v44
 ; VI-NEXT:    v_perm_b32 v42, v0, v52, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v54
 ; VI-NEXT:    v_perm_b32 v43, v0, v53, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v62, s21
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v46
 ; VI-NEXT:    v_perm_b32 v44, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:740 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:728 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:744 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v62, s21
+; VI-NEXT:    v_mov_b32_e32 v63, s19
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    v_perm_b32 v45, v0, v59, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:736 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v45, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:740 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:732 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v54, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:732 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:720 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:736 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:724 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v40, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:724 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:712 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:728 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:720 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v9, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:716 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:704 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:712 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v9, 16, v9
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v46, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:708 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:696 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:716 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:704 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v8, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:700 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:688 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:708 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:696 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v8, 16, v8
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v47, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:692 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:680 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:700 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:688 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v7, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:684 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:672 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:692 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:680 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v7, 16, v7
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v56, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:676 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:664 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:684 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:672 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v6, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:668 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:656 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:676 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:664 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v6, 16, v6
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v57, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:660 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:648 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:668 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:656 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v5, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:652 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:640 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:660 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:648 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v5, 16, v5
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v58, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:644 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:632 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:652 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:640 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v4, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:644 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:632 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v4, 16, v4
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v59, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:628 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:628 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
@@ -168402,32 +168415,35 @@ define inreg <64 x half> @bitcast_v128i8_to_v64f16_scalar(<128 x i8> inreg %a, i
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    s_setpc_b64 s[30:31]
 ; VI-NEXT:  .LBB93_4:
-; VI-NEXT:    v_mov_b32_e32 v40, v55
-; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v33, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v42, v61
-; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v60, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v58, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v35, v45
-; VI-NEXT:    v_mov_b32_e32 v53, v63
-; VI-NEXT:    v_mov_b32_e32 v45, v34
+; VI-NEXT:    v_mov_b32_e32 v40, v55
+; VI-NEXT:    buffer_load_dword v46, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v53, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v62, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v63, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v45, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v33, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v58, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v60, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v47, v34
 ; VI-NEXT:    ; implicit-def: $vgpr0_vgpr1_vgpr2_vgpr3_vgpr4_vgpr5_vgpr6_vgpr7_vgpr8_vgpr9_vgpr10_vgpr11_vgpr12_vgpr13_vgpr14_vgpr15
 ; VI-NEXT:    ; implicit-def: $vgpr16_vgpr17_vgpr18_vgpr19_vgpr20_vgpr21_vgpr22_vgpr23_vgpr24_vgpr25_vgpr26_vgpr27_vgpr28_vgpr29_vgpr30_vgpr31
 ; VI-NEXT:    s_branch .LBB93_2
@@ -188203,94 +188219,144 @@ define inreg <64 x i16> @bitcast_v128i8_to_v64i16_scalar(<128 x i8> inreg %a, i3
 ; VI-NEXT:    buffer_store_dword v61, off, s[0:3], s32 offset:344 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v62, off, s[0:3], s32 offset:340 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v63, off, s[0:3], s32 offset:336 ; 4-byte Folded Spill
-; VI-NEXT:    v_mov_b32_e32 v41, v28
-; VI-NEXT:    v_mov_b32_e32 v31, v1
-; VI-NEXT:    v_mov_b32_e32 v28, v0
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:332
+; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:436 ; 4-byte Folded Spill
+; VI-NEXT:    v_mov_b32_e32 v22, v1
+; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:332
 ; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:8
 ; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_cmp_ne_u32_e32 vcc, 0, v0
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:248
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Spill
+; VI-NEXT:    v_cmp_ne_u32_e32 vcc, 0, v32
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:4
 ; VI-NEXT:    s_and_b64 s[4:5], vcc, exec
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:476 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:244
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:240
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:528 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:236
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:328
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:484 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:232
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:576 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:324
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:532 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:228
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:580 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:320
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:540 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:224
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:560 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:316
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:488 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:220
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:584 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:312
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:216
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:564 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:308
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:460 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:212
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:588 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:304
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:536 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:208
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:572 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:300
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:452 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v57, off, s[0:3], s32 offset:204
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:200
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:568 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:296
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:440 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:196
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:608 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:292
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:464 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:192
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:612 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:288
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:432 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v33, off, s[0:3], s32 offset:188
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:184
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:464 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:284
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:428 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:180
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:616 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:280
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:444 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:176
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:276
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:424 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:172
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:624 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:272
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:168
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:528 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:268
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:420 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v46, off, s[0:3], s32 offset:164
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:160
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:484 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:264
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:416 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v44, off, s[0:3], s32 offset:156
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:152
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:532 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:260
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:584 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:516 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:256
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:536 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:252
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:492 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:248
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:488 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:244
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:520 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:240
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:540 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:236
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:496 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v59, off, s[0:3], s32 offset:232
+; VI-NEXT:    buffer_load_ushort v61, off, s[0:3], s32 offset:228
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:224
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:220
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:508 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v42, off, s[0:3], s32 offset:216
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:212
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:208
+; VI-NEXT:    buffer_load_ushort v62, off, s[0:3], s32 offset:204
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:200
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:456 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:196
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:480 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v58, off, s[0:3], s32 offset:192
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:188
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:472 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:184
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:444 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:180
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:460 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:176
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:440 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:172
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:452 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v57, off, s[0:3], s32 offset:168
+; VI-NEXT:    buffer_load_ushort v33, off, s[0:3], s32 offset:164
+; VI-NEXT:    buffer_load_ushort v44, off, s[0:3], s32 offset:160
+; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:156
+; VI-NEXT:    buffer_load_ushort v34, off, s[0:3], s32 offset:152
 ; VI-NEXT:    buffer_load_ushort v60, off, s[0:3], s32 offset:148
-; VI-NEXT:    buffer_load_ushort v59, off, s[0:3], s32 offset:144
-; VI-NEXT:    buffer_load_ushort v58, off, s[0:3], s32 offset:140
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:136
+; VI-NEXT:    buffer_load_ushort v46, off, s[0:3], s32 offset:144
+; VI-NEXT:    buffer_load_ushort v41, off, s[0:3], s32 offset:140
+; VI-NEXT:    buffer_load_ushort v35, off, s[0:3], s32 offset:136
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:588 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v42, off, s[0:3], s32 offset:132
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:128
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:592 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v63, off, s[0:3], s32 offset:132
+; VI-NEXT:    buffer_load_ushort v35, off, s[0:3], s32 offset:128
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:592 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:596 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v43, off, s[0:3], s32 offset:124
 ; VI-NEXT:    buffer_load_ushort v45, off, s[0:3], s32 offset:120
 ; VI-NEXT:    buffer_load_ushort v56, off, s[0:3], s32 offset:116
@@ -188306,223 +188372,158 @@ define inreg <64 x i16> @bitcast_v128i8_to_v64i16_scalar(<128 x i8> inreg %a, i3
 ; VI-NEXT:    buffer_load_ushort v52, off, s[0:3], s32 offset:76
 ; VI-NEXT:    buffer_load_ushort v37, off, s[0:3], s32 offset:72
 ; VI-NEXT:    buffer_load_ushort v50, off, s[0:3], s32 offset:68
-; VI-NEXT:    buffer_load_ushort v34, off, s[0:3], s32 offset:64
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:64
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v48, off, s[0:3], s32 offset:60
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:56
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:56
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:596 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v38, off, s[0:3], s32 offset:52
-; VI-NEXT:    buffer_load_ushort v62, off, s[0:3], s32 offset:48
+; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:48
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:600 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_load_ushort v36, off, s[0:3], s32 offset:44
-; VI-NEXT:    buffer_load_ushort v61, off, s[0:3], s32 offset:40
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:36
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:40
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:32
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:416 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:36
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:604 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:28
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:32
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:600 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:24
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:472 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:20
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:328
-; VI-NEXT:    s_waitcnt vmcnt(2)
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v63, off, s[0:3], s32 offset:16
-; VI-NEXT:    buffer_load_ushort v0, off, s[0:3], s32 offset:12
-; VI-NEXT:    s_waitcnt vmcnt(3)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:568 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:324
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:604 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:28
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:572 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:320
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:420 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:24
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:552 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:316
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:428 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:20
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:576 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:312
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:424 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:16
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:308
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:580 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:304
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:564 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:300
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:560 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v1, off, s[0:3], s32 offset:296
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:292
-; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:616 ; 4-byte Folded Spill
 ; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:620 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v3, off, s[0:3], s32 offset:624 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v28, off, s[0:3], s32 offset:628 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v5, off, s[0:3], s32 offset:632 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v2, off, s[0:3], s32 offset:636 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v7, off, s[0:3], s32 offset:640 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v4, off, s[0:3], s32 offset:644 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v9, off, s[0:3], s32 offset:648 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v6, off, s[0:3], s32 offset:652 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v11, off, s[0:3], s32 offset:656 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v8, off, s[0:3], s32 offset:660 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v13, off, s[0:3], s32 offset:664 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v10, off, s[0:3], s32 offset:668 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v15, off, s[0:3], s32 offset:672 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v12, off, s[0:3], s32 offset:676 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v17, off, s[0:3], s32 offset:680 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v14, off, s[0:3], s32 offset:684 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v19, off, s[0:3], s32 offset:688 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v16, off, s[0:3], s32 offset:692 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v21, off, s[0:3], s32 offset:696 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v18, off, s[0:3], s32 offset:700 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v23, off, s[0:3], s32 offset:704 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v20, off, s[0:3], s32 offset:708 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v25, off, s[0:3], s32 offset:712 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:716 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v27, off, s[0:3], s32 offset:720 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v24, off, s[0:3], s32 offset:724 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v29, off, s[0:3], s32 offset:728 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v26, off, s[0:3], s32 offset:732 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v41, off, s[0:3], s32 offset:736 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v30, off, s[0:3], s32 offset:740 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:744 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v37, off, s[0:3], s32 offset:748 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v38, off, s[0:3], s32 offset:752 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v48, off, s[0:3], s32 offset:756 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v49, off, s[0:3], s32 offset:760 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v50, off, s[0:3], s32 offset:764 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v54, off, s[0:3], s32 offset:768 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v40, off, s[0:3], s32 offset:772 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:776 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v47, off, s[0:3], s32 offset:780 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v56, off, s[0:3], s32 offset:784 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v59, off, s[0:3], s32 offset:788 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v43, off, s[0:3], s32 offset:792 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v42, off, s[0:3], s32 offset:796 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v39, off, s[0:3], s32 offset:800 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v58, off, s[0:3], s32 offset:804 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v52, off, s[0:3], s32 offset:808 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v53, off, s[0:3], s32 offset:812 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v60, off, s[0:3], s32 offset:816 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v44, off, s[0:3], s32 offset:820 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v46, off, s[0:3], s32 offset:824 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v51, off, s[0:3], s32 offset:828 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v33, off, s[0:3], s32 offset:456 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:492 ; 4-byte Folded Spill
-; VI-NEXT:    s_waitcnt vmcnt(14)
-; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:608 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:288
+; VI-NEXT:    buffer_load_ushort v31, off, s[0:3], s32 offset:12
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:448 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:284
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:612 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:280
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:500 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:276
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:544 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:272
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:516 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:268
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:468 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:264
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:520 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:260
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:504 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:256
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:524 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_ushort v32, off, s[0:3], s32 offset:252
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:480 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v31, off, s[0:3], s32 offset:432 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v22, off, s[0:3], s32 offset:628 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v3, off, s[0:3], s32 offset:632 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v5, off, s[0:3], s32 offset:640 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v2, off, s[0:3], s32 offset:644 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v7, off, s[0:3], s32 offset:648 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v4, off, s[0:3], s32 offset:652 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v9, off, s[0:3], s32 offset:656 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v6, off, s[0:3], s32 offset:660 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v11, off, s[0:3], s32 offset:664 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v8, off, s[0:3], s32 offset:668 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v13, off, s[0:3], s32 offset:672 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v10, off, s[0:3], s32 offset:676 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v15, off, s[0:3], s32 offset:680 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v12, off, s[0:3], s32 offset:684 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v17, off, s[0:3], s32 offset:688 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v14, off, s[0:3], s32 offset:692 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v19, off, s[0:3], s32 offset:696 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v16, off, s[0:3], s32 offset:700 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v21, off, s[0:3], s32 offset:704 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v18, off, s[0:3], s32 offset:708 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v23, off, s[0:3], s32 offset:712 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v20, off, s[0:3], s32 offset:716 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v25, off, s[0:3], s32 offset:720 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v27, off, s[0:3], s32 offset:724 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v24, off, s[0:3], s32 offset:728 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v29, off, s[0:3], s32 offset:732 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v26, off, s[0:3], s32 offset:736 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v28, off, s[0:3], s32 offset:740 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v30, off, s[0:3], s32 offset:744 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v36, off, s[0:3], s32 offset:748 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v37, off, s[0:3], s32 offset:752 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v38, off, s[0:3], s32 offset:756 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v48, off, s[0:3], s32 offset:760 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v49, off, s[0:3], s32 offset:764 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v50, off, s[0:3], s32 offset:768 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v54, off, s[0:3], s32 offset:772 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v40, off, s[0:3], s32 offset:776 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v35, off, s[0:3], s32 offset:780 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v47, off, s[0:3], s32 offset:784 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v56, off, s[0:3], s32 offset:788 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v46, off, s[0:3], s32 offset:792 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v43, off, s[0:3], s32 offset:796 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v63, off, s[0:3], s32 offset:800 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v39, off, s[0:3], s32 offset:804 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v44, off, s[0:3], s32 offset:808 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v41, off, s[0:3], s32 offset:812 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v52, off, s[0:3], s32 offset:816 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v53, off, s[0:3], s32 offset:820 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:824 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v60, off, s[0:3], s32 offset:828 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v32, off, s[0:3], s32 offset:832 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v33, off, s[0:3], s32 offset:836 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v51, off, s[0:3], s32 offset:840 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v58, off, s[0:3], s32 offset:448 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v1, off, s[0:3], s32 offset:468 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v42, off, s[0:3], s32 offset:476 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v62, off, s[0:3], s32 offset:504 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v59, off, s[0:3], s32 offset:544 ; 4-byte Folded Spill
+; VI-NEXT:    buffer_store_dword v61, off, s[0:3], s32 offset:552 ; 4-byte Folded Spill
 ; VI-NEXT:    s_cbranch_scc0 .LBB97_4
 ; VI-NEXT:  ; %bb.1: ; %cmp.false
 ; VI-NEXT:    s_mov_b32 s4, 0xc0c0004
-; VI-NEXT:    v_mov_b32_e32 v57, v61
-; VI-NEXT:    v_mov_b32_e32 v61, v3
-; VI-NEXT:    v_mov_b32_e32 v33, v34
-; VI-NEXT:    v_mov_b32_e32 v34, v2
+; VI-NEXT:    v_perm_b32 v6, v6, v7, s4
+; VI-NEXT:    v_perm_b32 v7, v10, v11, s4
+; VI-NEXT:    buffer_load_dword v10, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v58, v24
+; VI-NEXT:    v_mov_b32_e32 v24, v3
+; VI-NEXT:    v_mov_b32_e32 v42, v2
 ; VI-NEXT:    v_perm_b32 v4, v4, v5, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v4, 16, v4
-; VI-NEXT:    v_perm_b32 v5, v34, v61, s4
+; VI-NEXT:    v_perm_b32 v5, v42, v24, s4
 ; VI-NEXT:    v_or_b32_e32 v4, v5, v4
 ; VI-NEXT:    v_perm_b32 v5, v8, v9, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v5, 16, v5
-; VI-NEXT:    v_perm_b32 v6, v6, v7, s4
 ; VI-NEXT:    v_or_b32_e32 v5, v6, v5
 ; VI-NEXT:    v_perm_b32 v6, v12, v13, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v6, 16, v6
-; VI-NEXT:    v_perm_b32 v7, v10, v11, s4
 ; VI-NEXT:    v_or_b32_e32 v6, v7, v6
 ; VI-NEXT:    v_perm_b32 v7, v16, v17, s4
+; VI-NEXT:    v_mov_b32_e32 v1, s17
+; VI-NEXT:    v_mov_b32_e32 v3, 0xc0c0004
 ; VI-NEXT:    v_lshlrev_b32_e32 v7, 16, v7
 ; VI-NEXT:    v_perm_b32 v8, v14, v15, s4
+; VI-NEXT:    v_perm_b32 v62, s16, v1, v3
+; VI-NEXT:    v_mov_b32_e32 v1, s19
 ; VI-NEXT:    v_or_b32_e32 v7, v8, v7
 ; VI-NEXT:    v_perm_b32 v8, v20, v21, s4
+; VI-NEXT:    v_perm_b32 v1, s18, v1, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v8, 16, v8
 ; VI-NEXT:    v_perm_b32 v9, v18, v19, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v1, 16, v1
 ; VI-NEXT:    v_or_b32_e32 v8, v9, v8
-; VI-NEXT:    v_perm_b32 v9, v24, v25, s4
+; VI-NEXT:    v_perm_b32 v9, v58, v25, s4
+; VI-NEXT:    v_mov_b32_e32 v59, v0
+; VI-NEXT:    buffer_store_dword v34, off, s[0:3], s32 offset:844 ; 4-byte Folded Spill
+; VI-NEXT:    v_mov_b32_e32 v34, v28
+; VI-NEXT:    v_or_b32_e32 v0, v62, v1
 ; VI-NEXT:    v_lshlrev_b32_e32 v9, 16, v9
-; VI-NEXT:    v_perm_b32 v10, v22, v23, s4
-; VI-NEXT:    v_or_b32_e32 v9, v10, v9
-; VI-NEXT:    v_perm_b32 v10, v41, v29, s4
-; VI-NEXT:    v_lshlrev_b32_e32 v10, 16, v10
+; VI-NEXT:    buffer_load_dword v62, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
 ; VI-NEXT:    v_perm_b32 v11, v26, v27, s4
-; VI-NEXT:    v_or_b32_e32 v10, v11, v10
-; VI-NEXT:    buffer_load_dword v11, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
 ; VI-NEXT:    v_perm_b32 v17, v35, v53, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v17, 16, v17
 ; VI-NEXT:    v_perm_b32 v19, v40, v51, s4
-; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
-; VI-NEXT:    v_perm_b32 v16, v48, v33, s4
 ; VI-NEXT:    v_or_b32_e32 v17, v19, v17
-; VI-NEXT:    v_mov_b32_e32 v40, v55
 ; VI-NEXT:    v_perm_b32 v19, v47, v55, s4
-; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    v_perm_b32 v21, v58, v59, s4
-; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v32, v62
-; VI-NEXT:    v_mov_b32_e32 v62, v28
-; VI-NEXT:    v_mov_b32_e32 v28, v31
-; VI-NEXT:    v_perm_b32 v28, v62, v28, s4
-; VI-NEXT:    v_mov_b32_e32 v62, v63
-; VI-NEXT:    buffer_store_dword v57, off, s[0:3], s32 offset:832 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v28, v59, v22, s4
+; VI-NEXT:    v_mov_b32_e32 v40, v55
+; VI-NEXT:    v_perm_b32 v21, v41, v46, s4
 ; VI-NEXT:    v_perm_b32 v18, v52, v39, s4
-; VI-NEXT:    v_perm_b32 v15, v36, v32, s4
-; VI-NEXT:    v_mov_b32_e32 v3, 0xc0c0004
-; VI-NEXT:    v_mov_b32_e32 v1, s19
+; VI-NEXT:    v_perm_b32 v22, v32, v44, s4
 ; VI-NEXT:    v_mov_b32_e32 v31, s23
-; VI-NEXT:    v_mov_b32_e32 v0, s17
-; VI-NEXT:    v_perm_b32 v1, s18, v1, v3
 ; VI-NEXT:    v_mov_b32_e32 v2, s21
 ; VI-NEXT:    v_perm_b32 v31, s22, v31, v3
-; VI-NEXT:    v_perm_b32 v0, s16, v0, v3
-; VI-NEXT:    v_lshlrev_b32_e32 v1, 16, v1
 ; VI-NEXT:    v_perm_b32 v2, s20, v2, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v31, 16, v31
-; VI-NEXT:    v_or_b32_e32 v0, v0, v1
 ; VI-NEXT:    v_or_b32_e32 v1, v2, v31
 ; VI-NEXT:    v_mov_b32_e32 v31, s27
 ; VI-NEXT:    v_mov_b32_e32 v2, s25
@@ -188534,43 +188535,58 @@ define inreg <64 x i16> @bitcast_v128i8_to_v64i16_scalar(<128 x i8> inreg %a, i3
 ; VI-NEXT:    v_perm_b32 v3, s28, v31, v3
 ; VI-NEXT:    v_lshlrev_b32_e32 v28, 16, v28
 ; VI-NEXT:    v_or_b32_e32 v3, v3, v28
+; VI-NEXT:    buffer_load_dword v31, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v35, v45
-; VI-NEXT:    v_mov_b32_e32 v53, v62
-; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v31, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(10)
-; VI-NEXT:    v_perm_b32 v11, v11, v12, s4
+; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:844 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v16, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v46, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(7)
+; VI-NEXT:    v_perm_b32 v10, v10, v23, s4
+; VI-NEXT:    v_or_b32_e32 v9, v10, v9
+; VI-NEXT:    v_perm_b32 v10, v34, v29, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v10, 16, v10
+; VI-NEXT:    v_or_b32_e32 v10, v11, v10
+; VI-NEXT:    buffer_load_dword v11, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
-; VI-NEXT:    v_lshlrev_b32_e32 v11, 16, v11
-; VI-NEXT:    s_waitcnt vmcnt(10)
-; VI-NEXT:    v_mov_b32_e32 v63, v14
-; VI-NEXT:    s_waitcnt vmcnt(9)
-; VI-NEXT:    v_perm_b32 v22, v44, v22, s4
-; VI-NEXT:    s_waitcnt vmcnt(8)
-; VI-NEXT:    v_perm_b32 v20, v43, v55, s4
+; VI-NEXT:    s_waitcnt vmcnt(7)
+; VI-NEXT:    v_perm_b32 v15, v36, v62, s4
 ; VI-NEXT:    s_waitcnt vmcnt(4)
-; VI-NEXT:    v_mov_b32_e32 v43, v41
+; VI-NEXT:    v_perm_b32 v20, v43, v55, s4
+; VI-NEXT:    s_waitcnt vmcnt(3)
+; VI-NEXT:    v_perm_b32 v16, v48, v16, s4
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v11, v12, v11, s4
+; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
+; VI-NEXT:    v_lshlrev_b32_e32 v11, 16, v11
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v12, v30, v12, s4
 ; VI-NEXT:    v_or_b32_e32 v11, v12, v11
-; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v12, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v12, v13, v12, s4
+; VI-NEXT:    v_perm_b32 v12, v12, v13, s4
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v12, 16, v12
-; VI-NEXT:    v_perm_b32 v13, v14, v62, s4
-; VI-NEXT:    v_or_b32_e32 v12, v13, v12
-; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v62, v32
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_mov_b32_e32 v53, v61
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v13, v13, v57, s4
-; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v13, v13, v61, s4
+; VI-NEXT:    v_or_b32_e32 v12, v13, v12
+; VI-NEXT:    buffer_load_dword v13, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v13, v13, v14, s4
+; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v13, 16, v13
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v14, v61, v57, s4
+; VI-NEXT:    v_perm_b32 v14, v14, v59, s4
 ; VI-NEXT:    v_or_b32_e32 v13, v14, v13
-; VI-NEXT:    v_perm_b32 v14, v38, v41, s4
+; VI-NEXT:    buffer_load_dword v14, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v14, v38, v14, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v14, 16, v14
 ; VI-NEXT:    v_or_b32_e32 v14, v15, v14
 ; VI-NEXT:    v_perm_b32 v15, v50, v37, s4
@@ -188580,115 +188596,114 @@ define inreg <64 x i16> @bitcast_v128i8_to_v64i16_scalar(<128 x i8> inreg %a, i3
 ; VI-NEXT:    v_lshlrev_b32_e32 v16, 16, v16
 ; VI-NEXT:    v_or_b32_e32 v16, v18, v16
 ; VI-NEXT:    v_perm_b32 v18, v56, v45, s4
-; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v18, 16, v18
 ; VI-NEXT:    v_or_b32_e32 v18, v19, v18
-; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v34, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v50, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v51, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v54, v63
-; VI-NEXT:    v_mov_b32_e32 v45, v33
+; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v34, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v50, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v51, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(8)
-; VI-NEXT:    v_perm_b32 v19, v42, v56, s4
+; VI-NEXT:    v_perm_b32 v19, v63, v56, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v19, 16, v19
 ; VI-NEXT:    v_or_b32_e32 v19, v20, v19
 ; VI-NEXT:    v_perm_b32 v20, v60, v47, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v20, 16, v20
 ; VI-NEXT:    v_or_b32_e32 v20, v21, v20
-; VI-NEXT:    buffer_load_dword v21, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_perm_b32 v21, v33, v57, s4
+; VI-NEXT:    v_lshlrev_b32_e32 v21, 16, v21
+; VI-NEXT:    v_or_b32_e32 v21, v22, v21
+; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(2)
 ; VI-NEXT:    v_perm_b32 v42, v51, v37, s4
 ; VI-NEXT:    v_mov_b32_e32 v41, v36
 ; VI-NEXT:    v_mov_b32_e32 v32, v50
 ; VI-NEXT:    v_mov_b32_e32 v33, v51
-; VI-NEXT:    v_mov_b32_e32 v60, v31
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v21, v46, v21, s4
-; VI-NEXT:    v_lshlrev_b32_e32 v21, 16, v21
-; VI-NEXT:    v_or_b32_e32 v21, v22, v21
-; VI-NEXT:    buffer_load_dword v22, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v22, v23, v22, s4
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v22, 16, v22
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v24, v23, s4
 ; VI-NEXT:    v_or_b32_e32 v22, v23, v22
-; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v23, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v24, v23, s4
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v23, 16, v23
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v24, v25, v24, s4
+; VI-NEXT:    v_perm_b32 v24, v24, v25, s4
 ; VI-NEXT:    v_or_b32_e32 v23, v24, v23
-; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v24, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v24, v25, v24, s4
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v24, v24, v25, s4
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v24, 16, v24
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v25, v26, v25, s4
 ; VI-NEXT:    v_or_b32_e32 v24, v25, v24
-; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v25, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v25, v26, v25, s4
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v25, 16, v25
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v26, v27, v26, s4
 ; VI-NEXT:    v_or_b32_e32 v25, v26, v25
-; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v26, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v26, v27, v26, s4
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v26, 16, v26
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v27, v28, v27, s4
 ; VI-NEXT:    v_or_b32_e32 v26, v27, v26
-; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v27, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v27, v28, v27, s4
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v27, 16, v27
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v28, v29, v28, s4
 ; VI-NEXT:    v_or_b32_e32 v27, v28, v27
-; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v28, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_mov_b32_e32 v58, v29
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v28, v29, v28, s4
-; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v28, 16, v28
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v29, v30, v29, s4
 ; VI-NEXT:    v_or_b32_e32 v28, v29, v28
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v29, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_mov_b32_e32 v58, v29
+; VI-NEXT:    v_mov_b32_e32 v44, v30
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v29, v29, v30, s4
-; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v60, v29
+; VI-NEXT:    v_perm_b32 v29, v30, v29, s4
+; VI-NEXT:    buffer_load_dword v30, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v29, 16, v29
+; VI-NEXT:    v_mov_b32_e32 v57, v31
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v30, v31, v30, s4
 ; VI-NEXT:    v_or_b32_e32 v29, v30, v29
@@ -188699,28 +188714,39 @@ define inreg <64 x i16> @bitcast_v128i8_to_v64i16_scalar(<128 x i8> inreg %a, i3
 ; VI-NEXT:    v_perm_b32 v31, v50, v36, s4
 ; VI-NEXT:    v_lshlrev_b32_e32 v31, 16, v31
 ; VI-NEXT:    v_or_b32_e32 v31, v42, v31
-; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:832 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v63, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v45, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v36, v34
 ; VI-NEXT:    s_cbranch_execnz .LBB97_3
 ; VI-NEXT:  .LBB97_2: ; %cmp.true
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(14)
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(13)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v32
 ; VI-NEXT:    s_mov_b32 s4, 0xc0c0004
 ; VI-NEXT:    v_perm_b32 v0, v0, v41, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:400 ; 4-byte Folded Spill
+; VI-NEXT:    s_waitcnt vmcnt(13)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v33
+; VI-NEXT:    s_waitcnt vmcnt(10)
 ; VI-NEXT:    v_perm_b32 v0, v0, v37, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:404 ; 4-byte Folded Spill
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v36
+; VI-NEXT:    s_waitcnt vmcnt(9)
 ; VI-NEXT:    v_perm_b32 v0, v0, v38, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:408 ; 4-byte Folded Spill
-; VI-NEXT:    s_waitcnt vmcnt(14)
+; VI-NEXT:    s_waitcnt vmcnt(9)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v39
+; VI-NEXT:    s_waitcnt vmcnt(4)
 ; VI-NEXT:    v_perm_b32 v21, v0, v49, s4
-; VI-NEXT:    s_waitcnt vmcnt(5)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v58
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v44
+; VI-NEXT:    v_perm_b32 v22, v0, v60, s4
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v57
 ; VI-NEXT:    v_mov_b32_e32 v34, v35
 ; VI-NEXT:    s_add_i32 s28, s28, 3
 ; VI-NEXT:    s_add_i32 s26, s26, 3
@@ -188728,289 +188754,284 @@ define inreg <64 x i16> @bitcast_v128i8_to_v64i16_scalar(<128 x i8> inreg %a, i3
 ; VI-NEXT:    s_add_i32 s22, s22, 3
 ; VI-NEXT:    s_add_i32 s20, s20, 3
 ; VI-NEXT:    s_add_i32 s18, s18, 3
-; VI-NEXT:    v_mov_b32_e32 v63, s19
 ; VI-NEXT:    s_add_i32 s16, s16, 3
 ; VI-NEXT:    v_mov_b32_e32 v18, s17
 ; VI-NEXT:    s_waitcnt vmcnt(3)
-; VI-NEXT:    v_perm_b32 v22, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v60
-; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v23, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v58
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v24, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v25, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v26, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v27, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
-; VI-NEXT:    v_add_u32_e32 v27, vcc, 0x300, v27
-; VI-NEXT:    s_waitcnt vmcnt(1)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v28, v0, v1, s4
 ; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:484 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:528 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v29, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v25, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:516 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:532 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_perm_b32 v30, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    v_perm_b32 v26, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v27, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:520 ; 4-byte Folded Reload
 ; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:488 ; 4-byte Folded Reload
+; VI-NEXT:    v_add_u32_e32 v27, vcc, 0x300, v27
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v28, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:496 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:540 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v29, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:544 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v30, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:508 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:500 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v31, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:536 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:548 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:476 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v33, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:492 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:504 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:468 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v35, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:464 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:480 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v36, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:456 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:448 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v37, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:460 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:444 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v38, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:452 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:440 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v20, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:824 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:836 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:824 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v39, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:820 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:832 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:808 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v49, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:816 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:788 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:828 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:792 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v50, v0, v47, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:804 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:812 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v19, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:796 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:812 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:800 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:820 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v51, v0, v56, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:792 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:796 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v32, v0, v55, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:784 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:788 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v0, v0, v34, s4
 ; VI-NEXT:    buffer_store_dword v0, off, s[0:3], s32 offset:412 ; 4-byte Folded Spill
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:780 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:784 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v34, v0, v40, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:776 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:780 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v10, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:772 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:828 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:776 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:840 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v11, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:768 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:760 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:772 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:764 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v12, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:808 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:800 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:816 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:804 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v13, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:764 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:748 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:768 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:752 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v14, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:756 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:512 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:760 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:524 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v15, v0, v45, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:752 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:756 ; 4-byte Folded Reload
 ; VI-NEXT:    v_add_u32_e32 v15, vcc, 0x300, v15
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v16, v0, v43, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:744 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:748 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    v_perm_b32 v17, v0, v62, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v48
 ; VI-NEXT:    v_perm_b32 v55, v0, v42, s4
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v63
+; VI-NEXT:    v_perm_b32 v41, v0, v59, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v61
-; VI-NEXT:    v_perm_b32 v41, v0, v57, s4
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v44
 ; VI-NEXT:    v_perm_b32 v42, v0, v52, s4
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v54
 ; VI-NEXT:    v_perm_b32 v43, v0, v53, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:472 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v62, s21
-; VI-NEXT:    s_waitcnt vmcnt(0)
-; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v46
 ; VI-NEXT:    v_perm_b32 v44, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:740 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:728 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:744 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v62, s21
+; VI-NEXT:    v_mov_b32_e32 v63, s19
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
-; VI-NEXT:    v_perm_b32 v45, v0, v59, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:736 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(0)
+; VI-NEXT:    v_perm_b32 v45, v0, v1, s4
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:740 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:732 ; 4-byte Folded Reload
+; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
+; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v54, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:732 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:720 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:736 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:724 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v40, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:724 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:712 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:728 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:720 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v9, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:716 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:704 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:436 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:712 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v9, 16, v9
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v46, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:708 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:696 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:716 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:704 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v8, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:700 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:688 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:708 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:696 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v8, 16, v8
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v47, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:692 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:680 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:700 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:688 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v7, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:684 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:672 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:692 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:680 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v7, 16, v7
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v56, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:676 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:664 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:684 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:672 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v6, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:668 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:656 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:676 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:664 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v6, 16, v6
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v57, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:660 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:648 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:668 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:656 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v5, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:652 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:640 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:660 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:648 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v5, 16, v5
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v58, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:644 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:632 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:652 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:640 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v4, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:644 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:632 ; 4-byte Folded Reload
 ; VI-NEXT:    v_lshlrev_b32_e32 v4, 16, v4
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    v_perm_b32 v59, v0, v1, s4
-; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:628 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v0, off, s[0:3], s32 offset:636 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v1, off, s[0:3], s32 offset:628 ; 4-byte Folded Reload
 ; VI-NEXT:    s_waitcnt vmcnt(1)
 ; VI-NEXT:    v_add_u32_e32 v0, vcc, 3, v0
 ; VI-NEXT:    s_waitcnt vmcnt(0)
@@ -189175,32 +189196,35 @@ define inreg <64 x i16> @bitcast_v128i8_to_v64i16_scalar(<128 x i8> inreg %a, i3
 ; VI-NEXT:    s_waitcnt vmcnt(0)
 ; VI-NEXT:    s_setpc_b64 s[30:31]
 ; VI-NEXT:  .LBB97_4:
-; VI-NEXT:    v_mov_b32_e32 v40, v55
-; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v33, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:552 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:556 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v47, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
-; VI-NEXT:    v_mov_b32_e32 v42, v61
-; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v60, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v58, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
-; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
 ; VI-NEXT:    v_mov_b32_e32 v35, v45
-; VI-NEXT:    v_mov_b32_e32 v53, v63
-; VI-NEXT:    v_mov_b32_e32 v45, v34
+; VI-NEXT:    v_mov_b32_e32 v40, v55
+; VI-NEXT:    buffer_load_dword v46, off, s[0:3], s32 offset:400 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v53, off, s[0:3], s32 offset:620 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v52, off, s[0:3], s32 offset:428 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v59, off, s[0:3], s32 offset:604 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v54, off, s[0:3], s32 offset:432 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v42, off, s[0:3], s32 offset:416 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v61, off, s[0:3], s32 offset:424 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v62, off, s[0:3], s32 offset:600 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v63, off, s[0:3], s32 offset:420 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v43, off, s[0:3], s32 offset:408 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v48, off, s[0:3], s32 offset:412 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v45, off, s[0:3], s32 offset:404 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v41, off, s[0:3], s32 offset:576 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v32, off, s[0:3], s32 offset:580 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v33, off, s[0:3], s32 offset:584 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v36, off, s[0:3], s32 offset:588 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v55, off, s[0:3], s32 offset:596 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v37, off, s[0:3], s32 offset:560 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v56, off, s[0:3], s32 offset:592 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v38, off, s[0:3], s32 offset:564 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v39, off, s[0:3], s32 offset:568 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v58, off, s[0:3], s32 offset:624 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v57, off, s[0:3], s32 offset:616 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v60, off, s[0:3], s32 offset:608 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v44, off, s[0:3], s32 offset:612 ; 4-byte Folded Reload
+; VI-NEXT:    buffer_load_dword v49, off, s[0:3], s32 offset:572 ; 4-byte Folded Reload
+; VI-NEXT:    v_mov_b32_e32 v47, v34
 ; VI-NEXT:    ; implicit-def: $vgpr0_vgpr1_vgpr2_vgpr3_vgpr4_vgpr5_vgpr6_vgpr7_vgpr8_vgpr9_vgpr10_vgpr11_vgpr12_vgpr13_vgpr14_vgpr15
 ; VI-NEXT:    ; implicit-def: $vgpr16_vgpr17_vgpr18_vgpr19_vgpr20_vgpr21_vgpr22_vgpr23_vgpr24_vgpr25_vgpr26_vgpr27_vgpr28_vgpr29_vgpr30_vgpr31
 ; VI-NEXT:    s_branch .LBB97_2
