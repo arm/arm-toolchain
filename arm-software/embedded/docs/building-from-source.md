@@ -76,6 +76,10 @@ independent per-library CMake options:
 | `LLVM_TOOLCHAIN_ENABLE_NEWLIB_NANO` | OFF | newlib-nano |
 | `LLVM_TOOLCHAIN_ENABLE_LLVMLIBC` | OFF | LLVM libc |
 
+> **Note:** The default C library may change in a future ATfE version.
+> If your build requires a specific C library, for example picolibc,
+> please enable it explicitly with `-DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON`.
+
 Multiple libraries can be enabled simultaneously. For example, to build both
 picolibc and LLVM libc:
 
