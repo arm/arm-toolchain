@@ -10,7 +10,7 @@ Please refer to the _Host Platforms_ section in the [README](https://github.com/
 
 ### Building
 
-The build requires the following software to be installed: 
+The build requires the following software to be installed:
 * [Software required by LLVM](https://llvm.org/docs/GettingStarted.html#software)
 * [Meson](https://mesonbuild.com/Getting-meson.html)
 * [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
@@ -21,7 +21,7 @@ The build requires the following software to be installed:
 Library testing requires:
 * [QEMU](https://www.qemu.org/download/)
 
-Testing with QEMU is enabled by default, but can be disabled using the 
+Testing with QEMU is enabled by default, but can be disabled using the
 `-DENABLE_QEMU_TESTING=OFF` CMake option if testing is not required or QEMU is
 not installed.
 
@@ -63,9 +63,62 @@ them.
 
 ## Customizing
 
+### Selecting C libraries
+
+By default, ATfE builds with [picolibc](https://github.com/picolibc/picolibc).
+You can enable additional C libraries or switch to a different one using
+independent per-library CMake options:
+
+| Option | Default | Library |
+|--------|---------|---------|
+| `LLVM_TOOLCHAIN_ENABLE_PICOLIBC` | **ON** | picolibc |
+| `LLVM_TOOLCHAIN_ENABLE_NEWLIB` | OFF | newlib |
+| `LLVM_TOOLCHAIN_ENABLE_NEWLIB_NANO` | OFF | newlib-nano |
+| `LLVM_TOOLCHAIN_ENABLE_LLVMLIBC` | OFF | LLVM libc |
+
+> **Note:** The default C library may change in a future ATfE version.
+> If your build requires a specific C library, for example picolibc,
+> please enable it explicitly with `-DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON`.
+
+Multiple libraries can be enabled simultaneously. For example, to build both
+picolibc and LLVM libc:
+
+```
+cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON
+```
+
+When multiple libraries are enabled, picolibc is always the **primary** library
+(its runtimes are installed directly under `lib/clang-runtimes/`). Non-primary
+libraries are installed under `lib/clang-runtimes/<libc>/` and **require** the
+corresponding `--config=<libc>.cfg` flag on the command line to be used, for
+example:
+
+```
+clang --config=newlib.cfg --target=arm-none-eabi -march=armv7m ...
+clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m ...
+```
+
+To build with only a non-default library, disable picolibc explicitly:
+
+```
+cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=OFF -DLLVM_TOOLCHAIN_ENABLE_NEWLIB=ON
+```
+
+When only a single library is enabled, it becomes the primary regardless of
+which library it is, so its runtimes are installed directly under
+`lib/clang-runtimes/` and no `--config` flag is needed.
+
+> **Note:** The older `LLVM_TOOLCHAIN_C_LIBRARY` option is deprecated. It is
+> still accepted for backward compatibility but will emit a warning. Use the
+> per-library options above instead.
+
+### Library variants
+
 To build additional library variants, add the JSON configuration under
 [arm-multilib/json/variants](../arm-multilib/json/variants/) and register it in
 [multilib.json](../arm-multilib/json/multilib.json).
+
+### LLVM Tools
 
 To build additional LLVM tools, edit the `CMakeLists.txt` by adding required
 tools to the `LLVM_DISTRIBUTION_COMPONENTS` CMake list.
@@ -229,7 +282,7 @@ using specific test targets:
 `ninja check-cxxabi`
 `ninja check-unwind`
 
-Alternatively, `ninja check-all` runs all enabled tests. 
+Alternatively, `ninja check-all` runs all enabled tests.
 
 ## Building sets of libraries
 
@@ -256,7 +309,7 @@ ninja
 ```
 To only build a subset of the variants defined in the JSON file,
 the `-DENABLE_VARIANTS` option controls which variants to build.
-E.g, `-DENABLE_VARIANTS="aarch64a;armv7a_soft_nofp"` only builds the two 
+E.g, `-DENABLE_VARIANTS="aarch64a;armv7a_soft_nofp"` only builds the two
 variants of `aarch64a` and `armv7a_soft_nofp`.
 
 If enabled and the required test executor available, tests can be run with
