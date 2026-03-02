@@ -754,9 +754,9 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
     math(EXPR lib_count_dec "${lib_count} - 1")
 
     foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
-        # Use a per-libc prefix to avoid subproject build dir conflicts.
-        set(multilib_prefix ${CMAKE_BINARY_DIR}/multilib-builds/${libc})
         set(multilib_project multilib-${libc})
+        # Use a per-libc prefix to avoid subproject build dir conflicts.
+        set(multilib_prefix ${CMAKE_BINARY_DIR}/${multilib_project}-builds/)
         set(libc_install_dir ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR})
         if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL OR NOT libc STREQUAL LLVM_TOOLCHAIN_PRIMARY_LIBC)
             string(APPEND libc_install_dir "/${libc}")
@@ -768,10 +768,10 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         ExternalProject_Add(
             ${multilib_project}
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/arm-multilib
-            STAMP_DIR ${multilib_prefix}/stamp
-            BINARY_DIR ${multilib_prefix}/build
-            DOWNLOAD_DIR ${multilib_prefix}/dl
-            TMP_DIR ${multilib_prefix}/tmp
+            STAMP_DIR ${multilib_prefix}/multilib/stamp
+            BINARY_DIR ${multilib_prefix}/multilib/build
+            DOWNLOAD_DIR ${multilib_prefix}/multilib/dl
+            TMP_DIR ${multilib_prefix}/multilib/tmp
             INSTALL_DIR ${libc_install_dir}
             DEPENDS ${lib_tool_dependencies}
             CMAKE_ARGS
