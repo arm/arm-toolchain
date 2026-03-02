@@ -1,4 +1,4 @@
-// Begin downstream change #726
+; Begin downstream change #726
 ; RUN: llc -verify-machineinstrs -enable-machine-outliner -mtriple aarch64 %s -o - | FileCheck %s --check-prefix V8A
 ; RUN: llc -verify-machineinstrs -enable-machine-outliner -mtriple aarch64 -mattr=+v8.3a %s -o - | FileCheck %s --check-prefix V83A
 
@@ -104,4 +104,4 @@ define void @c() "sign-return-address"="all" "sign-return-address-key"="a_key" n
 ; V83A-LABEL:    OUTLINED_FUNCTION_0:
 ; V83A:          paciasp
 ; V83A:          retaa
-// End downstream change #726
+; End downstream change #726
