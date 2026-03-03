@@ -5,8 +5,7 @@ This section describes how to download and install the Arm Toolchain for Linux.
 ### Note
 
 The recommended installation method requires system administrator (`root`)
-assistance. Non-root installation is also possible, you can read about it
-further.
+assistance. Non-root installation is also possible, see below.
 
 ## Recommended installation method
 
@@ -25,6 +24,8 @@ $ curl "https://developer.arm.com/packages/arm-toolchains:ubuntu-22/jammy/Releas
 $ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] https://developer.arm.com/packages/arm-toolchains:ubuntu-22/jammy/ ./" | sudo tee /etc/apt/sources.list.d/obs-oss-arm-com.list
 
 $ sudo apt update
+
+$ sudo apt install arm-toolchains-transition
 ```
 
 * Ubuntu 24.04
@@ -35,6 +36,8 @@ $ curl "https://developer.arm.com/packages/arm-toolchains:ubuntu-24/noble/Releas
 $ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] https://developer.arm.com/packages/arm-toolchains:ubuntu-24/noble/ ./" | sudo tee /etc/apt/sources.list.d/obs-oss-arm-com.list
 
 $ sudo apt update
+
+$ sudo apt install arm-toolchains-transition
 ```
 
 * Red Hat Enterprise Linux 8
@@ -43,6 +46,8 @@ $ sudo apt update
 $ sudo dnf install 'dnf-command(config-manager)'
 
 $ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-toolchains:rhel-8/el8/arm-toolchains:rhel-8.repo
+
+$ sudo dnf install arm-toolchains-transition
 ```
 
 * Red Hat Enterprise Linux 9
@@ -51,6 +56,8 @@ $ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-t
 $ sudo dnf install 'dnf-command(config-manager)'
 
 $ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-toolchains:rhel-9/el9/arm-toolchains:rhel-9.repo
+
+$ sudo dnf install arm-toolchains-transition
 ```
 
 * Red Hat Enterprise Linux 10
@@ -59,6 +66,8 @@ $ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-t
 $ sudo dnf install 'dnf-command(config-manager)'
 
 $ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-toolchains:rhel-10/el10/arm-toolchains:rhel-10.repo
+
+$ sudo dnf install arm-toolchains-transition
 ```
 
 * Amazon Linux 2023
@@ -67,12 +76,24 @@ $ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-t
 $ sudo dnf install 'dnf-command(config-manager)'
 
 $ sudo dnf config-manager -y --add-repo https://developer.arm.com/packages/arm-toolchains:amzn-2023/al2023/arm-toolchains:amzn-2023.repo
+
+$ sudo dnf install arm-toolchains-transition
 ```
 
 * SUSE Linux Enterprise Server 15
 
 ```
 $ sudo zypper ar -f https://developer.arm.com/packages/arm-toolchains:sles-15/sl15/arm-toolchains:sles-15.repo
+
+$ sudo zypper install arm-toolchains-transition
+```
+
+* SUSE Linux Enterprise Server 16
+
+```
+$ sudo zypper ar -f https://developer.arm.com/packages/arm-toolchains/sles/sles16/aarch64/arm-toolchains-repository-1-1.sles16.aarch64.rpm
+
+$ sudo zypper --gpg-auto-import-keys --no-gpg-checks refresh --repo arm-toolchains
 ```
 
 Select the installation command appropriate for your Linux distribution. This
