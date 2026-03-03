@@ -55,13 +55,6 @@ jobs:
             target_os: macOS-arm64
             runner: mini-github-m4-01
 
-          # LLVM-libc Overlay Package Build
-          - build_script: build_llvmlibc_overlay.sh
-            test_script: test_llvmlibc.sh
-            install_script: install_dependencies.sh
-            target_os: Ubuntu-22.04-arm64
-            runner: ah-ubuntu_22_04-c7g_8x-100
-
           # Newlib nano Overlay Package Build
           - build_script: build_newlib_nano_overlay.sh
             test_script: ''

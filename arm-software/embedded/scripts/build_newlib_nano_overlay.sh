@@ -22,7 +22,10 @@ BUILD_DIR=${REPO_ROOT}/build_newlib_nano_overlay
 mkdir -p "${BUILD_DIR}"
 cd "${BUILD_DIR}"
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_TOOLCHAIN_C_LIBRARY=newlib-nano -DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on
+cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF \
+    -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=OFF \
+    -DLLVM_TOOLCHAIN_ENABLE_NEWLIB_NANO=ON \
+    -DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on
 ninja package-llvm-toolchain
 
 # The package-llvm-toolchain target will produce a .tar.xz package, but we also
