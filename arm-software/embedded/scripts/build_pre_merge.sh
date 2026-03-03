@@ -30,8 +30,5 @@ fi
 mkdir -p "${REPO_ROOT}"/build
 cd "${REPO_ROOT}"/build
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_CCACHE_BUILD=On \
-    -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON \
-    -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON \
-    ${EXTRA_CMAKE_ARGS}
+cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_CCACHE_BUILD=On ${EXTRA_CMAKE_ARGS}
 ninja package-llvm-toolchain
