@@ -26,19 +26,25 @@
 
 #if __ARM_64BIT_STATE // A64
 #  define SEMIHOST_INSTRUCTION "hlt #0xf000"
+#  define SEMIHOST_CLOBBER "memory", "cc"
 #elif defined(__thumb__) // T32
 #  if defined(__ARM_ARCH_PROFILE) && __ARM_ARCH_PROFILE == 'M'
 #    define SEMIHOST_INSTRUCTION "bkpt #0xAB"
+#    define SEMIHOST_CLOBBER "memory", "cc"
 #  elif defined(HLT_SEMIHOSTING)
 #    define SEMIHOST_INSTRUCTION ".inst.n 0xbabc" // hlt #60
+#    define SEMIHOST_CLOBBER "memory", "cc"
 #  else
 #    define SEMIHOST_INSTRUCTION "svc 0xab"
+#    define SEMIHOST_CLOBBER "memory", "cc", "lr"
 #  endif
 #else // A32
 #  if defined(HLT_SEMIHOSTING)
 #    define SEMIHOST_INSTRUCTION ".inst 0xe10f0070" // hlt #0xf000
+#    define SEMIHOST_CLOBBER "memory", "cc"
 #  else
 #    define SEMIHOST_INSTRUCTION "svc 0x123456"
+#    define SEMIHOST_CLOBBER "memory", "cc", "lr"
 #  endif
 #endif
 
@@ -49,7 +55,7 @@ static long semihosting_call(long val, const void *ptr) {
   __asm__ __volatile__(SEMIHOST_INSTRUCTION
                        : "+r"(v), "+r"(p)
                        :
-                       : "memory", "cc");
+                       : SEMIHOST_CLOBBER);
   return v;
 }
 

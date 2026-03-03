@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [22.1.0]
+
+This is the third release of the Arm Toolchain for Linux (ATfL), a successor of
+the Arm Compiler for Linux (ACfL).
+
+Although ATfL is based entirely on LLVM version 22.1.0, several changes have
+been introduced specifically for this toolchain. The most notable include:
+
+- The compiler uses a config file by default, which improves
+  performance-specific optimizations; most notably, it encourages the use of the
+  vectorized mathematical routines in the Loop Vectorizer which enables the
+  possibility of vectorizing loops containing the calls to the mathematical
+  library functions.
+
+- The Bash autocompletion has been extended to cover `armclang`, `armclang++`
+  and `armflang`.
+
+- The Amazon Linux target triple is properly recognized, which enables
+  vectorizations of the pieces of code calling the `sincos`* functions.
+  See [this pull request](https://github.com/llvm/llvm-project/pull/136114) for
+  more details.
+
+- Non-standard `rtc` Fortran intrinsic implemented as an alias for `time`.
+
+- `threadprivate` common block variables appearing in equivalence in
+  a Fortran/OpenMP code are allowed.
+
 ## [21.1.1]
 
 This is the second release of the Arm Toolchain for Linux (ATfL), a successor of

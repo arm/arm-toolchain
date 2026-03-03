@@ -381,9 +381,10 @@ def main():
             description="More recent picolibc versions do now support char16_t and char32_t",
         ),
         XFail(
-            name="UID 0 lookup",
+            name="picolibc_UID0_lookup",
             testnames=[
                 "test-pwd.test",
+                "test-grp.test",
             ],
             result=NewResult.EXCLUDE,
             project="picolibc",
@@ -454,6 +455,7 @@ def main():
             name="picolibc_rateInHz",
             testnames=[
                 "semihost-gettimeofday.test",
+                "test-stat.test",
             ],
             result=NewResult.XFAILED,
             project="picolibc",
@@ -483,7 +485,7 @@ def main():
                 "armv8.1m.main_soft_nofp_nomve_pacret_bti_size",
                 "armv8.1m.main_soft_nofp_nomve_pacret_bti_unaligned_size",
             ],
-            description="rateInHz port not connected in Corstone-310 FVP (SDDKW-94045).",
+            description="rateInHz port not connected in Corstone-310 FVP (SDDKW-95688).",
         ),
         XFail(
             name="string push back",
