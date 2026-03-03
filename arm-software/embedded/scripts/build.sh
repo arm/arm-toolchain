@@ -33,5 +33,6 @@ cd "${REPO_ROOT}"/build
 cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF \
     -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON \
     -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON \
+    -DENABLE_PARALLEL_LIB_CONFIG=OFF \
     ${EXTRA_CMAKE_ARGS}
 ninja package-llvm-toolchain
