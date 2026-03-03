@@ -29,6 +29,11 @@ been introduced specifically for this toolchain. The most notable include:
 - `threadprivate` common block variables appearing in equivalence in
   a Fortran/OpenMP code are allowed.
 
+- The Arm Toolchains package repositories are transitioning to a new and
+  improved structure. Users who have previously installed using the native
+  package manager can update to ATfL 22.1.0 automatically. New users must
+  follow the updated instructions in the Installation.md file.
+
 ## [21.1.1]
 
 This is the second release of the Arm Toolchain for Linux (ATfL), a successor of
