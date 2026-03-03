@@ -8,7 +8,8 @@ for the details on Clang OpenMP support.
 ## Flang OpenMP support
 
 See the [status page](https://flang.llvm.org/docs/OpenMPSupport.html)
-for the details on Flang OpenMP support.
+for the details on Flang OpenMP support. Note that ATfL does not support
+offloading.
 
 ### `do concurrent` mapping to OpenMP
 
