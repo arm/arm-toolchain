@@ -58,7 +58,7 @@ void invalidate_cache() {
           (use64BitCCSIDR ? CCSIDR.NumSets64 : CCSIDR.NumSets) + 1;
       unsigned int ways =
           (use64BitCCSIDR ? CCSIDR.Associativity64 : CCSIDR.Associativity) + 1;
-      unsigned way_offset = __builtin_clz(ways); // 32-log2(number of ways)
+      unsigned way_offset = __builtin_clz(ways - 1); // 32-log2(number of ways)
       for (int set = 0; set < sets; ++set) {
         for (int way = 0; way < ways; ++way) {
           unsigned long val =
