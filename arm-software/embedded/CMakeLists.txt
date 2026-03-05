@@ -458,18 +458,6 @@ foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
             COMPONENT ${libc_component}
         )
 
-        set(_llvmlibc_samples_dir ${CMAKE_CURRENT_SOURCE_DIR}/llvmlibc-samples)
-        if(EXISTS ${_llvmlibc_samples_dir})
-            install(
-              DIRECTORY
-              ${_llvmlibc_samples_dir}/
-              DESTINATION samples
-              COMPONENT ${libc_component}
-            )
-        else()
-            message(WARNING "llvmlibc samples directory not found at ${_llvmlibc_samples_dir}; skipping sample installation.")
-        endif()
-
     endif()
 endforeach()
 list(APPEND LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS ${LLVM_TOOLCHAIN_LIBC_CONFIG_COMPONENTS})
