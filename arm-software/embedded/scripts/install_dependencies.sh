@@ -13,7 +13,7 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     clang \
     ccache \
     cmake \
-    ninja-build=1.10.1-1 \
+    ninja-build \
     python3-pip \
     python3-setuptools \
     qemu-system-arm \
