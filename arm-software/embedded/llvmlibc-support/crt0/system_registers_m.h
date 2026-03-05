@@ -29,6 +29,9 @@ namespace sysreg {
   REGNAME(ICSR, 0xE000ED04)                                                    \
   REGNAME(VTOR, 0xE000ED08)                                                    \
   REGNAME(CCR, 0xE000ED14)                                                     \
+  REGNAME(CLIDR, 0xE000ED78)                                                   \
+  REGNAME(CCSIDR, 0xE000ED80)                                                  \
+  REGNAME(CSSELR, 0xE000ED84)                                                  \
   REGNAME(SHCSR, 0xE000ED24)                                                   \
   REGNAME(CFSR, 0xE000ED28)                                                    \
   REGNAME(HFSR, 0xE000ED2C)                                                    \
@@ -36,7 +39,10 @@ namespace sysreg {
   REGNAME(BFAR, 0xE000ED38)                                                    \
   REGNAME(CPACR, 0xE000ED88)                                                   \
   REGNAME(NSACR, 0xE000ED8C)                                                   \
+  REGNAME(MPU_TYPE, 0xE000ED90)                                                \
   REGNAME(MPU_CTRL, 0xE000ED94)                                                \
+  REGNAME(ICIALLU, 0xE000EF50)                                                 \
+  REGNAME(DCISW, 0xE000EF60)                                                   \
   REGNAME(SFSR, 0xE000EDE4)                                                    \
   REGNAME(SFAR, 0xE000EDE8)                                                    \
   REGNAME(FPCCR, 0xE000EF34)
@@ -126,6 +132,40 @@ public:
   Bit<20> TRD;
 };
 
+class CLIDR_Class : public SysReg<SysRegName::CLIDR> {
+public:
+  static constexpr unsigned long CacheTypeNone = 0;
+  static constexpr unsigned long CacheTypeInstruction = 1;
+  static constexpr unsigned long CacheTypeData = 2;
+  static constexpr unsigned long CacheTypeSeparate = 3;
+  static constexpr unsigned long CacheTypeUnified = 4;
+
+  Field<0, 2> L1CacheType;
+
+  [[clang::always_inline]] bool HasICache() {
+    unsigned long ctype = L1CacheType;
+    return (ctype == CacheTypeInstruction) || (ctype == CacheTypeSeparate) ||
+           (ctype == CacheTypeUnified);
+  }
+
+  [[clang::always_inline]] bool HasDCache() {
+    unsigned long ctype = L1CacheType;
+    return (ctype == CacheTypeData) || (ctype == CacheTypeSeparate) ||
+           (ctype == CacheTypeUnified);
+  }
+
+  [[clang::always_inline]] bool HasAnyCache() {
+    return L1CacheType != CacheTypeNone;
+  }
+};
+
+class CCSIDR_Class : public SysReg<SysRegName::CCSIDR> {
+public:
+  Field<0, 2> LineSize;
+  Field<3, 12> Associativity;
+  Field<13, 27> NumSets;
+};
+
 class CFSR_Class : public SysReg<SysRegName::CFSR> {
 public:
   Field<0, 7> MMFSR;
@@ -162,6 +202,13 @@ public:
   Bit<0> ENABLE;
   Bit<1> HFNMIENA;
   Bit<2> PRIVDEFENA;
+};
+
+class MPU_TYPE_Class : public SysReg<SysRegName::MPU_TYPE> {
+public:
+  Field<8, 15> DREGION;
+
+  [[clang::always_inline]] bool HasMPU() { return DREGION != 0; }
 };
 
 class CPUID_Class : public SysReg<SysRegName::CPUID> {
@@ -251,6 +298,11 @@ extern CPUID_Class CPUID;
 extern ICSR_Class ICSR;
 extern SysReg<SysRegName::VTOR> VTOR;
 extern CCR_Class CCR;
+extern CLIDR_Class CLIDR;
+extern CCSIDR_Class CCSIDR;
+extern SysReg<SysRegName::CSSELR> CSSELR;
+extern SysReg<SysRegName::ICIALLU> ICIALLU;
+extern SysReg<SysRegName::DCISW> DCISW;
 extern SHCSR_Class SHCSR;
 extern CFSR_Class CFSR;
 extern SysReg<SysRegName::HFSR> HFSR;
@@ -258,6 +310,7 @@ extern SysReg<SysRegName::MMFAR> MMFAR;
 extern SysReg<SysRegName::BFAR> BFAR;
 extern CPACR_Class CPACR;
 extern NSACR_Class NSACR;
+extern MPU_TYPE_Class MPU_TYPE;
 extern MPU_CTRL_Class MPU_CTRL;
 extern SysReg<SysRegName::SFSR> SFSR;
 extern SysReg<SysRegName::SFAR> SFAR;
