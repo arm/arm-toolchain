@@ -10,14 +10,14 @@
 set -e
 
 sudo apt-get update && sudo apt-get install -y --no-install-recommends \
-    clang=1:14.0-55~exp2 \
+    clang \
     ccache \
-    cmake=3.22.1-1ubuntu1.22.04.2 \
-    ninja-build=1.10.1-1 \
+    cmake \
+    ninja-build \
     python3-pip \
     python3-setuptools \
-    qemu-system-arm=1:6.2+dfsg-2ubuntu6.27 \
-    ipxe-qemu=1.21.1+git-20220113.fbbdc3926-0ubuntu1
+    qemu-system-arm \
+    ipxe-qemu
 
 # Upgrade pip and install dependencies
 python3 -m pip install --upgrade pip
