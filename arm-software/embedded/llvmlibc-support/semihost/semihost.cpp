@@ -121,7 +121,7 @@ void _platform_init(void) {
 void _platform_debug_putc(int c) {
   unsigned char ch = (unsigned char)c;
 
-  __llvm_libc_stdio_write(&__llvm_libc_stderr_cookie, (const char *)&ch, 1);
+  semihosting_call(SYS_WRITEC, &ch);
 }
 
 // Provide command line options (argc/argv) for the main function
