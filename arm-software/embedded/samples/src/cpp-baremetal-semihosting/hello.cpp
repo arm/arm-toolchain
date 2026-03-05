@@ -6,7 +6,6 @@
 
 #include <vector>
 #include <iostream>
-#include <cstdio>
 
 int main(void) {
   std::vector<int> v = {1, 2, 3};
@@ -14,11 +13,7 @@ int main(void) {
   v.insert(v.end(), 5);
 
   for (int elem: v) {
-#if __LLVM_LIBC__
-    std::printf("%d ", elem);
-#else
     std::cout << elem << " ";
-#endif
   }
   std::puts("\n");
 
