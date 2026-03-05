@@ -649,7 +649,7 @@ add_custom_target(
     -Dpicolibc_URL=${picolibc_URL}
     -Dnewlib_SOURCE_DIR=${newlib_SOURCE_DIR}
     -Dnewlib_URL=${newlib_URL}
-    -DLLVM_TOOLCHAIN_ENABLED_LIBCS=${LLVM_TOOLCHAIN_ENABLED_LIBCS}
+    "-DLLVM_TOOLCHAIN_ENABLED_LIBCS=\"${LLVM_TOOLCHAIN_ENABLED_LIBCS}\""
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_version_txt.cmake
     BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/VERSION.txt
 )
