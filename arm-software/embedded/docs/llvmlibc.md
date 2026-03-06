@@ -205,9 +205,9 @@ $ LIBC=llvmlibc make build
 
 ## Limitations of LLVM libc in Arm Toolchain for Embedded
 
-At present, this toolchain builds C++ libraries limited to what is supported with
-LLVM libc, for example, file IO and fstream is not available
-- only console iostream can be used.
+At present, this toolchain builds the C++ libraries limited to what is supported
+in conjunction with LLVM libc. For example, file I/O and fstream are not
+available - only console iostream can be used.
 
 LLVM libc is a work in
 progress. It is incomplete: not all standard C library functionality
