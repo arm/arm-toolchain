@@ -73,7 +73,7 @@ jobs:
         run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
 
       - name: Build
-        run: ./arm-software/embedded/scripts/build.sh
+        run: ./arm-software/embedded/scripts/build_post_merge.sh
 
       - name: Test
-        run: ./arm-software/embedded/scripts/test_post-merge.sh
+        run: ./arm-software/embedded/scripts/test_post_merge.sh
