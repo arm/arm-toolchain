@@ -4093,6 +4093,9 @@ convertOmpThreadprivate(Operation &opInst, llvm::IRBuilderBase &builder,
   if (auto asCast = dyn_cast<LLVM::AddrSpaceCastOp>(symOp))
     symOp = asCast.getOperand().getDefiningOp();
 
+  if (auto gepCast = dyn_cast<LLVM::GEPOp>(symOp))
+    symOp = gepCast.getOperand(0).getDefiningOp();
+
   if (!isa<LLVM::AddressOfOp>(symOp))
     return opInst.emitError("Addressing symbol not found");
   LLVM::AddressOfOp addressOfOp = dyn_cast<LLVM::AddressOfOp>(symOp);
