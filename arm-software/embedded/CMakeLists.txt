@@ -469,6 +469,13 @@ set(LLVM_EXTERNAL_ELF2BIN_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared/elf2b
 set(clang_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/clang_lit_xfails.txt")
 set(CLANG_TEST_EXTRA_ARGS "@${clang_lit_xfails_path}")
 
+# Generate a toolchain ID.
+# Product code 'E' for Embedded.
+# This must be done before the llvm directory is included.
+set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
+set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
+include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
+
 add_subdirectory(
     ${llvmproject_src_dir}/llvm llvm
 )
@@ -488,12 +495,6 @@ add_custom_target(
 )
 add_dependencies(check-clang clang-xfail-lit-args)
 add_dependencies(check-all clang-xfail-lit-args)
-
-# Generate a toolchain ID.
-# Product code 'E' for Embedded.
-set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
-set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
-include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 
 get_directory_property(LLVM_VERSION_MAJOR DIRECTORY ${llvmproject_src_dir}/llvm DEFINITION LLVM_VERSION_MAJOR)
 get_directory_property(LLVM_VERSION_MINOR DIRECTORY ${llvmproject_src_dir}/llvm DEFINITION LLVM_VERSION_MINOR)
