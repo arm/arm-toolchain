@@ -91,4 +91,4 @@ jobs:
         run: ./arm-software/embedded/scripts/build_pre_merge.sh
 
       - name: Test
-        run: ./arm-software/embedded/scripts/test_pre-merge.sh
+        run: ./arm-software/embedded/scripts/test_pre_merge.sh
