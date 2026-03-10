@@ -37,9 +37,10 @@
 #include <stdlib.h>
 #include <string>
 #if defined(_WIN32)
-#   include <io.h> // _mktemp_s
-#   include <fcntl.h> // _O_EXCL, ...
-#   include <sys/stat.h> // _S_IREAD, ...
+#  include <io.h>       // _mktemp_s
+#  include <fcntl.h>    // _O_EXCL, ...
+#  include <sys/stat.h> // _S_IREAD, ...
+#  include <cerrno>
 // Downstream issue: #375 (Enable fstream independently of filesystem)
 #elif _LIBCPP_LIBC_NEWLIB
 // No need to include extra headers for the get_temp_file_name() implementation
