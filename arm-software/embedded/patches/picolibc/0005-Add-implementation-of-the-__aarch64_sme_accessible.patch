@@ -1,0 +1,37 @@
+From 47e627b5b34f8c5dc44c81e7bcb6773428601464 Mon Sep 17 00:00:00 2001
+From: Amilendra Kodithuwakku <amilendra.kodithuwakku@arm.com>
+Date: Thu, 29 Jan 2026 09:19:13 +0000
+Subject: Add implementation of the __aarch64_sme_accessible
+
+compiler-rt relies on the the __aarch64_sme_accessible support
+function to emit SME ABI support routines calls [1].
+__aarch64_sme_accessible returns non-zero when SME support is
+enabled in the underlying hardware.
+
+[1] https://github.com/llvm/llvm-project/commit/2b05fa8f0be7e38f4b4364ea855a3d200ded7480
+---
+ picocrt/machine/aarch64/crt0.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/picocrt/machine/aarch64/crt0.c b/picocrt/machine/aarch64/crt0.c
+index f0c864c7e0..1bf22b1123 100644
+--- a/picocrt/machine/aarch64/crt0.c
++++ b/picocrt/machine/aarch64/crt0.c
+@@ -61,6 +61,14 @@ _set_tls(void *tls)
+     __asm__ volatile("msr tpidr_el0, %x0" : : "r"(tls - TP_OFFSET));
+ }
+ 
++int __aarch64_sme_accessible() {
++  int result = 0;
++  __asm__ volatile ("mrs %x[result], id_aa64pfr1_el1" : [result]"=r"(result) :  : );
++  /* Although the ISA reserves BITS 24~27 for SME, at this point of time,
++     only BITS 24 (SME) and 25 (SME + SME2 ZT0 register) have meaning.*/
++  return (result & 0x3000000) != 0;
++}
++
+ #include "../../crt0.h"
+ 
+ /* Defined in crt0.S */
+-- 
+2.43.0
+

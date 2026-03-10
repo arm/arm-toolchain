@@ -1,0 +1,29 @@
+From 62005b9b0a0f2f536039923cebf37d3e2de64e17 Mon Sep 17 00:00:00 2001
+From: Simi Pallipurath <simi.pallipurath@arm.com>
+Date: Thu, 14 Nov 2024 10:12:33 +0000
+Subject: Define picocrt_machines for AArch32 builds as well as 64.
+
+Our cmake build command for picolibc unconditionally includes
+`-Dtest-machine=...`, which depends on this being defined.
+---
+ picocrt/machine/arm/meson.build | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/picocrt/machine/arm/meson.build b/picocrt/machine/arm/meson.build
+index 6da07cb927..5ba6a813d9 100644
+--- a/picocrt/machine/arm/meson.build
++++ b/picocrt/machine/arm/meson.build
+@@ -34,3 +34,10 @@
+ #
+ src_picocrt += files('crt0.c')
+ has_crt0_linux = true
++
++picocrt_machines += [
++  {
++    'name': 'fvp',
++    'suffix': '-fvp',
++  },
++]
+-- 
+2.43.0
+

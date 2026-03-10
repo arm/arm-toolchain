@@ -1,0 +1,40 @@
+//
+// Copyright (c) 2026, Arm Limited and affiliates.
+//
+// Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM
+// Exceptions. See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+//
+
+#if __ARM_ARCH_PROFILE == 'M'
+
+#include "system_registers_m.h"
+
+namespace bootcode {
+namespace sysreg {
+
+ICTR_Class ICTR;
+SYST_CSR_Class SYST_CSR;
+SysReg<SysRegName::SYST_RVR> SYST_RVR;
+SysReg<SysRegName::SYST_CVR> SYST_CVR;
+SysReg<SysRegName::SYST_CALIB> SYST_CALIB;
+CPUID_Class CPUID;
+ICSR_Class ICSR;
+SysReg<SysRegName::VTOR> VTOR;
+CCR_Class CCR;
+SHCSR_Class SHCSR;
+CFSR_Class CFSR;
+SysReg<SysRegName::HFSR> HFSR;
+SysReg<SysRegName::MMFAR> MMFAR;
+SysReg<SysRegName::BFAR> BFAR;
+CPACR_Class CPACR;
+NSACR_Class NSACR;
+MPU_CTRL_Class MPU_CTRL;
+SysReg<SysRegName::SFSR> SFSR;
+SysReg<SysRegName::SFAR> SFAR;
+FPCCR_Class FPCCR;
+SysRegSet<SysRegSetName::NVIC_ICERn> NVIC_ICER;
+
+} // namespace sysreg
+} // namespace bootcode
+#endif

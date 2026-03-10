@@ -1,0 +1,65 @@
+{
+    "SPDXID": "SPDXRef-DOCUMENT",
+    "creationInfo": {
+        "created": "2025-03-11T14:57:55Z",
+        "creators": [
+            "Organization: Arm Limited (open-source-office@arm.com)"
+        ]
+    },
+    "dataLicense": "CC0-1.0",
+    "name": "Arm Toolchain for Embedded LLVM libc overlay",
+    "spdxVersion": "SPDX-2.3",
+    "documentNamespace": "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
+    "packages": [
+        {
+            "SPDXID": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
+            "downloadLocation": "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "Arm Toolchain for Embedded",
+            "originator": "Organization: Arm Limited (open-source-office@arm.com)",
+            "supplier": "Organization: Arm Limited (open-source-office@arm.com)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/compiler-rt",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "compiler-rt",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-09ef5819-9c48-5d94-b42b-4a918b20f6e4",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/libc",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libc",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        }
+    ],
+    "relationships": [
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-09ef5819-9c48-5d94-b42b-4a918b20f6e4",
+            "relationshipType": "DESCRIBES"
+        }
+    ]
+}

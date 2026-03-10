@@ -1,0 +1,7 @@
+# Code profiling and coverage sample
+
+This sample shows how to use instrumentation to emit profile data
+and use it to show code coverage.
+
+Use `make run` to build with instrumentation, run and collect the raw profile data,
+then output a visualization of the code coverage.
