@@ -24,6 +24,9 @@ been introduced specifically for this toolchain. The most notable include:
   See [this pull request](https://github.com/llvm/llvm-project/pull/136114) for
   more details.
 
+- New Fortran directives supported by `armflang`: `vector vectorlength`,
+  `prefetch`, `inline`, `forceinline`, `noinline`.
+
 - Non-standard `rtc` Fortran intrinsic implemented as an alias for `time`.
 
 - `threadprivate` common block variables appearing in equivalence in
