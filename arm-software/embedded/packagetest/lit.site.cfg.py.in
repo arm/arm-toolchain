@@ -4,6 +4,7 @@ config.llvm_src_root = "@LLVM_SOURCE_DIR@"
 config.llvm_obj_root = "@LLVM_BINARY_DIR@"
 config.unpack_directory = lit_config.substitute("@unpack_directory@")
 config.samples_dir = lit_config.substitute("@samples_dir@")
+config.packagetest_libc = "@LLVM_TOOLCHAIN_PACKAGETEST_LIBC@"
 config.llvm_tools_dir = lit_config.substitute("@unpack_directory@/bin")
 config.llvm_libs_dir = lit_config.substitute("@unpack_directory@/lib")
 config.lit_tools_dir = "@LLVM_LIT_TOOLS_DIR@"
