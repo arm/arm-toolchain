@@ -36,7 +36,7 @@ using namespace sysreg;
 
 #if BOOTCODE_M_ARCH_CACHE_SUPPORTED
 static inline void sync_barriers() {
-  static constexpr unsigned int FullSystemScope = 0xf;
+  constexpr unsigned int FullSystemScope = 0xf;
 
   __dsb(FullSystemScope);
   __isb(FullSystemScope);
