@@ -72,7 +72,7 @@ FILE *fopen(const char *filename, const char *mode) {
 
   size_t args[3];
   args[0] = (size_t)filename;
-  args[1] = (size_t)OPENMODE_W | OPENMODE_B;
+  args[1] = (size_t)(OPENMODE_W | OPENMODE_B);
   args[2] = strlen(filename);
 
   long handle = semihosting_call(SYS_OPEN, args);
