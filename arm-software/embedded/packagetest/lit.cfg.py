@@ -47,5 +47,11 @@ llvm_config.config.substitutions.append(("%samples_dir", '"%s"' % config.samples
 llvm_config.config.substitutions.append(
     ("%unpack_directory", '"%s"' % config.unpack_directory)
 )
+if config.packagetest_libc:
+    llvm_config.config.substitutions.append(
+        ("%sample_libc", "LIBC=%s" % config.packagetest_libc)
+    )
+else:
+    llvm_config.config.substitutions.append(("%sample_libc", ""))
 
 config.environment["CLANG_NO_DEFAULT_CONFIG"] = "1"

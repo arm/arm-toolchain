@@ -1,4 +1,4 @@
 # RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-prof clean
-# RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-prof run BIN_PATH=%unpack_directory/bin 2>&1 | FileCheck %s
+# RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-prof run BIN_PATH=%unpack_directory/bin %sample_libc 2>&1 | FileCheck %s
 # RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-prof clean
-# CHECK: 1 2 3 4 5
+# CHECK: 5|    for (auto num: vec)
