@@ -11,9 +11,6 @@ choose to use the LLVM project's own C library.
 
 ## Building the toolchain with LLVM libc
 
-> [!IMPORTANT]
-> Building the LLVM libc package is only supported on Linux and macOS.
-
 Enable LLVM libc with `-DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON`.
 
 By default, ATfE builds with `picolibc` enabled. To build both `picolibc`
