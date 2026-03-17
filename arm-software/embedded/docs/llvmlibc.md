@@ -11,20 +11,30 @@ choose to use the LLVM project's own C library.
 
 ## Building the toolchain with LLVM libc
 
-> [!IMPORTANT]
-> Building the LLVM libc package is only supported on Linux and macOS.
+Enable LLVM libc with `-DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON`.
 
-Configure the toolchain with the CMake setting
-`-DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc` to build a version of the
-toolchain based on LLVM libc.
+By default, ATfE builds with `picolibc` enabled. To build both `picolibc`
+and LLVM libc, use:
 
-If you also add `-DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on` then the
-`package-llvm-toolchain` CMake target will generate an overlay package
-similar to the [newlib overlay
-package](/docs/newlib.md).
-If you unpack this over an existing installation of the toolchain,
-then you can switch to LLVM libc by adding `--config=llvmlibc.cfg` on
-the command line.
+```
+cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON
+```
+
+To build only LLVM libc, disable `picolibc` explicitly:
+
+```
+cmake .. -GNinja \
+  -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=OFF \
+  -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON
+```
+
+> [!NOTE]
+> The legacy option `-DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc` is still accepted
+> for backwards compatibility, but it is deprecated.
+
+If you also add `-DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=ON`, then the
+`package-llvm-toolchain` CMake target generates an LLVM libc overlay package.
+Overlay builds require LLVM libc to be the only enabled C library.
 
 ## Using LLVM libc
 
@@ -32,9 +42,10 @@ To compile a program with this LLVM libc, you must provide the
 following command line options, in addition to `--target`, `-march` or
 `-mcpu`, and the input and output files:
 
-* `--config=llvmlibc.cfg` if you are using LLVM libc as an overlay
-  package (but you do not need this if you have built the whole
-  toolchain with only LLVM libc)
+* `--config=llvmlibc.cfg` if LLVM libc is installed as a secondary C library in
+  the standard ATfE package where `picolibc` remains the primary library, or
+  when using an LLVM libc overlay package. You do not need this option if you
+  built the toolchain with only LLVM libc enabled.
 
 * `-nostartfiles` to not include the currently non-existent `crt0.o`
 
@@ -194,8 +205,12 @@ The maximum accepted command line length is 255 characters.
 
 ## Samples
 
-To use the sample programs provided by Arm Toolchain for Embedded with LLVM libc,
-set the `LIBC` environment variable to `llvmlibc`, for example:
+LLVM libc uses the same shared sample set as `picolibc`. Therefore, there is no
+separate `samples/llvmlibc` directory. The samples are installed under
+`samples/src/`.
+
+To build any sample with LLVM libc, change to the sample directory and set the
+`LIBC` environment variable to `llvmlibc`, for example:
 ```
 $ LIBC=llvmlibc make build
 ```
