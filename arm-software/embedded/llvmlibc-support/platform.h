@@ -35,6 +35,9 @@ void _platform_setup_arch_extensions(void);
 // Relocate read-write data into its runtime memory and clear the BSS region.
 void _platform_init_data_segments(void);
 
+// Initialize thread-local storage (TLS) for the initial execution context.
+void _platform_init_tls(void);
+
 // Any other initialization right before the main function is called,
 // for example, in semihosting, the standard I/O handles must be opened
 // via the SYS_OPEN operation, and this function is where libsemihost.a does it.

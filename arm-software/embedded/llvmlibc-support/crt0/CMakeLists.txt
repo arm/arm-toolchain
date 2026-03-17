@@ -13,6 +13,7 @@ set(CRT0_COMMON_SOURCES
   misc.cpp
   system_registers_a.cpp
   system_registers_m.cpp
+  tls.cpp
 )
 
 # crt0 with nohost implementation of platform initialization and finalization

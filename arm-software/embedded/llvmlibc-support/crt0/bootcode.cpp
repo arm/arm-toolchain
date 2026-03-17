@@ -40,6 +40,7 @@ void do_start() {
   _platform_setup_arch_extensions();
 
   _platform_init_data_segments();
+  _platform_init_tls();
 
   __libc_init_array();
   _platform_init();
