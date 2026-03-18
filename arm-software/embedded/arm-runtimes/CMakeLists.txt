@@ -766,6 +766,8 @@ if(C_LIBRARY STREQUAL llvmlibc)
         # Let CMake know we're cross-compiling
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
+        -DLLVM_EXTERNAL_LIT=${external_lit_path}
+        -DLLVM_LIT_ARGS=${LLVM_LIT_ARGS}
     )
 
     ExternalProject_Add(
@@ -844,6 +846,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
     if(ENABLE_LIBC_TESTS)
         add_custom_target(check-llvmlibc)
+        add_custom_target(check-llvmlibc-lit)
         add_dependencies(check-all check-llvmlibc)
 
         ExternalProject_Add_Step(
@@ -855,8 +858,18 @@ if(C_LIBRARY STREQUAL llvmlibc)
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
         )
+        ExternalProject_Add_Step(
+            llvmlibc
+            check-libc-lit
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc-lit -- -k 0 || true
+            DEPENDEES install
+            USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
+            ALWAYS TRUE
+        )
 
         ExternalProject_Add_StepTargets(llvmlibc check)
+        ExternalProject_Add_StepTargets(llvmlibc check-libc-lit)
         ExternalProject_Add_StepDependencies(
             llvmlibc
             check
@@ -865,8 +878,17 @@ if(C_LIBRARY STREQUAL llvmlibc)
             compiler_rt-install
             cxxlibs-install
         )
-        
+        ExternalProject_Add_StepDependencies(
+            llvmlibc
+            check-libc-lit
+            llvmlibc-build
+            llvmlibc-support-build
+            compiler_rt-install
+            cxxlibs-install
+        )
+
         add_dependencies(check-llvmlibc llvmlibc-check)
+        add_dependencies(check-llvmlibc-lit llvmlibc-check-libc-lit)
     endif()
 endif()
 

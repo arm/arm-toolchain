@@ -685,6 +685,9 @@ set(LLVM_DEFAULT_EXTERNAL_LIT "${LLVM_BINARY_DIR}/bin/llvm-lit")
 
 add_custom_target(check-llvm-toolchain-runtimes)
 set(LLVM_TOOLCHAIN_LIBC_CHECK_TARGETS "")
+if(LLVM_TOOLCHAIN_ENABLE_LLVMLIBC)
+    add_custom_target(check-llvmlibc-lit)
+endif()
 foreach(libc IN LISTS LLVM_TOOLCHAIN_ENABLED_LIBCS)
     set(_libc_multilib_name multilib-${libc})
     set(_libc_check_target check-${_libc_multilib_name}-libc)
@@ -720,6 +723,9 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         check-libc
         ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS}
     )
+    if(TARGET check-llvmlibc-lit)
+        add_dependencies(check-llvm-toolchain-runtimes check-llvmlibc-lit)
+    endif()
 
     if(LIBS_USE_COMPILER_LAUNCHER)
         if(CMAKE_C_COMPILER_LAUNCHER)
@@ -753,6 +759,9 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         set(libc_check_target check-${libc})
         set(libc_public_check_target check-${multilib_project}-libc)
         set(libc_check_targets ${libc_check_target} ${LLVM_TOOLCHAIN_SHARED_CHECK_TARGETS})
+        if(libc STREQUAL llvmlibc)
+            list(APPEND libc_check_targets check-llvmlibc-lit)
+        endif()
 
         ExternalProject_Add(
             ${multilib_project}
