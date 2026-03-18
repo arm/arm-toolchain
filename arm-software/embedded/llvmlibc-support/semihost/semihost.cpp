@@ -133,7 +133,7 @@ void _platform_debug_putc(int c) {
 
 // Helper functions implemented here to avoid dependency on libc which is not
 // available in LLVM libc hermetic testing.
-static int _isspace(int ch) {
+static int _isspace(char ch) {
   return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' || ch == '\v' ||
          ch == '\f';
 }
@@ -147,7 +147,7 @@ __attribute__((no_builtin("strlen"))) static size_t _strlen(const char *str) {
 }
 
 static inline void skip_spaces(const char *&p) {
-  while (_isspace(static_cast<unsigned char>(*p)))
+  while (_isspace(*p))
     ++p;
 }
 
@@ -178,7 +178,7 @@ static int parse_cmdline_buf(char *buf) {
       } else if (quote && c == quote) {
         quote = '\0'; // End quoted section
         continue;
-      } else if (!quote && _isspace(static_cast<unsigned char>(c))) {
+      } else if (!quote && _isspace(c)) {
         break; // End of token
       }
 
