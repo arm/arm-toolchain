@@ -9,10 +9,8 @@
 #include "semihost.h"
 #include "platform.h"
 
-#include <ctype.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 namespace {
@@ -133,8 +131,23 @@ void _platform_debug_putc(int c) {
 // - Escape sequences: \ copies next char as-is unless inside ' quotes
 //   or at the end of the string.
 
+// Helper functions implemented here to avoid dependency on libc which is not
+// available in LLVM libc hermetic testing.
+static int _isspace(int ch) {
+  return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' || ch == '\v' ||
+         ch == '\f';
+}
+
+__attribute__((no_builtin("strlen"))) static size_t _strlen(const char *str) {
+  const char *pend = str;
+  while (*pend) {
+    pend++;
+  }
+  return (size_t)(pend - str);
+}
+
 static inline void skip_spaces(const char *&p) {
-  while (isspace(static_cast<unsigned char>(*p)))
+  while (_isspace(static_cast<unsigned char>(*p)))
     ++p;
 }
 
@@ -165,7 +178,7 @@ static int parse_cmdline_buf(char *buf) {
       } else if (quote && c == quote) {
         quote = '\0'; // End quoted section
         continue;
-      } else if (!quote && isspace(static_cast<unsigned char>(c))) {
+      } else if (!quote && _isspace(static_cast<unsigned char>(c))) {
         break; // End of token
       }
 
@@ -184,7 +197,7 @@ static int fill_argv_from_parsed_buf(const char *buf, const char **argv,
                                      int argc) {
   for (int i = 0; i < argc; i++) {
     argv[i] = buf;
-    buf += strlen(buf) + 1;
+    buf += _strlen(buf) + 1;
   }
   argv[argc] = nullptr;
   return argc;
