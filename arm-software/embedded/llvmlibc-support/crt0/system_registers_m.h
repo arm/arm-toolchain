@@ -18,8 +18,8 @@
 namespace bootcode {
 namespace sysreg {
 
-// System register names and the address each is located at
-#define REGNAMES                                                               \
+// System registers that are memory-mapped.
+#define MEM_REGNAMES                                                           \
   REGNAME(ICTR, 0xE000E004)                                                    \
   REGNAME(SYST_CSR, 0xE000E010)                                                \
   REGNAME(SYST_RVR, 0xE000E014)                                                \
@@ -41,9 +41,21 @@ namespace sysreg {
   REGNAME(SFAR, 0xE000EDE8)                                                    \
   REGNAME(FPCCR, 0xE000EF34)
 
+// System registers that are accessed using mrs/msr.
+#define MRS_REGNAMES                                                           \
+  REGNAME(CONTROL, 0)                                                          \
+  REGNAME(PAC_KEY_P_0, 0)                                                      \
+  REGNAME(PAC_KEY_P_1, 0)                                                      \
+  REGNAME(PAC_KEY_P_2, 0)                                                      \
+  REGNAME(PAC_KEY_P_3, 0)                                                      \
+  REGNAME(PAC_KEY_U_0, 0)                                                      \
+  REGNAME(PAC_KEY_U_1, 0)                                                      \
+  REGNAME(PAC_KEY_U_2, 0)                                                      \
+  REGNAME(PAC_KEY_U_3, 0)
+
 enum class SysRegName {
 #define REGNAME(X, Y) X,
-  REGNAMES
+  MEM_REGNAMES MRS_REGNAMES
 #undef REGNAME
 };
 
@@ -55,7 +67,8 @@ template <SysRegName Name> class SysRegTraits {};
   public:                                                                      \
     static constexpr unsigned long Addr = Y;                                   \
   };
-REGNAMES
+MEM_REGNAMES
+MRS_REGNAMES
 #undef REGNAME
 
 template <SysRegName Name> class SysReg : public SysRegBase<SysReg<Name>> {
@@ -76,6 +89,20 @@ public:
     return *this;
   }
 };
+
+#define REGNAME(X, Y)                                                          \
+  template <>                                                                  \
+  [[clang::always_inline]] inline unsigned long                                \
+  SysReg<SysRegName::X>::read() {                                              \
+    return __arm_rsr(#X);                                                      \
+  }                                                                            \
+  template <>                                                                  \
+  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(           \
+      unsigned long val) {                                                     \
+    __arm_wsr(#X, val);                                                        \
+  }
+MRS_REGNAMES
+#undef REGNAME
 
 // Register sets, the base address, and the maximum member index
 #define REGSETNAMES REGNAME(NVIC_ICERn, 0xE000E180, 15)
@@ -242,6 +269,18 @@ public:
   Bit<31> ASPEN;
 };
 
+class CONTROL_Class : public SysReg<SysRegName::CONTROL> {
+public:
+  Bit<0> nPRIV;
+  Bit<1> SPSEL;
+  Bit<2> FPCA;
+  Bit<3> SFPA;
+  Bit<4> BTI_EN;
+  Bit<5> UBTI_EN;
+  Bit<6> PAC_EN;
+  Bit<7> UPAC_EN;
+};
+
 extern ICTR_Class ICTR;
 extern SYST_CSR_Class SYST_CSR;
 extern SysReg<SysRegName::SYST_RVR> SYST_RVR;
@@ -262,6 +301,15 @@ extern MPU_CTRL_Class MPU_CTRL;
 extern SysReg<SysRegName::SFSR> SFSR;
 extern SysReg<SysRegName::SFAR> SFAR;
 extern FPCCR_Class FPCCR;
+extern CONTROL_Class CONTROL;
+extern SysReg<SysRegName::PAC_KEY_P_0> PAC_KEY_P_0;
+extern SysReg<SysRegName::PAC_KEY_P_1> PAC_KEY_P_1;
+extern SysReg<SysRegName::PAC_KEY_P_2> PAC_KEY_P_2;
+extern SysReg<SysRegName::PAC_KEY_P_3> PAC_KEY_P_3;
+extern SysReg<SysRegName::PAC_KEY_U_0> PAC_KEY_U_0;
+extern SysReg<SysRegName::PAC_KEY_U_1> PAC_KEY_U_1;
+extern SysReg<SysRegName::PAC_KEY_U_2> PAC_KEY_U_2;
+extern SysReg<SysRegName::PAC_KEY_U_3> PAC_KEY_U_3;
 extern SysRegSet<SysRegSetName::NVIC_ICERn> NVIC_ICER;
 
 } // namespace sysreg
