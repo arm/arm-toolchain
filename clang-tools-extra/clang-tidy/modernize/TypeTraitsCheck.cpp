@@ -195,7 +195,9 @@ void TypeTraitsCheck::registerMatchers(MatchFinder *Finder) {
                            .bind(Bind),
                        this);
   }
-  Finder->addMatcher(typeLoc(isType()).bind(Bind), this);
+  Finder->addMatcher(
+      traverse(TK_IgnoreUnlessSpelledInSource, typeLoc(isType()).bind(Bind)),
+      this);
 }
 
 static bool isNamedDeclInStdTraitsSet(const NamedDecl *ND,
