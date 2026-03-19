@@ -26,6 +26,8 @@ $ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] https://develope
 $ sudo apt update
 
 $ sudo apt install arm-toolchains-transition
+
+$ sudo apt update
 ```
 
 * Ubuntu 24.04
@@ -38,6 +40,8 @@ $ echo "deb [signed-by=/usr/share/keyrings/obs-oss-arm-com.gpg] https://develope
 $ sudo apt update
 
 $ sudo apt install arm-toolchains-transition
+
+$ sudo apt update
 ```
 
 * Red Hat Enterprise Linux 8
