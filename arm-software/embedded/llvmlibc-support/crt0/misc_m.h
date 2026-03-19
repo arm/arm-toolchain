@@ -43,10 +43,15 @@ extern "C" [[gnu::weak]] void _platform_setup_arch_extensions() {
   // production use!
   // The numbers start with ACnn to make it easy to identify during debugging.
 
-  PAC_KEY_P_0 = PAC_KEY_U_0 = 0xAC0017B4;
-  PAC_KEY_P_1 = PAC_KEY_U_1 = 0xAC01C9E2;
-  PAC_KEY_P_2 = PAC_KEY_U_2 = 0xAC025D8F;
-  PAC_KEY_P_3 = PAC_KEY_U_3 = 0xAC03A641;
+  PAC_KEY_P_0 = 0xAC0017B4;
+  PAC_KEY_P_1 = 0xAC01C9E2;
+  PAC_KEY_P_2 = 0xAC025D8F;
+  PAC_KEY_P_3 = 0xAC03A641;
+
+  PAC_KEY_U_0 = 0xAC104A7C;
+  PAC_KEY_U_1 = 0xAC1191E2;
+  PAC_KEY_U_2 = 0xAC123DB5;
+  PAC_KEY_U_3 = 0xAC13F068;
 
   // Enable PAC in both privileged and unprivileged mode.
   CONTROL.PAC_EN = 1;
