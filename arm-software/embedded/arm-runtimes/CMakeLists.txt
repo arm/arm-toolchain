@@ -861,7 +861,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ExternalProject_Add_Step(
             llvmlibc
             check-libc-lit
-            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc-lit -- -k 0 || true
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc-lit
             DEPENDEES install
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
