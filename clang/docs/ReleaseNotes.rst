@@ -920,9 +920,28 @@ Crash and bug fixes
 Improvements
 ^^^^^^^^^^^^
 
-- The `expand-macros <https://clang.llvm.org/docs/analyzer/user-docs/Options.html#expand-macros>`__
+.. |ss| raw:: html
+
+   <strike>
+
+.. |se| raw:: html
+
+   </strike>
+
+.. |br| raw:: html
+
+   <br />
+
+- |ss| The `expand-macros <https://clang.llvm.org/docs/analyzer/user-docs/Options.html#expand-macros>`__
   analyzer config option now formats the macro expansions using LLVM-style
-  clang-format. (#GH154743)
+  clang-format. (#GH154743) |se| |br|
+  **EDIT:** This feature was later reverted from upstream LLVM (#GH186614), and
+  it's currently not planned to land again due to the library dependencies it
+  would need. We didn't revert this change from the release branch for ABI
+  compatibility reasons. We are sorry for the inconvinience.
+  Read more about this in the relevant
+  `LLVM Discourse thread <https://discourse.llvm.org/t/can-we-link-clang-format-into-clanganalysis/89014/7>`__.
+
 - ``[[clang::suppress]]`` now can suppress diagnostics within primary templates.
   (#GH168954)
 - Improved the false-positive suppression for ``std::unique_ptr`` and
