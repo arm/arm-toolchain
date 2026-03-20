@@ -746,6 +746,18 @@ endif()
 if(C_LIBRARY STREQUAL llvmlibc)
     set(test_cmd "${lit_test_executor} @BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
+    set(enable_dummypackeys OFF)
+    set(llvmlibc_test_link_options
+        -nostartfiles
+        -lsemihost
+        -T
+        llvmlibc.ld
+    )
+    if(VARIANT MATCHES "(^|_)pacret_bti(_|$)")
+        set(enable_dummypackeys ON)
+        list(APPEND llvmlibc_test_link_options -ldummypackeys)
+    endif()
+    list(JOIN llvmlibc_test_link_options "," llvmlibc_test_link_options_default)
 
     set(common_llvmlibc_cmake_args
         -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
@@ -789,7 +801,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_ENABLE_RUNTIMES=libc
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
-        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=-nostartfiles,-lsemihost,-T,llvmlibc.ld
+        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
         -DLIBC_TEST_CMD=${test_cmd}
         -DLIBC_TEST_HERMETIC_ONLY=true
         STEP_TARGETS configure build install
@@ -833,6 +845,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DRAM_ADDRESS=${RAM_ADDRESS}
         -DRAM_SIZE=${RAM_SIZE}
         -DSTACK_SIZE=${STACK_SIZE}
+        -DLLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS=${enable_dummypackeys}
         STEP_TARGETS build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE

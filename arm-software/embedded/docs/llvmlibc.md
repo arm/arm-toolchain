@@ -56,6 +56,11 @@ following command line options, in addition to `--target`, `-march` or
   in LLVM's libc in terms of the Arm semihosting API (or else provide
   an alternative implementation of those functions yourself)
 
+* `-ldummypackeys` optionally, for M-profile PACBTI variants only, to
+  install dummy PAC keys for testing and enable PAC/BTI in the default startup
+  hook. Do not use this library in production builds -
+  override `void _platform_setup_arch_extensions()` instead, see below.
+
 * `-T llvmlibc.ld` to include the default linker script. Alternatively,
   you can include the linker script in your custom linker script,
   similar to [how `picolibc.ld` is used](https://github.com/picolibc/picolibc/blob/main/doc/linking.md#using-picolibcld),
