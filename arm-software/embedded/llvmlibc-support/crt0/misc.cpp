@@ -11,6 +11,10 @@
 #if __ARM_ARCH_PROFILE == 'A' || __ARM_ARCH_PROFILE == 'R'
 #include "misc_a.h"
 #elif __ARM_ARCH_PROFILE == 'M'
+
+#define MISC_M_PLATFORM_SETUP_ARCH_EXTENSIONS_STRONG 0
+#define MISC_M_PLATFORM_SETUP_ARCH_EXTENSIONS_SETUP_DUMMY_PAC_KEYS 0
+
 #include "misc_m.h"
 #else
 // ARMv4T
