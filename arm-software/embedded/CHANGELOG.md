@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 ### Changed
 ### Deprecated
+- Intel-based Mac support is deprecated: in a future release the Darwin binary
+package will be converted from `universal` to `arm64`-only. ATfE will keep the
+CMake option to build the `universal` package from source.
+
 ### Removed
 ### Fixed
 ### Security
