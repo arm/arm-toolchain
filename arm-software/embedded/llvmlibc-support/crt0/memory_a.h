@@ -72,6 +72,7 @@ void invalidate_cache() {
       }
     }
   }
+  __dsb(0xf);
 }
 
 void enable_cache() {
