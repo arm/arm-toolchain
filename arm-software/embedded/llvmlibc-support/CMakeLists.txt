@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
-# This directory builds two additional library files to go with llvm-libc:
+# This directory builds additional library files to go with llvm-libc:
 #
 # libcrt0.a contains an implementation of the _start() default entry point,
 # which sets up the stack and does any necessary initialization before
@@ -14,6 +14,10 @@
 # libsemihost.a implements llvm-libc's porting function API such as
 # __llvm_libc_stdio_write, in terms of the Arm semihosting system.
 #
+# libdummypackeys.a is an opt-in test-only helper for M-profile PACBTI
+# variants. It overrides the default architecture-extension hook with fixed
+# dummy PAC keys.
+#
 # To use LLVM libc in a semihosting context, include both of these
 # libraries. To use it in a different context, you will need to
 # reimplement the same functions that libsemihost.a provides, but
@@ -21,6 +25,12 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 project(llvmlibc-support LANGUAGES C CXX ASM)
+
+option(
+    LLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS
+    "Build the opt-in dummy PAC key helper library for M-profile PACBTI testing."
+    OFF
+)
 
 add_subdirectory(crt0) # crt0, crt0-none and crt0-semihost
 add_subdirectory(semihost)

@@ -39,6 +39,15 @@ MPU_CTRL_Class MPU_CTRL;
 SysReg<SysRegName::SFSR> SFSR;
 SysReg<SysRegName::SFAR> SFAR;
 FPCCR_Class FPCCR;
+CONTROL_Class CONTROL;
+SysReg<SysRegName::PAC_KEY_P_0> PAC_KEY_P_0;
+SysReg<SysRegName::PAC_KEY_P_1> PAC_KEY_P_1;
+SysReg<SysRegName::PAC_KEY_P_2> PAC_KEY_P_2;
+SysReg<SysRegName::PAC_KEY_P_3> PAC_KEY_P_3;
+SysReg<SysRegName::PAC_KEY_U_0> PAC_KEY_U_0;
+SysReg<SysRegName::PAC_KEY_U_1> PAC_KEY_U_1;
+SysReg<SysRegName::PAC_KEY_U_2> PAC_KEY_U_2;
+SysReg<SysRegName::PAC_KEY_U_3> PAC_KEY_U_3;
 SysRegSet<SysRegSetName::NVIC_ICERn> NVIC_ICER;
 
 } // namespace sysreg
