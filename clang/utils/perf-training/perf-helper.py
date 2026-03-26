@@ -276,6 +276,9 @@ def get_cc1_command_for_args(cmd, env):
             or ln.startswith(" (in-process)")
             or ln.startswith("Configuration file:")
             or ln.startswith("Build config:")
+            # Begin downstream change #805
+            or ln.startswith("Arm Toolchain ID:")
+            # End downstream change #805
             or " version " in ln
         ):
             continue
