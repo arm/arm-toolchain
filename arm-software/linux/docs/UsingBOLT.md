@@ -124,7 +124,7 @@ As these heatmaps are usually big, we suggest using the `aha` utility to
 convert them into HTML pages and view them in a web browser:
 
 ```
-$ aha -b -f heatmap-orig.txt heatmap-orig.htm
+$ aha -b -f heatmap-orig.txt heatmap-orig.html
 
 $ aha -b -f heatmap-bolt.txt heatmap-bolt.html
 ```
