@@ -12,7 +12,7 @@
       "tag": "9626fb83b8214e1da94987a471c7a4e2c0397db9"
     },
     "newlib": {
-      "url": "https://github.com/arm/newlib-cygwin-mirror",
+      "url": "https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git",
       "tagType": "commithash",
       "tag": "8ba4275b83ec27529f67e0d477611fa6d8d6e6bd"
     }
