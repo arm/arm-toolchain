@@ -71,6 +71,7 @@ void invalidate_cache() {
         }
       }
     }
+    __dsb(0xf); // Ensure completion of previous cache maintenance instruction
   }
 }
 
