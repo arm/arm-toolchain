@@ -57,6 +57,9 @@ static uintptr_t __llvm_libc_thread_pointer = 0;
 #endif
 
 [[gnu::weak]] void _platform_init_tls() {
+  // Linker defined symbols for TLS must be aligned in the linker script to
+  // meet the ABI requirements, see for an example:
+  // https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/llvmlibc-support/llvmlibc.ld.in
   if (linker_value(__tls_size) == 0 || linker_value(__tls_first) == 0)
     return;
 
