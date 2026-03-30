@@ -47,7 +47,7 @@ jobs:
             test_script: ''
             install_script: install_dependencies.ps1
             target_os: Windows-2022-x86_64
-            runner: ToolchainGroup_LargeRunner_Windows-x64
+            runner: ah-windows_2022-c7a_24x-200
 
           - build_script: build.sh
             test_script: test.sh
