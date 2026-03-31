@@ -14,12 +14,12 @@
 
 stshh keep
 // CHECK-INST: stshh keep
-// CHECK-ENCODING: encoding: [0x1f,0x96,0x01,0xd5]
+// CHECK-ENCODING: encoding: [0x1f,0x26,0x03,0xd5]
 // CHECK-ERROR: error: instruction requires: pcdphint
-// CHECK-UNKNOWN:  d501961f      msr S0_1_C9_C6_0, xzr
+// CHECK-UNKNOWN:  d503261f      hint #0x30
 
 stshh strm
 // CHECK-INST: stshh strm
-// CHECK-ENCODING: encoding: [0x3f,0x96,0x01,0xd5]
+// CHECK-ENCODING: encoding: [0x3f,0x26,0x03,0xd5]
 // CHECK-ERROR: error: instruction requires: pcdphint
-// CHECK-UNKNOWN:  d501963f      msr S0_1_C9_C6_1, xzr
+// CHECK-UNKNOWN:  d503263f      hint #0x31
