@@ -583,7 +583,7 @@ def main():
                 "aarch64r_soft_nofp_exn_rtti_unaligned",
                 "aarch64r_be_exn_rtti",
                 "aarch64r_be_soft_nofp_exn_rtti",
-                "armv8m.main_soft_nofp_exn_rtti_unaligned_size"
+                "armv8m.main_soft_nofp_exn_rtti_unaligned_size",
             ],
             description="std::regex exponential match/search tests abort at runtime (exit status 134)",
         ),
