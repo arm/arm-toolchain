@@ -8,5 +8,3 @@
 # Upgrade pip and install meson
 python -m pip install --upgrade pip
 python -m pip install meson==1.2.3
-
-cmake --version
