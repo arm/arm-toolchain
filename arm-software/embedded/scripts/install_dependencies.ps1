@@ -5,17 +5,6 @@
 #
 # This script installs the essential build dependencies for ATfE.
 
-# Upgrade pip and install dependencies
+# Upgrade pip and install meson
 python -m pip install --upgrade pip
-python -m pip install cmake==4.3.0 meson==1.2.3
-
-# Ensure this step and later workflow steps use the cmake and meson installed
-# by pip, rather than any preinstalled versions on the runner.
-$pythonScriptsDir = python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
-
-$env:PATH = "$pythonScriptsDir;$env:PATH"
-if ($env:GITHUB_PATH) {
-    Add-Content -Path $env:GITHUB_PATH -Value $pythonScriptsDir
-}
-
-cmake --version
+python -m pip install meson==1.2.3
