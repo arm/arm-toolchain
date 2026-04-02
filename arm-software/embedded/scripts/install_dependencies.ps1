@@ -7,12 +7,11 @@
 
 # Upgrade pip and install dependencies
 python -m pip install --upgrade pip
-python -m pip install --user cmake==4.3.0 meson==1.2.3
+python -m pip install cmake==4.3.0 meson==1.2.3
 
-# Ensure this step and later workflow steps use the `cmake.exe` installed by
-# `pip install --user`, rather than any preinstalled CMake on the runner.
-$pythonScriptsDir = python -c "import site; print(site.USER_BASE)"
-$pythonScriptsDir = Join-Path $pythonScriptsDir "Scripts"
+# Ensure this step and later workflow steps use the cmake and meson installed
+# by pip, rather than any preinstalled versions on the runner.
+$pythonScriptsDir = python -c "import sysconfig; print(sysconfig.get_path('scripts'))"
 
 $env:PATH = "$pythonScriptsDir;$env:PATH"
 if ($env:GITHUB_PATH) {
