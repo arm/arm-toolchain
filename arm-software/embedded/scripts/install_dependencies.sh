@@ -12,7 +12,6 @@ set -e
 sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     clang \
     ccache \
-    cmake \
     ninja-build \
     python3-pip \
     python3-setuptools \
@@ -21,4 +20,7 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
 
 # Upgrade pip and install dependencies
 python3 -m pip install --upgrade pip
-python3 -m pip install meson==1.2.3 ruff==0.8.6
+python3 -m pip install --user cmake==4.3.0 meson==1.2.3 ruff==0.8.6
+
+export PATH="${HOME}/.local/bin:${PATH}"
+cmake --version
