@@ -3299,7 +3299,9 @@ class OffloadingActionBuilder final {
 
     /// Tool chains associated with this builder. The same programming
     /// model may have associated one or more tool chains.
+    /// There should be one entry for each TargetID.
     SmallVector<const ToolChain *, 2> ToolChains;
+    const ToolChain *FatBinaryToolChain = nullptr;
 
     /// The derived arguments associated with this builder.
     DerivedArgList &Args;
@@ -3481,9 +3483,9 @@ class OffloadingActionBuilder final {
              llvm::sys::path::extension(FileName) == LibFileExt))
           return ABRT_Inactive;
 
-        for (auto Arch : GpuArchList) {
+        for (auto [Arch, ToolChain] : llvm::zip(GpuArchList, ToolChains)) {
           CudaDeviceActions.push_back(UA);
-          UA->registerDependentActionInfo(ToolChains[0], Arch,
+          UA->registerDependentActionInfo(ToolChain, Arch,
                                           AssociatedOffloadKind);
         }
         IsActive = true;
@@ -3495,15 +3497,16 @@ class OffloadingActionBuilder final {
 
     void appendTopLevelActions(ActionList &AL) override {
       // Utility to append actions to the top level list.
-      auto AddTopLevel = [&](Action *A, TargetID TargetID) {
+      auto AddTopLevel = [&](Action *A, TargetID TargetID,
+                             const ToolChain *TC) {
         OffloadAction::DeviceDependences Dep;
-        Dep.add(*A, *ToolChains.front(), TargetID, AssociatedOffloadKind);
+        Dep.add(*A, *TC, TargetID, AssociatedOffloadKind);
         AL.push_back(C.MakeAction<OffloadAction>(Dep, A->getType()));
       };
 
       // If we have a fat binary, add it to the list.
       if (CudaFatBinary) {
-        AddTopLevel(CudaFatBinary, OffloadArch::Unused);
+        AddTopLevel(CudaFatBinary, OffloadArch::Unused, FatBinaryToolChain);
         CudaDeviceActions.clear();
         CudaFatBinary = nullptr;
         return;
@@ -3517,10 +3520,10 @@ class OffloadingActionBuilder final {
       // architecture.
       assert(CudaDeviceActions.size() == GpuArchList.size() &&
              "Expecting one action per GPU architecture.");
-      assert(ToolChains.size() == 1 &&
-             "Expecting to have a single CUDA toolchain.");
+      assert(ToolChains.size() == GpuArchList.size() &&
+             "Expecting to have a toolchain per GPU architecture");
       for (unsigned I = 0, E = GpuArchList.size(); I != E; ++I)
-        AddTopLevel(CudaDeviceActions[I], GpuArchList[I]);
+        AddTopLevel(CudaDeviceActions[I], GpuArchList[I], ToolChains[I]);
 
       CudaDeviceActions.clear();
     }
@@ -3553,20 +3556,21 @@ class OffloadingActionBuilder final {
         return true;
       }
 
-      std::set<StringRef> GpuArchs;
+      std::set<std::pair<StringRef, const ToolChain *>> GpuArchs;
       for (Action::OffloadKind Kind : {Action::OFK_Cuda, Action::OFK_HIP}) {
         for (auto &I : llvm::make_range(C.getOffloadToolChains(Kind))) {
-          ToolChains.push_back(I.second);
-
           for (auto Arch :
                C.getDriver().getOffloadArchs(C, C.getArgs(), Kind, *I.second))
-            GpuArchs.insert(Arch);
+            GpuArchs.insert({Arch, I.second});
         }
       }
 
-      for (auto Arch : GpuArchs)
+      for (auto [Arch, TC] : GpuArchs) {
         GpuArchList.push_back(Arch.data());
+        ToolChains.push_back(TC);
+      }
 
+      FatBinaryToolChain = ToolChains.front();
       CompileHostOnly = C.getDriver().offloadHostOnly();
       EmitLLVM = Args.getLastArg(options::OPT_emit_llvm);
       EmitAsm = Args.getLastArg(options::OPT_S);
@@ -3650,7 +3654,7 @@ class OffloadingActionBuilder final {
 
           for (auto &A : {AssembleAction, BackendAction}) {
             OffloadAction::DeviceDependences DDep;
-            DDep.add(*A, *ToolChains.front(), GpuArchList[I], Action::OFK_Cuda);
+            DDep.add(*A, *ToolChains[I], GpuArchList[I], Action::OFK_Cuda);
             DeviceActions.push_back(
                 C.MakeAction<OffloadAction>(DDep, A->getType()));
           }
@@ -3662,7 +3666,7 @@ class OffloadingActionBuilder final {
               C.MakeAction<LinkJobAction>(DeviceActions, types::TY_CUDA_FATBIN);
 
           if (!CompileDeviceOnly) {
-            DA.add(*CudaFatBinary, *ToolChains.front(), /*BoundArch=*/nullptr,
+            DA.add(*CudaFatBinary, *FatBinaryToolChain, /*BoundArch=*/nullptr,
                    Action::OFK_Cuda);
             // Clear the fat binary, it is already a dependence to an host
             // action.
@@ -3793,8 +3797,8 @@ class OffloadingActionBuilder final {
             // compiler phases, including backend and assemble phases.
             ActionList AL;
             Action *BackendAction = nullptr;
-            if (ToolChains.front()->getTriple().isSPIRV() ||
-                (ToolChains.front()->getTriple().isAMDGCN() &&
+            if (ToolChains[I]->getTriple().isSPIRV() ||
+                (ToolChains[I]->getTriple().isAMDGCN() &&
                  GpuArchList[I] == StringRef("amdgcnspirv"))) {
               // Emit LLVM bitcode for SPIR-V targets. SPIR-V device tool chain
               // (HIPSPVToolChain or HIPAMDToolChain) runs post-link LLVM IR
@@ -3825,7 +3829,7 @@ class OffloadingActionBuilder final {
           // device arch of the next action being propagated to the above link
           // action.
           OffloadAction::DeviceDependences DDep;
-          DDep.add(*CudaDeviceActions[I], *ToolChains.front(), GpuArchList[I],
+          DDep.add(*CudaDeviceActions[I], *ToolChains[I], GpuArchList[I],
                    AssociatedOffloadKind);
           CudaDeviceActions[I] = C.MakeAction<OffloadAction>(
               DDep, CudaDeviceActions[I]->getType());
@@ -3837,7 +3841,7 @@ class OffloadingActionBuilder final {
                                                       types::TY_HIP_FATBIN);
 
           if (!CompileDeviceOnly) {
-            DA.add(*CudaFatBinary, *ToolChains.front(), /*BoundArch=*/nullptr,
+            DA.add(*CudaFatBinary, *FatBinaryToolChain, /*BoundArch=*/nullptr,
                    AssociatedOffloadKind);
             // Clear the fat binary, it is already a dependence to an host
             // action.
@@ -3880,7 +3884,7 @@ class OffloadingActionBuilder final {
           *BundleOutput) {
         for (unsigned I = 0, E = GpuArchList.size(); I != E; ++I) {
           OffloadAction::DeviceDependences DDep;
-          DDep.add(*CudaDeviceActions[I], *ToolChains.front(), GpuArchList[I],
+          DDep.add(*CudaDeviceActions[I], *ToolChains[I], GpuArchList[I],
                    AssociatedOffloadKind);
           CudaDeviceActions[I] = C.MakeAction<OffloadAction>(
               DDep, CudaDeviceActions[I]->getType());
@@ -3918,8 +3922,8 @@ class OffloadingActionBuilder final {
         // Linking all inputs for the current GPU arch.
         // LI contains all the inputs for the linker.
         OffloadAction::DeviceDependences DeviceLinkDeps;
-        DeviceLinkDeps.add(*DeviceLinkAction, *ToolChains[0],
-            GpuArchList[I], AssociatedOffloadKind);
+        DeviceLinkDeps.add(*DeviceLinkAction, *ToolChains[I], GpuArchList[I],
+                           AssociatedOffloadKind);
         Actions.push_back(C.MakeAction<OffloadAction>(
             DeviceLinkDeps, DeviceLinkAction->getType()));
         ++I;
@@ -3940,7 +3944,7 @@ class OffloadingActionBuilder final {
         auto *TopDeviceLinkAction = C.MakeAction<LinkJobAction>(
             Actions,
             CompileDeviceOnly ? types::TY_HIP_FATBIN : types::TY_Object);
-        DDeps.add(*TopDeviceLinkAction, *ToolChains[0], nullptr,
+        DDeps.add(*TopDeviceLinkAction, *FatBinaryToolChain, nullptr,
                   AssociatedOffloadKind);
         // Offload the host object to the host linker.
         AL.push_back(
