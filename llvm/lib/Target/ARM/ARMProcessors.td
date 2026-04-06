@@ -347,6 +347,15 @@ def : ProcessorModel<"cortex-m4", CortexM4Model,        [ARMv7em,
                                                          FeatureUseMISched,
                                                          FeatureHasNoBranchPredictor]>;
 
+def : ProcessorModel<"cortex-m4-v41630", CortexM4Model, [ARMv7em,
+                                                         FeatureVFP4_D16_SP,
+                                                         FeaturePreferBranchAlign32,
+                                                         FeatureHasSlowFPVMLx,
+                                                         FeatureHasSlowFPVFMx,
+                                                         FeatureUseMISched,
+                                                         FeatureHasNoBranchPredictor,
+                                                         FeatureBadStrb]>;
+
 def : ProcessorModel<"cortex-m7", CortexM7Model,        [ARMv7em,
                                                          ProcM7,
                                                          FeatureFPARMv8_D16,

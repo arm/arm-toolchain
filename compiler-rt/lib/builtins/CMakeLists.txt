@@ -466,6 +466,7 @@ set(arm_or_thumb2_base_SOURCES
   arm/udivmodsi4.S
   arm/udivsi3.S
   arm/umodsi3.S
+  arm/badstrb_strb.c
   ${GENERIC_SOURCES}
 )
 

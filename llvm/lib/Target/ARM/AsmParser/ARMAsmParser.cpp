@@ -12989,6 +12989,7 @@ bool ARMAsmParser::enableArchExtFeature(StringRef Name, SMLoc &ExtLoc) {
       {ARM::AEK_RAS, {Feature_HasV8Bit}, {ARM::FeatureRAS}},
       {ARM::AEK_LOB, {Feature_HasV8_1MMainlineBit}, {ARM::FeatureLOB}},
       {ARM::AEK_PACBTI, {Feature_HasV8_1MMainlineBit}, {ARM::FeaturePACBTI}},
+      {ARM::AEK_BADSTRB, {}, {ARM::FeatureBadStrb}},
       // FIXME: Unsupported extensions.
       {ARM::AEK_OS, {}, {}},
       {ARM::AEK_IWMMXT, {}, {}},

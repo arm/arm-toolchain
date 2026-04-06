@@ -258,6 +258,7 @@ ARM_ARCH_EXT_NAME("cdecp5", ARM::AEK_CDECP5, "+cdecp5", "-cdecp5")
 ARM_ARCH_EXT_NAME("cdecp6", ARM::AEK_CDECP6, "+cdecp6", "-cdecp6")
 ARM_ARCH_EXT_NAME("cdecp7", ARM::AEK_CDECP7, "+cdecp7", "-cdecp7")
 ARM_ARCH_EXT_NAME("pacbti", ARM::AEK_PACBTI, "+pacbti", "-pacbti")
+ARM_ARCH_EXT_NAME("badstrb", ARM::AEK_BADSTRB, "+badstrb", "-badstrb")
 #undef ARM_ARCH_EXT_NAME
 
 #ifndef ARM_HW_DIV_NAME
@@ -344,6 +345,7 @@ ARM_CPU_NAME("cortex-r52plus", ARMV8R, FK_NEON_FP_ARMV8, false, ARM::AEK_NONE)
 ARM_CPU_NAME("sc300", ARMV7M, FK_NONE, false, ARM::AEK_NONE)
 ARM_CPU_NAME("cortex-m3", ARMV7M, FK_NONE, true, ARM::AEK_NONE)
 ARM_CPU_NAME("cortex-m4", ARMV7EM, FK_FPV4_SP_D16, true, ARM::AEK_NONE)
+ARM_CPU_NAME("cortex-m4-v41630", ARMV7EM, FK_FPV4_SP_D16, true, ARM::AEK_NONE | ARM::AEK_BADSTRB)
 ARM_CPU_NAME("cortex-m7", ARMV7EM, FK_FPV5_D16, false, ARM::AEK_NONE)
 ARM_CPU_NAME("cortex-m23", ARMV8MBaseline, FK_NONE, false, ARM::AEK_NONE)
 ARM_CPU_NAME("cortex-m33", ARMV8MMainline, FK_FPV5_SP_D16, false, ARM::AEK_DSP)

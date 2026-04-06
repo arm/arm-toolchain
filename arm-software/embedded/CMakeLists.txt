@@ -117,7 +117,7 @@ set(LLVM_TOOLCHAIN_MULTILIB_JSON
     "JSON file defining the multilib."
 )
 set(LLVM_TOOLCHAIN_LIBRARY_VARIANTS
-    "armv7m_hard_fpv4_sp_d16_unaligned" CACHE STRING
+    "armv7m_hard_fpv4_sp_d16_unaligned;armv7m_hard_fpv4_sp_d16_unaligned_badstrb" CACHE STRING
     "Build only the specified library variants, or \"all\"."
 )
 option(

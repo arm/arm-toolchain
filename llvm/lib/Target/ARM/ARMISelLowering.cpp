@@ -931,7 +931,10 @@ ARMTargetLowering::ARMTargetLowering(const TargetMachine &TM_,
       setIndexedLoadAction(im,  MVT::i16, Legal);
       setIndexedLoadAction(im,  MVT::i32, Legal);
       setIndexedStoreAction(im, MVT::i1,  Legal);
-      setIndexedStoreAction(im, MVT::i8,  Legal);
+      if (Subtarget->badStrb())
+        setIndexedStoreAction(im, MVT::i8,  Custom);
+      else
+        setIndexedStoreAction(im, MVT::i8,  Legal);
       setIndexedStoreAction(im, MVT::i16, Legal);
       setIndexedStoreAction(im, MVT::i32, Legal);
     }
@@ -998,6 +1001,11 @@ ARMTargetLowering::ARMTargetLowering(const TargetMachine &TM_,
   setOperationAction(ISD::INTRINSIC_WO_CHAIN, MVT::i64, Custom);
   setOperationAction(ISD::LOAD, MVT::i64, Custom);
   setOperationAction(ISD::STORE, MVT::i64, Custom);
+  if (Subtarget->badStrb()) {
+    setOperationAction(ISD::STORE, MVT::i8, Custom);
+    setTruncStoreAction(MVT::i32, MVT::i8, Custom);
+    setTruncStoreAction(MVT::i16, MVT::i8, Custom);
+  }
 
   // MVE lowers 64 bit shifts to lsll and lsrl
   // assuming that ISD::SRL and SRA of i64 are already marked custom
@@ -10043,6 +10051,30 @@ SDValue ARMTargetLowering::LowerSTORE(SDValue Op, SelectionDAG &DAG,
     return DAG.getMemIntrinsicNode(ARMISD::STRD, dl, DAG.getVTList(MVT::Other),
                                    {ST->getChain(), Lo, Hi, ST->getBasePtr()},
                                    MemVT, ST->getMemOperand());
+  } else if (MemVT == MVT::i8 && Subtarget->badStrb()) {
+    const auto &DL = DAG.getDataLayout();
+    SDValue Chain = ST->getChain();
+    SDValue Val = ST->getValue();
+    SDValue Ptr = ST->getBasePtr();
+    SDLoc dl(ST);
+
+    TargetLowering::ArgListTy Args;
+
+    TargetLowering::ArgListEntry EntryA(nullptr, Ptr, PointerType::getUnqual(*DAG.getContext()));
+    Args.push_back(EntryA);
+
+    TargetLowering::ArgListEntry EntryB(nullptr, Val, Type::getInt8Ty(*DAG.getContext()));
+    Args.push_back(Entry);
+
+    TargetLowering::CallLoweringInfo CLI(DAG);
+    CLI.setDebugLoc(dl).setChain(Chain)
+       .setLibCallee(CallingConv::C,
+                     Type::getVoidTy(*DAG.getContext()),
+                     DAG.getExternalSymbol("__badstrb_strb", getPointerTy(DL)),
+                     std::move(Args));
+
+    std::pair<SDValue, SDValue> CallResult = LowerCallTo(CLI);
+    return CallResult.second; // Return the new chain
   } else if (Subtarget->hasMVEIntegerOps() &&
              ((MemVT == MVT::v2i1 || MemVT == MVT::v4i1 || MemVT == MVT::v8i1 ||
                MemVT == MVT::v16i1))) {

@@ -11,9 +11,32 @@ The binaries built under this project are compatible with RHEL 8.
 
 # Limitations
 
-For compactness, this toolchain supports only armv7m_hard_fpv4_sp_d16_unaligned
-and not any other ARM variants. Other variants will need to be added to
-LLVM_TOOLCHAIN_LIBRARY_VARIANTS in arm-software/embedded/CMakeLists.txt.
+For compactness, this toolchain supports only armv7m_hard_fpv4_sp_d16_unaligned_size
+and armv7m_hard_fpv4_sp_d16_unaligned_badstrb, not any other ARM variants.
+Other variants will need to be added to LLVM_TOOLCHAIN_LIBRARY_VARIANTS in
+arm-software/embedded/CMakeLists.txt.
+
+# Vorago `badstrb` feature
+
+This compiler includes a non-standard feature for the ARM backend called
+`badstrb`. This feature works around an issue in the Vorago VA416x0
+microprocessor with unaligned stores (<16-bit). Any unaligned write to memory
+will corrupt the neighboring byte in a 16-bit word in _external memory_. Many of
+these issues are already resolved by using structure field alignment which
+is standard for compilers. The problem is that 8-bit stores are _always_ going to
+corrupt external memory.
+
+This feature will avoid 8-bit store operations by lowering them to a new compiler_rt
+function `__badstrb_strb`. This function will implement `strb` using an atomic
+load-modify-store in 16-bits.
+
+> [!WARNING]
+> 8-bit atomic operations are discouraged in this toolchain. There is an experimental
+> implementation of these operations in compiler which are _not_ enabled. It is recommeded
+> to use the `verify_nostrb.py` feature in the `fprime-vorago/va416x0-baremetal-nostrb` to
+> validate that these instructions do not exist in the final binary.
+
+To read more about this feature, see [here](https://github.com/fprime-community/llvm-vorago-arm-toolchain/pull/3/).
 
 # Reporting Issues
 

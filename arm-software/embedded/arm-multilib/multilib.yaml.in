@@ -53,6 +53,20 @@ Variants:
 
 Mappings:
 
+# The badstrb Arm feature is to workaround a hardware issue on
+# the Vorago v41630. These two variants will match this feature
+# and provide an additional custom flag to the multilib invocation.
+
+# ARM standard baseline
+- Match: -march=.*\+nobadstrb.*
+  Flags:
+  - -mcustom-feature=nobadstrb
+
+# ARM with strb instructions disabled (except in inline assembly)
+- Match: -march=.*\+badstrb.*
+  Flags:
+  - -mcustom-feature=badstrb
+
 # Map higher architecture versions to subsets of them, so that a
 # compatible library can be found even for architectures we don't have
 # specific variants for.
