@@ -1,0 +1,61 @@
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow runs all build scripts in parallel for multiple operating
+# systems and architectures.
+# It is intended to be triggered as part of a **nightly build** to
+# validate all build configurations and test them automatically.
+#
+# Each build script is paired with a corresponding test script using
+# a matrix strategy. Each build+test pair runs as a separate job,
+# allowing for concurrency and clear traceability of failures.
+
+name: ATfL Nightly Build and Test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'  # Every day at 06:00 UTC
+
+jobs:
+  build-and-test-toolchain:
+    name: Build ${{ matrix.build_script }} for ${{ matrix.target_os }} on ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    # Ensure the workflow only runs on the arm-toolchain repository and not on forks
+    if: github.repository == 'arm/arm-toolchain'
+
+    strategy:
+      fail-fast: false  # Prevents one job failure from cancelling all
+      matrix:
+        include:
+          # Complete Toolchain Build & Test
+          - build_script: build.sh
+            install_script: install_dependencies_ubuntu.sh
+            target_os: Ubuntu-22.04-arm64
+            runner: ah-ubuntu_22_04-c7g_8x-100
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add ~/.local/bin to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install Dependencies
+        run: ./arm-software/linux/scripts/${{ matrix.install_script }}
+
+      - name: Build (Unix)
+        run: |
+          set -o pipefail # ensure failure is propagated even when piping to tee
+          ./arm-software/linux/${{ matrix.build_script }} 2>&1 | tee build.log
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: atfl-${{ matrix.build_script }}-${{ matrix.target_os }}
+          path: |
+            arm-software/linux/output/atfl-*.tar.gz
+
