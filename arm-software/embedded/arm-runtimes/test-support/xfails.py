@@ -245,7 +245,7 @@ def main():
                 "armv6m_soft_nofp_exn_rtti_size",
                 "armv6m_soft_nofp_size",
                 "armebv6m_soft_nofp_size",
-                "armebv6m_soft_nofp_exn_rtti_size"
+                "armebv6m_soft_nofp_exn_rtti_size",
             ],
             description="pmr missing or incomplete pstl",
         ),
