@@ -763,6 +763,22 @@ if(C_LIBRARY STREQUAL llvmlibc)
     endif()
     list(JOIN llvmlibc_test_link_options "," llvmlibc_test_link_options_default)
 
+    set(llvmlibc_lit_args "${LLVM_LIT_ARGS}")
+    if(ENABLE_LIBC_TESTS)
+        # Generate xfails for llvmlibc.
+        set(llvmlibc_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_llvmlibc_lit_xfails.txt")
+        add_custom_target(
+            llvmlibc-xfail-lit-args
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
+                --variant ${VARIANT}
+                --project llvmlibc
+                --libc ${C_LIBRARY}
+                --output-args ${llvmlibc_lit_xfails_path}
+        )
+        set(llvmlibc_lit_args "@${llvmlibc_lit_xfails_path} ${llvmlibc_lit_args}")
+    endif()
+
     set(common_llvmlibc_cmake_args
         -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_ASM_COMPILER=${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX}
@@ -807,7 +823,9 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_LIBC_FULL_BUILD=ON
         -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
         -DLIBC_TEST_CMD=${test_cmd}
-        -DLIBC_TEST_HERMETIC_ONLY=true
+        -DLIBC_TEST_HERMETIC_ONLY=ON
+        -DLLVM_EXTERNAL_LIT=${external_lit_path}
+        -DLLVM_LIT_ARGS=${llvmlibc_lit_args}
         STEP_TARGETS configure build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
@@ -861,6 +879,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
     if(ENABLE_LIBC_TESTS)
         add_custom_target(check-llvmlibc)
+        add_custom_target(check-llvmlibc-lit)
         add_dependencies(check-all check-llvmlibc)
 
         ExternalProject_Add_Step(
@@ -873,7 +892,18 @@ if(C_LIBRARY STREQUAL llvmlibc)
             ALWAYS TRUE
         )
 
+        ExternalProject_Add_Step(
+            llvmlibc
+            check-lit
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc-lit
+            DEPENDEES install
+            USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
+            ALWAYS TRUE
+        )
+
         ExternalProject_Add_StepTargets(llvmlibc check)
+        ExternalProject_Add_StepTargets(llvmlibc check-lit)
         ExternalProject_Add_StepDependencies(
             llvmlibc
             check
@@ -882,8 +912,17 @@ if(C_LIBRARY STREQUAL llvmlibc)
             compiler_rt-install
             cxxlibs-install
         )
+        ExternalProject_Add_StepDependencies(
+            llvmlibc
+            check-lit
+            llvmlibc-build
+            llvmlibc-support-build
+            compiler_rt-install
+            cxxlibs-install
+            llvmlibc-xfail-lit-args
+        )
         
-        add_dependencies(check-llvmlibc llvmlibc-check)
+        add_dependencies(check-llvmlibc llvmlibc-check-lit)
     endif()
 endif()
 
@@ -896,6 +935,21 @@ add_dependencies(clib-install ${C_LIBRARY}-install)
 ###############################################################################
 
 if(ENABLE_CXX_LIBS)
+    if(ENABLE_LIBCXX_TESTS)
+        # Generate xfails for libcxx.
+        set(libcxx_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx_lit_xfails.txt")
+        set(libcxx_lit_args "@${libcxx_lit_xfails_path} ${LLVM_LIT_ARGS}"
+        )
+        add_custom_target(
+            libcxx-xfail-lit-args
+            COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
+                --variant ${VARIANT}
+                --project libcxx
+                --libc ${C_LIBRARY}
+                --output-arg ${libcxx_lit_xfails_path}
+        )
+    endif()
     if(C_LIBRARY STREQUAL picolibc)
         set(cxxlibs_extra_cmake_options
             -DLIBCXXABI_ENABLE_THREADS=OFF
@@ -911,19 +965,6 @@ if(ENABLE_CXX_LIBS)
             -DRUNTIMES_USE_LIBC=picolibc
         )
         if(ENABLE_LIBCXX_TESTS)
-            # Generate xfails for libxx.
-            set(libcxx_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx_lit_xfails.txt")
-            set(libcxx_lit_args "@${libcxx_lit_xfails_path} ${LLVM_LIT_ARGS}"
-            )
-            add_custom_target(
-                libcxx-xfail-lit-args
-                COMMAND ${Python3_EXECUTABLE}
-                    ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
-                    --variant ${VARIANT}
-                    --project libcxx
-                    --libc ${C_LIBRARY}
-                    --output-arg ${libcxx_lit_xfails_path}
-            )
             set(cxxlibs_test_cmake_options
                 -DLIBCXX_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++-picolibc.cfg.in
                 -DLIBCXX_TEST_PARAMS=executor=${lit_test_executor}
