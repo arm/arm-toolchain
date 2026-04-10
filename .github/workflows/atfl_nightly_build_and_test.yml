@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Arm Limited and affiliates.
+# Copyright (c) 2026, Arm Limited and affiliates.
 # Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
@@ -47,7 +47,12 @@ jobs:
         run: ./arm-software/linux/scripts/${{ matrix.install_script }}
 
       - name: Install packaging tools
-        run: sudo apt-get update && sudo apt-get install -y rpm ruby-full rubygems
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y rpm ruby-full rubygems dpkg-dev debhelper gettext-base
+          command -v envsubst
+          envsubst --version
 
       - name: Install fpm
         run: sudo gem install --no-document fpm
@@ -56,28 +61,119 @@ jobs:
         run: rm -rf arm-software/linux/output arm-software/linux/build
 
       - name: Build (Unix)
+        shell: bash
         run: |
           set -o pipefail # ensure failure is propagated even when piping to tee
           ./arm-software/linux/${{ matrix.build_script }} 2>&1 | tee build.log
 
-      - name: Create deb and rpm packages
+      - name: Create deb package
+        shell: bash
         run: |
           set -euo pipefail
-          cd arm-software/linux/output
-          tarball=$(ls atfl-*.tar.gz | head -n1)
-          rm -rf pkg
-          mkdir pkg && tar -xzf "$tarball" -C pkg
-          version=$(echo "$tarball" | sed -E 's/^atfl-([^-]+)-.*$/\1/')
-          fpm -s dir -t deb -n atfl -v "$version" -a arm64 --prefix /opt/atfl -C pkg/atfl --package "atfl-${version}-1-arm64.deb" .
-          fpm -s dir -t rpm -n atfl -v "$version" -a aarch64 --prefix /opt/atfl -C pkg/atfl --package "atfl-${version}-1.aarch64.rpm" .
+          shopt -s nullglob
+
+          WORKDIR="${GITHUB_WORKSPACE}/arm-software/linux/output"
+          cd "$WORKDIR"
+
+          PRODUCT_NAME="arm-toolchain-for-linux"
+          PACKAGE_BRANCH_VERSION="0.0"
+          PACKAGE_BUILD_NUMBER="0"
+          PACKAGE_NAME="${PRODUCT_NAME}-${PACKAGE_BRANCH_VERSION}-${PACKAGE_BUILD_NUMBER}"
+          DISTRO="ubuntu-22"
+          DISTRO_TAG="jammy"
+          PACK_DATE="$(date -R)"
+          DPKG_BINARY_DIR="${PRODUCT_NAME}-${PACKAGE_BRANCH_VERSION}"
+
+          export PRODUCT_NAME PACKAGE_BRANCH_VERSION PACKAGE_BUILD_NUMBER
+          export PACKAGE_NAME DISTRO DISTRO_TAG PACK_DATE DPKG_BINARY_DIR
+
+          PKG_DIR="$WORKDIR/$PACKAGE_NAME/DEB/$DPKG_BINARY_DIR"
+
+          rm -rf "$WORKDIR/$PACKAGE_NAME"
+          mkdir -p "$PKG_DIR"
+
+          tarballs=(atfl-*.tar.gz)
+          if [ "${#tarballs[@]}" -ne 1 ]; then
+            echo "Expected exactly one atfl-*.tar.gz, found ${#tarballs[@]}"
+            exit 1
+          fi
+          tarball="${tarballs[0]}"
+          echo "tarball: $tarball"
+
+          sudo mkdir -p /opt/arm
+          sudo rm -rf "/opt/arm/$PRODUCT_NAME"
+
+          sudo tar -xzf "$tarball" -C /opt/arm
+
+          if [ -d "/opt/arm/atfl" ]; then
+            sudo mv "/opt/arm/atfl" "/opt/arm/$PRODUCT_NAME"
+          fi
+
+          if [ ! -f "/opt/arm/$PRODUCT_NAME/arm/mkmoduledirs.sh" ]; then
+            echo "Expected extracted toolchain under /opt/arm/$PRODUCT_NAME"
+            exit 1
+          fi
+
+          sudo sed -i \
+            -e "s/^ATFL_VERSION=.*$/ATFL_VERSION=${PACKAGE_BRANCH_VERSION}/" \
+            -e "s/^ATFL_BUILD=.*$/ATFL_BUILD=${PACKAGE_BUILD_NUMBER}/" \
+            -e "s|^ATFL_INSTALL_PREFIX=.*$|ATFL_INSTALL_PREFIX=/opt/arm/${PRODUCT_NAME}|" \
+            "/opt/arm/$PRODUCT_NAME/arm/mkmoduledirs.sh"
+
+          (
+            umask 022
+            cd /opt/arm
+            sudo "./$PRODUCT_NAME/arm/mkmoduledirs.sh"
+          )
+
+          LLVM_HOST_TRIPLE="aarch64-unknown-linux-gnu"
+
+          if [ -f /opt/arm/arm-performance-libraries/lib/libamath.so ] && \
+             [ -f /opt/arm/arm-performance-libraries/lib/libamath.a ]; then
+            sudo ln -sfn /opt/arm/arm-performance-libraries/lib/libamath.so \
+              "/opt/arm/$PRODUCT_NAME/lib/$LLVM_HOST_TRIPLE/libamath.so"
+            sudo ln -sfn /opt/arm/arm-performance-libraries/lib/libamath.a \
+              "/opt/arm/$PRODUCT_NAME/lib/$LLVM_HOST_TRIPLE/libamath.a"
+          else
+            echo "Arm Performance Libraries not present; skipping libamath symlinks"
+          fi
+
+          mkdir -p "$WORKDIR/$PACKAGE_NAME/DEB"
+          mkdir -p "$PKG_DIR/opt"
+          sudo cp -a /opt/arm "$PKG_DIR/opt/"
+
+          cp -r "${GITHUB_WORKSPACE}/arm-software/linux/scripts/packaging/debian" \
+            "$WORKDIR/$PACKAGE_NAME/DEB"
+
+          for srcctl in changelog control rules; do
+            envsubst < "$WORKDIR/$PACKAGE_NAME/DEB/debian/${srcctl}.in" \
+              > "$WORKDIR/$PACKAGE_NAME/DEB/debian/${srcctl}"
+          done
+
+          cd "$WORKDIR/$PACKAGE_NAME/DEB"
+          dpkg-buildpackage -us -uc --build=binary
+
+      - name: List built artifacts
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          find arm-software/linux/output -maxdepth 3 -type f \( -name '*.tar.gz' -o -name '*.deb' \) | sort
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && env.ACT != 'true' }}
+        with:
+          name: build-log-${{ matrix.target_os }}
+          path: build.log
+          if-no-files-found: warn
 
       - name: Upload built packages
         uses: actions/upload-artifact@v4
-        if: success()
+        if: ${{ success() && env.ACT != 'true' }}
         with:
           name: atfl-${{ matrix.build_script }}-${{ matrix.target_os }}
           path: |
             arm-software/linux/output/atfl-*.tar.gz
-            arm-software/linux/output/*.deb
-            arm-software/linux/output/*.rpm
+            arm-software/linux/output/**/*.deb
 
