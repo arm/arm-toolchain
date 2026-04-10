@@ -87,6 +87,8 @@ clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles 
 >   * `void _platform_setup_exceptions()`
 >   * `void _platform_setup_memory()`
 >   * `void _platform_setup_arch_extensions()`
+>   * `void _platform_init_data_segments()`
+>   * `void _platform_init_tls()`
 >   * `void _platform_init()`
 >   * `void _platform_debug_putc(int c)`
 >   * `int _platform_get_argv(char *cmdline, int max_cmdline, const char **argv, int max_argv)`
@@ -103,6 +105,7 @@ functions in this order:
 1. `void _platform_setup_memory()`
 1. `void _platform_setup_arch_extensions()`
 1. `void _platform_init_data_segments()`
+1. `void _platform_init_tls()`
 1. `void _platform_init()`
 
 You can override any of these functions in your application to customize.
@@ -124,6 +127,10 @@ a cryptographic key.
   * `__data_size` - the size of the read-write data segment to be copied.
   * `__bss_start` - the address of the start of the BSS region.
   * `__bss_size` - the size of the BSS region to be cleared.
+* `void _platform_init_tls()` - Initialize the initial thread-local storage
+  block for the startup thread. By default, this uses the picolibc-compatible
+  linker script symbols `__tls_first`, `__tls_size`,
+  `__arm32_tls_tcb_offset`, and `__arm64_tls_tcb_offset`.
 * `void _platform_init()` - Any other initialization right before the main
 function is called, for example, setup standard I/O streams.
 
