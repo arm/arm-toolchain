@@ -520,6 +520,7 @@ def main():
                 "aarch64a_be_soft_nofp",
                 "aarch64a_be_soft_nofp_exn_rtti",
                 "aarch64r",
+                "aarch64r_unaligned",
                 "aarch64r_soft_nofp",
                 "aarch64r_soft_nofp_unaligned",
                 "aarch64r_soft_nofp_exn_rtti",
