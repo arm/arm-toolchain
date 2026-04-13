@@ -401,7 +401,6 @@ def main():
                 "aarch64a_exn_rtti_unaligned",
                 "aarch64a_soft_nofp",
                 "aarch64a_soft_nofp_exn_rtti",
-                "aarch64r_unaligned",
                 "armebv6m_soft_nofp_exn_rtti_size",
                 "armebv6m_soft_nofp_size",
                 "armebv7a_hard_vfpv3_d16",
