@@ -100,17 +100,17 @@ jobs:
           tarball="${tarballs[0]}"
           echo "tarball: $tarball"
 
-          sudo mkdir -p /opt/arm
-          sudo rm -rf "/opt/arm/$PRODUCT_NAME"
+          sudo rm -rf "${GITHUB_WORKSPACE}/opt/arm/$PRODUCT_NAME"
+          sudo mkdir -p "${GITHUB_WORKSPACE}/opt/arm"
 
-          sudo tar -xzf "$tarball" -C /opt/arm
+          sudo tar -xzf "$tarball" -C "${GITHUB_WORKSPACE}/opt/arm"
 
-          if [ -d "/opt/arm/atfl" ]; then
-            sudo mv "/opt/arm/atfl" "/opt/arm/$PRODUCT_NAME"
+          if [ -d "${GITHUB_WORKSPACE}/opt/arm/atfl" ]; then
+            sudo mv "${GITHUB_WORKSPACE}/opt/arm/atfl" "${GITHUB_WORKSPACE}/opt/arm/$PRODUCT_NAME"
           fi
 
-          if [ ! -f "/opt/arm/$PRODUCT_NAME/arm/mkmoduledirs.sh" ]; then
-            echo "Expected extracted toolchain under /opt/arm/$PRODUCT_NAME"
+          if [ ! -f "${GITHUB_WORKSPACE}/opt/arm/$PRODUCT_NAME/arm/mkmoduledirs.sh" ]; then
+            echo "Expected extracted toolchain under ${GITHUB_WORKSPACE}/opt/arm/$PRODUCT_NAME"
             exit 1
           fi
 
@@ -118,29 +118,23 @@ jobs:
             -e "s/^ATFL_VERSION=.*$/ATFL_VERSION=${PACKAGE_BRANCH_VERSION}/" \
             -e "s/^ATFL_BUILD=.*$/ATFL_BUILD=${PACKAGE_BUILD_NUMBER}/" \
             -e "s|^ATFL_INSTALL_PREFIX=.*$|ATFL_INSTALL_PREFIX=/opt/arm/${PRODUCT_NAME}|" \
-            "/opt/arm/$PRODUCT_NAME/arm/mkmoduledirs.sh"
+            "${GITHUB_WORKSPACE}/opt/arm/$PRODUCT_NAME/arm/mkmoduledirs.sh"
 
           (
             umask 022
-            cd /opt/arm
+            cd "${GITHUB_WORKSPACE}/opt/arm"
             sudo "./$PRODUCT_NAME/arm/mkmoduledirs.sh"
           )
 
           LLVM_HOST_TRIPLE="aarch64-unknown-linux-gnu"
-
-          if [ -f /opt/arm/arm-performance-libraries/lib/libamath.so ] && \
-             [ -f /opt/arm/arm-performance-libraries/lib/libamath.a ]; then
-            sudo ln -sfn /opt/arm/arm-performance-libraries/lib/libamath.so \
-              "/opt/arm/$PRODUCT_NAME/lib/$LLVM_HOST_TRIPLE/libamath.so"
-            sudo ln -sfn /opt/arm/arm-performance-libraries/lib/libamath.a \
-              "/opt/arm/$PRODUCT_NAME/lib/$LLVM_HOST_TRIPLE/libamath.a"
-          else
-            echo "Arm Performance Libraries not present; skipping libamath symlinks"
-          fi
+          sudo ln -sfn "${GITHUB_WORKSPACE}/opt/arm/arm-performance-libraries/lib/libamath.so" \
+            "${GITHUB_WORKSPACE}/opt/arm/$PRODUCT_NAME/lib/$LLVM_HOST_TRIPLE/libamath.so"
+          sudo ln -sfn "${GITHUB_WORKSPACE}/opt/arm/arm-performance-libraries/lib/libamath.a" \
+            "${GITHUB_WORKSPACE}/opt/arm/$PRODUCT_NAME/lib/$LLVM_HOST_TRIPLE/libamath.a"
 
           mkdir -p "$WORKDIR/$PACKAGE_NAME/DEB"
           mkdir -p "$PKG_DIR/opt"
-          sudo cp -a /opt/arm "$PKG_DIR/opt/"
+          sudo cp -a "${GITHUB_WORKSPACE}/opt/arm" "$PKG_DIR/opt/"
 
           cp -r "${GITHUB_WORKSPACE}/arm-software/linux/scripts/packaging/debian" \
             "$WORKDIR/$PACKAGE_NAME/DEB"
