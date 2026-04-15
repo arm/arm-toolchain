@@ -1,7 +1,7 @@
-From 0571fc0755bf05c017033ed5cd3d4ca82a1df24d Mon Sep 17 00:00:00 2001
+From 7624a70e5f5c78fa185d355b75b7ed8fcb3be594 Mon Sep 17 00:00:00 2001
 From: Benjamin Maxwell <benjamin.maxwell@arm.com>
-Date: Mon, 13 Apr 2026 12:39:28 +0000
-Subject: [PATCH] Add minimal SME ABI routines (__arm_sme_state)
+Date: Wed, 15 Apr 2026 17:45:27 +0000
+Subject: [PATCH 2/2] Add minimal SME ABI routines (__arm_sme_state)
 
 ---
  newlib/Makefile.in                       | 24 +++++++++++++++++--
@@ -21,7 +21,7 @@ index 4186ae553..09072476d 100644
 -@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/strrchr.S
 +@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/strrchr.S \
 +@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/sme-abi.S
-
+ 
  @HAVE_LIBC_MACHINE_AMDGCN_TRUE@am__append_66 = \
  @HAVE_LIBC_MACHINE_AMDGCN_TRUE@	libc/machine/amdgcn/_exit.c \
 @@ -1937,7 +1938,8 @@ am__objects_51 = libc/ssp/libc_a-chk_fail.$(OBJEXT) \
@@ -55,7 +55,7 @@ index 4186ae553..09072476d 100644
 @@ -17077,6 +17083,20 @@ libc/machine/aarch64/libc_a-strrchr.obj: libc/machine/aarch64/strrchr.S
  @AMDEP_TRUE@@am__fastdepCCAS_FALSE@	DEPDIR=$(DEPDIR) $(CCASDEPMODE) $(depcomp) @AMDEPBACKSLASH@
  @am__fastdepCCAS_FALSE@	$(AM_V_CPPAS@am__nodep@)$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libc_a_CPPFLAGS) $(CPPFLAGS) $(libc_a_CCASFLAGS) $(CCASFLAGS) -c -o libc/machine/aarch64/libc_a-strrchr.obj `if test -f 'libc/machine/aarch64/strrchr.S'; then $(CYGPATH_W) 'libc/machine/aarch64/strrchr.S'; else $(CYGPATH_W) '$(srcdir)/libc/machine/aarch64/strrchr.S'; fi`
-
+ 
 +libc/machine/aarch64/libc_a-sme-abi.o: libc/machine/aarch64/sme-abi.S
 +@am__fastdepCCAS_TRUE@	$(AM_V_CPPAS)$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libc_a_CPPFLAGS) $(CPPFLAGS) $(libc_a_CCASFLAGS) $(CCASFLAGS) -MT libc/machine/aarch64/libc_a-sme-abi.o -MD -MP -MF libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Tpo -c -o libc/machine/aarch64/libc_a-sme-abi.o `test -f 'libc/machine/aarch64/sme-abi.S' || echo '$(srcdir)/'`libc/machine/aarch64/sme-abi.S
 +@am__fastdepCCAS_TRUE@	$(AM_V_at)$(am__mv) libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Tpo libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Po
@@ -86,7 +86,7 @@ index 1068d88ce..b700d2bd1 100644
 +	%D%/sme-abi.S
 diff --git a/newlib/libc/machine/aarch64/sme-abi.S b/newlib/libc/machine/aarch64/sme-abi.S
 new file mode 100644
-index 000000000..8fdce8b02
+index 000000000..c5c2f9b02
 --- /dev/null
 +++ b/newlib/libc/machine/aarch64/sme-abi.S
 @@ -0,0 +1,30 @@
@@ -105,10 +105,10 @@ index 000000000..8fdce8b02
 +  mov x0, xzr
 +  mov x1, xzr
 +
-+  /* Although the ISA reserves BITS 24~27 for SME, at this point of time,
-+     only BITS 24 (SME) and 25 (SME + SME2 ZT0 register) have meaning. */
-+  mrs x16, id_aa64pfr1_el1
-+  tst w16, #0x3000000
++  /* Check if we have SME (global initialized in crt0.c) */
++  adrp x16, __arm64_has_sme
++  ldrb w16, [x16, :lo12:__arm64_has_sme]
++  cmp w16, #0
 +  b.eq	L(no_sme)
 +
 +  orr x0, x0, #0xC000000000000000
@@ -120,5 +120,6 @@ index 000000000..8fdce8b02
 +L(no_sme):
 +  ret
 +END (__arm_sme_state)
---
+-- 
 2.43.0
+
