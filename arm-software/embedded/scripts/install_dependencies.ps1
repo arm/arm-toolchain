@@ -7,4 +7,4 @@
 
 # Upgrade pip and install meson
 python -m pip install --upgrade pip
-python -m pip install meson==1.2.3
+python -m pip install meson==1.2.3 pyyaml==6.0.3
