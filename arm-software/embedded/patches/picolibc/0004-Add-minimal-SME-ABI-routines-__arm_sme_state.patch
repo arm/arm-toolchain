@@ -1,15 +1,13 @@
-From cce91bd5a8f908a40b032b0d13f15dde0da9e66b Mon Sep 17 00:00:00 2001
+From e27e49416ed5a41d4a293f3b1b9f97a5aa3cb515 Mon Sep 17 00:00:00 2001
 From: Benjamin Maxwell <benjamin.maxwell@arm.com>
-Date: Wed, 15 Apr 2026 16:39:03 +0000
-Subject: [PATCH] Add minimal SME ABI routines (__arm_sme_state)
+Date: Thu, 16 Apr 2026 09:09:46 +0000
+Subject: [PATCH 2/2] Add minimal SME ABI routines (__arm_sme_state)
 
-Note: We cache "has_sme" to avoid checking id_aa64pfr1_el1 in user code.
 ---
  libc/machine/aarch64/CMakeLists.txt |  1 +
  libc/machine/aarch64/meson.build    |  1 +
  libc/machine/aarch64/sme-abi.S      | 30 +++++++++++++++++++++++++++++
- picocrt/machine/aarch64/crt0.c      | 20 +++++++++++++++++++
- 4 files changed, 52 insertions(+)
+ 3 files changed, 32 insertions(+)
  create mode 100644 libc/machine/aarch64/sme-abi.S
 
 diff --git a/libc/machine/aarch64/CMakeLists.txt b/libc/machine/aarch64/CMakeLists.txt
@@ -72,37 +70,6 @@ index 000000000..c5c2f9b02
 +L(no_sme):
 +  ret
 +END (__arm_sme_state)
-diff --git a/picocrt/machine/aarch64/crt0.c b/picocrt/machine/aarch64/crt0.c
-index a43092ee9..d16454f9d 100644
---- a/picocrt/machine/aarch64/crt0.c
-+++ b/picocrt/machine/aarch64/crt0.c
-@@ -61,6 +61,26 @@ _set_tls(void *tls)
-     __asm__ volatile("msr tpidr_el0, %x0" : : "r"(tls - TP_OFFSET));
- }
- 
-+#define FEAT_SME_1      (1LL << 24)
-+#define FEAT_SME_2      (1LL << 25)
-+
-+_Bool __arm64_check_has_sme_or_sme2_el1() {
-+    /* Determine if SME or SME2 is available */
-+    int result = 0;
-+    __asm__ volatile ( "mrs %x[result], id_aa64pfr1_el1"
-+        : [result]"=r"(result) :  : );
-+    return (result & (FEAT_SME_1|FEAT_SME_2)) != 0;
-+}
-+
-+_Bool __arm64_has_sme;
-+
-+static void __arm64_post_memory_setup() {
-+    /* Initialize __arm64_has_sme once .bss and .data have been setup. */
-+    __arm64_has_sme = __arm64_check_has_sme_or_sme2_el1();
-+}
-+
-+#define POST_MEMORY_SETUP __arm64_post_memory_setup
-+
- #include "../../crt0.h"
- 
- /* Defined in crt0.S */
 -- 
 2.43.0
 
