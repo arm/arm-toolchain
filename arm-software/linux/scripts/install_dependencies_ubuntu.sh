@@ -7,17 +7,25 @@
 #
 # This script installs the essential build dependencies for ATfL build on Ubuntu OS.
 
-set -e
+set -euo pipefail
 
-sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    bash \
     binutils-dev \
     build-essential \
+    ca-certificates \
     ccache \
     clang \
-    graphviz \
     cmake \
+    curl \
+    debhelper \
+    dpkg-dev \
+    gettext-base \
     git \
+    graphviz \
     libzstd-dev \
+    make \
     ninja-build \
     python3 \
     python3-dev \
@@ -27,6 +35,13 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
     python3-setuptools \
     python3-sphinx \
     python3-yaml \
-    zlib1g-dev \
-    valgrind
+    rpm \
+    ruby-full \
+    rubygems \
+    valgrind \
+    zlib1g-dev
 
+# Install fpm
+gem install --no-document fpm
+
+rm -rf /var/lib/apt/lists/*
