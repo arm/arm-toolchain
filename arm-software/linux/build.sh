@@ -33,6 +33,12 @@ INTERACTIVE=false
 ## Configuration: Build ##
 ##########################
 
+if [[ -n "${COMMON_CMAKE_FLAGS}" ]]
+then
+    echo "Do not use the obsolete COMMON_CMAKE_FLAGS variable."
+    exit 1
+fi
+
 RELEASE_FLAGS=${RELEASE_FLAGS:-"false"}
 LLVM_VERSION_MAJOR=$(cat ${SOURCES_DIR}/cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_MAJOR | grep -o '[0-9]\+')
 LLVM_VERSION_MINOR=$(cat ${SOURCES_DIR}/cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_MINOR | grep -o '[0-9]\+')
@@ -54,103 +60,143 @@ PARALLEL_JOBS=${PARALLEL_JOBS:-"${PROCESSOR_COUNT}"}
 STAGES=(
     "bootstrap_compiler_build"
     "libcpp_build"
+    "product_bolted"
     "product_build"
     "static_libomp_build"
 )
 ZLIB_STATIC_PATH=${ZLIB_STATIC_PATH:-"/usr/lib/`uname -m`-linux-gnu/libz.a"}
+RELOCS_LINKER_FLAGS="-Wl,--emit-relocs,-znow"
 COMMON_LINKER_FLAGS="-Wl,--build-id"
-COMMON_CMAKE_FLAGS=(
-    ${COMMON_CMAKE_FLAGS}
-    -DCLANG_ENABLE_LIBXML2=OFF
-    -DLLVM_ENABLE_LIBXML2=OFF
-    -DLLVM_ENABLE_ZLIB=ON
-    -DLLVM_USE_STATIC_ZSTD=True
-    -DLLVM_ENABLE_ZSTD=ON
-    -DLLVM_BINUTILS_INCDIR=/usr/include
-    -DLLVM_ENABLE_PIC=ON
-    -DLLVM_ENABLE_ASSERTIONS="${ATFL_ASSERTIONS}"
-    -DLLVM_ENABLE_FFI=OFF
-    -DLLVM_ENABLE_BINDINGS=OFF
-    -DLLVM_ENABLE_PLUGINS=ON
-    -DLLVM_TOOL_LIBUNWIND_BUILD=ON
-    -DLLVM_TARGETS_TO_BUILD=AArch64
-    -DLLVM_DEFAULT_TARGET_TRIPLE=${ATFL_TARGET_TRIPLE}
-    -DZLIB_LIBRARY_RELEASE=${ZLIB_STATIC_PATH}
+
+# Safe to use by all stages
+declare -A COMMON_CMAKE_FLAGS=(
+    ["CLANG_ENABLE_LIBXML2:BOOL"]=OFF
+    ["LLVM_ENABLE_LIBXML2:BOOL"]=OFF
+    ["LLVM_ENABLE_ZLIB:BOOL"]=ON
+    ["LLVM_USE_STATIC_ZSTD:BOOL"]=True
+    ["LLVM_ENABLE_ZSTD:BOOL"]=ON
+    ["LLVM_BINUTILS_INCDIR:PATH"]="\"/usr/include\""
+    ["LLVM_ENABLE_ASSERTIONS:BOOL"]=${ATFL_ASSERTIONS}
+    ["LLVM_ENABLE_PIC:BOOL"]=ON
+    ["LLVM_ENABLE_FFI:BOOL"]=OFF
+    ["LLVM_ENABLE_BINDINGS:BOOL"]=OFF
+    ["LLVM_ENABLE_PLUGINS:BOOL"]=ON
+    ["LLVM_TOOL_LIBUNWIND_BUILD:BOOL"]=ON
+    ["LLVM_TARGETS_TO_BUILD:STRING"]="\"AArch64\""
+    ["LLVM_DEFAULT_TARGET_TRIPLE:STRING"]="\"${ATFL_TARGET_TRIPLE}\""
+    ["ZLIB_LIBRARY_RELEASE:FILEPATH"]="\"${ZLIB_STATIC_PATH}\""
 )
-PRODUCT_CMAKE_FLAGS=(
-    -DCMAKE_C_COMPILER="${BUILD_DIR}/bootstrap_compiler/bin/clang"
-    -DCMAKE_CXX_COMPILER="${BUILD_DIR}/bootstrap_compiler/bin/clang++"
-    -DCMAKE_INSTALL_PREFIX="${ATFL_DIR}"
-    -DLLVM_ENABLE_LLD=ON
+
+declare -A USE_BOOTSTRAP_CMAKE_FLAGS=(
+    ["CMAKE_C_COMPILER:FILEPATH"]="\"${BUILD_DIR}/bootstrap_compiler/bin/clang\""
+    ["CMAKE_CXX_COMPILER:FILEPATH"]="\"${BUILD_DIR}/bootstrap_compiler/bin/clang++\""
+    ["CMAKE_INSTALL_PREFIX:PATH"]="\"${ATFL_DIR}\""
+    ["LLVM_ENABLE_LLD:BOOL"]=ON
 )
-COMPILER_CMAKE_FLAGS=(
-    -DCMAKE_CXX_FLAGS="-stdlib++-isystem ${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT"
-    -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
-    -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
-    -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
-    -DCMAKE_BUILD_TYPE=Release
-    -DCMAKE_SKIP_RPATH=No
-    -DCMAKE_SKIP_INSTALL_RPATH=No
-    -DLLVM_BUILD_DOCS=ON
-    -DLLVM_ENABLE_SPHINX=ON
-    -DSPHINX_WARNINGS_AS_ERRORS=OFF
-    -DLLVM_ENABLE_PROJECTS="llvm;clang;flang;bolt;lld"
-    -DLLVM_ENABLE_RUNTIMES="compiler-rt;flang-rt;libunwind;openmp"
-    -DLLVM_TOOL_BOLT_BUILD=True
-    -DBOLT_TARGETS_TO_BUILD=AArch64
-    -DBOLT_BUILD_TOOLS=ON
-    -DBOLT_ENABLE_RUNTIME=ON
-    -DCLANG_ENABLE_LIBXML2=OFF
-    -DCLANG_PLUGIN_SUPPORT=ON
-    -DCLANG_ENABLE_STATIC_ANALYZER=ON
-    -DCLANG_TOOL_LIBCLANG_BUILD=ON
-    -DLIBCLANG_BUILD_STATIC=ON
-    -DCOMPILER_RT_DEFAULT_TARGET_ARCH=AArch64
-    -DCOMPILER_RT_BUILD_SANITIZERS=OFF
-    -DCOMPILER_RT_BUILD_LIBFUZZER=ON
-    -DCOMPILER_RT_BUILD_ORC=OFF
-    -DCOMPILER_RT_USE_LIBCXX=ON
-    -DCOMPILER_RT_BUILD_BUILTINS=ON
-    -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON
-    -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=OFF
-    -DCOMPILER_RT_BUILD_STANDALONE_LIBATOMIC=OFF
-    -DCOMPILER_RT_USE_ATOMIC_LIBRARY=ON
-    -DCOMPILER_RT_USE_LLVM_UNWINDER=OFF
-    -DCOMPILER_RT_LIBRARY_atomic_${ATFL_TARGET_TRIPLE}="-rtlib=compiler-rt"
-    -DFLANG_RT_ENABLE_SHARED=ON
-    -DFLANG_RT_ENABLE_STATIC=ON
-    -DARM_TOOLCHAIN_ID="${ARM_TOOLCHAIN_ID}"
-    -DCLANG_VENDOR="Arm Toolchain for Linux ${TOOLCHAIN_VERSION}"
-    -DFLANG_VENDOR="Arm Toolchain for Linux ${TOOLCHAIN_VERSION}"
-    -DLLVM_VERSION_SUFFIX=""
+
+declare -A COMPILER_CMAKE_FLAGS=(
+    ["CMAKE_CXX_FLAGS:STRING"]="\"-stdlib++-isystem ${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT\""
+    ["CLANG_PLUGIN_SUPPORT:BOOL"]=ON
+    ["CLANG_ENABLE_STATIC_ANALYZER:BOOL"]=ON
+    ["CLANG_TOOL_LIBCLANG_BUILD:BOOL"]=ON
+    ["LIBCLANG_BUILD_STATIC:BOOL"]=ON
+    ["ARM_TOOLCHAIN_ID:STRING"]="\"${ARM_TOOLCHAIN_ID}\""
+    ["CLANG_VENDOR:STRING"]="\"Arm Toolchain for Linux ${TOOLCHAIN_VERSION}\""
+    ["FLANG_VENDOR:STRING"]="\"Arm Toolchain for Linux ${TOOLCHAIN_VERSION}\""
+    ["LLVM_VERSION_SUFFIX:STRING"]="\"\""
+    ["LLVM_TOOL_BOLT_BUILD:BOOL"]=True
 )
-LIBOMP_SHARED_CMAKE_FLAGS=(
-    -DLIBOMP_ENABLE_SHARED=True
-    -DLIBOMP_OMPT_SUPPORT=ON
-    -DLIBOMP_COPY_EXPORTS=False
-    -DLIBOMP_USE_HWLOC=False
-    -DLIBOMP_OMPD_GDB_SUPPORT=OFF
+
+declare -A SKIP_RPATH_CMAKE_FLAGS=(
+    ["CMAKE_SKIP_RPATH:BOOL"]=Yes
+    ["CMAKE_SKIP_INSTALL_RPATH:BOOL"]=Yes
 )
-LIBOMP_NOSHARED_CMAKE_FLAGS=(
-    -DLIBOMP_ENABLE_SHARED=False
-    -DLIBOMP_OMPT_SUPPORT=OFF
-    -DLIBOMP_COPY_EXPORTS=False
-    -DLIBOMP_USE_HWLOC=False
-    -DLIBOMP_OMPD_GDB_SUPPORT=OFF
+
+declare -A USE_RPATH_CMAKE_FLAGS=(
+    ["CMAKE_SKIP_RPATH:BOOL"]=No
+    ["CMAKE_SKIP_INSTALL_RPATH:BOOL"]=No
 )
-LIBUNWIND_SHARED_CMAKE_FLAGS=(
-    -DLIBUNWIND_USE_COMPILER_RT=ON
-    -DLIBUNWIND_ENABLE_SHARED=ON
-    -DLIBUNWIND_ENABLE_STATIC=ON
-    -DLIBUNWIND_ENABLE_ASSERTIONS=OFF
-    -DLIBUNWIND_ENABLE_THREADS=ON
+
+declare -A BOLT_CMAKE_FLAGS=(
+    ["BOLT_TARGETS_TO_BUILD:STRING"]="\"AArch64\""
+    ["BOLT_BUILD_TOOLS:BOOL"]=ON
+    ["BOLT_ENABLE_RUNTIME:BOOL"]=ON
 )
-LIBUNWIND_NOSHARED_CMAKE_FLAGS=(
-    -DLIBUNWIND_USE_COMPILER_RT=ON
-    -DLIBUNWIND_ENABLE_SHARED=OFF
-    -DLIBUNWIND_ENABLE_STATIC=ON
-    -DLIBUNWIND_ENABLE_ASSERTIONS=OFF
-    -DLIBUNWIND_ENABLE_THREADS=ON
+
+declare -A COMPILER_RT_CMAKE_FLAGS=(
+    ["COMPILER_RT_DEFAULT_TARGET_ARCH:STRING"]="\"AArch64\""
+    ["COMPILER_RT_BUILD_SANITIZERS:BOOL"]=OFF
+    ["COMPILER_RT_BUILD_LIBFUZZER:BOOL"]=ON
+    ["COMPILER_RT_BUILD_ORC:BOOL"]=OFF
+    ["COMPILER_RT_USE_LIBCXX:BOOL"]=ON
+    ["COMPILER_RT_BUILD_BUILTINS:BOOL"]=ON
+    ["COMPILER_RT_USE_BUILTINS_LIBRARY:BOOL"]=ON
+    ["COMPILER_RT_EXCLUDE_ATOMIC_BUILTIN:BOOL"]=OFF
+    ["COMPILER_RT_BUILD_STANDALONE_LIBATOMIC:BOOL"]=OFF
+    ["COMPILER_RT_USE_ATOMIC_LIBRARY:BOOL"]=ON
+    ["COMPILER_RT_USE_LLVM_UNWINDER:BOOL"]=OFF
+    ["COMPILER_RT_LIBRARY_atomic_${ATFL_TARGET_TRIPLE}:STRING"]="\"-rtlib=compiler-rt\""
+)
+
+declare -A FLANG_RT_CMAKE_FLAGS=(
+    ["FLANG_RT_ENABLE_SHARED:BOOL"]=ON
+    ["FLANG_RT_ENABLE_STATIC:BOOL"]=ON
+)
+
+declare -A LIBCXX_CMAKE_FLAGS=(
+    ["LIBCXXABI_USE_COMPILER_RT:BOOL"]=ON
+    ["LIBCXXABI_USE_LLVM_UNWINDER:BOOL"]=ON
+    ["LIBCXXABI_ENABLE_STATIC_UNWINDER:BOOL"]=ON
+    ["LIBCXXABI_ENABLE_EXCEPTIONS:BOOL"]=ON
+    ["LIBCXXABI_ENABLE_ASSERTIONS:BOOL"]=OFF
+    ["LIBCXXABI_ENABLE_SHARED:BOOL"]=ON
+    ["LIBCXXABI_ENABLE_STATIC:BOOL"]=ON
+    ["LIBCXXABI_ENABLE_THREADS:BOOL"]=ON
+    ["LIBCXXABI_HAS_EXTERNAL_THREAD_API:BOOL"]=OFF
+    ["LIBCXX_CXX_ABI:STRING"]="\"libcxxabi\""
+    ["LIBCXX_USE_COMPILER_RT:BOOL"]=ON
+    ["LIBCXX_ENABLE_EXCEPTIONS:BOOL"]=ON
+    ["LIBCXX_ENABLE_ASSERTIONS:BOOL"]=OFF
+    ["LIBCXX_ENABLE_SHARED:BOOL"]=ON
+    ["LIBCXX_ENABLE_STATIC:BOOL"]=ON
+    ["LIBCXX_ENABLE_THREADS:BOOL"]=ON
+    ["LIBCXX_HAS_EXTERNAL_THREAD_API:BOOL"]=OFF
+    ["LIBCXX_ENABLE_LOCALIZATION:BOOL"]=ON
+    ["LIBCXX_ENABLE_TIME_ZONE_DATABASE:BOOL"]=OFF
+    ["LIBCXX_ENABLE_UNICODE:BOOL"]=ON
+    ["LIBCXX_ENABLE_WIDE_CHARACTERS:BOOL"]=ON
+)
+
+declare -A LIBOMP_SHARED_CMAKE_FLAGS=(
+    ["LIBOMP_ENABLE_SHARED:BOOL"]=True
+    ["LIBOMP_OMPT_SUPPORT:BOOL"]=ON
+    ["LIBOMP_COPY_EXPORTS:BOOL"]=False
+    ["LIBOMP_USE_HWLOC:BOOL"]=False
+    ["LIBOMP_OMPD_GDB_SUPPORT:BOOL"]=OFF
+)
+
+declare -A LIBOMP_NOSHARED_CMAKE_FLAGS=(
+    ["LIBOMP_ENABLE_SHARED:BOOL"]=False
+    ["LIBOMP_OMPT_SUPPORT:BOOL"]=OFF
+    ["LIBOMP_COPY_EXPORTS:BOOL"]=False
+    ["LIBOMP_USE_HWLOC:BOOL"]=False
+    ["LIBOMP_OMPD_GDB_SUPPORT:BOOL"]=OFF
+)
+
+declare -A LIBUNWIND_SHARED_CMAKE_FLAGS=(
+    ["LIBUNWIND_USE_COMPILER_RT:BOOL"]=ON
+    ["LIBUNWIND_ENABLE_SHARED:BOOL"]=ON
+    ["LIBUNWIND_ENABLE_STATIC:BOOL"]=ON
+    ["LIBUNWIND_ENABLE_ASSERTIONS:BOOL"]=OFF
+    ["LIBUNWIND_ENABLE_THREADS:BOOL"]=ON
+)
+
+declare -A LIBUNWIND_NOSHARED_CMAKE_FLAGS=(
+    ["LIBUNWIND_USE_COMPILER_RT:BOOL"]=ON
+    ["LIBUNWIND_ENABLE_SHARED:BOOL"]=OFF
+    ["LIBUNWIND_ENABLE_STATIC:BOOL"]=ON
+    ["LIBUNWIND_ENABLE_ASSERTIONS:BOOL"]=OFF
+    ["LIBUNWIND_ENABLE_THREADS:BOOL"]=ON
 )
 
 CMAKE_ARGS=""
@@ -158,7 +204,7 @@ CMAKE_BUILD_ARGS="-j${PARALLEL_JOBS}"
 NINJA_ARGS="-j${PARALLEL_JOBS}"
 if [[ "${TRACE-0}" == "1" ]]; then
     run_command CMAKE_ARGS="${CMAKE_ARGS} --trace-expand"
-    COMMON_CMAKE_FLAGS="${COMMON_CMAKE_FLAGS} -DCMAKE_VERBOSE_MAKEFILE=ON"
+    COMMON_CMAKE_FLAGS["CMAKE_VERBOSE_MAKEFILE:BOOL"]=ON
     run_command CMAKE_BUILD_ARGS="${CMAKE_BUILD_ARGS} -v"
     NINJA_ARGS="${NINJA_ARGS} -v"
 fi
@@ -282,6 +328,19 @@ apply_patches() {
     echo_bold "Applying patches...done"
 }
 
+print_forced_cached_flag()
+{
+  echo "set($(echo "$1" | cut -d ":" -f1) $2 CACHE $(echo "$1" | cut -s -d ":" -f2) \"\" FORCE)"
+}
+
+print_forced_cmake_flags_cache()
+{
+  declare -A arr="${1#*=}"
+  for i in "${!arr[@]}"; do
+    print_forced_cached_flag "$i" "${arr["$i"]}"
+  done
+}
+
 bootstrap_compiler_default_config() {
     echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang.cfg
     echo "-fuse-ld=lld" >${BUILD_DIR}/bootstrap_compiler/bin/clang++.cfg
@@ -291,14 +350,18 @@ bootstrap_compiler_build() {
     mkdir -p "${BUILD_DIR}/stage/bootstrap_compiler"
     cd "${BUILD_DIR}/stage/bootstrap_compiler"
 
+    { print_forced_cmake_flags_cache "$(declare -p COMMON_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p USE_RPATH_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p LIBUNWIND_NOSHARED_CMAKE_FLAGS)"
+    } > flags.cmake
+
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
+        -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_ASM_FLAGS_RELEASE="-O2 -DNDEBUG" \
         -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG" \
         -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG" \
-        -DCMAKE_SKIP_RPATH=No \
-        -DCMAKE_SKIP_INSTALL_RPATH=No \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/bootstrap_compiler" \
         -DLLVM_ENABLE_LLD=OFF \
         -DLLVM_ENABLE_LIBCXX=OFF \
@@ -323,8 +386,7 @@ bootstrap_compiler_build() {
         -DCOMPILER_RT_USE_ATOMIC_LIBRARY=ON \
         -DCOMPILER_RT_USE_LLVM_UNWINDER=ON \
         -DCOMPILER_RT_ENABLE_STATIC_UNWINDER=ON \
-        "${COMMON_CMAKE_FLAGS[@]}" "${LIBUNWIND_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
-        tee "${LOGS_DIR}/bootstrap_compiler.txt"
+        2>&1 | tee "${LOGS_DIR}/bootstrap_compiler.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BUILD_DIR}/bootstrap_compiler/bin:$PATH"
@@ -336,44 +398,91 @@ libcpp_build() {
     mkdir -p "${BUILD_DIR}/stage/libcpp_build"
     cd "${BUILD_DIR}/stage/libcpp_build"
     bootstrap_compiler_default_config
+
+    { print_forced_cmake_flags_cache "$(declare -p COMMON_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p USE_BOOTSTRAP_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p SKIP_RPATH_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p LIBCXX_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p LIBUNWIND_NOSHARED_CMAKE_FLAGS)"
+    } > flags.cmake
+
+    local libs="-rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed ${RELOCS_LINKER_FLAGS} ${COMMON_LINKER_FLAGS}"
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/runtimes" \
+        -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
-        -DCMAKE_CXX_FLAGS="-D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT" \
-        -DCMAKE_EXE_LINKER_FLAGS="-rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_MODULE_LINKER_FLAGS="-rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_SHARED_LINKER_FLAGS="-rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_SKIP_RPATH=Yes \
-        -DCMAKE_SKIP_INSTALL_RPATH=Yes \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DCMAKE_CXX_FLAGS="-D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT" \
+        -DCMAKE_EXE_LINKER_FLAGS="${libs}" \
+        -DCMAKE_MODULE_LINKER_FLAGS="${libs}" \
+        -DCMAKE_SHARED_LINKER_FLAGS="${libs}" \
         -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
-        -DLIBCXXABI_USE_COMPILER_RT=ON \
-        -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
-        -DLIBCXXABI_ENABLE_STATIC_UNWINDER=ON \
-        -DLIBCXXABI_ENABLE_EXCEPTIONS=ON \
-        -DLIBCXXABI_ENABLE_ASSERTIONS=OFF \
-        -DLIBCXXABI_ENABLE_SHARED=ON \
-        -DLIBCXXABI_ENABLE_STATIC=ON \
-        -DLIBCXXABI_ENABLE_THREADS=ON \
-        -DLIBCXXABI_HAS_EXTERNAL_THREAD_API=OFF \
-        -DLIBCXX_CXX_ABI="libcxxabi" \
-        -DLIBCXX_USE_COMPILER_RT=ON \
-        -DLIBCXX_ENABLE_EXCEPTIONS=ON \
-        -DLIBCXX_ENABLE_ASSERTIONS=OFF \
-        -DLIBCXX_ENABLE_SHARED=ON \
-        -DLIBCXX_ENABLE_STATIC=ON \
-        -DLIBCXX_ENABLE_THREADS=ON \
-        -DLIBCXX_HAS_EXTERNAL_THREAD_API=OFF \
-        -DLIBCXX_ENABLE_LOCALIZATION=ON \
-        -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=OFF \
-        -DLIBCXX_ENABLE_UNICODE=ON \
-        -DLIBCXX_ENABLE_WIDE_CHARACTERS=ON \
-        "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${LIBUNWIND_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
-        tee "${LOGS_DIR}/libcpp.txt"
+        2>&1 | tee "${LOGS_DIR}/libcpp.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     export LD_LIBRARY_PATH="${ATFL_DIR}/lib:${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}:$LD_LIBRARY_PATH"
     run_command ninja ${NINJA_ARGS} check-cxx 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command ninja ${NINJA_ARGS} check-cxxabi 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
+}
+
+product_bolted() {
+    if [[ "${ATFL_ASSERTIONS}" == "ON" ]]; then
+        return 0
+    fi
+
+    local extra_flags=""
+    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=OFF"
+    else
+        extra_flags="${extra_flags} -DLLVM_APPEND_VC_REV=ON"
+    fi
+
+    local libs="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${RELOCS_LINKER_FLAGS} ${COMMON_LINKER_FLAGS}"
+
+    mkdir -p "${BUILD_DIR}/stage/product_bolted"
+    cd "${BUILD_DIR}/stage/product_bolted"
+    mkdir cmake-caches
+    cp "${SOURCES_DIR}/clang/cmake/caches/BOLT.cmake" cmake-caches
+    sed -i "s%${RELOCS_LINKER_FLAGS}%${libs}%g" cmake-caches/BOLT.cmake
+    { print_forced_cmake_flags_cache "$(declare -p COMMON_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p USE_RPATH_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p COMPILER_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p COMPILER_RT_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p LIBUNWIND_SHARED_CMAKE_FLAGS)"
+      print_forced_cached_flag "LLVM_ENABLE_RUNTIMES:STRING" "\"compiler-rt;libunwind\""
+      print_forced_cached_flag "RUNTIMES_CMAKE_ARGS:STRING" "\"-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${libs};-DCMAKE_MODULE_LINKER_FLAGS=${libs};-DCMAKE_SHARED_LINKER_FLAGS=${libs}\""
+    } >> cmake-caches/BOLT.cmake
+
+    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
+        print_forced_cached_flag "LLVM_APPEND_VC_REV:BOOL" OFF >> cmake-caches/BOLT.cmake
+    else
+        print_forced_cached_flag "LLVM_APPEND_VC_REV:BOOL" ON >> cmake-caches/BOLT.cmake
+    fi
+    mkdir -p tools/clang/stage2-instrumented-bins/lib
+    cp -d "${BUILD_DIR}"/stage/libcpp_build/lib/lib* tools/clang/stage2-instrumented-bins/lib
+    bootstrap_compiler_default_config
+
+    { print_forced_cmake_flags_cache "$(declare -p COMMON_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p USE_BOOTSTRAP_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p USE_RPATH_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p COMPILER_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p COMPILER_RT_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p LIBUNWIND_SHARED_CMAKE_FLAGS)"
+    } > flags.cmake
+
+    run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
+        -DPGO_BUILD_CONFIGURATION="${BUILD_DIR}/stage/product_bolted/cmake-caches/BOLT.cmake" \
+        -C ${SOURCES_DIR}/clang/cmake/caches/BOLT-PGO.cmake \
+        -C flags.cmake \
+        -DBOOTSTRAP_LLVM_ENABLE_LLD=ON \
+        -DBOOTSTRAP_BOOTSTRAP_LLVM_ENABLE_LLD=ON \
+        -DPGO_INSTRUMENT_LTO=Thin \
+        -DCMAKE_EXE_LINKER_FLAGS="${libs}" \
+        -DCMAKE_MODULE_LINKER_FLAGS="${libs}" \
+        -DCMAKE_SHARED_LINKER_FLAGS="${libs}" \
+        -DLLVM_ENABLE_RUNTIMES="compiler-rt;libunwind" \
+        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${libs};-DCMAKE_MODULE_LINKER_FLAGS=${libs};-DCMAKE_SHARED_LINKER_FLAGS=${libs}" \
+        ${extra_flags} 2>&1 | tee "${LOGS_DIR}/product-bolted.txt"
+    run_command ninja stage2-clang-bolt 2>&1 | tee -a "${LOGS_DIR}/product-bolted.txt"
 }
 
 product_build() {
@@ -392,12 +501,41 @@ product_build() {
     mkdir -p "${BUILD_DIR}/stage/product_build"
     cd "${BUILD_DIR}/stage/product_build"
     bootstrap_compiler_default_config
+
+    { print_forced_cmake_flags_cache "$(declare -p COMMON_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p USE_BOOTSTRAP_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p USE_RPATH_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p COMPILER_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p COMPILER_RT_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p FLANG_RT_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p LIBOMP_SHARED_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p LIBUNWIND_SHARED_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p BOLT_CMAKE_FLAGS)"
+    } > flags.cmake
+
+    local libs="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/llvm" \
+        -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
-        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS};-DCMAKE_MODULE_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS};-DCMAKE_SHARED_LINKER_FLAGS=-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        "${COMMON_CMAKE_FLAGS[@]}" "${PRODUCT_CMAKE_FLAGS[@]}" "${COMPILER_CMAKE_FLAGS[@]}" "${LIBOMP_SHARED_CMAKE_FLAGS[@]}" "${LIBUNWIND_SHARED_CMAKE_FLAGS[@]}" ${extra_flags} 2>&1 |
-        tee "${LOGS_DIR}/product.txt"
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_EXE_LINKER_FLAGS="${libs}" \
+        -DCMAKE_MODULE_LINKER_FLAGS="${libs}" \
+        -DCMAKE_SHARED_LINKER_FLAGS="${libs}" \
+        -DLLVM_BUILD_DOCS=ON \
+        -DLLVM_ENABLE_SPHINX=ON \
+        -DSPHINX_WARNINGS_AS_ERRORS=OFF \
+        -DLLVM_ENABLE_PROJECTS="llvm;clang;flang;bolt;lld" \
+        -DLLVM_ENABLE_RUNTIMES="compiler-rt;flang-rt;libunwind;openmp" \
+        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${libs};-DCMAKE_MODULE_LINKER_FLAGS=${libs};-DCMAKE_SHARED_LINKER_FLAGS=${libs}" \
+        ${extra_flags} 2>&1 | tee "${LOGS_DIR}/product.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    if [[ "${ATFL_ASSERTIONS}" == "OFF" ]]; then
+      local clang_name
+      clang_name="$(readlink bin/clang)"
+      mv "bin/${clang_name}" "bin/${clang_name}.not_bolted"
+      cp "${BUILD_DIR}/stage/product_bolted/tools/clang/stage2-instrumented-bins/tools/clang/stage2-bins/bin/${clang_name}" bin
+      touch "bin/${clang_name}"
+    fi
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     cp -d ${ATFL_DIR}/lib/clang/*/lib/${ATFL_TARGET_TRIPLE}/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
@@ -410,23 +548,31 @@ static_libomp_build() {
     mkdir -p "${BUILD_DIR}/stage/static_libomp_build"
     cd "${BUILD_DIR}/stage/static_libomp_build"
     bootstrap_compiler_default_config
+
+    { print_forced_cmake_flags_cache "$(declare -p COMMON_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p USE_BOOTSTRAP_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p SKIP_RPATH_CMAKE_FLAGS)"
+      print_forced_cmake_flags_cache "$(declare -p LIBOMP_NOSHARED_CMAKE_FLAGS)"
+    } > flags.cmake
+
+    local libs="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
     run_command cmake ${CMAKE_ARGS} -G Ninja "${SOURCES_DIR}/runtimes" \
+        -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
         -DLLVM_ENABLE_RUNTIMES="openmp" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
         -DCMAKE_LINKER="${ATFL_DIR}/bin/ld.lld" \
         -DCMAKE_CXX_FLAGS="-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT" \
-        -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
+        -DCMAKE_EXE_LINKER_FLAGS="${libs}" \
+        -DCMAKE_MODULE_LINKER_FLAGS="${libs}" \
+        -DCMAKE_SHARED_LINKER_FLAGS="${libs}" \
         -DOPENMP_TEST_C_COMPILER="${ATFL_DIR}//bin/clang" \
         -DOPENMP_TEST_CXX_COMPILER="${ATFL_DIR}/bin/clang++" \
         -DOPENMP_TEST_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
         -DOPENMP_LLVM_LIT_EXECUTABLE="${BUILD_DIR}/stage/product_build/bin/llvm-lit" \
         -DOPENMP_FILECHECK_EXECUTABLE="${BUILD_DIR}/stage/product_build/bin/FileCheck" \
-        "${PRODUCT_CMAKE_FLAGS[@]}" "${LIBOMP_NOSHARED_CMAKE_FLAGS[@]}" 2>&1 |
-        tee "${LOGS_DIR}/static_libomp.txt"
+        2>&1 | tee "${LOGS_DIR}/static_libomp.txt"
     run_command cmake --build . ${CMAKE_BUILD_ARGS} 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
     rm -rf "${ATFL_DIR}.keep" "${ATFL_DIR}.libs"
     mv "${ATFL_DIR}" "${ATFL_DIR}.keep"
