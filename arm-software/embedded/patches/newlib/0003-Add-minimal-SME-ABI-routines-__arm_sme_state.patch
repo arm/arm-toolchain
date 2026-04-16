@@ -105,7 +105,7 @@ index 000000000..c5c2f9b02
 +  mov x0, xzr
 +  mov x1, xzr
 +
-+  /* Check if we have SME (global initialized in crt0.c) */
++  /* Check if we have SME (global initialized in libgloss) */
 +  adrp x16, __arm64_has_sme
 +  ldrb w16, [x16, :lo12:__arm64_has_sme]
 +  cmp w16, #0
