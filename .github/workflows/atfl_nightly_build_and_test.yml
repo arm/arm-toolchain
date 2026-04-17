@@ -80,7 +80,7 @@ jobs:
           PACKAGE_BUILD_NUMBER="0"
           PACKAGE_NAME="${PRODUCT_NAME}-${PACKAGE_BRANCH_VERSION}-${PACKAGE_BUILD_NUMBER}"
           DISTRO="ubuntu-24"
-          DISTRO_TAG="jammy"
+          DISTRO_TAG="noble"
           PACK_DATE="$(date -R)"
           DPKG_BINARY_DIR="${PRODUCT_NAME}-${PACKAGE_BRANCH_VERSION}"
 
@@ -90,7 +90,6 @@ jobs:
           PKG_DIR="$WORKDIR/$PACKAGE_NAME/DEB/$DPKG_BINARY_DIR"
 
           rm -rf "$WORKDIR/$PACKAGE_NAME"
-          mkdir -p "$PKG_DIR"
 
           tarballs=(atfl-*.tar.gz)
           if [ "${#tarballs[@]}" -ne 1 ]; then
