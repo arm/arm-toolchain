@@ -1,13 +1,13 @@
-From 7624a70e5f5c78fa185d355b75b7ed8fcb3be594 Mon Sep 17 00:00:00 2001
+From 46054f0dfde930644d5cbcf13a2103525892bba7 Mon Sep 17 00:00:00 2001
 From: Benjamin Maxwell <benjamin.maxwell@arm.com>
-Date: Wed, 15 Apr 2026 17:45:27 +0000
-Subject: [PATCH 2/2] Add minimal SME ABI routines (__arm_sme_state)
+Date: Mon, 20 Apr 2026 13:31:44 +0000
+Subject: [PATCH] Add minimal SME ABI routines (__arm_sme_state)
 
 ---
- newlib/Makefile.in                       | 24 +++++++++++++++++--
+ newlib/Makefile.in                       | 24 ++++++++++++++++++--
  newlib/libc/machine/aarch64/Makefile.inc |  3 ++-
- newlib/libc/machine/aarch64/sme-abi.S    | 30 ++++++++++++++++++++++++
- 3 files changed, 54 insertions(+), 3 deletions(-)
+ newlib/libc/machine/aarch64/sme-abi.S    | 29 ++++++++++++++++++++++++
+ 3 files changed, 53 insertions(+), 3 deletions(-)
  create mode 100644 newlib/libc/machine/aarch64/sme-abi.S
 
 diff --git a/newlib/Makefile.in b/newlib/Makefile.in
@@ -86,10 +86,10 @@ index 1068d88ce..b700d2bd1 100644
 +	%D%/sme-abi.S
 diff --git a/newlib/libc/machine/aarch64/sme-abi.S b/newlib/libc/machine/aarch64/sme-abi.S
 new file mode 100644
-index 000000000..c5c2f9b02
+index 000000000..b74d387c1
 --- /dev/null
 +++ b/newlib/libc/machine/aarch64/sme-abi.S
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,29 @@
 +/*
 + * sme-abi.S - minimal SME ABI routines implementation
 + *
@@ -108,8 +108,7 @@ index 000000000..c5c2f9b02
 +  /* Check if we have SME (global initialized in libgloss) */
 +  adrp x16, __arm64_has_sme
 +  ldrb w16, [x16, :lo12:__arm64_has_sme]
-+  cmp w16, #0
-+  b.eq	L(no_sme)
++  cbz w16, L(no_sme)
 +
 +  orr x0, x0, #0xC000000000000000
 +  /* Read SVCR */

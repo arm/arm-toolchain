@@ -1,13 +1,13 @@
-From e27e49416ed5a41d4a293f3b1b9f97a5aa3cb515 Mon Sep 17 00:00:00 2001
+From 1919a3a74be87a2efed57a22e1bd5561de85daae Mon Sep 17 00:00:00 2001
 From: Benjamin Maxwell <benjamin.maxwell@arm.com>
-Date: Thu, 16 Apr 2026 09:09:46 +0000
+Date: Mon, 20 Apr 2026 13:28:58 +0000
 Subject: [PATCH 2/2] Add minimal SME ABI routines (__arm_sme_state)
 
 ---
  libc/machine/aarch64/CMakeLists.txt |  1 +
  libc/machine/aarch64/meson.build    |  1 +
- libc/machine/aarch64/sme-abi.S      | 30 +++++++++++++++++++++++++++++
- 3 files changed, 32 insertions(+)
+ libc/machine/aarch64/sme-abi.S      | 29 +++++++++++++++++++++++++++++
+ 3 files changed, 31 insertions(+)
  create mode 100644 libc/machine/aarch64/sme-abi.S
 
 diff --git a/libc/machine/aarch64/CMakeLists.txt b/libc/machine/aarch64/CMakeLists.txt
@@ -36,10 +36,10 @@ index 8a11d7d15..e5ee1989a 100644
  
 diff --git a/libc/machine/aarch64/sme-abi.S b/libc/machine/aarch64/sme-abi.S
 new file mode 100644
-index 000000000..c5c2f9b02
+index 000000000..956d8d4c8
 --- /dev/null
 +++ b/libc/machine/aarch64/sme-abi.S
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,29 @@
 +/*
 + * sme-abi.S - minimal SME ABI routines implementation
 + *
@@ -58,8 +58,7 @@ index 000000000..c5c2f9b02
 +  /* Check if we have SME (global initialized in crt0.c) */
 +  adrp x16, __arm64_has_sme
 +  ldrb w16, [x16, :lo12:__arm64_has_sme]
-+  cmp w16, #0
-+  b.eq	L(no_sme)
++  cbz w16, L(no_sme)
 +
 +  orr x0, x0, #0xC000000000000000
 +  /* Read SVCR */
