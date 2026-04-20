@@ -1,0 +1,124 @@
+From 46054f0dfde930644d5cbcf13a2103525892bba7 Mon Sep 17 00:00:00 2001
+From: Benjamin Maxwell <benjamin.maxwell@arm.com>
+Date: Mon, 20 Apr 2026 13:31:44 +0000
+Subject: [PATCH] Add minimal SME ABI routines (__arm_sme_state)
+
+---
+ newlib/Makefile.in                       | 24 ++++++++++++++++++--
+ newlib/libc/machine/aarch64/Makefile.inc |  3 ++-
+ newlib/libc/machine/aarch64/sme-abi.S    | 29 ++++++++++++++++++++++++
+ 3 files changed, 53 insertions(+), 3 deletions(-)
+ create mode 100644 newlib/libc/machine/aarch64/sme-abi.S
+
+diff --git a/newlib/Makefile.in b/newlib/Makefile.in
+index 4186ae553..09072476d 100644
+--- a/newlib/Makefile.in
++++ b/newlib/Makefile.in
+@@ -659,7 +659,8 @@ check_PROGRAMS =
+ @HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/strnlen-stub.c \
+ @HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/strnlen.S \
+ @HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/strrchr-stub.c \
+-@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/strrchr.S
++@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/strrchr.S \
++@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/sme-abi.S
+ 
+ @HAVE_LIBC_MACHINE_AMDGCN_TRUE@am__append_66 = \
+ @HAVE_LIBC_MACHINE_AMDGCN_TRUE@	libc/machine/amdgcn/_exit.c \
+@@ -1937,7 +1938,8 @@ am__objects_51 = libc/ssp/libc_a-chk_fail.$(OBJEXT) \
+ @HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/libc_a-strnlen-stub.$(OBJEXT) \
+ @HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/libc_a-strnlen.$(OBJEXT) \
+ @HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/libc_a-strrchr-stub.$(OBJEXT) \
+-@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/libc_a-strrchr.$(OBJEXT)
++@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/libc_a-strrchr.$(OBJEXT) \
++@HAVE_LIBC_MACHINE_AARCH64_TRUE@	libc/machine/aarch64/libc_a-sme-abi.$(OBJEXT)
+ @HAVE_LIBC_MACHINE_AMDGCN_TRUE@am__objects_77 = libc/machine/amdgcn/libc_a-_exit.$(OBJEXT) \
+ @HAVE_LIBC_MACHINE_AMDGCN_TRUE@	libc/machine/amdgcn/libc_a-abort.$(OBJEXT) \
+ @HAVE_LIBC_MACHINE_AMDGCN_TRUE@	libc/machine/amdgcn/libc_a-atexit.$(OBJEXT) \
+@@ -8195,6 +8197,9 @@ libc/machine/aarch64/libc_a-strrchr-stub.$(OBJEXT):  \
+ libc/machine/aarch64/libc_a-strrchr.$(OBJEXT):  \
+ 	libc/machine/aarch64/$(am__dirstamp) \
+ 	libc/machine/aarch64/$(DEPDIR)/$(am__dirstamp)
++libc/machine/aarch64/libc_a-sme-abi.$(OBJEXT):  \
++	libc/machine/aarch64/$(am__dirstamp) \
++	libc/machine/aarch64/$(DEPDIR)/$(am__dirstamp)
+ libc/machine/amdgcn/$(am__dirstamp):
+ 	@$(MKDIR_P) libc/machine/amdgcn
+ 	@: > libc/machine/amdgcn/$(am__dirstamp)
+@@ -12904,6 +12909,7 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@libc/machine/aarch64/$(DEPDIR)/libc_a-rawmemchr-stub.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@libc/machine/aarch64/$(DEPDIR)/libc_a-rawmemchr.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@libc/machine/aarch64/$(DEPDIR)/libc_a-setjmp.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@libc/machine/aarch64/$(DEPDIR)/libc_a-stpcpy-stub.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@libc/machine/aarch64/$(DEPDIR)/libc_a-stpcpy.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@libc/machine/aarch64/$(DEPDIR)/libc_a-strchr-stub.Po@am__quote@
+@@ -17077,6 +17083,20 @@ libc/machine/aarch64/libc_a-strrchr.obj: libc/machine/aarch64/strrchr.S
+ @AMDEP_TRUE@@am__fastdepCCAS_FALSE@	DEPDIR=$(DEPDIR) $(CCASDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+ @am__fastdepCCAS_FALSE@	$(AM_V_CPPAS@am__nodep@)$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libc_a_CPPFLAGS) $(CPPFLAGS) $(libc_a_CCASFLAGS) $(CCASFLAGS) -c -o libc/machine/aarch64/libc_a-strrchr.obj `if test -f 'libc/machine/aarch64/strrchr.S'; then $(CYGPATH_W) 'libc/machine/aarch64/strrchr.S'; else $(CYGPATH_W) '$(srcdir)/libc/machine/aarch64/strrchr.S'; fi`
+ 
++libc/machine/aarch64/libc_a-sme-abi.o: libc/machine/aarch64/sme-abi.S
++@am__fastdepCCAS_TRUE@	$(AM_V_CPPAS)$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libc_a_CPPFLAGS) $(CPPFLAGS) $(libc_a_CCASFLAGS) $(CCASFLAGS) -MT libc/machine/aarch64/libc_a-sme-abi.o -MD -MP -MF libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Tpo -c -o libc/machine/aarch64/libc_a-sme-abi.o `test -f 'libc/machine/aarch64/sme-abi.S' || echo '$(srcdir)/'`libc/machine/aarch64/sme-abi.S
++@am__fastdepCCAS_TRUE@	$(AM_V_at)$(am__mv) libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Tpo libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Po
++@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	$(AM_V_CPPAS)source='libc/machine/aarch64/sme-abi.S' object='libc/machine/aarch64/libc_a-sme-abi.o' libtool=no @AMDEPBACKSLASH@
++@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	DEPDIR=$(DEPDIR) $(CCASDEPMODE) $(depcomp) @AMDEPBACKSLASH@
++@am__fastdepCCAS_FALSE@	$(AM_V_CPPAS@am__nodep@)$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libc_a_CPPFLAGS) $(CPPFLAGS) $(libc_a_CCASFLAGS) $(CCASFLAGS) -c -o libc/machine/aarch64/libc_a-sme-abi.o `test -f 'libc/machine/aarch64/sme-abi.S' || echo '$(srcdir)/'`libc/machine/aarch64/sme-abi.S
++
++libc/machine/aarch64/libc_a-sme-abi.obj: libc/machine/aarch64/sme-abi.S
++@am__fastdepCCAS_TRUE@	$(AM_V_CPPAS)$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libc_a_CPPFLAGS) $(CPPFLAGS) $(libc_a_CCASFLAGS) $(CCASFLAGS) -MT libc/machine/aarch64/libc_a-sme-abi.obj -MD -MP -MF libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Tpo -c -o libc/machine/aarch64/libc_a-sme-abi.obj `if test -f 'libc/machine/aarch64/sme-abi.S'; then $(CYGPATH_W) 'libc/machine/aarch64/sme-abi.S'; else $(CYGPATH_W) '$(srcdir)/libc/machine/aarch64/sme-abi.S'; fi`
++@am__fastdepCCAS_TRUE@	$(AM_V_at)$(am__mv) libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Tpo libc/machine/aarch64/$(DEPDIR)/libc_a-sme-abi.Po
++@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	$(AM_V_CPPAS)source='libc/machine/aarch64/sme-abi.S' object='libc/machine/aarch64/libc_a-sme-abi.obj' libtool=no @AMDEPBACKSLASH@
++@AMDEP_TRUE@@am__fastdepCCAS_FALSE@	DEPDIR=$(DEPDIR) $(CCASDEPMODE) $(depcomp) @AMDEPBACKSLASH@
++@am__fastdepCCAS_FALSE@	$(AM_V_CPPAS@am__nodep@)$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libc_a_CPPFLAGS) $(CPPFLAGS) $(libc_a_CCASFLAGS) $(CCASFLAGS) -c -o libc/machine/aarch64/libc_a-sme-abi.obj `if test -f 'libc/machine/aarch64/sme-abi.S'; then $(CYGPATH_W) 'libc/machine/aarch64/sme-abi.S'; else $(CYGPATH_W) '$(srcdir)/libc/machine/aarch64/sme-abi.S'; fi`
++
+ libc/machine/arc/libc_a-memcmp.o: libc/machine/arc/memcmp.S
+ @am__fastdepCCAS_TRUE@	$(AM_V_CPPAS)$(CCAS) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libc_a_CPPFLAGS) $(CPPFLAGS) $(libc_a_CCASFLAGS) $(CCASFLAGS) -MT libc/machine/arc/libc_a-memcmp.o -MD -MP -MF libc/machine/arc/$(DEPDIR)/libc_a-memcmp.Tpo -c -o libc/machine/arc/libc_a-memcmp.o `test -f 'libc/machine/arc/memcmp.S' || echo '$(srcdir)/'`libc/machine/arc/memcmp.S
+ @am__fastdepCCAS_TRUE@	$(AM_V_at)$(am__mv) libc/machine/arc/$(DEPDIR)/libc_a-memcmp.Tpo libc/machine/arc/$(DEPDIR)/libc_a-memcmp.Po
+diff --git a/newlib/libc/machine/aarch64/Makefile.inc b/newlib/libc/machine/aarch64/Makefile.inc
+index 1068d88ce..b700d2bd1 100644
+--- a/newlib/libc/machine/aarch64/Makefile.inc
++++ b/newlib/libc/machine/aarch64/Makefile.inc
+@@ -30,4 +30,5 @@ libc_a_SOURCES += \
+ 	%D%/strnlen-stub.c \
+ 	%D%/strnlen.S \
+ 	%D%/strrchr-stub.c \
+-	%D%/strrchr.S
++	%D%/strrchr.S \
++	%D%/sme-abi.S
+diff --git a/newlib/libc/machine/aarch64/sme-abi.S b/newlib/libc/machine/aarch64/sme-abi.S
+new file mode 100644
+index 000000000..b74d387c1
+--- /dev/null
++++ b/newlib/libc/machine/aarch64/sme-abi.S
+@@ -0,0 +1,29 @@
++/*
++ * sme-abi.S - minimal SME ABI routines implementation
++ *
++ * Copyright (c) 2026, Arm Limited.
++ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
++ */
++
++#include "asmdefs.h"
++
++// __arm_sme_state fills the result registers based on id_aa64pfr1_el1.
++ENTRY (__arm_sme_state)
++  .variant_pcs __arm_sme_state
++  mov x0, xzr
++  mov x1, xzr
++
++  /* Check if we have SME (global initialized in libgloss) */
++  adrp x16, __arm64_has_sme
++  ldrb w16, [x16, :lo12:__arm64_has_sme]
++  cbz w16, L(no_sme)
++
++  orr x0, x0, #0xC000000000000000
++  /* Read SVCR */
++  mrs x16, s3_3_c4_c2_2
++  bfxil x0, x16, #0, #2
++  /* Read TPIDR2_EL0 */
++  mrs x1, s3_3_c13_c0_5
++L(no_sme):
++  ret
++END (__arm_sme_state)
+-- 
+2.43.0
+

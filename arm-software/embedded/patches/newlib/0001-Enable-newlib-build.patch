@@ -27,23 +27,6 @@ index 5146a7880..895da03c2 100644
  am__TEXINFO_TEX_DIR = $(srcdir)/../texinfo
  DVIS = doc/porting.dvi
  PDFS = doc/porting.pdf
-diff --git a/libgloss/aarch64/syscalls.c b/libgloss/aarch64/syscalls.c
-index 5b4071893..cfe1d6d23 100644
---- a/libgloss/aarch64/syscalls.c
-+++ b/libgloss/aarch64/syscalls.c
-@@ -172,6 +172,12 @@ newslot (void)
-   return i;
- }
- 
-+int __aarch64_sme_accessible() {
-+  int result = 0;
-+  asm volatile ( "mrs %x[result], id_aa64pfr1_el1" : [result]"=r"(result) :  : );
-+  return (result & 0x3000000) != 0;
-+}
-+
- void
- initialise_monitor_handles (void)
- {
 diff --git a/libgloss/arm/cpu-init/rdimon-aem.S b/libgloss/arm/cpu-init/rdimon-aem.S
 index 2aacbeba9..87cb5702d 100644
 --- a/libgloss/arm/cpu-init/rdimon-aem.S
