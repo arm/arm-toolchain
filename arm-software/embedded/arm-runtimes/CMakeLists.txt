@@ -376,9 +376,9 @@ if(ENABLE_COMPILER_RT_TESTS)
         check-compiler-rt
         COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-compiler-rt
         COMMAND ${Python3_EXECUTABLE}
-        ${CMAKE_CURRENT_SOURCE_DIR}/test-support/modify-compiler-rt-xml.py
-        --dir <BINARY_DIR>
-        --variant ${variant_xml_name}
+        ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
+        --dir <BINARY_DIR>/compiler-rt/test
+        --testsuite compiler-rt-${variant_xml_name}
         USES_TERMINAL TRUE
         EXCLUDE_FROM_MAIN TRUE
         ALWAYS TRUE
@@ -896,6 +896,10 @@ if(C_LIBRARY STREQUAL llvmlibc)
             llvmlibc
             check-lit
             COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc-lit
+            COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
+            --dir <BINARY_DIR>/libc/test
+            --testsuite libc-${variant_xml_name}
             DEPENDEES install
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
