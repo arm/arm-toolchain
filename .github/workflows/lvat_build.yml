@@ -111,7 +111,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.pango }}
-          path: build/${{ matrix.pango }}.tar.xz
+          path: ${{ matrix.pango }}.tar.xz
 
       - name: Build and push toolchain Docker image
         id: build
@@ -140,7 +140,7 @@ jobs:
         if: success() && github.event_name == 'release'
         run: |
           gh release upload --repo "${{ github.repository }}" "${{ github.ref_name }}" "build/${{ matrix.package }}.tar.xz"
-          gh release upload --repo "${{ github.repository }}" "${{ github.ref_name }}" "build/${{ matrix.pango }}.tar.xz"
+          gh release upload --repo "${{ github.repository }}" "${{ github.ref_name }}" "${{ matrix.pango }}.tar.xz"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
