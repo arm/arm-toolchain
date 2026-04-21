@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
-# Helper script to modify the xml results from compiler-rt.
+# Helper script to rename the testsuite in xml results.
 
-# compiler-rt always puts all the test results into the "compiler-rt"
-# testsuite in the junit xml file. We have multiple variants of
-# compiler-rt, so the xml is modified to group the tests by variant.
+# compiler-rt and LLVM libc always put all the test results into
+# the "compiler-rt" or "libc" testsuite in the junit xml file. ATfE
+# builds multiple variants of these projects, so it is useful to
+# modify the xml to group the tests by variant so that the names do
+# not overlap in a CI environment.
 
 import argparse
 import os
@@ -13,16 +15,16 @@ from xml.etree import ElementTree
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Reformat compiler-rt xml results")
+    parser = argparse.ArgumentParser(description="Reformat xml results")
     parser.add_argument(
         "--dir",
         required=True,
-        help="Path to compiler-rt build directory",
+        help="Path to project build's test directory",
     )
     parser.add_argument(
-        "--variant",
+        "--testsuite",
         required=True,
-        help="Name of the variant under test",
+        help="New name for the testsuite",
     )
     args = parser.parse_args()
 
@@ -40,9 +42,7 @@ def main():
             if os.path.isabs(results_path):
                 xml_file = results_path
             else:
-                # If not absolute, the path will be relative to compiler-rt/test
-                # in the build directory, not this script.
-                xml_file = os.path.join(args.dir, "compiler-rt", "test", results_path)
+                xml_file = os.path.join(args.dir, results_path)
     if xml_file is None:
         print(f"No xml results generated to modify.")
         return
@@ -53,10 +53,11 @@ def main():
     # The compiler-rt Builtins tests runs two testsuites: TestCases and Unit
     # TestCases are recorded in the "Builtins" suite.
     # But the Unit tests are recorded in "Builtins-arm-generic" or similar.
-    # For readability, combine them all under compiler-rt-{variant}-Builtins
+    # For readability, both can be combined all under compiler-rt-{variant}.
+    # LLVM libc places all tests in the "libc" suite.
     for testsuite in root.iter("testsuite"):
         old_suitename = testsuite.get("name")
-        new_suitename = f"compiler-rt-{args.variant}-Builtins"
+        new_suitename = args.testsuite
         testsuite.set("name", new_suitename)
         for testcase in testsuite.iter("testcase"):
             old_classname = testcase.get("classname")
