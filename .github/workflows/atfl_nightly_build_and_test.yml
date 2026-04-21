@@ -21,11 +21,10 @@ on:
 
 jobs:
   build-and-test-toolchain:
-    name: Build ${{ matrix.build_script }} for ${{ matrix.target_os }} on ${{ matrix.container }}
-    runs-on: [self-hosted, ah-ubuntu_24_04-c7g_8x-100]
-
-    container:
-      image: ${{ matrix.container }}
+    name: Build ${{ matrix.build_script }} for ${{ matrix.target_os }} on ${{ matrix.runner_label }}
+    runs-on:
+      - self-hosted
+      - ${{ matrix.runner_label }}
 
     defaults:
       run:
@@ -42,7 +41,7 @@ jobs:
           - build_script: build.sh
             install_script: install_dependencies_ubuntu.sh
             target_os: Ubuntu-24.04-arm64
-            container: ubuntu:24.04
+            runner_label: ah-ubuntu_24_04-c7g_8x-100
 
     steps:
       - name: Checkout
