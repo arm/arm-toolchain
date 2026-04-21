@@ -2,10 +2,15 @@
 ARG dev_image
 FROM ${dev_image}
 ARG lvat_package
+ARG pango_package
 
 # Install built toolchain in container
 RUN --mount=type=bind,source=.,destination=/src \
     tar -C /usr/local -Jx -f /src/build/${lvat_package}.tar.xz --strip-components=1 \
         ${lvat_package}/bin \
         ${lvat_package}/include \
-        ${lvat_package}/lib
+        ${lvat_package}/lib && \
+    tar -C / -Jx -f /src/${pango_package}.tar.xz
+
+ENV PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/
+ENV LD_LIBRARY_PATH=/usr/local/lib64/

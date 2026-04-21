@@ -42,9 +42,9 @@ RUN dnf install -y epel-release && \
         patch \
         plantuml \
         procps-ng \
-        python39 \
-        python39-pip \
-        python39-devel \
+        python3.12 \
+        python3.12-pip \
+        python3.12-devel \
         qemu-kvm \
         ripgrep \
         socat \
@@ -55,7 +55,7 @@ RUN dnf install -y epel-release && \
         zlib-devel \
     && \
     dnf clean all && \
-    alternatives --set python3 /usr/bin/python3.9 && \
+    alternatives --set python3 /usr/bin/python3.12 && \
     rm -rf /var/cache/dnf
 
 # Install useful/required Python packages
@@ -72,7 +72,7 @@ RUN pip3 install --no-cache-dir --upgrade \
         plantuml-markdown \
         pyelftools \
         pyyaml \
-        WeasyPrint==52.5
+        WeasyPrint
 
 # Install Google's addlicense tool to help with copyright headers
 RUN curl -L --fail \

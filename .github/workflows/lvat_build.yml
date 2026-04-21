@@ -29,8 +29,10 @@ jobs:
         include:
           - runner: ubuntu-24.04
             package: LVAT-Linux-x86_64
+            pango: Pango-Linux-x86_64
           - runner: ubuntu-24.04-arm
             package: LVAT-Linux-AArch64
+            pango: Pango-Linux-aarch64
 
     steps:
       - name: Checkout
@@ -91,14 +93,25 @@ jobs:
           subject-digest: ${{ steps.build_dev.outputs.digest }}
           push-to-registry: true
 
+      # Note: RHEL 8 has too old of a version of Pango to be compatible with WeasyPrint, which is needed for documentation purposes
+      # If you don't need mkdocs-to-pdf support in your container, though, you could easily leave this out.
+      - name: Build Pango
+        run: docker run -v .:/src -w /src "${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}@${{ steps.build_dev.outputs.digest }}" ./pango_build.sh
+
       - name: Build Toolchain
         run: docker run -v .:/src -w /src "${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}@${{ steps.build_dev.outputs.digest }}" ./lvat_build.sh
 
-      - name: Upload built tarball
+      - name: Upload built Toolchain tarball
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.package }}
           path: build/${{ matrix.package }}.tar.xz
+
+      - name: Upload built Pango tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.pango }}
+          path: build/${{ matrix.pango }}.tar.xz
 
       - name: Build and push toolchain Docker image
         id: build
@@ -110,6 +123,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             lvat_package=${{ matrix.package }}
+            pango_package=${{ matrix.pango }}
             dev_image=${{ env.REGISTRY }}/${{ env.DEV_IMAGE_NAME }}@${{ steps.build_dev.outputs.digest }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=build
@@ -122,9 +136,11 @@ jobs:
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
-      - name: Release built tarball
+      - name: Release built tarballs
         if: success() && github.event_name == 'release'
-        run: gh release upload --repo "${{ github.repository }}" "${{ github.ref_name }}" "build/${{ matrix.package }}.tar.xz"
+        run: |
+          gh release upload --repo "${{ github.repository }}" "${{ github.ref_name }}" "build/${{ matrix.package }}.tar.xz"
+          gh release upload --repo "${{ github.repository }}" "${{ github.ref_name }}" "build/${{ matrix.pango }}.tar.xz"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
