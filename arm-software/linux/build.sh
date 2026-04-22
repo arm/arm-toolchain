@@ -417,9 +417,9 @@ static_libomp_build() {
         -DCMAKE_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
         -DCMAKE_LINKER="${ATFL_DIR}/bin/ld.lld" \
         -DCMAKE_CXX_FLAGS="-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT" \
-        -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
-        -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}" \
+        -DCMAKE_EXE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -Wl,--as-needed ${COMMON_LINKER_FLAGS}" \
+        -DCMAKE_MODULE_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -Wl,--as-needed ${COMMON_LINKER_FLAGS}" \
+        -DCMAKE_SHARED_LINKER_FLAGS="-L${ATFL_DIR}/lib -rtlib=compiler-rt -Wl,--as-needed ${COMMON_LINKER_FLAGS}" \
         -DOPENMP_TEST_C_COMPILER="${ATFL_DIR}//bin/clang" \
         -DOPENMP_TEST_CXX_COMPILER="${ATFL_DIR}/bin/clang++" \
         -DOPENMP_TEST_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
