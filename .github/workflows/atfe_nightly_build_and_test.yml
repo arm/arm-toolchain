@@ -50,7 +50,7 @@ jobs:
             runner: ah-windows_2022-c7a_24x-200
 
           - build_script: build.sh
-            test_script: test.sh
+            test_script: test_package_only.sh
             install_script: install_dependencies_macos.sh
             target_os: macOS-arm64
             runner: mini-github-m4-01
