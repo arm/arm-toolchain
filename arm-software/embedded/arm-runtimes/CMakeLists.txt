@@ -895,7 +895,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ExternalProject_Add_Step(
             llvmlibc
             check-lit
-            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc-lit
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc
             COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
             --dir <BINARY_DIR>/libc/test
