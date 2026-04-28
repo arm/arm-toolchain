@@ -281,6 +281,7 @@ set(BUG_REPORT_URL "https://github.com/arm/arm-toolchain/issues" CACHE STRING ""
 set(LLVM_DISTRIBUTION_COMPONENTS
     clang-resource-headers
     clang
+    clangd
     clang-check
     clang-format
     clang-scan-deps
@@ -316,7 +317,7 @@ set(LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS
     CACHE STRING "Components defined by this CMakeLists that should be
 installed by the install-llvm-toolchain target"
 )
-set(LLVM_ENABLE_PROJECTS clang;lld CACHE STRING "")
+set(LLVM_ENABLE_PROJECTS clang;clang-tools-extra;lld CACHE STRING "")
 set(LLVM_TARGETS_TO_BUILD AArch64;ARM CACHE STRING "")
 set(LLVM_DEFAULT_TARGET_TRIPLE aarch64-unknown-linux-gnu CACHE STRING "")
 set(LLVM_APPEND_VC_REV OFF CACHE BOOL "")
