@@ -23,8 +23,10 @@ jobs:
   build-and-test-toolchain:
     name: Build ${{ matrix.build_script }} for ${{ matrix.target_os }} on ${{ matrix.runner }}
     runs-on: ${{ matrix.runner }}
-    # Ensure the workflow only runs on the arm-toolchain repository and not on forks
-    if: github.repository == 'arm/arm-toolchain'
+
+    # Allow manual runs on Fork for testing, and
+    # scheduled runs only on arm/arm-toolchain
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'arm/arm-toolchain'
 
     strategy:
       fail-fast: false  # Prevents one job failure from cancelling all
