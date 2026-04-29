@@ -9,8 +9,20 @@
 
 set -euo pipefail
 
-apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+if [ "$(id -u)" -eq 0 ]; then
+    echo "root privileges are present"
+    SUDO=""
+else
+    echo "root privileges are not present"
+    command -v sudo >/dev/null 2>&1 || {
+        echo "sudo is required but not installed"
+        exit 1
+    }
+    SUDO="sudo"
+fi
+
+$SUDO apt-get update
+DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y --no-install-recommends \
     bash \
     binutils-dev \
     build-essential \
@@ -42,6 +54,5 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     zlib1g-dev
 
 # Install fpm
-gem install --no-document fpm
-
-rm -rf /var/lib/apt/lists/*
+$SUDO gem install --no-document fpm
+$SUDO rm -rf /var/lib/apt/lists/*
