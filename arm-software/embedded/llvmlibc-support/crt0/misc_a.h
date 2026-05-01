@@ -18,6 +18,35 @@ namespace misc {
 
 using namespace sysreg;
 
+#if defined(__ARM_ARCH_ISA_A64)
+[[clang::always_inline]] inline bool has_sme_or_sme2() {
+  constexpr auto FEAT_SME_1 = 1UL << 24;
+  constexpr auto FEAT_SME_2 = 1UL << 25;
+
+  return (static_cast<unsigned long>(ID_AA64PFR1) & (FEAT_SME_1 | FEAT_SME_2)) != 0;
+}
+
+[[clang::always_inline]] inline void init_sme_state() {
+  if (!has_sme_or_sme2())
+    return;
+
+  // TPIDR2_EL0 resets to an architecturally unknown value, so clear it.
+  asm volatile("msr s3_3_c13_c0_5, xzr\n\tisb" : : : "memory");
+
+  // Try to set the streaming vector length to the architectural maximum.
+  unsigned long smcr;
+  if (__arm_rsr("CurrentEL") == 3 << 2) {
+    asm volatile("mrs %0, s3_6_c1_c2_6" : "=r"(smcr));
+    smcr = (smcr & ~0xfUL) | 0xfUL;
+    asm volatile("msr s3_6_c1_c2_6, %0\n\tisb" : : "r"(smcr) : "memory");
+  } else if (__arm_rsr("CurrentEL") == 2 << 2) {
+    asm volatile("mrs %0, s3_4_c1_c2_6" : "=r"(smcr));
+    smcr = (smcr & ~0xfUL) | 0xfUL;
+    asm volatile("msr s3_4_c1_c2_6, %0\n\tisb" : : "r"(smcr) : "memory");
+  }
+}
+#endif
+
 extern "C" [[gnu::weak]] void _platform_setup_arch_extensions() {
 #ifdef __ARM_FEATURE_PAUTH
   // Set all of the pointer authentication keys to different values. In
@@ -54,6 +83,7 @@ extern "C" [[gnu::weak]] void _platform_setup_arch_extensions() {
   // relevant feature these bits are ignored, so safe to set unconditionally.
   CPTR.EZ = 1;
   CPTR.ESM = 1;
+  init_sme_state();
 #else
   // Enable VFP and SIMD
   __arm_wsr("fpexc", 1 << 30);

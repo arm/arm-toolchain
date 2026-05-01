@@ -11,6 +11,7 @@ set(CRT0_COMMON_SOURCES
   exceptions.cpp
   memory.cpp
   misc.cpp
+  sme_abi.cpp
   system_registers_a.cpp
   system_registers_m.cpp
   tls.cpp
