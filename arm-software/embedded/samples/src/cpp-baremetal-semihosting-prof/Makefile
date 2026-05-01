@@ -12,7 +12,7 @@ build: hello.elf
 hello.elf: *.cpp
 	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) ../../ldscripts/microbit.ld.in -o microbit.ld
 	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) -g -c proflib.c
-	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) $(CPP_FLAGS) -g -T microbit.ld -fprofile-instr-generate -fcoverage-mapping -o hello.elf hello.cpp proflib.o -lclang_rt.profile
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) $(CPP_FLAGS) -g -T microbit.ld -fprofile-instr-generate -fcoverage-mapping -o hello.elf hello.cpp proflib.o
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@
