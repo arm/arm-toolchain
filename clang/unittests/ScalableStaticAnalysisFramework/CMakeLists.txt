@@ -1,4 +1,5 @@
 add_distinct_clang_unittest(ClangScalableAnalysisTests
+  Analyses/PointerFlow/PointerFlowTest.cpp
   Analyses/CallGraph/CallGraphExtractorTest.cpp
   Analyses/UnsafeBufferUsage/UnsafeBufferUsageTest.cpp
   ASTEntityMappingTest.cpp
