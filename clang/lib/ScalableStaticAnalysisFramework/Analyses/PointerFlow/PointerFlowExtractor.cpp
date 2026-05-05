@@ -361,4 +361,4 @@ volatile int PointerFlowTUSummaryExtractorAnchorSource = 0;
 
 static TUSummaryExtractorRegistry::Add<PointerFlowTUSummaryExtractor>
     RegisterExtractor(PointerFlowEntitySummary::Name,
-                      "The TUSummaryExtractor for pointer flow");
+                      "Extract pointer flow information");

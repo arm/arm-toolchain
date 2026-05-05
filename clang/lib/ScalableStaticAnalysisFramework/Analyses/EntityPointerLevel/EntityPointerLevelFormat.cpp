@@ -56,3 +56,29 @@ llvm::Expected<EntityPointerLevel> clang::ssaf::entityPointerLevelFromJSON(
 
   return buildEntityPointerLevel(*Id, *PtrLv);
 }
+
+llvm::json::Array clang::ssaf::entityPointerLevelSetToJSON(
+    llvm::iterator_range<EntityPointerLevelSet::const_iterator> EPLs,
+    JSONFormat::EntityIdToJSONFn EntityId2JSON) {
+  llvm::json::Array Result;
+
+  for (const auto &EPL : EPLs)
+    Result.push_back(entityPointerLevelToJSON(EPL, EntityId2JSON));
+  return Result;
+}
+
+Expected<EntityPointerLevelSet> clang::ssaf::entityPointerLevelSetFromJSON(
+    const llvm::json::Array &EPLsData,
+    JSONFormat::EntityIdFromJSONFn EntityIdFromJSON) {
+  EntityPointerLevelSet EPLs;
+
+  for (const auto &EltData : EPLsData) {
+    llvm::Expected<EntityPointerLevel> EPL =
+        entityPointerLevelFromJSON(EltData, EntityIdFromJSON);
+
+    if (!EPL)
+      return EPL.takeError();
+    EPLs.insert(*EPL);
+  }
+  return EPLs;
+}
