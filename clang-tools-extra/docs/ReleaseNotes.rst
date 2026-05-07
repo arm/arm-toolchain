@@ -579,6 +579,14 @@ Changes in existing checks
   - Fixed a false positive in array subscript expressions where the types are
     not yet resolved.
 
+- Improved :doc:`readability-redundant-casting
+  <clang-tidy/checks/readability/redundant-casting>` check by adding the
+  `IgnoreImplicitCasts` option (default `false`) to flag casts as redundant
+  when at least one operand of a binary operation matches the cast type due to
+  implicit conversion. For example, ``static_cast<float>(1.0f + 1)`` is now
+  identified as redundant since ``1`` is implicitly converted to ``float``.
+  Setting this option to `true` restores the previous behavior.
+
 - Improved :doc:`readability-redundant-member-init
   <clang-tidy/checks/readability/redundant-member-init>` check by adding an
   `IgnoreMacros` option to suppress warnings when the initializer involves
