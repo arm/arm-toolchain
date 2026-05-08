@@ -335,7 +335,9 @@ X86LegalizerInfo::X86LegalizerInfo(const X86Subtarget &STI,
       .widenScalarToNextPow2(1, /*Min*/ 32)
       .clampScalar(1, s32, sMaxScalar);
 
-  getActionDefinitionsBuilder({G_FRAME_INDEX, G_GLOBAL_VALUE}).legalFor({p0});
+  getActionDefinitionsBuilder(G_FRAME_INDEX).legalFor({p0});
+
+  getActionDefinitionsBuilder(G_GLOBAL_VALUE).customFor({p0});
 
   // load/store: add more corner cases
   for (unsigned Op : {G_LOAD, G_STORE}) {
@@ -641,6 +643,8 @@ bool X86LegalizerInfo::legalizeCustom(LegalizerHelper &Helper, MachineInstr &MI,
     return legalizeGETROUNDING(MI, MRI, Helper);
   case TargetOpcode::G_SET_ROUNDING:
     return legalizeSETROUNDING(MI, MRI, Helper);
+  case TargetOpcode::G_GLOBAL_VALUE:
+    return legalizeGLOBAL_VALUE(MI, MRI, Helper);
   }
   llvm_unreachable("expected switch to return");
 }
@@ -1008,6 +1012,33 @@ bool X86LegalizerInfo::legalizeSETROUNDING(MachineInstr &MI,
   }
 
   MI.eraseFromParent();
+  return true;
+}
+
+bool X86LegalizerInfo::legalizeGLOBAL_VALUE(MachineInstr &MI,
+                                            MachineRegisterInfo &MRI,
+                                            LegalizerHelper &Helper) const {
+  const GlobalValue *GV = MI.getOperand(1).getGlobal();
+  Register Dst = MI.getOperand(0).getReg();
+  LLT DstTy = MRI.getType(Dst);
+  unsigned GVOpFlags = Subtarget.classifyGlobalReference(GV);
+
+  // For stub references (GOT/PLT), we need G_WRAPPER_RIP + load
+  if (isGlobalStubReference(GVOpFlags)) {
+    MachineIRBuilder &MIRBuilder = Helper.MIRBuilder;
+    MachineFunction &MF = MIRBuilder.getMF();
+
+    Register StubAddr = MRI.createGenericVirtualRegister(DstTy);
+    MIRBuilder.buildInstr(X86::G_WRAPPER_RIP)
+        .addDef(StubAddr)
+        .addGlobalAddress(GV);
+
+    MachineMemOperand *MMO = MF.getMachineMemOperand(
+        MachinePointerInfo::getGOT(MF), MachineMemOperand::MOLoad, DstTy,
+        Align(DstTy.getSizeInBytes()));
+    MIRBuilder.buildLoad(Dst, StubAddr, *MMO);
+    MI.eraseFromParent();
+  }
   return true;
 }
 
