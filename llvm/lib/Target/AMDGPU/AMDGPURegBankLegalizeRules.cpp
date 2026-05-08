@@ -1875,6 +1875,25 @@ RegBankLegalizeRules::RegBankLegalizeRules(const GCNSubtarget &_ST,
                     amdgcn_global_store_async_from_lds_b128})
       .Any({{}, {{}, {IntrId, VgprP1, VgprP3}}});
 
+  addRulesForIOpcs({amdgcn_cluster_load_b32})
+      .Any({{UniB32}, {{UniInVgprB32}, {IntrId, SgprP1, Imm, SgprB32_M0}}})
+      .Any({{DivB32, _, UniP1}, {{VgprB32}, {IntrId, SgprP1, Imm, SgprB32_M0}}})
+      .Any(
+          {{DivB32, _, DivP1}, {{VgprB32}, {IntrId, VgprP1, Imm, SgprB32_M0}}});
+
+  addRulesForIOpcs({amdgcn_cluster_load_b64})
+      .Any({{UniB64}, {{UniInVgprB64}, {IntrId, SgprP1, Imm, SgprB32_M0}}})
+      .Any({{DivB64, _, UniP1}, {{VgprB64}, {IntrId, SgprP1, Imm, SgprB32_M0}}})
+      .Any(
+          {{DivB64, _, DivP1}, {{VgprB64}, {IntrId, VgprP1, Imm, SgprB32_M0}}});
+
+  addRulesForIOpcs({amdgcn_cluster_load_b128})
+      .Any({{UniB128}, {{UniInVgprB128}, {IntrId, SgprP1, Imm, SgprB32_M0}}})
+      .Any({{DivB128, _, UniP1},
+            {{VgprB128}, {IntrId, SgprP1, Imm, SgprB32_M0}}})
+      .Any({{DivB128, _, DivP1},
+            {{VgprB128}, {IntrId, VgprP1, Imm, SgprB32_M0}}});
+
   addRulesForIOpcs({amdgcn_cluster_load_async_to_lds_b8,
                     amdgcn_cluster_load_async_to_lds_b32,
                     amdgcn_cluster_load_async_to_lds_b64,
