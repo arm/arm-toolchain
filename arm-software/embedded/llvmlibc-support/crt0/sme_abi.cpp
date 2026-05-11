@@ -10,6 +10,8 @@
 
 // Minimal SME ABI support for compiler-rt and LLVM libc users.
 // https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst#811__arm_sme_state
+// TODO: Consider caching the state to avoid rechecking id_aa64pfr1_el1
+// when running user workloads.
 asm(
     ".text\n"
     ".globl __arm_sme_state\n"
