@@ -882,7 +882,15 @@ unsigned ARMAsmBackend::adjustFixupValue(const MCAssembler &Asm,
       Ctx.reportError(Fixup.getLoc(), FixupDiagnostic);
       return 0;
     }
-    uint32_t out = (((Value - 4) >> 1) & 0xf) << 23;
+
+    int64_t encoded = (Value - 4) >> 1;
+    if (encoded == 0) {
+      Ctx.reportError(Fixup.getLoc(),
+                      "invalid BF encoding: target must not be the next instruction");
+      return 0;
+    }
+
+    uint32_t out = (encoded & 0xf) << 23;
     return swapHalfWords(out, Endian == llvm::endianness::little);
   }
   case ARM::fixup_bf_target:
