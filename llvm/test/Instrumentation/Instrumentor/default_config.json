@@ -87,6 +87,8 @@
   "function_pre": {
     "function": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "address": true,
       "address.description": "The function address.",
       "name": true,
@@ -105,6 +107,8 @@
   "function_post": {
     "function": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "address": true,
       "address.description": "The function address.",
       "name": true,
@@ -122,11 +126,15 @@
   "instruction_pre": {
     "unreachable": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "id": true,
       "id.description": "A unique ID associated with the given instrumentor call"
     },
     "load": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "pointer": true,
       "pointer.replace": true,
       "pointer.description": "The accessed pointer.",
@@ -149,6 +157,8 @@
     },
     "alloca": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "size": true,
       "size.replace": true,
       "size.description": "The allocation size.",
@@ -159,6 +169,8 @@
     },
     "store": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "pointer": true,
       "pointer.replace": true,
       "pointer.description": "The accessed pointer.",
@@ -185,6 +197,8 @@
   "instruction_post": {
     "load": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "pointer": true,
       "pointer.description": "The accessed pointer.",
       "pointer_as": true,
@@ -209,6 +223,8 @@
     },
     "alloca": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "address": true,
       "address.replace": true,
       "address.description": "The allocated memory address.",
@@ -221,6 +237,8 @@
     },
     "store": {
       "enabled": true,
+      "filter": "",
+      "filter.description": "Static property filter to exclude instrumentation.",
       "pointer": true,
       "pointer.description": "The accessed pointer.",
       "pointer_as": true,
