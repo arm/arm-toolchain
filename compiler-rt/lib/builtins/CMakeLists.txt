@@ -472,8 +472,11 @@ if(COMPILER_RT_ARM_OPTIMIZED_FP AND BUILTIN_SUPPORTED_ARCH MATCHES "arm")
       arm/muldf3.S
       arm/divdf3.S
       arm/cmpdf2.S
+      arm/cmpsf2.S
       arm/gedf2.S
+      arm/gesf2.S
       arm/unorddf2.S
+      arm/unordsf2.S
       )
     set_source_files_properties(${assembly_files}
       PROPERTIES COMPILE_OPTIONS ${implicit_it_flag})
@@ -517,7 +520,6 @@ set(arm_sync_SOURCES
 set(thumb1_base_SOURCES
   arm/divsi3.S
   arm/udivsi3.S
-  arm/comparesf2.S
   arm/addsf3.S
   ${GENERIC_SOURCES}
 )
@@ -527,8 +529,11 @@ if(COMPILER_RT_ARM_OPTIMIZED_FP)
   set(thumb1_base_SOURCES
     arm/thumb1/mulsf3.S
     arm/thumb1/cmpdf2.S
+    arm/thumb1/cmpsf2.S
     arm/thumb1/gedf2.S
+    arm/thumb1/gesf2.S
     arm/thumb1/unorddf2.S
+    arm/thumb1/unordsf2.S
     arm/fnan2.c
     arm/fnorm2.c
     arm/funder.c
@@ -536,6 +541,15 @@ if(COMPILER_RT_ARM_OPTIMIZED_FP)
   )
   set_special_properties(arm/thumb1/cmpdf2.S
     SUPERSEDES comparedf2.c PROVIDES comparedf2)
+  set_special_properties(arm/thumb1/cmpsf2.S
+    SUPERSEDES comparesf2.c PROVIDES comparesf2)
+else()
+  # Other Thumb1 assembly implementations which do not fall under the
+  # COMPILER_RT_ARM_OPTIMIZED_FP umbrella
+  set(thumb1_base_SOURCES
+    arm/comparesf2.S
+    ${thumb1_base_SOURCES}
+  )
 endif()
 
 set(arm_EABI_RT_SOURCES
