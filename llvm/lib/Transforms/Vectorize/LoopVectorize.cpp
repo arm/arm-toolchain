@@ -5523,6 +5523,8 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
     if (VF.isScalable())
       return InstructionCost::getInvalid();
     return TTI.getArithmeticInstrCost(Instruction::Mul, RetTy, Config.CostKind);
+  case Instruction::Freeze:
+    return TTI::TCC_Free;
   default:
     // This opcode is unknown. Assume that it is the same as 'mul'.
     return TTI.getArithmeticInstrCost(Instruction::Mul, VectorTy,
