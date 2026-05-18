@@ -440,10 +440,30 @@ static bool isLTOPreLink(ThinOrFullLTOPhase Phase) {
          Phase == ThinOrFullLTOPhase::FullLTOPreLink;
 }
 
+// Helper to check if the current compilation phase is preparing for FullLTO
+[[maybe_unused]] static bool isFullLTOPreLink(ThinOrFullLTOPhase Phase) {
+  return Phase == ThinOrFullLTOPhase::FullLTOPreLink;
+}
+
+// Helper to check if the current compilation phase is preparing for ThinLTO
+static bool isThinLTOPreLink(ThinOrFullLTOPhase Phase) {
+  return Phase == ThinOrFullLTOPhase::ThinLTOPreLink;
+}
+
 // Helper to check if the current compilation phase is LTO backend
 static bool isLTOPostLink(ThinOrFullLTOPhase Phase) {
   return Phase == ThinOrFullLTOPhase::ThinLTOPostLink ||
          Phase == ThinOrFullLTOPhase::FullLTOPostLink;
+}
+
+// Helper to check if the current compilation phase is FullLTO backend
+static bool isFullLTOPostLink(ThinOrFullLTOPhase Phase) {
+  return Phase == ThinOrFullLTOPhase::FullLTOPostLink;
+}
+
+// Helper to check if the current compilation phase is ThinLTO backend
+static bool isThinLTOPostLink(ThinOrFullLTOPhase Phase) {
+  return Phase == ThinOrFullLTOPhase::ThinLTOPostLink;
 }
 
 // Helper to wrap conditionally Coro passes.
@@ -540,7 +560,7 @@ PassBuilder::buildO1FunctionSimplificationPipeline(OptimizationLevel Level,
   // inaccurate. The normal unroller doesn't pay attention to forced full unroll
   // attributes so we need to make sure and allow the full unroll pass to pay
   // attention to it.
-  if (Phase != ThinOrFullLTOPhase::ThinLTOPreLink || !PGOOpt ||
+  if (!isThinLTOPreLink(Phase) || !PGOOpt ||
       PGOOpt->Action != PGOOptions::SampleUse)
     LPM2.addPass(LoopFullUnrollPass(Level.getSpeedupLevel(),
                                     /* OnlyWhenForced= */ !PTO.LoopUnrolling,
@@ -639,9 +659,7 @@ PassBuilder::buildFunctionSimplificationPipeline(OptimizationLevel Level,
 
   // Jump table to switch conversion.
   if (EnableJumpTableToSwitch)
-    FPM.addPass(JumpTableToSwitchPass(
-        /*InLTO=*/Phase == ThinOrFullLTOPhase::ThinLTOPostLink ||
-        Phase == ThinOrFullLTOPhase::FullLTOPostLink));
+    FPM.addPass(JumpTableToSwitchPass(/*InLTO=*/isLTOPostLink(Phase)));
 
   FPM.addPass(
       SimplifyCFGPass(SimplifyCFGOptions().convertSwitchRangeToICmp(true)));
@@ -724,7 +742,7 @@ PassBuilder::buildFunctionSimplificationPipeline(OptimizationLevel Level,
   // inaccurate. The normal unroller doesn't pay attention to forced full unroll
   // attributes so we need to make sure and allow the full unroll pass to pay
   // attention to it.
-  if (Phase != ThinOrFullLTOPhase::ThinLTOPreLink || !PGOOpt ||
+  if (!isThinLTOPreLink(Phase) || !PGOOpt ||
       PGOOpt->Action != PGOOptions::SampleUse)
     LPM2.addPass(LoopFullUnrollPass(Level.getSpeedupLevel(),
                                     /* OnlyWhenForced= */ !PTO.LoopUnrolling,
@@ -1028,7 +1046,7 @@ PassBuilder::buildInlinerPipeline(OptimizationLevel Level,
   MainCGPipeline.addPass(createCGSCCToFunctionPassAdaptor(
       RequireAnalysisPass<ShouldNotRunFunctionPassesAnalysis, Function>()));
 
-  if (Phase != ThinOrFullLTOPhase::ThinLTOPreLink) {
+  if (!isThinLTOPreLink(Phase)) {
     MainCGPipeline.addPass(CoroSplitPass(Level != OptimizationLevel::O0));
     MainCGPipeline.addPass(CoroAnnotationElidePass());
   }
@@ -1078,7 +1096,7 @@ PassBuilder::buildModuleInlinerPipeline(OptimizationLevel Level,
       buildFunctionSimplificationPipeline(Level, Phase),
       PTO.EagerlyInvalidateAnalyses));
 
-  if (Phase != ThinOrFullLTOPhase::ThinLTOPreLink) {
+  if (!isThinLTOPreLink(Phase)) {
     MPM.addPass(createModuleToPostOrderCGSCCPassAdaptor(
         CoroSplitPass(Level != OptimizationLevel::O0)));
     MPM.addPass(
@@ -1094,15 +1112,14 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
   assert(Level != OptimizationLevel::O0 &&
          "Should not be used for O0 pipeline");
 
-  assert(Phase != ThinOrFullLTOPhase::FullLTOPostLink &&
+  assert(!isFullLTOPostLink(Phase) &&
          "FullLTOPostLink shouldn't call buildModuleSimplificationPipeline!");
 
   ModulePassManager MPM;
 
   // Place pseudo probe instrumentation as the first pass of the pipeline to
   // minimize the impact of optimization changes.
-  if (PGOOpt && PGOOpt->PseudoProbeForProfiling &&
-      Phase != ThinOrFullLTOPhase::ThinLTOPostLink)
+  if (PGOOpt && PGOOpt->PseudoProbeForProfiling && !isThinLTOPostLink(Phase))
     MPM.addPass(SampleProfileProbePass(TM));
 
   bool HasSampleProfile = PGOOpt && (PGOOpt->Action == PGOOptions::SampleUse);
@@ -1111,8 +1128,7 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
   // profile information will be annotated in PreLink phase so there is
   // no need to load the profile again in PostLink.
   bool LoadSampleProfile =
-      HasSampleProfile &&
-      !(FlattenedProfileUsed && Phase == ThinOrFullLTOPhase::ThinLTOPostLink);
+      HasSampleProfile && !(FlattenedProfileUsed && isThinLTOPostLink(Phase));
 
   // During the ThinLTO backend phase we perform early indirect call promotion
   // here, before globalopt. Otherwise imported available_externally functions
@@ -1128,13 +1144,13 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
   // command line. E.g. for flattened profiles where we will not be reloading
   // the sample profile in the ThinLTO backend, we ideally shouldn't have to
   // provide the sample profile file.
-  if (Phase == ThinOrFullLTOPhase::ThinLTOPostLink && !LoadSampleProfile)
+  if (isThinLTOPostLink(Phase) && !LoadSampleProfile)
     MPM.addPass(PGOIndirectCallPromotion(true /* InLTO */, HasSampleProfile));
 
   // Create an early function pass manager to cleanup the output of the
   // frontend. Not necessary with LTO post link pipelines since the pre link
   // pipeline already cleaned up the frontend output.
-  if (Phase != ThinOrFullLTOPhase::ThinLTOPostLink) {
+  if (!isThinLTOPostLink(Phase)) {
     // Do basic inference of function attributes from known properties of system
     // libraries and other oracles.
     MPM.addPass(InferFunctionAttrsPass());
@@ -1186,7 +1202,7 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
   // Lower type metadata and the type.test intrinsic in the ThinLTO
   // post link pipeline after ICP. This is to enable usage of the type
   // tests in ICP sequences.
-  if (Phase == ThinOrFullLTOPhase::ThinLTOPostLink)
+  if (isThinLTOPostLink(Phase))
     MPM.addPass(DropTypeTestsPass());
 
   invokePipelineEarlySimplificationEPCallbacks(MPM, Level, Phase);
@@ -1218,7 +1234,7 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
                                                 PTO.EagerlyInvalidateAnalyses));
 
   // We already asserted this happens in non-FullLTOPostLink earlier.
-  const bool IsPreLink = Phase != ThinOrFullLTOPhase::ThinLTOPostLink;
+  const bool IsPreLink = !isThinLTOPostLink(Phase);
   // Enable contextual profiling instrumentation.
   const bool IsCtxProfGen =
       IsPreLink && PGOCtxProfLoweringPass::isCtxIRPGOInstrEnabled();
@@ -1233,8 +1249,7 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
   assert(!(IsPGOInstrGen && PGOCtxProfLoweringPass::isCtxIRPGOInstrEnabled()) &&
          "Enabling both instrumented PGO and contextual instrumentation is not "
          "supported.");
-  const bool IsCtxProfUse =
-      !UseCtxProfile.empty() && Phase == ThinOrFullLTOPhase::ThinLTOPreLink;
+  const bool IsCtxProfUse = !UseCtxProfile.empty() && isThinLTOPreLink(Phase);
 
   assert(
       (InstrumentColdFuncOnlyPath.empty() || PGOInstrumentColdFunctionOnly) &&
@@ -1307,10 +1322,10 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
   // and argument promotion.
   MPM.addPass(DeadArgumentEliminationPass());
 
-  if (Phase == ThinOrFullLTOPhase::ThinLTOPostLink)
+  if (isThinLTOPostLink(Phase))
     MPM.addPass(SimplifyTypeTestsPass());
 
-  if (Phase != ThinOrFullLTOPhase::ThinLTOPreLink)
+  if (!isThinLTOPreLink(Phase))
     MPM.addPass(CoroCleanupPass());
 
   // Optimize globals now that functions are fully simplified.
@@ -1324,8 +1339,6 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
 void PassBuilder::addVectorPasses(OptimizationLevel Level,
                                   FunctionPassManager &FPM,
                                   ThinOrFullLTOPhase LTOPhase) {
-  const bool IsFullLTO = LTOPhase == ThinOrFullLTOPhase::FullLTOPostLink;
-
   FPM.addPass(LoopVectorizePass(
       LoopVectorizeOptions(!PTO.LoopInterleaving, !PTO.LoopVectorization)));
 
@@ -1335,7 +1348,7 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
     FPM.addPass(DropUnnecessaryAssumesPass(/*DropDereferenceable=*/true));
 
   FPM.addPass(InferAlignmentPass());
-  if (IsFullLTO) {
+  if (isFullLTOPostLink(LTOPhase)) {
     // The vectorizer may have significantly shortened a loop body; unroll
     // again. Unroll small loops to hide loop backedge latency and saturate any
     // parallel execution resources of an out-of-order processor. We also then
@@ -1360,7 +1373,7 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
     FPM.addPass(SROAPass(SROAOptions::PreserveCFG));
   }
 
-  if (!IsFullLTO) {
+  if (!isFullLTOPostLink(LTOPhase)) {
     // Eliminate loads by forwarding stores from the previous iteration to loads
     // of the current iteration.
     FPM.addPass(LoopLoadEliminationPass());
@@ -1410,7 +1423,7 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
                                   .hoistCommonInsts(true)
                                   .sinkCommonInsts(true)));
 
-  if (IsFullLTO) {
+  if (isFullLTOPostLink(LTOPhase)) {
     FPM.addPass(SCCPPass());
     FPM.addPass(InstCombinePass());
     FPM.addPass(BDCEPass());
@@ -1426,7 +1439,7 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
   // Enhance/cleanup vector code.
   FPM.addPass(VectorCombinePass());
 
-  if (!IsFullLTO) {
+  if (!isFullLTOPostLink(LTOPhase)) {
     FPM.addPass(InstCombinePass());
     // Unroll small loops to hide loop backedge latency and saturate any
     // parallel execution resources of an out-of-order processor. We also then
@@ -1474,7 +1487,6 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
 ModulePassManager
 PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
                                              ThinOrFullLTOPhase LTOPhase) {
-  const bool LTOPreLink = isLTOPreLink(LTOPhase);
   ModulePassManager MPM;
 
   // Run partial inlining pass to partially inline functions that have
@@ -1491,7 +1503,7 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   // may make globals referenced by available external functions dead and saves
   // running remaining passes on the eliminated functions. These should be
   // preserved during prelinking for link-time inlining decisions.
-  if (!LTOPreLink)
+  if (!isLTOPreLink(LTOPhase))
     MPM.addPass(EliminateAvailableExternallyPass());
 
   // Do RPO function attribute inference across the module to forward-propagate
@@ -1503,7 +1515,7 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   // sensitive PGO pass. We don't want to do this in LTOPreLink phrase as
   // cross-module inline has not been done yet. The context sensitive
   // instrumentation is after all the inlines are done.
-  if (!LTOPreLink && PGOOpt) {
+  if (!isLTOPreLink(LTOPhase) && PGOOpt) {
     if (PGOOpt->CSAction == PGOOptions::CSIRInstr)
       addPGOInstrPasses(MPM, Level, /*RunProfileGen=*/true,
                         /*IsCS=*/true, PGOOpt->AtomicCounterUpdate,
@@ -1574,7 +1586,8 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   LoopPassManager LPM;
   // First rotate loops that may have been un-rotated by prior passes.
   // Disable header duplication at -Oz.
-  LPM.addPass(LoopRotatePass(/*EnableLoopHeaderDuplication=*/true, LTOPreLink,
+  LPM.addPass(LoopRotatePass(/*EnableLoopHeaderDuplication=*/true,
+                             isLTOPreLink(LTOPhase),
                              /*CheckExitCount=*/true));
   // Some loops may have become dead by now. Try to delete them.
   // FIXME: see discussion in https://reviews.llvm.org/D112851,
@@ -1646,7 +1659,7 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
 
   // AllocToken transforms heap allocation calls; this needs to run late after
   // other allocation call transformations (such as those in InstCombine).
-  if (!LTOPreLink)
+  if (!isLTOPreLink(LTOPhase))
     MPM.addPass(AllocTokenPass());
 
   invokeOptimizerLastEPCallbacks(MPM, Level, LTOPhase);
@@ -1658,7 +1671,7 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   // Split out cold code. Splitting is done late to avoid hiding context from
   // other optimizations and inadvertently regressing performance. The tradeoff
   // is that this has a higher code size cost than splitting early.
-  if (EnableHotColdSplit && !LTOPreLink)
+  if (EnableHotColdSplit && !isLTOPreLink(LTOPhase))
     MPM.addPass(HotColdSplittingPass());
 
   // Search the code for similar regions of code. If enough similar regions can
@@ -1680,11 +1693,11 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   if (PTO.MergeFunctions)
     MPM.addPass(MergeFunctionsPass());
 
-  if (PTO.CallGraphProfile && !LTOPreLink)
+  if (PTO.CallGraphProfile && !isLTOPreLink(LTOPhase))
     MPM.addPass(CGProfilePass(isLTOPostLink(LTOPhase)));
 
   // RelLookupTableConverterPass runs later in LTO post-link pipeline.
-  if (!LTOPreLink)
+  if (!isLTOPreLink(LTOPhase))
     MPM.addPass(RelLookupTableConverterPass());
 
   // Add devirtualization pass only when LTO is not enabled, as otherwise
