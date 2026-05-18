@@ -17,6 +17,111 @@
 namespace bootcode {
 namespace sysreg {
 
+#ifdef __ARM_ARCH_ISA_A64
+enum class ExceptionLevel : unsigned long {
+  EL0 = 0,
+  EL1 = 1,
+  EL2 = 2,
+  EL3 = 3,
+};
+
+class CurrentEL_Class : public SysRegBase<CurrentEL_Class> {
+public:
+  [[clang::always_inline]] static unsigned long read() {
+    return __arm_rsr("CurrentEL");
+  }
+
+  Field<2, 3> EL;
+
+  [[clang::always_inline]] ExceptionLevel value() {
+    return static_cast<ExceptionLevel>(static_cast<unsigned long>(EL));
+  }
+
+  [[clang::always_inline]] bool is(ExceptionLevel level) {
+    return value() == level;
+  }
+};
+
+extern CurrentEL_Class CurrentEL;
+
+class TPIDR2_Class : public SysRegBase<TPIDR2_Class> {
+public:
+  [[clang::always_inline]] static unsigned long read() {
+    return __arm_rsr64("s3_3_c13_c0_5");
+  }
+
+  [[clang::always_inline]] static void write(unsigned long val) {
+    __arm_wsr64("s3_3_c13_c0_5", val);
+  }
+
+  [[clang::always_inline]] TPIDR2_Class &operator=(unsigned long val) {
+    write(val);
+    return *this;
+  }
+};
+
+class SVCR_Class : public SysRegBase<SVCR_Class> {
+public:
+  [[clang::always_inline]] static unsigned long read() {
+    return __arm_rsr64("s3_3_c4_c2_2");
+  }
+
+  [[clang::always_inline]] static void write(unsigned long val) {
+    __arm_wsr64("s3_3_c4_c2_2", val);
+  }
+
+  [[clang::always_inline]] SVCR_Class &operator=(unsigned long val) {
+    write(val);
+    return *this;
+  }
+
+  Bit<0> SM;
+  Bit<1> ZA;
+};
+
+extern TPIDR2_Class TPIDR2;
+extern SVCR_Class SVCR;
+
+class SMCR_EL2_Class : public SysRegBase<SMCR_EL2_Class> {
+public:
+  [[clang::always_inline]] static unsigned long read() {
+    return __arm_rsr64("s3_4_c1_c2_6");
+  }
+
+  [[clang::always_inline]] static void write(unsigned long val) {
+    __arm_wsr64("s3_4_c1_c2_6", val);
+  }
+
+  [[clang::always_inline]] SMCR_EL2_Class &operator=(unsigned long val) {
+    write(val);
+    return *this;
+  }
+
+  Field<0, 3> LEN;
+};
+
+class SMCR_EL3_Class : public SysRegBase<SMCR_EL3_Class> {
+public:
+  [[clang::always_inline]] static unsigned long read() {
+    return __arm_rsr64("s3_6_c1_c2_6");
+  }
+
+  [[clang::always_inline]] static void write(unsigned long val) {
+    __arm_wsr64("s3_6_c1_c2_6", val);
+  }
+
+  [[clang::always_inline]] SMCR_EL3_Class &operator=(unsigned long val) {
+    write(val);
+    return *this;
+  }
+
+  Field<0, 3> LEN;
+};
+
+extern SMCR_EL2_Class SMCR_EL2;
+extern SMCR_EL3_Class SMCR_EL3;
+#endif
+
 // Registers that only have an EL0 version.
 #define EL0_REGNAMES REGNAME(PMCCFILTR, "p15:0:c14:c15:7")
 
@@ -107,7 +212,7 @@ EL1_REGNAMES
   template <>                                                                  \
   [[clang::always_inline]] inline unsigned long                          \
   SysReg<SysRegName::X>::read() {                                              \
-    if (__arm_rsr("CurrentEL") == 3 << 2)                                      \
+    if (CurrentEL.is(ExceptionLevel::EL3))                                     \
       return __arm_rsr64(#X "_EL3");                                           \
     else                                                                       \
       return __arm_rsr64(#X "_EL2");                                           \
@@ -115,7 +220,7 @@ EL1_REGNAMES
   template <>                                                                  \
   [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
       unsigned long val) {                                                     \
-    if (__arm_rsr("CurrentEL") == 3 << 2)                                      \
+    if (CurrentEL.is(ExceptionLevel::EL3))                                     \
       __arm_wsr64(#X "_EL3", val);                                             \
     else                                                                       \
       __arm_wsr64(#X "_EL2", val);                                             \
@@ -276,6 +381,12 @@ public:
   Field<28, 31> TraceFilt;
 };
 
+class ID_AA64PFR1_Class : public SysReg<SysRegName::ID_AA64PFR1> {
+public:
+  Bit<24> SME;
+  Bit<25> SME2;
+};
+
 class ID_AA64MMFR2_Class : public SysReg<SysRegName::ID_AA64MMFR2> {
 public:
   Field<20, 23> CCIDX;
@@ -290,6 +401,7 @@ extern DACR_Class DACR;
 extern CPACR_Class CPACR;
 extern PMCCFILTR_Class PMCCFILTR;
 extern ID_DFR0_Class ID_DFR0;
+extern ID_AA64PFR1_Class ID_AA64PFR1;
 extern ID_AA64MMFR2_Class ID_AA64MMFR2;
 extern SysReg<SysRegName::VBAR> VBAR;
 extern SysReg<SysRegName::ESR> ESR;
@@ -298,7 +410,6 @@ extern SysReg<SysRegName::FAR> FAR;
 extern SysReg<SysRegName::CSSELR> CSSELR;
 extern SysReg<SysRegName::TTBR0> TTBR0;
 extern SysReg<SysRegName::MAIR> MAIR;
-extern SysReg<SysRegName::ID_AA64PFR1> ID_AA64PFR1;
 extern SysReg<SysRegName::TCR> TCR;
 extern SysReg<SysRegName::APIAKeyLo> APIAKeyLo;
 extern SysReg<SysRegName::APIAKeyHi> APIAKeyHi;

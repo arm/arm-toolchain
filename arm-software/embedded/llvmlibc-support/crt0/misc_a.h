@@ -18,6 +18,30 @@ namespace misc {
 
 using namespace sysreg;
 
+#if defined(__ARM_ARCH_ISA_A64)
+[[clang::always_inline]] inline bool has_sme_or_sme2() {
+  return ID_AA64PFR1.SME != 0 || ID_AA64PFR1.SME2 != 0;
+}
+
+[[clang::always_inline]] inline void init_sme_state() {
+  if (!has_sme_or_sme2())
+    return;
+
+  // TPIDR2_EL0 resets to an architecturally unknown value, so clear it.
+  TPIDR2 = 0;
+  __isb(0xf);
+
+  // Try to set the streaming vector length to the architectural maximum.
+  if (CurrentEL.is(ExceptionLevel::EL3)) {
+    SMCR_EL3.LEN = 0xf;
+    __isb(0xf);
+  } else if (CurrentEL.is(ExceptionLevel::EL2)) {
+    SMCR_EL2.LEN = 0xf;
+    __isb(0xf);
+  }
+}
+#endif
+
 extern "C" [[gnu::weak]] void _platform_setup_arch_extensions() {
 #ifdef __ARM_FEATURE_PAUTH
   // Set all of the pointer authentication keys to different values. In
@@ -54,6 +78,7 @@ extern "C" [[gnu::weak]] void _platform_setup_arch_extensions() {
   // relevant feature these bits are ignored, so safe to set unconditionally.
   CPTR.EZ = 1;
   CPTR.ESM = 1;
+  init_sme_state();
 #else
   // Enable VFP and SIMD
   __arm_wsr("fpexc", 1 << 30);

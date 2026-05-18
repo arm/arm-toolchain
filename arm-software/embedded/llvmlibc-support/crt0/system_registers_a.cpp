@@ -13,6 +13,13 @@
 namespace bootcode {
 namespace sysreg {
 
+#ifdef __ARM_ARCH_ISA_A64
+CurrentEL_Class CurrentEL;
+TPIDR2_Class TPIDR2;
+SVCR_Class SVCR;
+SMCR_EL2_Class SMCR_EL2;
+SMCR_EL3_Class SMCR_EL3;
+#endif
 SCTLR_Class SCTLR;
 CLIDR_Class CLIDR;
 CCSIDR_Class CCSIDR;
@@ -22,6 +29,7 @@ DACR_Class DACR;
 CPACR_Class CPACR;
 PMCCFILTR_Class PMCCFILTR;
 ID_DFR0_Class ID_DFR0;
+ID_AA64PFR1_Class ID_AA64PFR1;
 ID_AA64MMFR2_Class ID_AA64MMFR2;
 SysReg<SysRegName::VBAR> VBAR;
 SysReg<SysRegName::ESR> ESR;
@@ -30,7 +38,6 @@ SysReg<SysRegName::FAR> FAR;
 SysReg<SysRegName::CSSELR> CSSELR;
 SysReg<SysRegName::TTBR0> TTBR0;
 SysReg<SysRegName::MAIR> MAIR;
-SysReg<SysRegName::ID_AA64PFR1> ID_AA64PFR1;
 SysReg<SysRegName::TCR> TCR;
 SysReg<SysRegName::APIAKeyLo> APIAKeyLo;
 SysReg<SysRegName::APIAKeyHi> APIAKeyHi;
