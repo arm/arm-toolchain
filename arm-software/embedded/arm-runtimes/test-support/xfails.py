@@ -1149,7 +1149,6 @@ def main():
         XFail(
             name="Untriaged llvmlibc xfails 6",
             testnames=[
-                "src/math/smoke/libc.test.src.math.smoke.exp10m1f_test.__hermetic__.__build__",
                 "src/stdlib/libc.test.src.stdlib.malloc_test.__hermetic__.__build__",
             ],
             result=NewResult.XFAILED,
