@@ -163,7 +163,7 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
         elseif(TEST_EXECUTOR STREQUAL fvp)
             set(picocrt "crt0-semihost-fvp")
         endif()
-        set(test_link_flags "-nostartfiles -l${picocrt} -lsemihost -T picolibcpp.ld")
+        set(runtime_test_link_flags "-nostartfiles -l${picocrt} -lsemihost -T picolibcpp.ld")
     elseif(C_LIBRARY STREQUAL llvmlibc)
         # QEMU logic handled later
     else()
@@ -289,7 +289,7 @@ if(ENABLE_COMPILER_RT_TESTS)
             --output-args ${compiler_rt_lit_xfails_path}
     )
 
-    set(compiler_rt_test_flags "${lib_compile_flags} ${test_link_flags}")
+    set(compiler_rt_test_flags "${lib_compile_flags} ${runtime_test_link_flags}")
     set(
         compiler_rt_test_cmake_args
         -DCOMPILER_RT_INCLUDE_TESTS=ON
@@ -763,6 +763,11 @@ if(C_LIBRARY STREQUAL llvmlibc)
     endif()
     list(JOIN llvmlibc_test_link_options "," llvmlibc_test_link_options_default)
 
+    # libc tests use upstream start.cpp as the bootcode, libcxx tests need crt0
+    set(llvmlibc_cxx_test_link_options ${llvmlibc_test_link_options})
+    list(INSERT llvmlibc_cxx_test_link_options 1 -lcrt0-semihost)
+    list(JOIN llvmlibc_cxx_test_link_options " " runtime_test_link_flags)
+
     set(llvmlibc_lit_args "${LLVM_LIT_ARGS}")
     if(ENABLE_LIBC_TESTS)
         # Generate xfails for llvmlibc.
@@ -954,7 +959,9 @@ if(ENABLE_CXX_LIBS)
                 --output-arg ${libcxx_lit_xfails_path}
         )
     endif()
+    set(runtime_test_extra_compile_flags "")
     if(C_LIBRARY STREQUAL picolibc)
+        set(runtime_test_extra_compile_flags "-include picolibc.h")
         set(cxxlibs_extra_cmake_options
             -DLIBCXXABI_ENABLE_THREADS=OFF
             -DLIBCXX_ENABLE_MONOTONIC_CLOCK=OFF
@@ -968,20 +975,6 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_RTTI=${ENABLE_RTTI}
             -DRUNTIMES_USE_LIBC=picolibc
         )
-        if(ENABLE_LIBCXX_TESTS)
-            set(cxxlibs_test_cmake_options
-                -DLIBCXX_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++-picolibc.cfg.in
-                -DLIBCXX_TEST_PARAMS=executor=${lit_test_executor}
-                -DLIBCXXABI_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++abi-picolibc.cfg.in
-                -DLIBCXXABI_TEST_PARAMS=executor=${lit_test_executor}
-                -DLIBUNWIND_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libunwind-picolibc.cfg.in
-                -DLIBUNWIND_TEST_PARAMS=executor=${lit_test_executor}
-                -DRUNTIME_TEST_ARCH_FLAGS=${compile_arch_flags}
-                -DRUNTIME_TEST_LINK_FLAGS=${test_link_flags}
-                -DLLVM_LIT_ARGS=${libcxx_lit_args}
-                -DLLVM_EXTERNAL_LIT=${external_lit_path}
-            )
-        endif()
     elseif(C_LIBRARY STREQUAL llvmlibc)
         set(cxxlibs_extra_cmake_options
             -DLIBCXXABI_ENABLE_THREADS=OFF
@@ -1029,6 +1022,22 @@ if(ENABLE_CXX_LIBS)
                 -DLIBCXX_ENABLE_WIDE_CHARACTERS=ON
             )
         endif()
+    endif()
+
+    if(ENABLE_LIBCXX_TESTS AND (C_LIBRARY STREQUAL picolibc OR C_LIBRARY STREQUAL llvmlibc))
+        set(cxxlibs_test_cmake_options
+            -DLIBCXX_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++-embedded.cfg.in
+            -DLIBCXX_TEST_PARAMS=executor=${lit_test_executor}
+            -DLIBCXXABI_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++abi-embedded.cfg.in
+            -DLIBCXXABI_TEST_PARAMS=executor=${lit_test_executor}
+            -DLIBUNWIND_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libunwind-embedded.cfg.in
+            -DLIBUNWIND_TEST_PARAMS=executor=${lit_test_executor}
+            -DRUNTIME_TEST_ARCH_FLAGS=${compile_arch_flags}
+            -DRUNTIME_TEST_LINK_FLAGS=${runtime_test_link_flags}
+            -DRUNTIME_TEST_EXTRA_COMPILE_FLAGS=${runtime_test_extra_compile_flags}
+            -DLLVM_LIT_ARGS=${libcxx_lit_args}
+            -DLLVM_EXTERNAL_LIT=${external_lit_path}
+        )
     endif()
 
     ExternalProject_Add(
