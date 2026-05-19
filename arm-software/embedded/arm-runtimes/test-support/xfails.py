@@ -1248,46 +1248,6 @@ def main():
             description="TODO: Unknown failures to be triaged.",
         ),
         XFail(
-            name="Untriaged llvmlibc xfails 7",
-            testnames=[
-                "src/math/smoke/libc.test.src.math.smoke.fabsf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fmaxf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fmaximum_numf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fmaximumf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fminf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fminimum_numbf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fminimum_numf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fminimumf16_test.__hermetic__.__build__",
-            ],
-            result=NewResult.EXCLUDE,
-            project="llvmlibc",
-            variants=[
-                "aarch64a",
-                "aarch64a_exn_rtti",
-            ],
-            description="TODO: Unknown failures to be triaged. These timeout rather than fail.",
-        ),
-        XFail(
-            name="Untriaged llvmlibc xfails 8",
-            testnames=[
-                "src/math/smoke/libc.test.src.math.smoke.fabsf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fmaxf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fmaximum_numf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fmaximumf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fminf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fminimum_numbf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fminimum_numf16_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.fminimumf16_test.__hermetic__.__build__",
-            ],
-            result=NewResult.XFAILED,
-            project="llvmlibc",
-            variants=[
-                "aarch64a_exn_rtti_unaligned",
-                "aarch64a_unaligned",
-            ],
-            description="TODO: Unknown failures to be triaged.",
-        ),
-        XFail(
             name="Untriaged llvmlibc xfails 9",
             testnames=[
                 "src/math/smoke/libc.test.src.math.smoke.fmaf_test.__hermetic__.__build__",
