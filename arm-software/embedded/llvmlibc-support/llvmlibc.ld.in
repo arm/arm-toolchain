@@ -339,7 +339,7 @@ SECTIONS
 
 	/* Make the rest of memory available for heap storage */
 	PROVIDE (__heap_start = __end);
-	PROVIDE (__heap_end = __stack - (DEFINED(__stack_size) ? __stack_size : 4K));
+	PROVIDE (__heap_end = __stack - (DEFINED(__stack_size) ? __stack_size : @STACK_SIZE@));
 	PROVIDE (__heap_size = __heap_end - __heap_start);
 
         /* Allow a minimum heap size to be specified */
@@ -349,7 +349,7 @@ SECTIONS
 
 	/* Define a stack region to make sure it fits in memory */
 	.stack (NOLOAD) : {
-		. += (DEFINED(__stack_size) ? __stack_size : 4K);
+		. += (DEFINED(__stack_size) ? __stack_size : @STACK_SIZE@);
 	} >ram :ram
 
 	/* Throw away C++ exception handling information */
