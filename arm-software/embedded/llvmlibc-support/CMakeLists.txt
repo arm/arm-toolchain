@@ -26,6 +26,17 @@
 cmake_minimum_required(VERSION 3.20.0)
 project(llvmlibc-support LANGUAGES C CXX ASM)
 
+set(LLVM_SOURCE_PREFIX "" CACHE STRING "Use prefix for sources")
+option(LLVM_USE_RELATIVE_PATHS_IN_FILES "Use relative paths in sources and debug info" OFF)
+
+if(LLVM_USE_RELATIVE_PATHS_IN_FILES)
+    file(RELATIVE_PATH relative_root "${CMAKE_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_compile_options(
+        "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:-ffile-prefix-map=${CMAKE_BINARY_DIR}=${relative_root}>"
+        "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:-ffile-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}/=${LLVM_SOURCE_PREFIX}>"
+    )
+endif()
+
 option(
     LLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS
     "Build the opt-in dummy PAC key helper library for M-profile PACBTI testing."
