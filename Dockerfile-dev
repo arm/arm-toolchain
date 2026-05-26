@@ -1,5 +1,5 @@
 # Base image compatible with RHEL 8
-FROM rockylinux/rockylinux:8
+FROM rockylinux/rockylinux:8 AS base
 
 # Update /etc/yum.repos.d/Rocky-AppStream.repo to not use the RockyLinux mirror
 # list, which as of October 2025 can cause `dnf` commands to fail. See this for
@@ -57,6 +57,12 @@ RUN dnf install -y epel-release && \
     dnf clean all && \
     alternatives --set python3 /usr/bin/python3.12 && \
     rm -rf /var/cache/dnf
+
+# Squash the image so far. This saves the spaced used by files that were
+# deleted or overridden during the upgrade.
+FROM scratch
+COPY --from=base / /
+CMD ["/bin/bash"]
 
 # Install useful/required Python packages
 RUN pip3 install --no-cache-dir --upgrade \

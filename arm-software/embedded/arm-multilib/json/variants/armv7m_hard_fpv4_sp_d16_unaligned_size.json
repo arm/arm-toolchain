@@ -19,6 +19,7 @@
             "LIBRARY_BUILD_TYPE": "minsizerelease"
         },
         "picolibc": {
+            "PICOLIBC_BUILD_TYPE": "debugoptimized",
             "ENABLE_CXX_LIBS": "ON",
             "ENABLE_LIBC_TESTS": "ON",
             "ENABLE_COMPILER_RT_TESTS": "ON",

@@ -16,6 +16,11 @@ and armv7m_hard_fpv4_sp_d16_unaligned_badstrb, not any other ARM variants.
 Other variants will need to be added to LLVM_TOOLCHAIN_LIBRARY_VARIANTS in
 arm-software/embedded/CMakeLists.txt.
 
+# Release builds
+
+In order to provide efficient memset and memcpy implementations, this toolchain
+compiles picolibc in Release mode rather than MinSize.
+
 # Vorago `badstrb` feature
 
 This compiler includes a non-standard feature for the ARM backend called
