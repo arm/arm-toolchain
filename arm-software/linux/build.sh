@@ -33,6 +33,11 @@ INTERACTIVE=false
 ## Configuration: Build ##
 ##########################
 
+if [[ -n "${COMMON_CMAKE_FLAGS}" ]]; then
+    echo "Do not pass the obsolete/undocumented/misleading COMMON_CMAKE_FLAGS variable."
+    exit 1
+fi
+
 RELEASE_FLAGS=${RELEASE_FLAGS:-"false"}
 LLVM_VERSION_MAJOR=$(cat ${SOURCES_DIR}/cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_MAJOR | grep -o '[0-9]\+')
 LLVM_VERSION_MINOR=$(cat ${SOURCES_DIR}/cmake/Modules/LLVMVersion.cmake | grep -i set | grep LLVM_VERSION_MINOR | grep -o '[0-9]\+')
@@ -60,7 +65,6 @@ STAGES=(
 ZLIB_STATIC_PATH=${ZLIB_STATIC_PATH:-"/usr/lib/`uname -m`-linux-gnu/libz.a"}
 COMMON_LINKER_FLAGS="-Wl,--build-id"
 COMMON_CMAKE_FLAGS=(
-    ${COMMON_CMAKE_FLAGS}
     -DCLANG_ENABLE_LIBXML2=OFF
     -DLLVM_ENABLE_LIBXML2=OFF
     -DLLVM_ENABLE_ZLIB=ON
