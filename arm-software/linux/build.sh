@@ -459,7 +459,22 @@ package() {
       cp "${LIBRARIES_DIR}/libamath.so" \
           "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     fi
-    cp ${ATFL_DIR}/include/flang/omp* "${ATFL_DIR}/include"
+    if compgen -G "${ATFL_DIR}/include/flang/omp*" >/dev/null; then
+      # Handle the old directory layout
+      cp "${ATFL_DIR}"/include/flang/omp* "${ATFL_DIR}/include"
+    else
+      # Handle the new directory layout
+      cp "${ATFL_DIR}"/lib/clang/*/include/omp* "${ATFL_DIR}/include"
+      cp "${ATFL_DIR}"/lib/clang/*/finclude/flang/"${ATFL_TARGET_TRIPLE}"/omp* "${ATFL_DIR}/include"
+    fi
+    if ! compgen -G "${ATFL_DIR}/include/omp*.h" >/dev/null; then
+      echo "The OpenMP headers could not be copied to ${ATFL_DIR}/include"
+      exit 1
+    fi
+    if ! compgen -G "${ATFL_DIR}/include/omp*.mod" >/dev/null; then
+      echo "The OpenMP Fortran modules could not be copied to ${ATFL_DIR}/include"
+      exit 1
+    fi
     cp "${ATFL_DIR}/share/man/man1/clang.1" "${ATFL_DIR}/share/man/man1/armclang.1"
     sed -i "s/clang /armclang /g" "${ATFL_DIR}/share/man/man1/armclang.1"
     sed -i "s/Bclang/Barmclang/g" "${ATFL_DIR}/share/man/man1/armclang.1"
