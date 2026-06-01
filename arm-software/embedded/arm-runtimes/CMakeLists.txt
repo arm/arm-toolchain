@@ -100,7 +100,7 @@ set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (pi
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
-option(LLVM_USE_RELATIVE_PATHS_IN_FILES "Use relative paths in sources and debug info" ON)
+option(LLVM_USE_RELATIVE_PATHS_IN_MACROS "Use relative paths in macro expansions" ON)
 
 set(PROJECT_PREFIX "subproj" CACHE STRING "Directory to build subprojects in.")
 set(VARIANT_BUILD_ID "${VARIANT}" CACHE STRING "Name to use to identify build directories." )
@@ -233,10 +233,10 @@ set(compile_arch_flags "--target=${target_triple} ${COMPILE_FLAGS} --sysroot ${T
 # Compiling the libraries benefits from some extra optimization
 # flags, and requires a sysroot or include folder for LLVM libc build.
 set(lib_compile_flags "${compile_arch_flags} -ffunction-sections -fdata-sections -fno-ident")
-if(LLVM_USE_RELATIVE_PATHS_IN_FILES)
+if(LLVM_USE_RELATIVE_PATHS_IN_MACROS)
     get_filename_component(project_prefix_abs "${PROJECT_PREFIX}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}")
     set(lib_compile_flags
-        "${lib_compile_flags} -ffile-prefix-map=${project_prefix_abs}/= -ffile-prefix-map=${CMAKE_CURRENT_BINARY_DIR}/= -ffile-prefix-map=${llvmproject_src_dir_abs}/="
+        "${lib_compile_flags} -fmacro-prefix-map=${project_prefix_abs}/= -fmacro-prefix-map=${CMAKE_CURRENT_BINARY_DIR}/= -fmacro-prefix-map=${llvmproject_src_dir_abs}/="
     )
 endif()
 
@@ -877,7 +877,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DRAM_SIZE=${RAM_SIZE}
         -DSTACK_SIZE=${STACK_SIZE}
         -DLLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS=${enable_dummypackeys}
-        -DLLVM_USE_RELATIVE_PATHS_IN_FILES=${LLVM_USE_RELATIVE_PATHS_IN_FILES}
+        -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
         STEP_TARGETS build install
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
