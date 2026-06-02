@@ -26,6 +26,16 @@
 cmake_minimum_required(VERSION 3.20.0)
 project(llvmlibc-support LANGUAGES C CXX ASM)
 
+option(LLVM_USE_RELATIVE_PATHS_IN_MACROS "Use relative paths in macro expansions" OFF)
+
+if(LLVM_USE_RELATIVE_PATHS_IN_MACROS)
+    file(RELATIVE_PATH relative_root "${CMAKE_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+    add_compile_options(
+        "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:-fmacro-prefix-map=${CMAKE_BINARY_DIR}=${relative_root}>"
+        "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:-fmacro-prefix-map=${CMAKE_CURRENT_SOURCE_DIR}/=>"
+    )
+endif()
+
 option(
     LLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS
     "Build the opt-in dummy PAC key helper library for M-profile PACBTI testing."
