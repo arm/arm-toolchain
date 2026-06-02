@@ -138,7 +138,6 @@
 #include "llvm/Transforms/Scalar/TailRecursionElimination.h"
 #include "llvm/Transforms/Scalar/WarnMissedTransforms.h"
 #include "llvm/Transforms/Utils/AddDiscriminators.h"
-#include "llvm/Transforms/Utils/AssignGUID.h"
 #include "llvm/Transforms/Utils/AssumeBundleBuilder.h"
 #include "llvm/Transforms/Utils/CanonicalizeAliases.h"
 #include "llvm/Transforms/Utils/CountVisits.h"
@@ -843,7 +842,6 @@ PassBuilder::buildFunctionSimplificationPipeline(OptimizationLevel Level,
 void PassBuilder::addRequiredLTOPreLinkPasses(ModulePassManager &MPM) {
   MPM.addPass(CanonicalizeAliasesPass());
   MPM.addPass(NameAnonGlobalPass());
-  MPM.addPass(AssignGUIDPass());
 }
 
 void PassBuilder::addPreInlinerPasses(ModulePassManager &MPM,
@@ -1101,7 +1099,6 @@ PassBuilder::buildModuleInlinerPipeline(OptimizationLevel Level,
   if (!UseCtxProfile.empty() && Phase == ThinOrFullLTOPhase::ThinLTOPostLink) {
     MPM.addPass(GlobalOptPass());
     MPM.addPass(GlobalDCEPass());
-    MPM.addPass(AssignGUIDPass());
     MPM.addPass(PGOCtxProfFlatteningPass(/*IsPreThinlink=*/false));
   }
 
@@ -1287,8 +1284,10 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
     // In pre-link, we just want the instrumented IR. We use the contextual
     // profile in the post-thinlink phase.
     // The instrumentation will be removed in post-thinlink after IPO.
+    // FIXME(mtrofin): move AssignGUIDPass if there is agreement to use this
+    // mechanism for GUIDs.
+    MPM.addPass(AssignGUIDPass());
     if (IsCtxProfUse) {
-      MPM.addPass(AssignGUIDPass());
       MPM.addPass(PGOCtxProfFlatteningPass(/*IsPreThinlink=*/true));
       return MPM;
     }
@@ -1300,7 +1299,6 @@ PassBuilder::buildModuleSimplificationPipeline(OptimizationLevel Level,
     // unnecessary to collect profiles for non-prevailing copies.
     MPM.addPass(NoinlineNonPrevailing());
     addPostPGOLoopRotation(MPM, Level);
-    MPM.addPass(AssignGUIDPass());
     MPM.addPass(PGOCtxProfLoweringPass());
   } else if (IsColdFuncOnlyInstrGen) {
     addPGOInstrPasses(MPM, Level, /* RunProfileGen */ true, /* IsCS */ false,
@@ -1735,8 +1733,6 @@ PassBuilder::buildModuleOptimizationPipeline(OptimizationLevel Level,
   if (PTO.DevirtualizeSpeculatively && LTOPhase == ThinOrFullLTOPhase::None) {
     // TODO: explore a better pipeline configuration that can improve
     // compilation time overhead.
-    // FIXME: move this earlier (lots of pass ordering tests will need fixing)
-    MPM.addPass(AssignGUIDPass());
     MPM.addPass(WholeProgramDevirtPass(
         /*ExportSummary*/ nullptr,
         /*ImportSummary*/ nullptr,
