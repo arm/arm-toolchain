@@ -23,13 +23,13 @@ jobs:
             to_branch: release/arm-software/22.x
     steps:
       - name: Configure Access Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         id: generate-token
         with:
           app-id: ${{ secrets.SYNC_APP_ID }}
           private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ matrix.branches.to_branch }}
           token: ${{ steps.generate-token.outputs.token }}

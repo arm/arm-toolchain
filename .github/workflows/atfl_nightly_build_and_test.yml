@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Add ~/.local/bin to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
@@ -147,7 +147,7 @@ jobs:
           find arm-software/linux/output -maxdepth 3 -type f \( -name '*.tar.gz' -o -name '*.deb' \) | sort
 
       - name: Upload build log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() && !env.ACT }}
         with:
           name: build-log-${{ matrix.target_os }}
@@ -155,7 +155,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload built packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ success() && !env.ACT }}
         with:
           name: atfl-${{ matrix.build_script }}-${{ matrix.target_os }}

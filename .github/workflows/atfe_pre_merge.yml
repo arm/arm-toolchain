@@ -56,14 +56,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Checks out the merge commit for the PR
           ref: refs/pull/${{ github.event.pull_request.number }}/merge
 
       # Restore ccache cache from previous runs
       - name: Restore ccache cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.CCACHE_DIR }}
           # key for a cache entry

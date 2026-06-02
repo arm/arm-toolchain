@@ -71,7 +71,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Dependencies
         run: ./arm-software/embedded/scripts/${{ matrix.install_script }}
@@ -115,7 +115,7 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE } # Propagate failure
 
       - name: Upload logs as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: logs-${{ matrix.build_script }}-${{ matrix.target_os }}
@@ -124,14 +124,14 @@ jobs:
             test.log
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-${{ matrix.build_script }}-${{ matrix.target_os }}
           path: build/**/lit_results.junit.xml
 
       - name: Upload built packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: success()
         with:
           name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}
