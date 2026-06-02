@@ -70,5 +70,4 @@ ninja package-llvm-toolchain
 # Remove CPack working directory.
 rm -rf atfe_packages/_CPack_Packages
 
-
 echo "==> Stage 2: Completed sanitizer build"
