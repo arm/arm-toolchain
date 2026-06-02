@@ -54,8 +54,21 @@ cd "${REPO_ROOT}"/build
 # Flag to disable detection of memory leaks in address sanitizer.
 export ASAN_OPTIONS=detect_leaks=0
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DCMAKE_BUILD_TYPE=Release -DLLVM_USE_SANITIZER="Address;Undefined" -DLLVM_ENABLE_ASSERTIONS=ON ${EXTRA_CMAKE_ARGS}
+cmake ../arm-software/embedded \
+    -GNinja \
+    -DFETCHCONTENT_QUIET=OFF \
+    -DCMAKE_C_COMPILER=$CC \
+    -DCMAKE_CXX_COMPILER=$CXX \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCPACK_PACKAGE_DIRECTORY=atfe_packages \
+    -DLLVM_USE_SANITIZER="Address;Undefined" \
+    -DLLVM_ENABLE_ASSERTIONS=ON \
+    ${EXTRA_CMAKE_ARGS}
 
 ninja package-llvm-toolchain
+
+# Remove CPack working directory.
+rm -rf atfe_packages/_CPack_Packages
+
 
 echo "==> Stage 2: Completed sanitizer build"
