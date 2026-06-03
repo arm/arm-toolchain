@@ -30,5 +30,14 @@ fi
 mkdir -p "${REPO_ROOT}"/build
 cd "${REPO_ROOT}"/build
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_CCACHE_BUILD=On ${EXTRA_CMAKE_ARGS}
+cmake ../arm-software/embedded \
+    -GNinja \
+    -DFETCHCONTENT_QUIET=OFF \
+    -DCPACK_PACKAGE_DIRECTORY=atfe_packages \
+    -DLLVM_CCACHE_BUILD=On \
+    ${EXTRA_CMAKE_ARGS}
 ninja package-llvm-toolchain
+
+# Remove CPack working directory.
+rm -rf atfe_packages/_CPack_Packages
+
