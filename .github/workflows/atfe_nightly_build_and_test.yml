@@ -136,6 +136,6 @@ jobs:
         with:
           name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}
           path: |
-            build*/ATfE-*.tar.xz
-            build*/ATfE-*.zip
-            build*/ATfE-*.dmg
+            build*/atfe_packages/ATfE-*.tar.xz
+            build*/atfe_packages/ATfE-*.zip
+            build*/atfe_packages/ATfE-*.dmg

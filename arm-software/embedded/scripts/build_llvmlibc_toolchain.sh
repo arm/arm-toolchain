@@ -22,5 +22,13 @@ BUILD_DIR=${REPO_ROOT}/build_llvmlibc_toolchain
 mkdir -p "${BUILD_DIR}"
 cd "${BUILD_DIR}"
 
-cmake ../arm-software/embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc
+cmake ../arm-software/embedded \
+    -GNinja \
+    -DFETCHCONTENT_QUIET=OFF \
+    -DCPACK_PACKAGE_DIRECTORY=atfe_packages \
+    -DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc
 ninja package-llvm-toolchain
+
+# Remove CPack working directory.
+rm -rf atfe_packages/_CPack_Packages
+
