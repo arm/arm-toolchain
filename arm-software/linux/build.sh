@@ -540,25 +540,6 @@ main() {
     echo_bold "Packaging...."
     package
     echo_bold "Packaged."
-    echo_bold "Preparing compilers.yaml..."
-    cat <<SPACK_EOF >"$OUTPUT_DIR"/compilers.yaml
-compilers:
-- compiler:
-    spec: arm@=${TOOLCHAIN_VERSION}
-    paths:
-      cc: ${ATFL_DIR}/bin/armclang
-      cxx: ${ATFL_DIR}/bin/armclang++
-      f77: ${ATFL_DIR}/bin/armflang
-      fc: ${ATFL_DIR}/bin/armflang
-    flags:
-      cflags: -Wno-error=implicit-function-declaration
-      cxxflags: -Wno-error=implicit-function-declaration
-    operating_system: $(awk -F= '/^(ID|VERSION_ID)=/ { gsub("\"", "", $2); values[$1]=$2 } END { print values["ID"] values["VERSION_ID"] }' /etc/os-release)
-    target: $(uname -m)
-    modules: []
-    environment: {}
-    extra_rpaths: []
-SPACK_EOF
     echo_bold "Done."
 }
 
