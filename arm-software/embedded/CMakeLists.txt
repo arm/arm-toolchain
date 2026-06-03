@@ -1088,9 +1088,9 @@ if (CPACK_PACKAGE_DIRECTORY)
     cmake_path(ABSOLUTE_PATH CPACK_PACKAGE_DIRECTORY
         BASE_DIRECTORY ${CMAKE_BINARY_DIR}
         OUTPUT_VARIABLE absolute_package_dir)
-        cmake_path(SET package_filepath ${absolute_package_dir}/${PACKAGE_FILE_NAME}${package_filename_extension})
+    set(package_filepath ${absolute_package_dir}/${PACKAGE_FILE_NAME}${package_filename_extension})
 else()
-    cmake_path(SET package_filepath ${CMAKE_BINARY_DIR}/${PACKAGE_FILE_NAME}${package_filename_extension})
+    set(package_filepath ${CMAKE_BINARY_DIR}/${PACKAGE_FILE_NAME}${package_filename_extension})
 endif()
 set(unpack_directory ${CMAKE_CURRENT_BINARY_DIR}/unpack/${PACKAGE_FILE_NAME})
 add_custom_command(
