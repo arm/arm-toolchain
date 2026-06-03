@@ -1080,7 +1080,18 @@ else()
     set(cpack_generator TXZ)
     set(package_filename_extension ".tar.xz")
 endif()
-set(package_filepath ${CMAKE_BINARY_DIR}/${PACKAGE_FILE_NAME}${package_filename_extension})
+# CPACK_PACKAGE_DIRECTORY can optionally set the location of the package.
+# If unset, the location will default to CMAKE_BINARY_DIR.
+if (CPACK_PACKAGE_DIRECTORY)
+    # CPACK_PACKAGE_DIRECTORY may or may not be relative, so
+    # resolve it to an absolute path first.
+    cmake_path(ABSOLUTE_PATH CPACK_PACKAGE_DIRECTORY
+        BASE_DIRECTORY ${CMAKE_BINARY_DIR}
+        OUTPUT_VARIABLE absolute_package_dir)
+    set(package_filepath ${absolute_package_dir}/${PACKAGE_FILE_NAME}${package_filename_extension})
+else()
+    set(package_filepath ${CMAKE_BINARY_DIR}/${PACKAGE_FILE_NAME}${package_filename_extension})
+endif()
 set(unpack_directory ${CMAKE_CURRENT_BINARY_DIR}/unpack/${PACKAGE_FILE_NAME})
 add_custom_command(
     OUTPUT ${package_filepath}
