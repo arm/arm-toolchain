@@ -13,6 +13,8 @@
 // class basic_ifstream;
 
 // native_handle_type native_handle() const noexcept;
+// Downstream issue: #375 (Enable fstream independently of filesystem)
+// UNSUPPORTED: baremetal
 
 #include "test_macros.h"
 #include "../native_handle_test_helpers.h"

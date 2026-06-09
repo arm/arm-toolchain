@@ -1,0 +1,115 @@
+From 0e6f71752d4f5c84be7562a567d80a5be38c8b75 Mon Sep 17 00:00:00 2001
+From: Mark Murray <mark.murray@arm.com>
+Date: Tue, 10 Feb 2026 14:35:01 +0000
+Subject: Update patch for newlib-4.6.0 tag
+
+Many of the patches for the 4.5.0 release have been merged.
+---
+ libgloss/Makefile.in               | 2 +-
+ libgloss/aarch64/syscalls.c        | 6 ++++++
+ libgloss/arm/cpu-init/rdimon-aem.S | 2 +-
+ libgloss/arm/linux-crt0.c          | 2 +-
+ libgloss/arm/syscalls.c            | 6 +++---
+ newlib/libc/include/sys/features.h | 3 +++
+ newlib/libc/string/wcwidth.c       | 2 +-
+ 7 files changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/libgloss/Makefile.in b/libgloss/Makefile.in
+index 5146a7880..895da03c2 100644
+--- a/libgloss/Makefile.in
++++ b/libgloss/Makefile.in
+@@ -1865,7 +1865,7 @@ AM_V_texidevnull = $(am__v_texidevnull_@AM_V@)
+ am__v_texidevnull_ = $(am__v_texidevnull_@AM_DEFAULT_V@)
+ am__v_texidevnull_0 = > /dev/null
+ am__v_texidevnull_1 = 
+-INFO_DEPS = $(srcdir)/doc/porting.info
++INFO_DEPS = 
+ am__TEXINFO_TEX_DIR = $(srcdir)/../texinfo
+ DVIS = doc/porting.dvi
+ PDFS = doc/porting.pdf
+diff --git a/libgloss/arm/cpu-init/rdimon-aem.S b/libgloss/arm/cpu-init/rdimon-aem.S
+index 2aacbeba9..87cb5702d 100644
+--- a/libgloss/arm/cpu-init/rdimon-aem.S
++++ b/libgloss/arm/cpu-init/rdimon-aem.S
+@@ -155,7 +155,7 @@ spin:
+     @ as the code is all PC-relative.  We actually cheat and do a BX <reg> so
+     @ that we are at a known address relatively quickly and have to move as
+     @ little code as possible.
+-    mov         r7, #(VectorCode_Limit - VectorCode)
++    mov         r7, #:lower16:(VectorCode_Limit - VectorCode)
+     adr         r5, VectorCode
+     adr         r6, vector_base_addr	@ Load the base for vectors
+     ldr         r6, [r6]
+diff --git a/libgloss/arm/linux-crt0.c b/libgloss/arm/linux-crt0.c
+index 6b2d62a9b..000a2c728 100644
+--- a/libgloss/arm/linux-crt0.c
++++ b/libgloss/arm/linux-crt0.c
+@@ -29,7 +29,7 @@ asm("\n"
+ __attribute__((naked, used))
+ static void _start_thumb(void)
+ #else
+-__attribute__((naked))
++//__attribute__((naked))
+ void _start(void)
+ #endif
+ {
+diff --git a/libgloss/arm/syscalls.c b/libgloss/arm/syscalls.c
+index 710a741ee..9e710b09a 100644
+--- a/libgloss/arm/syscalls.c
++++ b/libgloss/arm/syscalls.c
+@@ -180,7 +180,7 @@ initialise_monitor_handles (void)
+   const char * name;
+ 
+   name = ":tt";
+-  asm ("mov r0,%2; mov r1, #0; swi %a1; mov %0, r0"
++  asm ("movs r0,%2; movs r1, #0; swi %a1; mov %0, r0"
+        : "=r"(fh)
+        : "i" (SWI_Open),"r"(name)
+        : "r0","r1");
+@@ -189,14 +189,14 @@ initialise_monitor_handles (void)
+   if (_has_ext_stdout_stderr ())
+   {
+     name = ":tt";
+-    asm ("mov r0,%2; mov r1, #4; swi %a1; mov %0, r0"
++    asm ("movs r0,%2; movs r1, #4; swi %a1; mov %0, r0"
+ 	 : "=r"(fh)
+ 	 : "i" (SWI_Open),"r"(name)
+ 	 : "r0","r1");
+     monitor_stdout = fh;
+ 
+     name = ":tt";
+-    asm ("mov r0,%2; mov r1, #8; swi %a1; mov %0, r0"
++    asm ("movs r0,%2; movs r1, #8; swi %a1; mov %0, r0"
+ 	 : "=r"(fh)
+ 	 : "i" (SWI_Open),"r"(name)
+ 	 : "r0","r1");
+diff --git a/newlib/libc/include/sys/features.h b/newlib/libc/include/sys/features.h
+index 195300eb5..d37daf469 100644
+--- a/newlib/libc/include/sys/features.h
++++ b/newlib/libc/include/sys/features.h
+@@ -27,6 +27,9 @@ extern "C" {
+ 
+ #include <_newlib_version.h>
+ 
++#define _DEFAULT_SOURCE
++#define _GNU_SOURCE
++
+ /* Macro to test version of GCC.  Returns 0 for non-GCC or too old GCC. */
+ #ifndef __GNUC_PREREQ
+ # if defined __GNUC__ && defined __GNUC_MINOR__
+diff --git a/newlib/libc/string/wcwidth.c b/newlib/libc/string/wcwidth.c
+index 8348eefe8..65604c061 100644
+--- a/newlib/libc/string/wcwidth.c
++++ b/newlib/libc/string/wcwidth.c
+@@ -230,7 +230,7 @@ __wcwidth (const wint_t ucs)
+ }
+ 
+ int
+-wcwidth (const wint_t wc)
++wcwidth (const wchar_t wc)
+ {
+   wint_t wi = wc;
+ 
+-- 
+2.34.1
+

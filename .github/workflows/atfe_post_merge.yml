@@ -1,0 +1,79 @@
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow is triggered automatically after a pull request is merged into:
+#   - arm-toolchain branch
+#   - any release/arm-software/** branch
+#
+# It also runs after the completion of the Automerge workflow.
+#
+# It builds and tests the Arm Toolchain for Embedded (ATfE) to validate that the
+# merged changes do not introduce regressions and that the build remains stable.
+
+name: ATfE Post-Merge
+
+on:
+  # Trigger when a pull request is closed
+  pull_request:
+    types: [closed]
+    branches:
+      - 'arm-toolchain'
+      - 'release/arm-software/**'
+    paths:
+      # Run workflow if the PR modifies any of the following directories
+      - 'arm-software/embedded/**'
+      - 'clang/**'
+      - 'cmake/**'
+      - 'compiler-rt/**'
+      - 'libc/**'
+      - 'libcxx/**'
+      - 'libcxxabi/**'
+      - 'libunwind/**'
+      - 'lld/**'
+      - 'llvm/**'
+      - 'runtimes/**'
+      - 'utils/**'
+      # Exclude directories that are not relevant for ATfE
+      - '!arm-software/linux/**'
+      # Exclude changes in files with these extensions
+      - '!**/*.cfg'
+      - '!**/*.md'
+      - '!**/*.rst'
+
+  # Trigger after the Automerge workflow completes
+  workflow_run:
+    workflows: [Automerge]
+    types: [completed]
+
+jobs:
+  build-and-test:
+    name: Post-Merge - Branch ${{ github.ref_name }} SHA ${{ github.sha }}
+    # Ensure the workflow only runs on the arm-toolchain repository and not on forks,
+    # and only when a PR was merged or Automerge has completed
+    if: github.repository == 'arm/arm-toolchain' && (github.event_name == 'workflow_run' || github.event.pull_request.merged == true)
+    # Arm64 runner
+    runs-on: ah-ubuntu_22_04-c7g_8x-100
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Dependencies
+        run: ./arm-software/embedded/scripts/install_dependencies.sh
+
+      - name: Add ~/.local/bin to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Apply llvm-project patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project
+
+      - name: Apply llvm-project-perf patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
+
+      - name: Build
+        run: ./arm-software/embedded/scripts/build_post_merge.sh
+
+      - name: Test
+        run: ./arm-software/embedded/scripts/test_post_merge.sh

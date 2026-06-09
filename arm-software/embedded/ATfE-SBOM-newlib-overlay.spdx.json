@@ -1,0 +1,111 @@
+{
+    "SPDXID": "SPDXRef-DOCUMENT",
+    "creationInfo": {
+        "created": "2025-03-18T15:54:51Z",
+        "creators": [
+            "Organization: Arm Limited (open-source-office@arm.com)"
+        ]
+    },
+    "dataLicense": "CC0-1.0",
+    "name": "Arm Toolchain for Embedded newlib overlay",
+    "spdxVersion": "SPDX-2.3",
+    "documentNamespace": "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
+    "packages": [
+        {
+            "SPDXID": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
+            "downloadLocation": "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "Arm Toolchain for Embedded",
+            "originator": "Organization: Arm Limited (open-source-office@arm.com)",
+            "supplier": "Organization: Arm Limited (open-source-office@arm.com)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/compiler-rt",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "compiler-rt",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-55633fe2-115b-594e-a5ec-84ece9a16f80",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/libcxx",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libcxx",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-90f44391-c061-5db7-ad32-4c0951366e9e",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/libcxxabi",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libcxxabi",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-95411904-8af0-5830-8fbc-4185e16949de",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/libunwind",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libunwind",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
+            "downloadLocation": "https://sourceware.org/newlib/",
+            "filesAnalyzed": false,
+            "licenseComments": "Detailed list of licenses is at: https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.NEWLIB;hb=HEAD and https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.LIBGLOSS;hb=HEAD",
+            "name": "newlib",
+            "originator": "Organization: https://sourceware.org/newlib/ (newlib@sourceware.org)",
+            "supplier": "Organization: https://sourceware.org/newlib/ (newlib@sourceware.org)"
+        }
+    ],
+    "relationships": [
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-7b00a6db-5a0c-5d02-800d-c0bd1a9b0290",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-e44bc351-526b-5ca1-93c9-0f88a33b934a",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-55633fe2-115b-594e-a5ec-84ece9a16f80",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-90f44391-c061-5db7-ad32-4c0951366e9e",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-95411904-8af0-5830-8fbc-4185e16949de",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
+            "relationshipType": "DESCRIBES"
+        }
+    ]
+}
