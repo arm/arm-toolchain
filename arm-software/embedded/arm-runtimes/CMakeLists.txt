@@ -24,6 +24,12 @@ get_filename_component(llvmproject_src_dir_abs "${llvmproject_src_dir}" ABSOLUTE
 set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
 set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
+set(ENABLE_LLVM_LIBC_MINOR_VARIANT_def OFF)
+set(LLVM_LIBC_SUBARCHIVE_NAME_def "")
+set(ENABLE_LLVMLIBC_CORE_LIBS_def ON)
+set(ENABLE_LLVMLIBC_SUPPORT_LIBS_def ON)
+set(ENABLE_COMPILER_RT_LIBS_def ON)
+
 set(VARIANT_JSON "" CACHE STRING "JSON file to load args from.")
 if(VARIANT_JSON)
     file(READ ${VARIANT_JSON} variant_json_read)
@@ -97,9 +103,14 @@ set(LIBRARY_BUILD_TYPE ${LIBRARY_BUILD_TYPE_def} CACHE STRING "Build type to use
 set_property(CACHE LIBRARY_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_LIBRARY_BUILD_TYPES})
 
 set(ENABLE_CXX_LIBS ${ENABLE_CXX_LIBS_def} CACHE BOOL "Build CXX libs")
+set(ENABLE_COMPILER_RT_LIBS ${ENABLE_COMPILER_RT_LIBS_def} CACHE BOOL "Build compiler-rt libraries.")
 set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
+set(ENABLE_LLVM_LIBC_MINOR_VARIANT ${ENABLE_LLVM_LIBC_MINOR_VARIANT_def} CACHE BOOL "Install only the llvm-libc minor variant payload for this variant.")
+set(LLVM_LIBC_SUBARCHIVE_NAME ${LLVM_LIBC_SUBARCHIVE_NAME_def} CACHE STRING "llvm-libc subarchive to install when ENABLE_LLVM_LIBC_MINOR_VARIANT is enabled.")
+set(ENABLE_LLVMLIBC_CORE_LIBS ${ENABLE_LLVMLIBC_CORE_LIBS_def} CACHE BOOL "Build and install the core llvm-libc library archives.")
+set(ENABLE_LLVMLIBC_SUPPORT_LIBS ${ENABLE_LLVMLIBC_SUPPORT_LIBS_def} CACHE BOOL "Build and install llvmlibc support libraries such as crt0 and semihost.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
 set(LLVM_LIBC_TEST_SYSROOT "" CACHE PATH "Build-tree package-style sysroot for LLVM libc tests.")
 option(LLVM_USE_RELATIVE_PATHS_IN_MACROS "Use relative paths in macro expansions" ON)
@@ -154,6 +165,27 @@ else()
     set(cpu_family arm)
 endif()
 
+# Some llvm-libc variants are packaged as minor layers. The subprojects
+# are still built as normal, but the installed payload is restricted to
+# the files that differ from the base layer.
+if(ENABLE_LLVM_LIBC_MINOR_VARIANT)
+    if(NOT C_LIBRARY STREQUAL llvmlibc)
+        message(FATAL_ERROR "ENABLE_LLVM_LIBC_MINOR_VARIANT is only supported with C_LIBRARY=llvmlibc.")
+    endif()
+    if(NOT LLVM_LIBC_SUBARCHIVE_NAME)
+        message(FATAL_ERROR "ENABLE_LLVM_LIBC_MINOR_VARIANT requires LLVM_LIBC_SUBARCHIVE_NAME to be set.")
+    endif()
+endif()
+if(NOT ENABLE_COMPILER_RT_LIBS)
+    if(ENABLE_COMPILER_RT_TESTS)
+        message(FATAL_ERROR
+            "ENABLE_COMPILER_RT_TESTS requires ENABLE_COMPILER_RT_LIBS=ON.")
+    endif()
+    if(ENABLE_CXX_LIBS)
+        message(FATAL_ERROR
+            "ENABLE_CXX_LIBS requires ENABLE_COMPILER_RT_LIBS=ON.")
+    endif()
+endif()
 # compiler-rt's upstream atomic builtins require lock-free pointer-size
 # compare/exchange. Armv6K and Armv6ZK have load/store exclusive support, but
 # earlier Arm architectures and Armv6-M use the weak libatomic-fallback from
@@ -377,93 +409,105 @@ set(
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
 )
 
-ExternalProject_Add(
-    compiler_rt
-    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
-    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
-    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
-    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
-    SOURCE_DIR ${llvmproject_src_dir}/runtimes
-    INSTALL_DIR compiler-rt/install
-    CMAKE_ARGS
-    ${compiler_rt_common_flags}
-    ${compiler_launcher_cmake_args}
-    ${compiler_rt_cmake_args}
-    ${compiler_rt_test_cmake_args}
-    -DCOMPILER_RT_BUILD_BUILTINS=ON
-    -DCOMPILER_RT_BUILD_PROFILE=OFF
-    STEP_TARGETS configure build install
-    USES_TERMINAL_CONFIGURE TRUE
-    USES_TERMINAL_BUILD TRUE
-    USES_TERMINAL_INSTALL TRUE
-    LIST_SEPARATOR ,
-    CONFIGURE_HANDLED_BY_BUILD TRUE
-    INSTALL_COMMAND ${CMAKE_COMMAND} --install .
-    # Copy compiler-rt lib directory, moving libraries out of their
-    # target-specific subdirectory.
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E copy_directory
-        <INSTALL_DIR>/lib/${normalized_target_triple}
-        "${TEMP_LIB_DIR}/lib"
-)
-
 add_custom_target(check-compiler-rt)
 add_dependencies(check-all check-compiler-rt)
-if(ENABLE_COMPILER_RT_TESTS)
-    ExternalProject_Add_Step(
+if(ENABLE_COMPILER_RT_LIBS)
+    ExternalProject_Add(
         compiler_rt
-        check-compiler-rt
-        COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-compiler-rt
-        COMMAND ${Python3_EXECUTABLE}
-        ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
-        --dir <BINARY_DIR>/compiler-rt/test
-        --testsuite compiler-rt-${variant_xml_name}
-        USES_TERMINAL TRUE
-        EXCLUDE_FROM_MAIN TRUE
-        ALWAYS TRUE
+        STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
+        SOURCE_DIR ${llvmproject_src_dir}/runtimes
+        INSTALL_DIR compiler-rt/install
+        CMAKE_ARGS
+        ${compiler_rt_common_flags}
+        ${compiler_launcher_cmake_args}
+        ${compiler_rt_cmake_args}
+        ${compiler_rt_test_cmake_args}
+        -DCOMPILER_RT_BUILD_BUILTINS=ON
+        -DCOMPILER_RT_BUILD_PROFILE=OFF
+        STEP_TARGETS configure build install
+        USES_TERMINAL_CONFIGURE TRUE
+        USES_TERMINAL_BUILD TRUE
+        USES_TERMINAL_INSTALL TRUE
+        LIST_SEPARATOR ,
+        CONFIGURE_HANDLED_BY_BUILD TRUE
+        INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+        # Copy compiler-rt lib directory, moving libraries out of their
+        # target-specific subdirectory.
+        COMMAND
+            ${CMAKE_COMMAND}
+            -E copy_directory
+            <INSTALL_DIR>/lib/${normalized_target_triple}
+            "${TEMP_LIB_DIR}/lib"
     )
-    ExternalProject_Add_StepTargets(compiler_rt check-compiler-rt)
-    ExternalProject_Add_StepDependencies(
-        compiler_rt
-        check-compiler-rt
-        compiler_rt-build
-        clib-install
-        compiler-rt-xfail-lit-args
-    )
-    add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
+
+    if(ENABLE_COMPILER_RT_TESTS)
+        ExternalProject_Add_Step(
+            compiler_rt
+            check-compiler-rt
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-compiler-rt
+            COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
+            --dir <BINARY_DIR>/compiler-rt/test
+            --testsuite compiler-rt-${variant_xml_name}
+            USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
+            ALWAYS TRUE
+        )
+        ExternalProject_Add_StepTargets(compiler_rt check-compiler-rt)
+        ExternalProject_Add_StepDependencies(
+            compiler_rt
+            check-compiler-rt
+            compiler_rt-build
+            clib-install
+            compiler-rt-xfail-lit-args
+        )
+        add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
+    endif()
+else()
+    add_custom_target(compiler_rt-configure)
+    add_custom_target(compiler_rt-build)
+    add_custom_target(compiler_rt-install)
 endif()
 
 # Build compiler-rt profile library after the C library is available.
-ExternalProject_Add(
-    compiler_rt_profile
-    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/stamp
-    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/build
-    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/dl
-    TMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/tmp
-    SOURCE_DIR ${llvmproject_src_dir}/runtimes
-    INSTALL_DIR compiler-rt-profile/install
-    DEPENDS compiler_rt-install clib-install
-    CMAKE_ARGS
-    ${compiler_rt_common_flags}
-    ${compiler_launcher_cmake_args}
-    ${compiler_rt_cmake_args}
-    -DCOMPILER_RT_BUILD_BUILTINS=OFF
-    -DCOMPILER_RT_BUILD_PROFILE=ON
-    -DCOMPILER_RT_PROFILE_BAREMETAL=ON
-    STEP_TARGETS configure build install
-    USES_TERMINAL_CONFIGURE TRUE
-    USES_TERMINAL_BUILD TRUE
-    USES_TERMINAL_INSTALL TRUE
-    LIST_SEPARATOR ,
-    CONFIGURE_HANDLED_BY_BUILD TRUE
-    INSTALL_COMMAND ${CMAKE_COMMAND} --install .
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E copy_directory
-        <INSTALL_DIR>/lib/${normalized_target_triple}
-        "${TEMP_LIB_DIR}/lib"
-)
+if(ENABLE_COMPILER_RT_LIBS)
+    ExternalProject_Add(
+        compiler_rt_profile
+        STAMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/tmp
+        SOURCE_DIR ${llvmproject_src_dir}/runtimes
+        INSTALL_DIR compiler-rt-profile/install
+        DEPENDS compiler_rt-install clib-install
+        CMAKE_ARGS
+        ${compiler_rt_common_flags}
+        ${compiler_launcher_cmake_args}
+        ${compiler_rt_cmake_args}
+        -DCOMPILER_RT_BUILD_BUILTINS=OFF
+        -DCOMPILER_RT_BUILD_PROFILE=ON
+        -DCOMPILER_RT_PROFILE_BAREMETAL=ON
+        STEP_TARGETS configure build install
+        USES_TERMINAL_CONFIGURE TRUE
+        USES_TERMINAL_BUILD TRUE
+        USES_TERMINAL_INSTALL TRUE
+        LIST_SEPARATOR ,
+        CONFIGURE_HANDLED_BY_BUILD TRUE
+        INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+        COMMAND
+            ${CMAKE_COMMAND}
+            -E copy_directory
+            <INSTALL_DIR>/lib/${normalized_target_triple}
+            "${TEMP_LIB_DIR}/lib"
+    )
+else()
+    add_custom_target(compiler_rt_profile-configure)
+    add_custom_target(compiler_rt_profile-build)
+    add_custom_target(compiler_rt_profile-install)
+endif()
 
 ###############################################################################
 # picolibc
@@ -872,87 +916,138 @@ if(C_LIBRARY STREQUAL llvmlibc)
         # Let CMake know we're cross-compiling
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
+        -DENABLE_LLVM_LIBC_MINOR_VARIANT=${ENABLE_LLVM_LIBC_MINOR_VARIANT}
+        -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVM_LIBC_SUBARCHIVE_NAME}
     )
 
-    ExternalProject_Add(
-        llvmlibc
-        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/stamp
-        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/build
-        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/dl
-        TMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/tmp
-        SOURCE_DIR ${llvmproject_src_dir}/runtimes
-        INSTALL_DIR llvmlibc/install
-        CMAKE_ARGS
-        ${compiler_launcher_cmake_args}
-        ${common_llvmlibc_cmake_args}
-        -DLIBC_TARGET_TRIPLE=${target_triple}
-        -DLIBC_CONF_ERRNO_MODE=LIBC_ERRNO_MODE_SHARED
-        -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
-        -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
-        -DLIBC_CONF_PRINTF_MODULAR=ON
-        "-DLIBC_CONF_MATH_OPTIMIZATIONS=${libc_math_opt}"
-        -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
-        -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
-        -DLLVM_ENABLE_RUNTIMES=libc
-        -DLLVM_LIBC_ALL_HEADERS=ON
-        -DLLVM_LIBC_FULL_BUILD=ON
-        -DLIBC_TEST_COMPILE_OPTIONS_DEFAULT=${llvmlibc_test_compile_options_default}
-        -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
-        -DLIBC_TEST_CMD=${test_cmd}
-        -DLIBC_TEST_HERMETIC_ONLY=ON
-        -DLLVM_EXTERNAL_LIT=${external_lit_path}
-        -DLLVM_LIT_ARGS=${llvmlibc_lit_args}
-        STEP_TARGETS configure build install
-        USES_TERMINAL_CONFIGURE TRUE
-        USES_TERMINAL_BUILD TRUE
-        USES_TERMINAL_INSTALL TRUE
-        LIST_SEPARATOR ,
-        CONFIGURE_HANDLED_BY_BUILD TRUE
-        INSTALL_COMMAND ${CMAKE_COMMAND} --install .
-        # Copy llvm-libc lib directory, moving libraries out of their
-        # target-specific subdirectory.
-        COMMAND
-            ${CMAKE_COMMAND}
-            -E copy_directory
-            <INSTALL_DIR>/lib/${target_triple}
-            "${TEMP_LIB_DIR}/lib"
-        # Also copy the includes from their target-specific subdirectory.
-        COMMAND
-            ${CMAKE_COMMAND}
-            -E copy_directory
-            <INSTALL_DIR>/include/${target_triple}
-            "${TEMP_LIB_DIR}/include"
-    )
+    if(ENABLE_LLVMLIBC_CORE_LIBS OR ENABLE_LLVM_LIBC_MINOR_VARIANT)
+        ExternalProject_Add(
+            llvmlibc
+            STAMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/stamp
+            BINARY_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/build
+            DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/dl
+            TMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/tmp
+            SOURCE_DIR ${llvmproject_src_dir}/runtimes
+            INSTALL_DIR llvmlibc/install
+            CMAKE_ARGS
+            ${compiler_launcher_cmake_args}
+            ${common_llvmlibc_cmake_args}
+            -DLIBC_TARGET_TRIPLE=${target_triple}
+            -DLIBC_CONF_TIME_64BIT=ON
+            -DLIBC_CONF_ERRNO_MODE=LIBC_ERRNO_MODE_SHARED
+            -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
+            -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
+            -DLIBC_CONF_PRINTF_MODULAR=ON
+            -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
+            -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
+            -DLLVM_ENABLE_RUNTIMES=libc
+            -DLLVM_LIBC_ALL_HEADERS=ON
+            -DLLVM_LIBC_FULL_BUILD=ON
+            -DLIBC_TEST_COMPILE_OPTIONS_DEFAULT=${llvmlibc_test_compile_options_default}
+            -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
+            -DLIBC_TEST_CMD=${test_cmd}
+            -DLIBC_TEST_HERMETIC_ONLY=ON
+            -DLLVM_EXTERNAL_LIT=${external_lit_path}
+            -DLLVM_LIT_ARGS=${llvmlibc_lit_args}
+            STEP_TARGETS configure build install
+            USES_TERMINAL_CONFIGURE TRUE
+            USES_TERMINAL_BUILD TRUE
+            USES_TERMINAL_INSTALL TRUE
+            LIST_SEPARATOR ,
+            CONFIGURE_HANDLED_BY_BUILD TRUE
+            INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+            COMMAND
+                ${CMAKE_COMMAND}
+                -E copy_directory
+                <INSTALL_DIR>/lib/${target_triple}
+                "${TEMP_LIB_DIR}/lib"
+            COMMAND
+                ${CMAKE_COMMAND}
+                -E copy_directory
+                <INSTALL_DIR>/include/${target_triple}
+                "${TEMP_LIB_DIR}/include"
+        )
+    else()
+        ExternalProject_Add(
+            llvmlibc
+            STAMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/stamp
+            BINARY_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/build
+            DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/dl
+            TMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/tmp
+            SOURCE_DIR ${llvmproject_src_dir}/runtimes
+            INSTALL_DIR llvmlibc/install
+            CMAKE_ARGS
+            ${compiler_launcher_cmake_args}
+            ${common_llvmlibc_cmake_args}
+            -DLIBC_TARGET_TRIPLE=${target_triple}
+            -DLIBC_CONF_TIME_64BIT=ON
+            -DLIBC_CONF_ERRNO_MODE=LIBC_ERRNO_MODE_SHARED
+            -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
+            -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
+            -DLIBC_CONF_PRINTF_MODULAR=ON
+            -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
+            -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
+            -DLLVM_ENABLE_RUNTIMES=libc
+            -DLLVM_LIBC_ALL_HEADERS=ON
+            -DLLVM_LIBC_FULL_BUILD=ON
+            -DLIBC_TEST_COMPILE_OPTIONS_DEFAULT=${llvmlibc_test_compile_options_default}
+            -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
+            -DLIBC_TEST_CMD=${test_cmd}
+            -DLIBC_TEST_HERMETIC_ONLY=ON
+            -DLLVM_EXTERNAL_LIT=${external_lit_path}
+            -DLLVM_LIT_ARGS=${llvmlibc_lit_args}
+            STEP_TARGETS configure build install
+            USES_TERMINAL_CONFIGURE TRUE
+            USES_TERMINAL_BUILD TRUE
+            USES_TERMINAL_INSTALL TRUE
+            LIST_SEPARATOR ,
+            CONFIGURE_HANDLED_BY_BUILD TRUE
+            BUILD_COMMAND
+                ${CMAKE_COMMAND}
+                --build <BINARY_DIR>
+                --target install-libc-headers
+            INSTALL_COMMAND
+                ${CMAKE_COMMAND}
+                -E copy_directory
+                <INSTALL_DIR>/include/${target_triple}
+                "${TEMP_LIB_DIR}/include"
+        )
+    endif()
 
-    ExternalProject_Add(
-        llvmlibc-support
-        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
-        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
-        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
-        TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
-        SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
-        INSTALL_DIR ${TEMP_LIB_DIR}
-        DEPENDS ${lib_tool_dependencies} llvmlibc-install
-        CMAKE_ARGS
-        ${compiler_launcher_cmake_args}
-        ${common_llvmlibc_cmake_args}
-        -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
-        -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
-        -DFLASH_ADDRESS=${FLASH_ADDRESS}
-        -DFLASH_SIZE=${FLASH_SIZE}
-        -DRAM_ADDRESS=${RAM_ADDRESS}
-        -DRAM_SIZE=${RAM_SIZE}
-        -DSTACK_SIZE=${STACK_SIZE}
-        -DLLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS=${enable_dummypackeys}
-        -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
-        STEP_TARGETS build install
-        USES_TERMINAL_CONFIGURE TRUE
-        USES_TERMINAL_BUILD TRUE
-        USES_TERMINAL_INSTALL TRUE
-        USES_TERMINAL_TEST TRUE
-        LIST_SEPARATOR ,
-        CONFIGURE_HANDLED_BY_BUILD TRUE
-    )
+    if(ENABLE_LLVMLIBC_SUPPORT_LIBS)
+        ExternalProject_Add(
+            llvmlibc-support
+            STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
+            BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
+            DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
+            TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
+            SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
+            INSTALL_DIR ${TEMP_LIB_DIR}
+            DEPENDS ${lib_tool_dependencies} llvmlibc-install
+            CMAKE_ARGS
+            ${compiler_launcher_cmake_args}
+            ${common_llvmlibc_cmake_args}
+            -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
+            -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
+            -DFLASH_ADDRESS=${FLASH_ADDRESS}
+            -DFLASH_SIZE=${FLASH_SIZE}
+            -DRAM_ADDRESS=${RAM_ADDRESS}
+            -DRAM_SIZE=${RAM_SIZE}
+            -DSTACK_SIZE=${STACK_SIZE}
+            -DLLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS=${enable_dummypackeys}
+            -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
+            STEP_TARGETS build install
+            USES_TERMINAL_CONFIGURE TRUE
+            USES_TERMINAL_BUILD TRUE
+            USES_TERMINAL_INSTALL TRUE
+            USES_TERMINAL_TEST TRUE
+            LIST_SEPARATOR ,
+            CONFIGURE_HANDLED_BY_BUILD TRUE
+        )
+    else()
+        add_custom_target(llvmlibc-support-build)
+        add_custom_target(llvmlibc-support-install)
+    endif()
 
     if(ENABLE_LIBC_TESTS)
         add_custom_target(check-llvmlibc)
@@ -985,21 +1080,24 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
         ExternalProject_Add_StepTargets(llvmlibc check)
         ExternalProject_Add_StepTargets(llvmlibc check-lit)
+        set(llvmlibc_test_dependencies
+            llvmlibc-build
+            compiler_rt-install
+            cxxlibs-install
+        )
+        if(ENABLE_LLVMLIBC_SUPPORT_LIBS)
+            list(APPEND llvmlibc_test_dependencies llvmlibc-support-build)
+        endif()
+
         ExternalProject_Add_StepDependencies(
             llvmlibc
             check
-            llvmlibc-build
-            llvmlibc-support-build
-            compiler_rt-install
-            cxxlibs-install
+            ${llvmlibc_test_dependencies}
         )
         ExternalProject_Add_StepDependencies(
             llvmlibc
             check-lit
-            llvmlibc-build
-            llvmlibc-support-build
-            compiler_rt-install
-            cxxlibs-install
+            ${llvmlibc_test_dependencies}
             llvmlibc-xfail-lit-args
         )
         
