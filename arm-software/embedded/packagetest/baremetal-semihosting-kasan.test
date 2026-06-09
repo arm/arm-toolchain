@@ -1,0 +1,7 @@
+# RUN: make -C %samples_dir/src/baremetal-semihosting-kasan clean
+# RUN: not make -C %samples_dir/src/baremetal-semihosting-kasan run BIN_PATH=%unpack_directory/bin %sample_libc KASAN_TEST=1 > %t.out 2>&1
+# RUN: FileCheck %s < %t.out
+# RUN: make -C %samples_dir/src/baremetal-semihosting-kasan clean
+# CHECK: KASan minimal runtime sample
+# CHECK: Test 1: manual stack redzone
+# CHECK: KASAN: invalid store

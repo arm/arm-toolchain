@@ -7,11 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+
 - Shared support libraries now provide `libatomic-fallback.a` whose weak
 definitions can be overridden by users on platforms without native atomic
 operation support.
+- Bare-metal semihosting KASan sample with a minimal sanitizer runtime added.
+
 ### Changed
 ### Deprecated
+
 - `picolibc` will be superseded with LLVM libc as the default C library in
   ATfE 24. Further in ATfE 25 `picolibc` will be moved out of the main ATfE
   package into an overlay package. To keep using `picolibc` in your project

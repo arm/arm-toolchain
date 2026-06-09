@@ -1,0 +1,20 @@
+__boot_flash = 0x00000000;  /* fragment of the flash where interrupt vector goes */
+__boot_flash_size = 0x3000; /* length of flash fragment with interrupt vector */
+__flash = 0x00003000;       /* starting address of the remaining flash */
+__flash_size = 0x3d000;     /* length of the remaining flash */
+
+/*
+ * KASan uses shadow = (address >> 3) + 0x1c000000 for this sample.
+ * Reserve the first 2 KiB of the microbit RAM as shadow memory and expose
+ * only the remaining RAM to the C library linker script.
+ */
+__kasan_shadow_start = 0x20000000;
+__kasan_shadow_size = 0x800;
+__kasan_shadow_end = __kasan_shadow_start + __kasan_shadow_size;
+__kasan_shadow_offset = 0x1c000000;
+
+__ram = __kasan_shadow_end; /* starting address of application RAM */
+__ram_size = 0x4000 - __kasan_shadow_size;
+__stack_size = 0x400;       /* 1 KiB of stack */
+
+INCLUDE LIBC_LD_FILE
