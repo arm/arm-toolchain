@@ -20,8 +20,10 @@
 
 MultilibVersion: '1.0'
 
-# Make an exclusive group for library variants, to make sure we don't
-# accidentally include two or more variants at once.
+# Make the main library selection exclusive, to make sure we don't
+# accidentally include two or more base variants at once.But allow
+# specialised overlay layers such as string/startup deltas to be
+# selected in parallel with the base layer.
 #
 # Even if they all match the command-line options, putting two sets of
 # include directories on the include path can cause build failure,
@@ -32,7 +34,11 @@ MultilibVersion: '1.0'
 # nothing will ever include the _libc_ stdio.h, which was what the
 # #include_next was really looking for.
 Groups:
-- Name: stdlibs
+- Name: base_stdlibs
+  Type: Exclusive
+- Name: string_minor_libs
+  Type: Exclusive
+- Name: startup_libs
   Type: Exclusive
 
 # The list of library variants is substituted in by CMakeLists.txt, so
@@ -49,7 +55,7 @@ Variants:
 - Error: Arm Toolchain for Embedded does not provide RWPI library variants
   Flags:
   - -frwpi
-  Group: stdlibs
+  Group: base_stdlibs
 
 Mappings:
 
