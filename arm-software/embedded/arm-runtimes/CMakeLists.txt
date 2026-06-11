@@ -24,8 +24,8 @@ get_filename_component(llvmproject_src_dir_abs "${llvmproject_src_dir}" ABSOLUTE
 set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
 set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
-set(ENABLE_LLVM_LIBC_MINOR_VARIANT_def OFF)
-set(LLVM_LIBC_SUBARCHIVE_NAME_def "")
+set(ENABLE_LLVMLIBC_MINOR_VARIANT_def OFF)
+set(LLVMLIBC_SUBARCHIVE_NAME_def "")
 set(ENABLE_LLVMLIBC_CORE_LIBS_def ON)
 set(ENABLE_LLVMLIBC_SUPPORT_LIBS_def ON)
 set(ENABLE_COMPILER_RT_LIBS_def ON)
@@ -107,8 +107,8 @@ set(ENABLE_COMPILER_RT_LIBS ${ENABLE_COMPILER_RT_LIBS_def} CACHE BOOL "Build com
 set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
-set(ENABLE_LLVM_LIBC_MINOR_VARIANT ${ENABLE_LLVM_LIBC_MINOR_VARIANT_def} CACHE BOOL "Install only the llvm-libc minor variant payload for this variant.")
-set(LLVM_LIBC_SUBARCHIVE_NAME ${LLVM_LIBC_SUBARCHIVE_NAME_def} CACHE STRING "llvm-libc subarchive to install when ENABLE_LLVM_LIBC_MINOR_VARIANT is enabled.")
+set(ENABLE_LLVMLIBC_MINOR_VARIANT ${ENABLE_LLVMLIBC_MINOR_VARIANT_def} CACHE BOOL "Install only the llvm-libc minor variant payload for this variant.")
+set(LLVMLIBC_SUBARCHIVE_NAME ${LLVMLIBC_SUBARCHIVE_NAME_def} CACHE STRING "llvm-libc subarchive to install when ENABLE_LLVMLIBC_MINOR_VARIANT is enabled.")
 set(ENABLE_LLVMLIBC_CORE_LIBS ${ENABLE_LLVMLIBC_CORE_LIBS_def} CACHE BOOL "Build and install the core llvm-libc library archives.")
 set(ENABLE_LLVMLIBC_SUPPORT_LIBS ${ENABLE_LLVMLIBC_SUPPORT_LIBS_def} CACHE BOOL "Build and install llvmlibc support libraries such as crt0 and semihost.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
@@ -168,12 +168,12 @@ endif()
 # Some llvm-libc variants are packaged as minor layers. The subprojects
 # are still built as normal, but the installed payload is restricted to
 # the files that differ from the base layer.
-if(ENABLE_LLVM_LIBC_MINOR_VARIANT)
+if(ENABLE_LLVMLIBC_MINOR_VARIANT)
     if(NOT C_LIBRARY STREQUAL llvmlibc)
-        message(FATAL_ERROR "ENABLE_LLVM_LIBC_MINOR_VARIANT is only supported with C_LIBRARY=llvmlibc.")
+        message(FATAL_ERROR "ENABLE_LLVMLIBC_MINOR_VARIANT is only supported with C_LIBRARY=llvmlibc.")
     endif()
-    if(NOT LLVM_LIBC_SUBARCHIVE_NAME)
-        message(FATAL_ERROR "ENABLE_LLVM_LIBC_MINOR_VARIANT requires LLVM_LIBC_SUBARCHIVE_NAME to be set.")
+    if(NOT LLVMLIBC_SUBARCHIVE_NAME)
+        message(FATAL_ERROR "ENABLE_LLVMLIBC_MINOR_VARIANT requires LLVMLIBC_SUBARCHIVE_NAME to be set.")
     endif()
 endif()
 if(NOT ENABLE_COMPILER_RT_LIBS)
@@ -916,11 +916,11 @@ if(C_LIBRARY STREQUAL llvmlibc)
         # Let CMake know we're cross-compiling
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-        -DLLVM_LIBC_ENABLE_MINOR_VARIANT=${ENABLE_LLVM_LIBC_MINOR_VARIANT}
-        -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVM_LIBC_SUBARCHIVE_NAME}
+        -DLLVM_LIBC_ENABLE_MINOR_VARIANT=${ENABLE_LLVMLIBC_MINOR_VARIANT}
+        -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVMLIBC_SUBARCHIVE_NAME}
     )
 
-    if(ENABLE_LLVMLIBC_CORE_LIBS OR ENABLE_LLVM_LIBC_MINOR_VARIANT)
+    if(ENABLE_LLVMLIBC_CORE_LIBS OR ENABLE_LLVMLIBC_MINOR_VARIANT)
         ExternalProject_Add(
             llvmlibc
             STAMP_DIR ${PROJECT_PREFIX}/llvmlibc/${VARIANT_BUILD_ID}/stamp
