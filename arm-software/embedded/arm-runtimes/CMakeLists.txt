@@ -152,6 +152,18 @@ else()
     set(cpu_family arm)
 endif()
 
+# compiler-rt's upstream atomic builtins require lock-free pointer-size
+# compare/exchange. Pre-Armv7 targets do not provide that, so they use the
+# weak fallback libatomic from shared-support instead.
+set(target_supports_lock_free_atomics ON)
+if(TARGET_ARCH MATCHES "^(arm|armeb)v[4-6]")
+    set(target_supports_lock_free_atomics OFF)
+endif()
+set(use_fallback_libatomic OFF)
+if(NOT target_supports_lock_free_atomics)
+    set(use_fallback_libatomic ON)
+endif()
+
 # Create a single target for all testing. If no testing is enabled, this
 # will simply do nothing.
 add_custom_target(check-all)
@@ -165,7 +177,16 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
         elseif(TEST_EXECUTOR STREQUAL fvp)
             set(picocrt "crt0-semihost-fvp")
         endif()
-        set(runtime_test_link_flags "-nostartfiles -l${picocrt} -lsemihost -T picolibcpp.ld")
+        set(runtime_test_link_options
+            -nostartfiles
+            -l${picocrt}
+            -lsemihost
+        )
+        if(use_fallback_libatomic)
+            list(APPEND runtime_test_link_options -latomic)
+        endif()
+        list(APPEND runtime_test_link_options -T picolibcpp.ld)
+        list(JOIN runtime_test_link_options " " runtime_test_link_flags)
     elseif(C_LIBRARY STREQUAL llvmlibc)
         # QEMU logic handled later
     else()
@@ -310,10 +331,20 @@ if(ENABLE_COMPILER_RT_TESTS)
     )
 endif()
 
+set(compiler_rt_cmake_args)
 if(NOT C_LIBRARY STREQUAL "llvmlibc")
-    set(compiler_rt_cmake_args
-    -DCOMPILER_RT_EXCLUDE_LIBC_PROVIDED_ARM_AEABI_BUILTINS=ON
-  )
+    list(APPEND compiler_rt_cmake_args
+        -DCOMPILER_RT_EXCLUDE_LIBC_PROVIDED_ARM_AEABI_BUILTINS=ON
+    )
+endif()
+if(target_supports_lock_free_atomics)
+    list(APPEND compiler_rt_cmake_args
+        -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=OFF
+    )
+else()
+    list(APPEND compiler_rt_cmake_args
+        -DCOMPILER_RT_EXCLUDE_ATOMIC_BUILTIN=ON
+    )
 endif()
 
 # Common compiler_rt flags used by both builtins and profile builds
@@ -765,6 +796,9 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -T
         llvmlibc.ld
     )
+    if(use_fallback_libatomic)
+        list(APPEND llvmlibc_test_link_options -latomic)
+    endif()
     if(VARIANT MATCHES "(^|_)pacret_bti(_|$)")
         set(enable_dummypackeys ON)
         list(APPEND llvmlibc_test_link_options -ldummypackeys)
@@ -1148,6 +1182,85 @@ else() # if not ENABLE_CXX_LIBS
     # don't do anything.
     add_custom_target(cxxlibs-configure)
     add_custom_target(cxxlibs-build)
+    add_custom_target(cxxlibs-install)
+endif()
+
+###############################################################################
+# shared support libraries
+###############################################################################
+
+if(ENABLE_CXX_LIBS)
+    ExternalProject_Add(
+        shared-support
+        STAMP_DIR ${PROJECT_PREFIX}/shared-support/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/shared-support/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/shared-support/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/shared-support/${VARIANT_BUILD_ID}/tmp
+        SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/shared-support
+        INSTALL_DIR ${TEMP_LIB_DIR}
+        DEPENDS cxxlibs-install
+        CMAKE_ARGS
+        ${compiler_launcher_cmake_args}
+        -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
+        -DCMAKE_ASM_COMPILER=${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX}
+        -DCMAKE_ASM_COMPILER_TARGET=${target_triple}
+        -DCMAKE_ASM_FLAGS=${lib_compile_flags}
+        -DCMAKE_BUILD_TYPE=${LIBRARY_CMAKE_BUILD_TYPE}
+        -DCMAKE_CXX_COMPILER=${LLVM_BINARY_DIR}/bin/clang++${CMAKE_EXECUTABLE_SUFFIX}
+        -DCMAKE_CXX_COMPILER_TARGET=${target_triple}
+        -DCMAKE_CXX_FLAGS=${lib_compile_flags}
+        -DCMAKE_C_COMPILER=${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX}
+        -DCMAKE_C_COMPILER_TARGET=${target_triple}
+        -DCMAKE_C_FLAGS=${lib_compile_flags}
+        -DCMAKE_INSTALL_MESSAGE=${CMAKE_INSTALL_MESSAGE}
+        -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+        -DCMAKE_NM=${LLVM_BINARY_DIR}/bin/llvm-nm${CMAKE_EXECUTABLE_SUFFIX}
+        -DCMAKE_RANLIB=${LLVM_BINARY_DIR}/bin/llvm-ranlib${CMAKE_EXECUTABLE_SUFFIX}
+        -DCMAKE_SYSTEM_NAME=Generic
+        -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
+        -DENABLE_SHARED_SUPPORT_ATOMIC=${use_fallback_libatomic}
+        -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
+        STEP_TARGETS build install
+        USES_TERMINAL_CONFIGURE TRUE
+        USES_TERMINAL_BUILD TRUE
+        USES_TERMINAL_INSTALL TRUE
+        LIST_SEPARATOR ,
+        CONFIGURE_HANDLED_BY_BUILD TRUE
+    )
+else()
+    add_custom_target(shared-support-build)
+    add_custom_target(shared-support-install)
+endif()
+
+if(ENABLE_COMPILER_RT_TESTS)
+    ExternalProject_Add_StepDependencies(
+        compiler_rt
+        check-compiler-rt
+        shared-support-install
+    )
+endif()
+
+if(C_LIBRARY STREQUAL llvmlibc AND ENABLE_LIBC_TESTS)
+    ExternalProject_Add_StepDependencies(
+        llvmlibc
+        check
+        shared-support-install
+    )
+    ExternalProject_Add_StepDependencies(
+        llvmlibc
+        check-lit
+        shared-support-install
+    )
+endif()
+
+if(ENABLE_LIBCXX_TESTS)
+    foreach(check_target check-cxx check-cxxabi check-unwind)
+        ExternalProject_Add_StepDependencies(
+            cxxlibs
+            ${check_target}
+            shared-support-install
+        )
+    endforeach()
 endif()
 
 install(

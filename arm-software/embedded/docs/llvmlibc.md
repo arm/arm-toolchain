@@ -56,6 +56,12 @@ following command line options, in addition to `--target`, `-march` or
   in LLVM's libc in terms of the Arm semihosting API (or else provide
   an alternative implementation of those functions yourself)
 
+* `-latomic` to include weak fallback definitions for compiler-emitted
+  `__atomic_*` libcalls. This is mainly useful for targets such as Armv4T,
+  Armv5TE, and Armv6-M where the compiler may emit calls to helper functions
+  for atomic operations that are not lock-free. See the
+  [shared support library documentation](shared-support.md#atomic-operation-helpers).
+
 * `-ldummypackeys` optionally, for M-profile PACBTI variants only, to
   install dummy PAC keys for testing and enable PAC/BTI in the default startup
   hook. Do not use this library in production builds -
@@ -75,7 +81,7 @@ following command line options, in addition to `--target`, `-march` or
 For example:
 
 ```
-clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles -lcrt0-semihost -lsemihost -T llvmlibc.ld -o hello hello.c
+clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m  -nostartfiles -lcrt0-semihost -lsemihost -latomic -T llvmlibc.ld -o hello hello.c
 ```
 
 > [!TIP]
