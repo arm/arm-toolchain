@@ -678,9 +678,17 @@ then
   exit 1
 fi
 
-mkdir -p "${BUILD_DIR}"
-mkdir -p "${OUTPUT_DIR}"
-mkdir -p "${LOGS_DIR}"
+make_and_clean_directory() {
+    local dir="$1"
+    mkdir -p "${dir}"
+
+    # Initial clean-up of directory contents. Directory itself may be mounted.
+    find "${dir}" -mindepth 1 -maxdepth 1 -depth -exec rm -rf -- {} +
+}
+
+make_and_clean_directory "${BUILD_DIR:?}"
+make_and_clean_directory "${OUTPUT_DIR:?}"
+make_and_clean_directory "${LOGS_DIR:?}"
 
 main
 trap : 0
