@@ -7,12 +7,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+<<<<<<< HEAD
 
 - Shared support libraries now provide `libatomic-fallback.a` whose weak
 definitions can be overridden by users on platforms without native atomic
 operation support.
 - Bare-metal semihosting KASan sample with a minimal sanitizer runtime added.
 
+=======
+- C++ bare-metal semihosting KASan sample added, covering a shadow-memory
+  runtime with automatic stack poisoning.
+>>>>>>> 011f6a5e5e7f (Addressed review feedback)
 ### Changed
 ### Deprecated
 

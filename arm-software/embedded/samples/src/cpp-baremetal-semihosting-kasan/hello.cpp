@@ -23,7 +23,7 @@ __attribute__((noinline)) static void stack_overflow_test(void) {
 }
 
 __attribute__((noinline)) static void heap_overflow_test(void) {
-  uint8_t *buffer = malloc(16);
+  uint8_t *buffer = static_cast<uint8_t *>(malloc(16));
   if (!buffer) {
     puts("malloc failed");
     abort();
@@ -36,7 +36,7 @@ __attribute__((noinline)) static void heap_overflow_test(void) {
 }
 
 __attribute__((noinline)) static void heap_use_after_free_test(void) {
-  uint8_t *buffer = calloc(16, 1);
+  uint8_t *buffer = static_cast<uint8_t *>(calloc(16, 1));
   if (!buffer) {
     puts("calloc failed");
     abort();
@@ -51,7 +51,7 @@ __attribute__((noinline)) static void heap_use_after_free_test(void) {
 }
 
 int main(void) {
-  puts("KASan shadow-memory sample");
+  puts("C++ KASan shadow-memory sample");
 
 #if KASAN_TEST == 1
   puts("Test 1: automatic stack redzone");

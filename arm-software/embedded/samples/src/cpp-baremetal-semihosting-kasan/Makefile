@@ -5,43 +5,44 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
+LIBC=llvmlibc
 include ../../Makefile.conf
+
+ifneq ($(LIBC),llvmlibc)
+$(error This sample targets LLVM libc only. Use LIBC=llvmlibc)
+endif
 
 KASAN_FLAGS=\
 	-fsanitize=kernel-address \
 	-mllvm -asan-instrumentation-with-call-threshold=0 \
-	-mllvm -asan-stack=0 \
+	-mllvm -asan-mapping-offset=0x1c003800 \
+	-mllvm -asan-stack=1 \
+	-mllvm -asan-use-after-return=never \
 	-mllvm -asan-instrument-dynamic-allocas=0
 
-ifeq ($(LIBC),llvmlibc)
 KASAN_ALLOC_WRAPS=\
 	-Wl,--wrap=malloc \
 	-Wl,--wrap=calloc \
 	-Wl,--wrap=realloc \
 	-Wl,--wrap=free
-KASAN_RUNTIME_FLAGS=-DKASAN_WRAP_ALLOC
-DEFAULT_KASAN_TEST=2
-else
-DEFAULT_KASAN_TEST=1
-endif
 
 ifndef KASAN_TEST
-KASAN_TEST=$(DEFAULT_KASAN_TEST)
+KASAN_TEST=1
 endif
 
 build: hello.elf
 
-microbit.ld:
-	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) ../../ldscripts/microbit.ld.in -o microbit.ld
+microbit-kasan-shadow.ld:
+	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) microbit-kasan-shadow.ld.in -o $@
 
-hello.o: hello.c
-	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) $(KASAN_FLAGS) -DKASAN_TEST=$(KASAN_TEST) -g -c -o $@ $<
+hello.o: hello.cpp
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CPP_FLAGS) --std=c++17 $(KASAN_FLAGS) -DKASAN_TEST=$(KASAN_TEST) -g -c -o $@ $<
 
-kasan_runtime.o: kasan_runtime.c
-	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) $(KASAN_RUNTIME_FLAGS) -g -c -o $@ $<
+kasan_shadow_runtime.o: kasan_shadow_runtime.c
+	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) -g -c -o $@ $<
 
-hello.elf: hello.o kasan_runtime.o | microbit.ld
-	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) -g -T microbit.ld $(KASAN_ALLOC_WRAPS) -o $@ $^
+hello.elf: hello.o kasan_shadow_runtime.o | microbit-kasan-shadow.ld
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) $(CPP_FLAGS) --std=c++17 -g -T microbit-kasan-shadow.ld $(KASAN_ALLOC_WRAPS) -o $@ $^
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@

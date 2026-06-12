@@ -9,105 +9,99 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define KASAN_MAX_POISONED_RANGES 256
+#define KASAN_SHADOW_SCALE 3U
+#define KASAN_SHADOW_GRANULE_SIZE (1U << KASAN_SHADOW_SCALE)
+#define KASAN_SHADOW_OFFSET 0x1c003800U
 
-struct poisoned_range {
-  uintptr_t begin;
-  uintptr_t end;
-};
+#define KASAN_USER_POISON 0xf7U
+#define KASAN_HEAP_LEFT_REDZONE 0xfaU
+#define KASAN_HEAP_FREED 0xfdU
+#define KASAN_GLOBAL_REDZONE 0xf9U
 
-static struct poisoned_range poisoned_ranges[KASAN_MAX_POISONED_RANGES];
-static unsigned poisoned_range_count;
+extern uint8_t __kasan_shadow_start[];
+extern uint8_t __kasan_shadow_end[];
 
-/** @name Sample poisoning helpers
- * These helpers are sample APIs, not Clang ASan/KASan ABI entry points.
- * They track poisoned address ranges in a fixed table.
+/** @name Shadow-memory helpers
+ * These are sample-internal helpers for the linker-defined shadow region.
+ * They are not Clang ASan/KASan ABI entry points.
  * @{ */
 
 /**
- * @brief Mark an address range as poisoned.
- * @param addr Start of the range to poison.
- * @param size Number of bytes to poison.
+ * @brief Convert an application address to its ASan shadow address.
+ * @param addr Application address.
+ * @return Shadow-memory address for the application address.
  */
-void kasan_poison(void *addr, size_t size) {
-  if (size == 0)
-    return;
-
-  if (poisoned_range_count ==
-      sizeof(poisoned_ranges) / sizeof(poisoned_ranges[0]))
-    abort();
-
-  uintptr_t begin = (uintptr_t)addr;
-  poisoned_ranges[poisoned_range_count].begin = begin;
-  poisoned_ranges[poisoned_range_count].end = begin + size;
-  ++poisoned_range_count;
+static uintptr_t shadow_addr(uintptr_t addr) {
+  return (addr >> KASAN_SHADOW_SCALE) + KASAN_SHADOW_OFFSET;
 }
 
 /**
- * @brief Remove poisoning from an address range.
- * @param addr Start of the range to unpoison.
- * @param size Number of bytes to unpoison.
+ * @brief Convert an application address to a shadow byte pointer.
+ * @param addr Application address.
+ * @return Pointer to the corresponding shadow byte.
  */
-void kasan_unpoison(void *addr, size_t size) {
-  uintptr_t begin = (uintptr_t)addr;
-  uintptr_t end = begin + size;
-
-  for (unsigned i = 0; i < poisoned_range_count;) {
-    uintptr_t range_begin = poisoned_ranges[i].begin;
-    uintptr_t range_end = poisoned_ranges[i].end;
-
-    if (end <= range_begin || begin >= range_end) {
-      ++i;
-      continue;
-    }
-
-    if (begin <= range_begin && end >= range_end) {
-      poisoned_ranges[i] = poisoned_ranges[poisoned_range_count - 1];
-      --poisoned_range_count;
-      continue;
-    }
-
-    if (begin <= range_begin) {
-      poisoned_ranges[i].begin = end;
-      ++i;
-      continue;
-    }
-
-    if (end >= range_end) {
-      poisoned_ranges[i].end = begin;
-      ++i;
-      continue;
-    }
-
-    if (poisoned_range_count ==
-        sizeof(poisoned_ranges) / sizeof(poisoned_ranges[0]))
-      abort();
-
-    poisoned_ranges[i].end = begin;
-    poisoned_ranges[poisoned_range_count].begin = end;
-    poisoned_ranges[poisoned_range_count].end = range_end;
-    ++poisoned_range_count;
-    ++i;
-  }
+static uint8_t *shadow_for(uintptr_t addr) {
+  return (uint8_t *)shadow_addr(addr);
 }
+
+/**
+ * @brief Return non-zero if a shadow pointer is inside reserved shadow RAM.
+ * @param shadow Shadow byte pointer to test.
+ */
+static int shadow_in_range(uint8_t *shadow) {
+  return shadow >= __kasan_shadow_start && shadow < __kasan_shadow_end;
+}
+
+/** @brief Clear the reserved shadow RAM so all covered memory starts valid. */
+static void clear_shadow(void) {
+  for (uint8_t *shadow = __kasan_shadow_start; shadow < __kasan_shadow_end;
+       ++shadow)
+    *shadow = 0;
+}
+
+/** @brief Pre-initialization hook that clears shadow before constructors run. */
+static void kasan_preinit(void) { clear_shadow(); }
+
+/** @brief Register the sample shadow clear hook in the C preinit array. */
+void (*const __kasan_preinit)(void) __attribute__((section(".preinit_array"),
+                                                  used)) = kasan_preinit;
 
 /** @} */
 
+/** @name Retargettable report output hooks
+ * Users can provide non-weak definitions of these functions to route reports to
+ * UART, ITM/SWO, retained RAM, or another target-specific sink.
+ * @{ */
+
 /**
- * @brief Return non-zero if an access range overlaps a poisoned range.
- * @param addr First byte accessed by instrumented code.
- * @param size Number of bytes accessed.
+ * @brief Output one report character.
+ * @param c Character to output.
  */
-static int range_intersects_poison(uintptr_t addr, uintptr_t size) {
-  uintptr_t end = addr + size;
+__attribute__((weak)) void kasan_rt_putc(char c) { putc(c, stdout); }
 
-  for (unsigned i = 0; i < poisoned_range_count; ++i) {
-    if (addr < poisoned_ranges[i].end && end > poisoned_ranges[i].begin)
-      return 1;
-  }
-
-  return 0;
+/**
+ * @brief Output a NUL-terminated report string.
+ * @param s String to output.
+ */
+__attribute__((weak)) void kasan_rt_puts(const char *s) {
+  while (*s)
+    kasan_rt_putc(*s++);
 }
+
+/**
+ * @brief Output an address-sized value in fixed-width hexadecimal.
+ * @param addr Value to output.
+ */
+__attribute__((weak)) void kasan_rt_putaddr(uintptr_t addr) {
+  static const char hex[] = "0123456789abcdef";
+
+  kasan_rt_puts("0x");
+  for (int shift = (int)(sizeof(uintptr_t) * 8U) - 4; shift >= 0;
+       shift -= 4)
+    kasan_rt_putc(hex[(addr >> (unsigned)shift) & 0xfU]);
+}
+
+/** @} */
 
 /**
  * @brief Print a KASan access report and stop the program.
@@ -116,8 +110,13 @@ static int range_intersects_poison(uintptr_t addr, uintptr_t size) {
  * @param size Access size in bytes.
  */
 static void report_access(const char *kind, uintptr_t addr, uintptr_t size) {
-  printf("KASAN: invalid %s at 0x%08lx, size %lu\n", kind, (unsigned long)addr,
-         (unsigned long)size);
+  kasan_rt_puts("KASAN: invalid ");
+  kasan_rt_puts(kind);
+  kasan_rt_puts(" at ");
+  kasan_rt_putaddr(addr);
+  kasan_rt_puts(", size ");
+  kasan_rt_putaddr(size);
+  kasan_rt_putc('\n');
   abort();
 }
 
@@ -127,8 +126,31 @@ static void report_access(const char *kind, uintptr_t addr, uintptr_t size) {
  * @param ptr Pointer passed to the allocator wrapper.
  */
 static void report_alloc_error(const char *kind, const void *ptr) {
-  printf("KASAN: invalid %s of 0x%08lx\n", kind, (unsigned long)(uintptr_t)ptr);
+  kasan_rt_puts("KASAN: invalid ");
+  kasan_rt_puts(kind);
+  kasan_rt_puts(" of ");
+  kasan_rt_putaddr((uintptr_t)ptr);
+  kasan_rt_putc('\n');
   abort();
+}
+
+/**
+ * @brief Return non-zero if an application address is poisoned in shadow memory.
+ * @param addr Application address to test.
+ */
+static int address_is_poisoned(uintptr_t addr) {
+  uint8_t *shadow = shadow_for(addr);
+  if (!shadow_in_range(shadow))
+    return 0;
+
+  uint8_t value = *shadow;
+  if (value == 0)
+    return 0;
+
+  if (value < KASAN_SHADOW_GRANULE_SIZE)
+    return (addr & (KASAN_SHADOW_GRANULE_SIZE - 1U)) >= value;
+
+  return 1;
 }
 
 /**
@@ -138,11 +160,105 @@ static void report_alloc_error(const char *kind, const void *ptr) {
  * @param size Access size in bytes.
  */
 static void check_access(const char *kind, uintptr_t addr, uintptr_t size) {
-  if (range_intersects_poison(addr, size))
-    report_access(kind, addr, size);
+  for (uintptr_t i = 0; i < size; ++i) {
+    if (address_is_poisoned(addr + i))
+      report_access(kind, addr, size);
+  }
 }
 
-#ifdef KASAN_WRAP_ALLOC
+/** @name Sample poisoning helpers
+ * These helpers update shadow memory for sample code and allocator wrappers.
+ * Clang stack instrumentation writes shadow bytes directly instead.
+ * @{ */
+
+/**
+ * @brief Mark an address range as addressable in shadow memory.
+ * @param addr Start of the range to unpoison.
+ * @param size Number of bytes to unpoison.
+ */
+void kasan_unpoison(void *addr, size_t size) {
+  if (size == 0)
+    return;
+
+  uintptr_t begin = (uintptr_t)addr;
+  uintptr_t end = begin + size;
+  uintptr_t shadow_begin = shadow_addr(begin);
+  uintptr_t shadow_end = shadow_addr(end - 1U);
+
+  for (uintptr_t shadow = shadow_begin; shadow <= shadow_end; ++shadow) {
+    uint8_t *shadow_byte = (uint8_t *)shadow;
+    if (!shadow_in_range(shadow_byte))
+      continue;
+
+    uintptr_t granule_begin = (shadow - KASAN_SHADOW_OFFSET)
+                              << KASAN_SHADOW_SCALE;
+    uintptr_t granule_end = granule_begin + KASAN_SHADOW_GRANULE_SIZE;
+
+    if (begin <= granule_begin && end >= granule_end) {
+      *shadow_byte = 0;
+      continue;
+    }
+
+    if (begin <= granule_begin && end < granule_end)
+      *shadow_byte = (uint8_t)(end - granule_begin);
+  }
+}
+
+/**
+ * @brief Mark an address range as poisoned in shadow memory.
+ * @param addr Start of the range to poison.
+ * @param size Number of bytes to poison.
+ */
+void kasan_poison(void *addr, size_t size) {
+  if (size == 0)
+    return;
+
+  uintptr_t begin = (uintptr_t)addr;
+  uintptr_t end = begin + size;
+  uintptr_t shadow_begin = shadow_addr(begin);
+  uintptr_t shadow_end = shadow_addr(end - 1U);
+
+  for (uintptr_t shadow = shadow_begin; shadow <= shadow_end; ++shadow) {
+    uint8_t *shadow_byte = (uint8_t *)shadow;
+    if (!shadow_in_range(shadow_byte))
+      continue;
+
+    uintptr_t granule_begin = (shadow - KASAN_SHADOW_OFFSET)
+                              << KASAN_SHADOW_SCALE;
+    uintptr_t granule_end = granule_begin + KASAN_SHADOW_GRANULE_SIZE;
+
+    if (begin <= granule_begin && end >= granule_end) {
+      *shadow_byte = KASAN_USER_POISON;
+      continue;
+    }
+
+    if (begin > granule_begin && end >= granule_end)
+      *shadow_byte = (uint8_t)(begin - granule_begin);
+  }
+}
+
+/**
+ * @brief Fill shadow bytes for an address range with a specific poison value.
+ * @param addr Start of the range to poison.
+ * @param size Number of bytes to poison.
+ * @param value ASan poison byte to write to shadow memory.
+ */
+static void kasan_poison_with_value(void *addr, size_t size, uint8_t value) {
+  uintptr_t begin = (uintptr_t)addr;
+  uintptr_t end = begin + size;
+
+  if (size == 0)
+    return;
+
+  for (uintptr_t shadow = shadow_addr(begin); shadow <= shadow_addr(end - 1U);
+       ++shadow) {
+    uint8_t *shadow_byte = (uint8_t *)shadow;
+    if (shadow_in_range(shadow_byte))
+      *shadow_byte = value;
+  }
+}
+
+/** @} */
 
 /** @name LLVM libc allocator wrappers
  * These functions are reached through linker --wrap options. They are not
@@ -221,10 +337,10 @@ void *__wrap_malloc(size_t size) {
   header->total_size = total_size;
   header->payload_offset = payload_offset;
 
-  kasan_unpoison(base, total_size);
-  kasan_poison(base + sizeof(struct heap_header),
-               payload_offset - sizeof(struct heap_header));
-  kasan_poison(payload + size, KASAN_HEAP_REDZONE_SIZE);
+  kasan_poison_with_value(base, payload_offset, KASAN_HEAP_LEFT_REDZONE);
+  kasan_unpoison(payload, size);
+  kasan_poison_with_value(payload + size, KASAN_HEAP_REDZONE_SIZE,
+                          KASAN_HEAP_LEFT_REDZONE);
 
   return payload;
 }
@@ -299,8 +415,7 @@ void __wrap_free(void *ptr) {
   uint8_t *base = (uint8_t *)header;
   header->magic = KASAN_HEAP_FREED_MAGIC;
 
-  kasan_unpoison(base, header->total_size);
-  kasan_poison(base, header->total_size);
+  kasan_poison_with_value(base, header->total_size, KASAN_HEAP_FREED);
 
   /* Keep freed blocks quarantined so use-after-free remains detectable. */
   (void)__real_calloc;
@@ -309,8 +424,6 @@ void __wrap_free(void *ptr) {
 }
 
 /** @} */
-
-#endif
 
 /** @name Clang ASan/KASan ABI callbacks
  * Clang emits calls to these symbols when outlined instrumentation is enabled.
@@ -357,7 +470,7 @@ DEFINE_ACCESS_CALLBACKS(store)
 void __asan_handle_no_return(void) {}
 
 /** @brief ASan runtime initialization hook emitted by Clang. */
-void __asan_init(void) {}
+void __asan_init(void) { clear_shadow(); }
 
 /** @brief Version check hook expected by some ASan-instrumented objects. */
 void __asan_version_mismatch_check(void) {}
@@ -399,7 +512,8 @@ void __asan_register_globals(uintptr_t globals, uintptr_t n) {
       continue;
 
     kasan_unpoison((void *)beg, size);
-    kasan_poison((void *)(beg + size), size_with_redzone - size);
+    kasan_poison_with_value((void *)(beg + size), size_with_redzone - size,
+                            KASAN_GLOBAL_REDZONE);
   }
 }
 

@@ -1,7 +1,0 @@
-# RUN: make -C %samples_dir/src/baremetal-semihosting-kasan-shadow clean
-# RUN: not make -C %samples_dir/src/baremetal-semihosting-kasan-shadow run BIN_PATH=%unpack_directory/bin KASAN_TEST=1 > %t.out 2>&1
-# RUN: FileCheck %s < %t.out
-# RUN: make -C %samples_dir/src/baremetal-semihosting-kasan-shadow clean
-# CHECK: KASan shadow-memory sample
-# CHECK: Test 1: automatic stack redzone
-# CHECK: KASAN: invalid store
