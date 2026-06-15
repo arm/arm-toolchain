@@ -153,10 +153,13 @@ else()
 endif()
 
 # compiler-rt's upstream atomic builtins require lock-free pointer-size
-# compare/exchange. Pre-Armv7 targets do not provide that, so they use the
-# weak fallback libatomic from shared-support instead.
+# compare/exchange. Armv6K and Armv6ZK have load/store exclusive support, but
+# earlier Arm architectures and Armv6-M use the weak fallback libatomic from
+# shared-support instead.
 set(target_supports_lock_free_atomics ON)
-if(TARGET_ARCH MATCHES "^(arm|armeb)v[4-6]")
+if(TARGET_ARCH MATCHES "^(arm|armeb)v[45]")
+    set(target_supports_lock_free_atomics OFF)
+elseif(TARGET_ARCH MATCHES "^(arm|armeb)v6" AND NOT TARGET_ARCH MATCHES "^(arm|armeb)v6z?k")
     set(target_supports_lock_free_atomics OFF)
 endif()
 set(use_fallback_libatomic OFF)
