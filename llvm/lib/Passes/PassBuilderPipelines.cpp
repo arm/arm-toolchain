@@ -2217,6 +2217,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
   CGPM.addPass(ArgumentPromotionPass());
   CGPM.addPass(CoroSplitPass(Level != OptimizationLevel::O0));
   CGPM.addPass(CoroAnnotationElidePass());
+  invokeCGSCCOptimizerLateEPCallbacks(CGPM, Level);
   MPM.addPass(createModuleToPostOrderCGSCCPassAdaptor(std::move(CGPM)));
 
   FunctionPassManager FPM;
