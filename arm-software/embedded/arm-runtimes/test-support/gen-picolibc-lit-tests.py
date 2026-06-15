@@ -90,7 +90,7 @@ lit.llvm.initialize(lit_config, config)
 
 config.name = "%CONFIG_NAME%"
 config.suffixes = [".test"]
-config.test_format = lit.formats.ShTest(not lit.llvm.llvm_config.use_lit_shell)
+config.test_format = lit.formats.ShTest()
 config.test_source_root = os.path.join(os.path.dirname(__file__), "tests")
 """
     with open(os.path.join(args.output, "lit.cfg.py"), "w", encoding="utf-8") as f:

@@ -9,7 +9,7 @@ from lit.llvm import llvm_config
 # Configuration file for the 'lit' test runner.
 
 config.name = "Arm Toolchain for Embedded"
-config.test_format = lit.formats.ShTest(not llvm_config.use_lit_shell)
+config.test_format = lit.formats.ShTest()
 config.suffixes = [".c", ".cpp", ".test"]
 config.excludes = ["CMakeLists.txt"]
 config.test_source_root = os.path.dirname(__file__)
