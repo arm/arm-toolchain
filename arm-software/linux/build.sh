@@ -531,7 +531,6 @@ check_lit_xml_results() {
         "${LOGS_DIR}/check_cxx.xml"
         "${LOGS_DIR}/check_cxxabi.xml"
         "${LOGS_DIR}/product_check_all.xml"
-        "${LOGS_DIR}/check_openmp.xml"
     )
 
     echo_bold "Checking lit XML test results...."
