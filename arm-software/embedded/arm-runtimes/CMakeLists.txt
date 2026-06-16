@@ -154,7 +154,7 @@ endif()
 
 # compiler-rt's upstream atomic builtins require lock-free pointer-size
 # compare/exchange. Armv6K and Armv6ZK have load/store exclusive support, but
-# earlier Arm architectures and Armv6-M use the weak fallback libatomic from
+# earlier Arm architectures and Armv6-M use the weak libatomic-fallback from
 # shared-support instead.
 set(target_supports_lock_free_atomics ON)
 if(TARGET_ARCH MATCHES "^(arm|armeb)v[45]")
@@ -162,9 +162,9 @@ if(TARGET_ARCH MATCHES "^(arm|armeb)v[45]")
 elseif(TARGET_ARCH MATCHES "^(arm|armeb)v6" AND NOT TARGET_ARCH MATCHES "^(arm|armeb)v6z?k")
     set(target_supports_lock_free_atomics OFF)
 endif()
-set(use_fallback_libatomic OFF)
+set(use_libatomic_fallback OFF)
 if(NOT target_supports_lock_free_atomics)
-    set(use_fallback_libatomic ON)
+    set(use_libatomic_fallback ON)
 endif()
 
 # Create a single target for all testing. If no testing is enabled, this
@@ -185,8 +185,8 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
             -l${picocrt}
             -lsemihost
         )
-        if(use_fallback_libatomic)
-            list(APPEND runtime_test_link_options -latomic)
+        if(use_libatomic_fallback)
+            list(APPEND runtime_test_link_options -latomic-fallback)
         endif()
         list(APPEND runtime_test_link_options -T picolibcpp.ld)
         list(JOIN runtime_test_link_options " " runtime_test_link_flags)
@@ -799,8 +799,8 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -T
         llvmlibc.ld
     )
-    if(use_fallback_libatomic)
-        list(APPEND llvmlibc_test_link_options -latomic)
+    if(use_libatomic_fallback)
+        list(APPEND llvmlibc_test_link_options -latomic-fallback)
     endif()
     if(VARIANT MATCHES "(^|_)pacret_bti(_|$)")
         set(enable_dummypackeys ON)
@@ -1221,7 +1221,7 @@ if(ENABLE_CXX_LIBS)
         -DCMAKE_RANLIB=${LLVM_BINARY_DIR}/bin/llvm-ranlib${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-        -DENABLE_SHARED_SUPPORT_ATOMIC=${use_fallback_libatomic}
+        -DENABLE_SHARED_SUPPORT_ATOMIC_FALLBACK=${use_libatomic_fallback}
         -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
         STEP_TARGETS build install
         USES_TERMINAL_CONFIGURE TRUE

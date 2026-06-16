@@ -5,12 +5,12 @@
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #
 
-add_library(atomic STATIC
+add_library(atomic-fallback STATIC
   atomic.cpp
 )
 
-target_compile_features(atomic PRIVATE cxx_std_17)
-target_compile_options(atomic PRIVATE
+target_compile_features(atomic-fallback PRIVATE cxx_std_17)
+target_compile_options(atomic-fallback PRIVATE
   -fno-asynchronous-unwind-tables
   -fno-exceptions
   -fno-rtti

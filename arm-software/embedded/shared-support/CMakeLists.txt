@@ -8,7 +8,7 @@
 # This directory builds support libraries that are shared by multiple C library
 # variants.
 #
-# libatomic.a contains weak fallback definitions for compiler-emitted
+# libatomic-fallback.a contains weak fallback definitions for compiler-emitted
 # __atomic_* libcalls. On targets without lock-free atomics these definitions
 # are only suitable for non-preemptive bare-metal use; platforms that need real
 # atomicity should provide strong replacements.
@@ -17,7 +17,7 @@ cmake_minimum_required(VERSION 3.20.0)
 project(shared-support LANGUAGES C CXX ASM)
 
 option(LLVM_USE_RELATIVE_PATHS_IN_MACROS "Use relative paths in macro expansions" OFF)
-option(ENABLE_SHARED_SUPPORT_ATOMIC "Build libatomic fallback support" OFF)
+option(ENABLE_SHARED_SUPPORT_ATOMIC_FALLBACK "Build libatomic-fallback support" OFF)
 
 if(LLVM_USE_RELATIVE_PATHS_IN_MACROS)
     file(RELATIVE_PATH relative_root "${CMAKE_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -29,7 +29,7 @@ endif()
 
 install(CODE "")
 
-if(ENABLE_SHARED_SUPPORT_ATOMIC)
-    add_subdirectory(atomic)
-    install(TARGETS atomic DESTINATION lib)
+if(ENABLE_SHARED_SUPPORT_ATOMIC_FALLBACK)
+    add_subdirectory(atomic-fallback)
+    install(TARGETS atomic-fallback DESTINATION lib)
 endif()

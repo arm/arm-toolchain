@@ -14,12 +14,11 @@ small Arm targets where the maximum lock-free atomic size is smaller than the
 operation being compiled, for example Armv4T, Armv5TE, and Armv6-M.
 
 For Armv4, Armv5, and Armv6 variants that do not support pointer-size atomic
-operations, ATfE provides `libatomic.a` with weak definitions for the LLVM
+operations, ATfE provides `libatomic-fallback.a` with weak definitions for the LLVM
 `__atomic_*` libcall ABI for 1, 2, 4, and 8 byte operations, plus the generic
-any-size helpers. The implementation uses lock-free compiler atomics when
-`std::atomic<T>::is_always_lock_free` is true for the operation size. Otherwise,
-it falls back to a plain load, store, or read-modify-write operation. For
-variants that support pointer-size atomic operations, such as Armv7 and later,
+any-size helpers. The implementation uses plain load, store, and
+read-modify-write operations, and fails to compile on targets that support
+pointer-size atomic operations. For those variants, such as Armv6K and later,
 the `__atomic_*` helpers are provided by `compiler-rt` libraries instead.
 
 > [!CAUTION]
@@ -30,7 +29,8 @@ the `__atomic_*` helpers are provided by `compiler-rt` libraries instead.
 
 When real atomicity is needed, provide strong definitions for the required
 `__atomic_*` functions in your application or platform library.
-Those strong definitions override the weak definitions from `libatomic.a`.
+Those strong definitions override the weak definitions from
+`libatomic-fallback.a`.
 
 For example, a platform can override the 32-bit fetch-add helper by masking
 interrupts around the critical section:

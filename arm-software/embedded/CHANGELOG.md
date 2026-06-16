@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- Shared support libraries now provide a fallback `libatomic` whose weak
+- Shared support libraries now provide `libatomic-fallback.a` whose weak
 definitions can be overridden by users on platforms without native atomic
 operation support.
 ### Changed
