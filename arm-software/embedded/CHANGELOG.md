@@ -9,6 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 ### Changed
 ### Deprecated
+- `picolibc` will be superseded with LLVM libc as the default C library in
+  ATfE 24. Further in ATfE 25 `picolibc` will be moved out of the main ATfE
+  package into an overlay package. To keep using `picolibc` in your project
+  add `--config=picolibc.cfg` to the command line.
 - Intel-based Mac support is deprecated: in a future release the Darwin binary
 package will be converted from `universal` to `arm64`-only. ATfE will keep the
 CMake option to build the `universal` package from source.
