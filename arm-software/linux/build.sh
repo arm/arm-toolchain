@@ -520,8 +520,7 @@ static_libomp_build() {
     cp "${ATFL_DIR}".libs/lib/lib*.a \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
-    LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${LOGS_DIR}/check_openmp.xml" \
-        run_command ninja "${NINJA_ARGS[@]}" check-openmp 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
+    run_command ninja "${NINJA_ARGS[@]}" check-openmp 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
 }
 
 check_lit_xml_results() {
