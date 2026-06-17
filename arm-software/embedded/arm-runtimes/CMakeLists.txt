@@ -536,26 +536,28 @@ if(C_LIBRARY STREQUAL picolibc)
 
         # Timeout multipliers. The actual timeout value used in testing is:
         # Timeout in seconds (defined in the picolibc's testing specs) x Timeout multiplier
-        # In general, tests execute slower with FVPs compared to qemu. However certain
-        # variants can also be slower due to features enabled, for example: 
+        # In general, tests execute slower with FVPs compared to qemu, but specific tests are
+        # more impacted by the model performance than others due to significant looping. This
+        # timeout is only applied to those tests, via lit.
+        # Certain variants can also be slower due to the particular model, or specific
+        # features enabled, for example:
         # * Armv6m big-endian
         # * Armv7m big-endian
         # * Armv8.1-M Main PACBTI optimized for code size
         if(TEST_EXECUTOR STREQUAL fvp)
-            if(VARIANT MATCHES "armebv7a")
-                set(timeout_multiplier 3)
+            if(VARIANT MATCHES "^(armebv|^armv8\.1m\.main.*pacret.*size)")
+                set(timeout_multiplier 5)
             else()
                 set(timeout_multiplier 2)
             endif()
-        else()
-            set(timeout_multiplier 1)
+            set(picolibc_timeout_arg --slow-timeout ${timeout_multiplier})
         endif()
 
         # Step target to run the picolibc test via meson.
         ExternalProject_Add_Step(
             picolibc
             check-meson
-            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild -t ${timeout_multiplier}
+            COMMAND ${MESON_EXECUTABLE} test -C <BINARY_DIR> --no-rebuild
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             ALWAYS TRUE
@@ -573,7 +575,7 @@ if(C_LIBRARY STREQUAL picolibc)
                 --build <BINARY_DIR>
                 --output ${picolibc_lit_dir}
                 --name picolibc-${variant_xml_name}
-                --timeout-multiplier ${timeout_multiplier}
+                ${picolibc_timeout_arg}
             USES_TERMINAL TRUE
             EXCLUDE_FROM_MAIN TRUE
             DEPENDEES compile-tests
