@@ -236,7 +236,7 @@ run_command() {
     "$@"
 }
 
-run_lit_ninja() {
+run_test_command() {
     local xml_output="$1"
     local log_file="$2"
     shift 2
@@ -399,7 +399,7 @@ bootstrap_compiler_build() {
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BUILD_DIR}/bootstrap_compiler/bin:${PATH}"
     bootstrap_compiler_default_config
-    run_lit_ninja "${LOGS_DIR}/bootstrap_check_all.xml" "${LOGS_DIR}/bootstrap_compiler.txt" check-all
+    run_test_command "${LOGS_DIR}/bootstrap_check_all.xml" "${LOGS_DIR}/bootstrap_compiler.txt" check-all
 }
 
 libcpp_build() {
@@ -428,8 +428,8 @@ libcpp_build() {
     run_command cmake --build . "${CMAKE_BUILD_ARGS[@]}" 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     export LD_LIBRARY_PATH="${ATFL_DIR}/lib:${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}:${LD_LIBRARY_PATH}"
-    run_lit_ninja "${LOGS_DIR}/check_cxx.xml" "${LOGS_DIR}/libcpp.txt" check-cxx
-    run_lit_ninja "${LOGS_DIR}/check_cxxabi.xml" "${LOGS_DIR}/libcpp.txt" check-cxxabi
+    run_test_command "${LOGS_DIR}/check_cxx.xml" "${LOGS_DIR}/libcpp.txt" check-cxx
+    run_test_command "${LOGS_DIR}/check_cxxabi.xml" "${LOGS_DIR}/libcpp.txt" check-cxxabi
 }
 
 product_build() {
@@ -483,7 +483,7 @@ product_build() {
     cp -d "${ATFL_DIR}"/lib/clang/*/lib/"${ATFL_TARGET_TRIPLE}"/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     echo "-Wl,-rpath=${ATFL_DIR}/lib" >> "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
-    run_lit_ninja "${LOGS_DIR}/product_check_all.xml" "${LOGS_DIR}/product.txt" check-all
+    run_test_command "${LOGS_DIR}/product_check_all.xml" "${LOGS_DIR}/product.txt" check-all
 
     bootstrap_compiler_default_config
 }
@@ -526,7 +526,7 @@ static_libomp_build() {
     cp "${ATFL_DIR}".libs/lib/lib*.a \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
-    run_lit_ninja "${LOGS_DIR}/check_openmp.xml" "${LOGS_DIR}/static_libomp.txt" check-openmp
+    run_test_command "${LOGS_DIR}/check_openmp.xml" "${LOGS_DIR}/static_libomp.txt" check-openmp
 }
 
 check_lit_xml_results() {
@@ -537,6 +537,8 @@ check_lit_xml_results() {
         "${LOGS_DIR}/check_cxx.xml"
         "${LOGS_DIR}/check_cxxabi.xml"
         "${LOGS_DIR}/product_check_all.xml"
+        # OpenMP tests do not get executed currently
+        # "${LOGS_DIR}/check_openmp.xml"
     )
 
     echo_bold "Checking lit XML test results...."
