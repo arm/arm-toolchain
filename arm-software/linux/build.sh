@@ -236,6 +236,15 @@ run_command() {
     "$@"
 }
 
+run_test_command() {
+    local xml_output="$1"
+    local log_file="$2"
+    shift 2
+
+    LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${xml_output}" \
+        run_command ninja "${NINJA_ARGS[@]}" "$@" 2>&1 | tee -a "${log_file}"
+}
+
 print_help() {
     cat <<EOF
 Usage: $0 [OPTIONS]
@@ -390,7 +399,7 @@ bootstrap_compiler_build() {
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BUILD_DIR}/bootstrap_compiler/bin:${PATH}"
     bootstrap_compiler_default_config
-    run_command ninja "${NINJA_ARGS[@]}" check-all 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
+    run_test_command "${LOGS_DIR}/bootstrap_check_all.xml" "${LOGS_DIR}/bootstrap_compiler.txt" check-all
 }
 
 libcpp_build() {
@@ -419,8 +428,8 @@ libcpp_build() {
     run_command cmake --build . "${CMAKE_BUILD_ARGS[@]}" 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     export LD_LIBRARY_PATH="${ATFL_DIR}/lib:${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}:${LD_LIBRARY_PATH}"
-    run_command ninja "${NINJA_ARGS[@]}" check-cxx 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
-    run_command ninja "${NINJA_ARGS[@]}" check-cxxabi 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
+    run_test_command "${LOGS_DIR}/check_cxx.xml" "${LOGS_DIR}/libcpp.txt" check-cxx
+    run_test_command "${LOGS_DIR}/check_cxxabi.xml" "${LOGS_DIR}/libcpp.txt" check-cxxabi
 }
 
 product_build() {
@@ -474,7 +483,8 @@ product_build() {
     cp -d "${ATFL_DIR}"/lib/clang/*/lib/"${ATFL_TARGET_TRIPLE}"/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     echo "-Wl,-rpath=${ATFL_DIR}/lib" >> "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
-    run_command ninja "${NINJA_ARGS[@]}" check-all 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    run_test_command "${LOGS_DIR}/product_check_all.xml" "${LOGS_DIR}/product.txt" check-all
+
     bootstrap_compiler_default_config
 }
 
@@ -516,7 +526,39 @@ static_libomp_build() {
     cp "${ATFL_DIR}".libs/lib/lib*.a \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
-    run_command ninja "${NINJA_ARGS[@]}" check-openmp 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
+    run_test_command "${LOGS_DIR}/check_openmp.xml" "${LOGS_DIR}/static_libomp.txt" check-openmp
+}
+
+check_lit_xml_results() {
+    local failed=false
+    local result_file
+    local result_files=(
+        "${LOGS_DIR}/bootstrap_check_all.xml"
+        "${LOGS_DIR}/check_cxx.xml"
+        "${LOGS_DIR}/check_cxxabi.xml"
+        "${LOGS_DIR}/product_check_all.xml"
+        # OpenMP tests do not get executed currently
+        # "${LOGS_DIR}/check_openmp.xml"
+    )
+
+    echo_bold "Checking lit XML test results...."
+    for result_file in "${result_files[@]}"; do
+        if [[ ! -f "${result_file}" ]]; then
+            echo "Expected lit XML result file was not created: ${result_file}" >&2
+            failed=true
+            continue
+        fi
+
+        if grep -Eq '<failure([ >])| failures="[1-9][0-9]*"| errors="[1-9][0-9]*"' "${result_file}"; then
+            echo "lit reported failures in: ${result_file}" >&2
+            failed=true
+        fi
+    done
+
+    if ${failed}; then
+        return 1
+    fi
+    echo_bold "Checking lit XML test results....done"
 }
 
 package() {
@@ -609,6 +651,7 @@ main() {
         echo_bold "Completed stage: ${stage}."
     done
     echo_bold "Executed build stages."
+    check_lit_xml_results
     echo_bold "Packaging...."
     package
     echo_bold "Packaged."
@@ -678,9 +721,26 @@ then
   exit 1
 fi
 
-mkdir -p "${BUILD_DIR}"
-mkdir -p "${OUTPUT_DIR}"
-mkdir -p "${LOGS_DIR}"
+make_and_clean_directory() {
+    local dir="$1"
+    mkdir -p "${dir}"
+
+    # Initial clean-up of directory contents. Directory itself may be mounted.
+    find "${dir}" -mindepth 1 -maxdepth 1 -depth -exec rm -rf -- {} +
+}
+
+make_and_clean_directory "${BUILD_DIR:?}"
+make_and_clean_directory "${OUTPUT_DIR:?}"
+make_and_clean_directory "${LOGS_DIR:?}"
+
+# If a test fails, lit will ordinarily return a non-zero result,
+# which prevents further testing. Setting the --ignore-fail option
+# will cause testing to continue, so that CI systems can get a
+# full set of results.
+# The lit test suites do not generate xml results by default.
+# This can be enabled with the --xunit-xml-output option.
+# Each check target appends its own --xunit-xml-output path under LOGS_DIR.
+export LIT_OPTS="${LIT_OPTS:+${LIT_OPTS} }--ignore-fail"
 
 main
 trap : 0
