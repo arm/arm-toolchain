@@ -1023,31 +1023,6 @@ def main():
             description="wrong lane indices for SIMD mask on BE target (LLVMAENG-6202)",
         ),
         XFail(
-            name="String repeated-character initialization",
-            testnames=[
-                "src/__support/CPP/libc.test.src.__support.CPP.string_test.__hermetic__.__build__",
-                "src/stdio/libc.test.src.stdio.asprintf_test.__hermetic__.__build__",
-                "src/stdio/libc.test.src.stdio.snprintf_test.__hermetic__.__build__",
-                "src/stdio/libc.test.src.stdio.vasprintf_test.__hermetic__.__build__",
-                "src/stdio/libc.test.src.stdio.vsnprintf_test.__hermetic__.__build__",
-                "src/string/libc.test.src.string.memset_explicit_test.__hermetic__.__build__",
-                "src/string/libc.test.src.string.memset_opt_host_test.__hermetic__.__build__",
-                "src/string/libc.test.src.string.memset_test.__hermetic__.__build__",
-                "src/time/libc.test.src.time.strftime_test.__hermetic__.__build__",
-            ],
-            result=NewResult.XFAILED,
-            project="llvmlibc",
-            variants=[
-                "armebv7m_hard_fpv4_sp_d16_exn_rtti_size",
-                "armebv7m_hard_fpv4_sp_d16_size",
-                "armebv7m_soft_fpv4_sp_d16_exn_rtti_size",
-                "armebv7m_soft_fpv4_sp_d16_size",
-                "armebv7m_soft_nofp_exn_rtti_size",
-                "armebv7m_soft_nofp_size",
-            ],
-            description="String repeated-character initialization returns empty string on BE variant (LLVMAENG-6205)",
-        ),
-        XFail(
             name="ldexp/scalbn FP rounding",
             testnames=[
                 "src/math/libc.test.src.math.ldexp_test.__hermetic__.__build__",
