@@ -236,6 +236,15 @@ run_command() {
     "$@"
 }
 
+run_lit_ninja() {
+    local xml_output="$1"
+    local log_file="$2"
+    shift 2
+
+    LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${xml_output}" \
+        run_command ninja "${NINJA_ARGS[@]}" "$@" 2>&1 | tee -a "${log_file}"
+}
+
 print_help() {
     cat <<EOF
 Usage: $0 [OPTIONS]
@@ -390,8 +399,7 @@ bootstrap_compiler_build() {
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BUILD_DIR}/bootstrap_compiler/bin:${PATH}"
     bootstrap_compiler_default_config
-    LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${LOGS_DIR}/bootstrap_check_all.xml" \
-        run_command ninja "${NINJA_ARGS[@]}" check-all 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
+    run_lit_ninja "${LOGS_DIR}/bootstrap_check_all.xml" "${LOGS_DIR}/bootstrap_compiler.txt" check-all
 }
 
 libcpp_build() {
@@ -420,10 +428,8 @@ libcpp_build() {
     run_command cmake --build . "${CMAKE_BUILD_ARGS[@]}" 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
     export LD_LIBRARY_PATH="${ATFL_DIR}/lib:${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}:${LD_LIBRARY_PATH}"
-    LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${LOGS_DIR}/check_cxx.xml" \
-        run_command ninja "${NINJA_ARGS[@]}" check-cxx 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
-    LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${LOGS_DIR}/check_cxxabi.xml" \
-        run_command ninja "${NINJA_ARGS[@]}" check-cxxabi 2>&1 | tee -a "${LOGS_DIR}/libcpp.txt"
+    run_lit_ninja "${LOGS_DIR}/check_cxx.xml" "${LOGS_DIR}/libcpp.txt" check-cxx
+    run_lit_ninja "${LOGS_DIR}/check_cxxabi.xml" "${LOGS_DIR}/libcpp.txt" check-cxxabi
 }
 
 product_build() {
@@ -477,8 +483,8 @@ product_build() {
     cp -d "${ATFL_DIR}"/lib/clang/*/lib/"${ATFL_TARGET_TRIPLE}"/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     echo "-Wl,-rpath=${ATFL_DIR}/lib" >> "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
-    LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${LOGS_DIR}/product_check_all.xml" \
-        run_command ninja "${NINJA_ARGS[@]}" check-all 2>&1 | tee -a "${LOGS_DIR}/product.txt"
+    run_lit_ninja "${LOGS_DIR}/product_check_all.xml" "${LOGS_DIR}/product.txt" check-all
+
     bootstrap_compiler_default_config
 }
 
@@ -520,7 +526,7 @@ static_libomp_build() {
     cp "${ATFL_DIR}".libs/lib/lib*.a \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     rm -r "${ATFL_DIR}.libs"
-    run_command ninja "${NINJA_ARGS[@]}" check-openmp 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
+    run_lit_ninja "${LOGS_DIR}/check_openmp.xml" "${LOGS_DIR}/static_libomp.txt" check-openmp
 }
 
 check_lit_xml_results() {
