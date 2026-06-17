@@ -776,6 +776,17 @@ if(C_LIBRARY STREQUAL llvmlibc)
     list(INSERT llvmlibc_cxx_test_link_options 1 -lcrt0-semihost)
     list(JOIN llvmlibc_cxx_test_link_options " " runtime_test_link_flags)
 
+    # We want to set LIBC_MATH_ASSUME_ROUND_NEAREST_ONLY in the
+    # LIBC_CONF_MATH_OPTIMIZATIONS setting, in addition to all the bit
+    # flags set by the default baremetal/config.json. So find out what
+    # those flags are.
+    file(READ ${llvmproject_src_dir}/libc/config/baremetal/config.json
+      baremetal_config_json)
+    string(JSON libc_math_opt GET "${baremetal_config_json}"
+      math LIBC_CONF_MATH_OPTIMIZATIONS value)
+    set(libc_math_opt
+      "(${libc_math_opt} | LIBC_MATH_ASSUME_ROUND_NEAREST_ONLY)")
+
     set(llvmlibc_lit_args "${LLVM_LIT_ARGS}")
     if(ENABLE_LIBC_TESTS)
         # Generate xfails for llvmlibc.
@@ -830,6 +841,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLIBC_CONF_PRINTF_DISABLE_FLOAT=OFF
         -DLIBC_CONF_PRINTF_FLOAT_TO_STR_USE_FLOAT320=ON
         -DLIBC_CONF_PRINTF_MODULAR=ON
+        "-DLIBC_CONF_MATH_OPTIMIZATIONS=${libc_math_opt}"
         -DLLVM_CMAKE_DIR=${LLVM_BINARY_DIR}/lib/cmake/llvm
         -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
         -DLLVM_ENABLE_RUNTIMES=libc
