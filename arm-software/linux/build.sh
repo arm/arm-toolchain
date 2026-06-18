@@ -489,6 +489,8 @@ product_build() {
 }
 
 static_libomp_build() {
+    rm -rf "${BUILD_DIR}/stage/static_libomp_build"
+    rm -rf "${BUILD_DIR}/stage/static_libomp_install"
     mkdir -p "${BUILD_DIR}/stage/static_libomp_build"
     cd "${BUILD_DIR}/stage/static_libomp_build"
     bootstrap_compiler_default_config
@@ -514,18 +516,29 @@ static_libomp_build() {
         -DOPENMP_TEST_C_COMPILER="${ATFL_DIR}/bin/clang" \
         -DOPENMP_TEST_CXX_COMPILER="${ATFL_DIR}/bin/clang++" \
         -DOPENMP_TEST_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
-        -DOPENMP_LLVM_LIT_EXECUTABLE="${BUILD_DIR}/stage/product_build/bin/llvm-lit" \
-        -DOPENMP_FILECHECK_EXECUTABLE="${BUILD_DIR}/stage/product_build/bin/FileCheck" \
+        -DCMAKE_C_COMPILER="${BUILD_DIR}/bootstrap_compiler/bin/clang" \
+        -DCMAKE_CXX_COMPILER="${BUILD_DIR}/bootstrap_compiler/bin/clang++" \
+        -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/stage/static_libomp_install" \
+        -DOPENMP_TEST_COMPILER_ID=Clang \
+        -DCMAKE_DISABLE_FIND_PACKAGE_Clang=TRUE \
+        -DClang_DIR=Clang_DIR-NOTFOUND \
+        -DLLVM_DIR="${BUILD_DIR}/stage/product_build/lib/cmake/llvm" \
+        -DLLVM_TOOLS_BINARY_DIR="${BUILD_DIR}/stage/product_build/bin" \
+        -DLLVM_EXTERNAL_LIT="${BUILD_DIR}/stage/product_build/bin/llvm-lit" \
+        -DOPENMP_NOT_EXECUTABLE:FILEPATH="${BUILD_DIR}/stage/product_build/bin/not" \
         2>&1 | tee "${LOGS_DIR}/static_libomp.txt"
     run_command cmake --build . "${CMAKE_BUILD_ARGS[@]}" 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
-    rm -rf "${ATFL_DIR}.keep" "${ATFL_DIR}.libs"
-    mv "${ATFL_DIR}" "${ATFL_DIR}.keep"
+
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/static_libomp.txt"
-    mv "${ATFL_DIR}" "${ATFL_DIR}.libs"
-    mv "${ATFL_DIR}.keep" "${ATFL_DIR}"
-    cp "${ATFL_DIR}".libs/lib/lib*.a \
+
+    mkdir -p "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
+    cp "${BUILD_DIR}/stage/static_libomp_install/lib/"lib*.a \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
-    rm -r "${ATFL_DIR}.libs"
+
+    local CLANG_VERSION
+    CLANG_VERSION="$("${ATFL_DIR}/bin/clang" -dumpversion | cut -d. -f1)"
+    export LD_LIBRARY_PATH="${ATFL_DIR}/lib:${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}:${ATFL_DIR}/lib/clang/${CLANG_VERSION}/lib/${ATFL_TARGET_TRIPLE}:${BUILD_DIR}/stage/product_build/lib:${BUILD_DIR}/stage/product_build/lib/${ATFL_TARGET_TRIPLE}:${LD_LIBRARY_PATH:-}"
+
     run_test_command "${LOGS_DIR}/check_openmp.xml" "${LOGS_DIR}/static_libomp.txt" check-openmp
 }
 
@@ -537,8 +550,7 @@ check_lit_xml_results() {
         "${LOGS_DIR}/check_cxx.xml"
         "${LOGS_DIR}/check_cxxabi.xml"
         "${LOGS_DIR}/product_check_all.xml"
-        # OpenMP tests do not get executed currently
-        # "${LOGS_DIR}/check_openmp.xml"
+        "${LOGS_DIR}/check_openmp.xml"
     )
 
     echo_bold "Checking lit XML test results...."
