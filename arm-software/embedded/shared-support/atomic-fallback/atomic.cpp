@@ -46,6 +46,10 @@ template <typename T, typename Op> T fallback_fetch_modify(T *ptr, T value, Op o
 // Do not replace these byte helpers with libc mem*() calls. This library is
 // linked into LLVM libc hermetic tests, where introducing a libc dependency
 // would break the test link.
+// Do not add __restrict on the source or destination pointers as this may
+// allow the LoopIdiomRecognize optimization pass to turn the loops into
+// memcpy/memcmp calls, recreating the libc dependency.
+
 void copy_bytes(void *dst, const void *src, std::size_t size) {
   auto *dst_bytes = static_cast<unsigned char *>(dst);
   auto *src_bytes = static_cast<const unsigned char *>(src);
