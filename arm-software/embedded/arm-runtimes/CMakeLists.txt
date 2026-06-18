@@ -162,10 +162,6 @@ if(TARGET_ARCH MATCHES "^(arm|armeb)v[45]")
 elseif(TARGET_ARCH MATCHES "^(arm|armeb)v6" AND NOT TARGET_ARCH MATCHES "^(arm|armeb)v6z?k")
     set(target_supports_lock_free_atomics OFF)
 endif()
-set(use_libatomic_fallback OFF)
-if(NOT target_supports_lock_free_atomics)
-    set(use_libatomic_fallback ON)
-endif()
 
 # Create a single target for all testing. If no testing is enabled, this
 # will simply do nothing.
@@ -185,7 +181,7 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
             -l${picocrt}
             -lsemihost
         )
-        if(use_libatomic_fallback)
+        if(NOT target_supports_lock_free_atomics)
             list(APPEND runtime_test_link_options -latomic-fallback)
         endif()
         list(APPEND runtime_test_link_options -T picolibcpp.ld)
@@ -799,7 +795,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -T
         llvmlibc.ld
     )
-    if(use_libatomic_fallback)
+    if(NOT target_supports_lock_free_atomics)
         list(APPEND llvmlibc_test_link_options -latomic-fallback)
     endif()
     if(VARIANT MATCHES "(^|_)pacret_bti(_|$)")
@@ -1193,6 +1189,13 @@ endif()
 ###############################################################################
 
 if(ENABLE_CXX_LIBS)
+    set(shared_support_cmake_args)
+    if(target_supports_lock_free_atomics)
+        list(APPEND shared_support_cmake_args -DENABLE_SHARED_SUPPORT_ATOMIC_FALLBACK=OFF)
+    else()
+        list(APPEND shared_support_cmake_args -DENABLE_SHARED_SUPPORT_ATOMIC_FALLBACK=ON)
+    endif()
+
     ExternalProject_Add(
         shared-support
         STAMP_DIR ${PROJECT_PREFIX}/shared-support/${VARIANT_BUILD_ID}/stamp
@@ -1221,7 +1224,7 @@ if(ENABLE_CXX_LIBS)
         -DCMAKE_RANLIB=${LLVM_BINARY_DIR}/bin/llvm-ranlib${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-        -DENABLE_SHARED_SUPPORT_ATOMIC_FALLBACK=${use_libatomic_fallback}
+        ${shared_support_cmake_args}
         -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
         STEP_TARGETS build install
         USES_TERMINAL_CONFIGURE TRUE
