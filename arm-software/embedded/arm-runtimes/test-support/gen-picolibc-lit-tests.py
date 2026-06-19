@@ -45,7 +45,14 @@ def main():
         help="Name to give the lit suite.",
     )
     arg_parser.add_argument(
-        "--timeout-multiplier", type=float, help="Timeout multiplier (float)."
+        "--global-timeout-multiplier",
+        type=float,
+        help="Global timeout multiplier, applied to all tests (float).",
+    )
+    arg_parser.add_argument(
+        "--slow-tests-timeout-multiplier",
+        type=float,
+        help="Timeout multiplier for slow tests only (float).",
     )
 
     args = arg_parser.parse_args()
@@ -62,6 +69,19 @@ def main():
         text=True,
     )
 
+    # List of tests that are known to take longer to run.
+    slow_testnames = [
+        "test-long-double",
+        "test-long-double",
+        "test-long-long-float",
+        "test-long-long-int",
+        "test-long-long-long",
+        "test-long-long",
+        "test-memchr",
+        "test-memmem",
+        "test-memset",
+    ]
+
     for line in p.stdout.splitlines():
         # Meson lists tests in the format of
         # [SUBPROJECT]:[PATH] / [TESTNAME]
@@ -77,8 +97,14 @@ def main():
             # Invoke meson to run the test.
             # Set --logbase so that each has a unique log name.
             cmd = f"# RUN: {args.meson} test -C {args.build} {testname} --logbase {testname} --no-rebuild"
-            if args.timeout_multiplier and args.timeout_multiplier != 1:
-                cmd += f" -t {args.timeout_multiplier}"
+            if (
+                testname in slow_testnames
+                and args.slow_tests_timeout_multiplier
+                and args.slow_tests_timeout_multiplier != 1
+            ):
+                cmd += f" -t {args.slow_tests_timeout_multiplier}"
+            elif args.global_timeout_multiplier and args.global_timeout_multiplier != 1:
+                cmd += f" -t {args.global_timeout_multiplier}"
             f.write(f"{cmd}\n")
 
     # Simple lit config to run the tests.
