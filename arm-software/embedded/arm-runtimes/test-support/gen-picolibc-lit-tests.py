@@ -45,12 +45,12 @@ def main():
         help="Name to give the lit suite.",
     )
     arg_parser.add_argument(
-        "--timeout-multiplier",
+        "--global-timeout-multiplier",
         type=float,
         help="Global timeout multiplier, applied to all tests (float).",
     )
     arg_parser.add_argument(
-        "--slow-timeout",
+        "--slow-tests-timeout-multiplier",
         type=float,
         help="Timeout multiplier for slow tests only (float).",
     )
@@ -99,12 +99,12 @@ def main():
             cmd = f"# RUN: {args.meson} test -C {args.build} {testname} --logbase {testname} --no-rebuild"
             if (
                 testname in slow_testnames
-                and args.slow_timeout
-                and args.slow_timeout != 1
+                and args.slow_tests_timeout_multiplier
+                and args.slow_tests_timeout_multiplier != 1
             ):
-                cmd += f" -t {args.slow_timeout}"
-            elif args.timeout_multiplier and args.timeout_multiplier != 1:
-                cmd += f" -t {args.timeout_multiplier}"
+                cmd += f" -t {args.slow_tests_timeout_multiplier}"
+            elif args.global_timeout_multiplier and args.global_timeout_multiplier != 1:
+                cmd += f" -t {args.global_timeout_multiplier}"
             f.write(f"{cmd}\n")
 
     # Simple lit config to run the tests.

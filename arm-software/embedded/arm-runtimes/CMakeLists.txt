@@ -537,8 +537,9 @@ if(C_LIBRARY STREQUAL picolibc)
         # Timeout multipliers. The actual timeout value used in testing is:
         # Timeout in seconds (defined in the picolibc's testing specs) x Timeout multiplier
         # In general, tests execute slower with FVPs compared to qemu, but specific tests are
-        # more impacted by the model performance than others due to significant looping. This
-        # timeout is only applied to those tests, via lit.
+        # more impacted by the model performance than others due to significant looping. Running
+        # the tests directly through meson only allows a timeout to be set for all tests, but
+        # using the lit wrapper allows the timeout to be customized per test.
         # Certain variants can also be slower due to the particular model, or specific
         # features enabled, for example:
         # * Armv6m big-endian
@@ -550,7 +551,7 @@ if(C_LIBRARY STREQUAL picolibc)
             else()
                 set(timeout_multiplier 2)
             endif()
-            set(picolibc_timeout_arg --slow-timeout ${timeout_multiplier})
+            set(picolibc_timeout_arg --slow-tests-timeout-multiplier ${timeout_multiplier})
         endif()
 
         # Step target to run the picolibc test via meson.
