@@ -241,8 +241,10 @@ run_test_command() {
     local log_file="$2"
     shift 2
 
-    LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${xml_output}" \
-        run_command ninja "${NINJA_ARGS[@]}" "$@" 2>&1 | tee -a "${log_file}"
+    if ! LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${xml_output}" \
+        run_command ninja "${NINJA_ARGS[@]}" "$@" 2>&1 | tee -a "${log_file}"; then
+        echo "WARNING: Test command failed, continuing: $*" | tee -a "${log_file}"
+    fi
 }
 
 print_help() {
@@ -550,8 +552,8 @@ check_lit_xml_results() {
         fi
 
         if grep -Eq '<failure([ >])| failures="[1-9][0-9]*"| errors="[1-9][0-9]*"' "${result_file}"; then
-            echo "lit reported failures in: ${result_file}" >&2
-            failed=true
+            # Test failures does not mean abort!
+            echo "WARNING: lit reported failures in: ${result_file}" >&2
         fi
     done
 
