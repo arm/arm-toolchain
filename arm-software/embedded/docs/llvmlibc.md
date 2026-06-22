@@ -1,6 +1,6 @@
 # Experimental LLVM libc support
 
-Arm Toolchain for Embedded uses
+Arm Toolchain for Embedded (ATfE) uses
 [`picolibc`](https://github.com/picolibc/picolibc) as the standard C
 library. For experimental and evaluation purposes, you can instead
 choose to use the LLVM project's own C library.
@@ -106,7 +106,7 @@ clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m -nostartfiles -
 
 ## Migrating from `picolibc` to LLVM libc
 
-The C standard leaves some C library behavior implementation-defined, which may
+The C standard leaves some C library behavior implementation-defined, which might
 impact your project during migration from `picolibc` to LLVM libc.
 The following sections summarize some of the differences.
 
@@ -140,8 +140,8 @@ Standard reference: C17 7.14 and 7.14.1.1.
 
 The set of supported signals and parts of `signal` handler behavior are
 implementation-defined. `picolibc` provides fallback signal state for bare-metal
-and semihosted environments. LLVM libc's ATfE bare-metal entrypoint set does not
-currently include a comparable `signal` implementation.
+and semihosted environments. The ATfE bare-metal entrypoint set for LLVM libc
+does not currently include a comparable `signal` implementation.
 
 #### Clock and calendar-time sources
 
@@ -154,14 +154,14 @@ libc bare-metal `clock` and `timespec_get` call ATfE retargeting hooks.
 
 #### Other implementation-defined choices
 
-Other examples of standard-library implementation-defined choices that may
+Other examples of standard-library implementation-defined choices that might
 impact migration are the exact values of library macros, the supported set of
 error numbers, the value used by `EXIT_FAILURE`, and the representation and
 range of library typedefs such as `size_t`, `wchar_t`, `time_t`, and `clock_t`.
 
 ## LLVM libc initialization
 
-When used with ATfE provided `crt0` startup code, LLVM libc calls the following
+When used with ATfE-provided `crt0` startup code, LLVM libc calls the following
 functions in this order:
 1. `void _platform_setup_exceptions()`
 1. `void _platform_setup_memory()`
@@ -205,8 +205,9 @@ your own startup code:
 
 > [!NOTE]
 > For the Memory Management Unit setup LLVM libc startup code constructs the
-> initial translation table at runtime, thus uses RAM (up to 4KB for AArch64),
-> in contrast to `picolibc` that provides the table as part of the ROM image.
+> initial translation table at runtime and therefore uses RAM (up to 4KB for
+> AArch64), in contrast to `picolibc` that provides the table as part of the ROM
+> image.
 
 ## LLVM libc finalization
 
