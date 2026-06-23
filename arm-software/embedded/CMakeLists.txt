@@ -282,6 +282,7 @@ set(LLVM_DISTRIBUTION_COMPONENTS
     clang-resource-headers
     clang
     clang-format
+    clangd
     dsymutil
     elf2bin
     lld
@@ -316,7 +317,7 @@ set(LLVM_TOOLCHAIN_DISTRIBUTION_COMPONENTS
     CACHE STRING "Components defined by this CMakeLists that should be
 installed by the install-llvm-toolchain target"
 )
-set(LLVM_ENABLE_PROJECTS clang;lld CACHE STRING "")
+set(LLVM_ENABLE_PROJECTS clang;lld;clang-tools-extra CACHE STRING "")
 set(LLVM_TARGETS_TO_BUILD ARM CACHE STRING "")
 set(LLVM_DEFAULT_TARGET_TRIPLE thumbv7m-unknown-none-eabi CACHE STRING "")
 set(LLVM_APPEND_VC_REV OFF CACHE BOOL "")
