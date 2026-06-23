@@ -64,22 +64,6 @@ FROM scratch
 COPY --from=base / /
 CMD ["/bin/bash"]
 
-# Install useful/required Python packages
-RUN pip3 install --no-cache-dir --upgrade \
-        black \
-        cxxheaderparser \
-        fprime-bootstrap \
-        mapfile_parser==2.11.0 \
-        mike \
-        mkdocs-material[imaging] \
-        mkdocs-to-pdf \
-        mkdocs-macros-plugin \
-        pip \
-        plantuml-markdown \
-        pyelftools \
-        pyyaml \
-        WeasyPrint
-
 # Install Google's addlicense tool to help with copyright headers
 RUN curl -L --fail \
         https://github.com/google/addlicense/releases/download/v1.1.1/addlicense_1.1.1_Linux_x86_64.tar.gz | \
