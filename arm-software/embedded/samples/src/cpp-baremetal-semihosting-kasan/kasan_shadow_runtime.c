@@ -103,35 +103,65 @@ __attribute__((weak)) void kasan_rt_putaddr(uintptr_t addr) {
 
 /** @} */
 
+/** @name Retargettable report handlers
+ * Users can provide non-weak definitions of these functions to change whether
+ * reports abort or recover. Returning from a handler lets the invalid access
+ * continue, which is useful for diagnostics but unsafe for production.
+ * @{ */
+
 /**
- * @brief Print a KASan access report and stop the program.
+ * @brief Report a poisoned memory access and stop the program by default.
  * @param kind Access kind, such as "load" or "store".
  * @param addr Address reported by the instrumentation callback.
  * @param size Access size in bytes.
  */
-static void report_access(const char *kind, uintptr_t addr, uintptr_t size) {
+__attribute__((weak)) void kasan_rt_report_access(const char *kind,
+                                                  uintptr_t addr,
+                                                  uintptr_t size) {
   kasan_rt_puts("KASAN: invalid ");
   kasan_rt_puts(kind);
   kasan_rt_puts(" at ");
   kasan_rt_putaddr(addr);
   kasan_rt_puts(", size ");
   kasan_rt_putaddr(size);
-  kasan_rt_putc('\n');
+  kasan_rt_puts(" (aborted)\n");
   abort();
 }
 
 /**
- * @brief Print an allocator misuse report and stop the program.
+ * @brief Report allocator API misuse and stop the program by default.
  * @param kind Allocator error kind, such as "double free".
  * @param ptr Pointer passed to the allocator wrapper.
  */
-static void report_alloc_error(const char *kind, const void *ptr) {
+__attribute__((weak)) void kasan_rt_report_alloc_error(const char *kind,
+                                                       const void *ptr) {
   kasan_rt_puts("KASAN: invalid ");
   kasan_rt_puts(kind);
   kasan_rt_puts(" of ");
   kasan_rt_putaddr((uintptr_t)ptr);
-  kasan_rt_putc('\n');
+  kasan_rt_puts(" (aborted)\n");
   abort();
+}
+
+/** @} */
+
+/**
+ * @brief Dispatch a KASan access report to the retargettable handler.
+ * @param kind Access kind, such as "load" or "store".
+ * @param addr Address reported by the instrumentation callback.
+ * @param size Access size in bytes.
+ */
+static void report_access(const char *kind, uintptr_t addr, uintptr_t size) {
+  kasan_rt_report_access(kind, addr, size);
+}
+
+/**
+ * @brief Dispatch allocator misuse reports to the retargettable handler.
+ * @param kind Allocator error kind, such as "double free".
+ * @param ptr Pointer passed to the allocator wrapper.
+ */
+static void report_alloc_error(const char *kind, const void *ptr) {
+  kasan_rt_report_alloc_error(kind, ptr);
 }
 
 /**
@@ -260,7 +290,7 @@ static void kasan_poison_with_value(void *addr, size_t size, uint8_t value) {
 
 /** @} */
 
-/** @name LLVM libc allocator wrappers
+/** @name Allocator wrappers
  * These functions are reached through linker --wrap options. They are not
  * Clang ASan/KASan ABI entry points.
  * @{ */

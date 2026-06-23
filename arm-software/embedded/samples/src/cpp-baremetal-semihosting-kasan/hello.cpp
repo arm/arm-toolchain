@@ -8,64 +8,97 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef KASAN_TEST
-#define KASAN_TEST 1
-#endif
+// Override the default aborting report hooks so this sample can recover and
+// continue through all demo tests in one run.
 
-static volatile unsigned out_of_bounds_index = 16;
+extern "C" void kasan_rt_puts(const char *s);
+extern "C" void kasan_rt_putaddr(uintptr_t addr);
 
-__attribute__((noinline)) static void stack_overflow_test(void) {
-  uint8_t buffer[16] = {0};
+extern "C" __attribute__((no_sanitize("kernel-address"))) void
+kasan_rt_report_access(const char *kind, uintptr_t addr, uintptr_t size) {
+  kasan_rt_puts("KASAN: invalid ");
+  kasan_rt_puts(kind);
+  kasan_rt_puts(" at ");
+  kasan_rt_putaddr(addr);
+  kasan_rt_puts(", size ");
+  kasan_rt_putaddr(size);
+  kasan_rt_puts(" (recovered)\n");
+}
 
-  puts("Writing one byte past a 16-byte stack buffer");
+extern "C" __attribute__((no_sanitize("kernel-address"))) void
+kasan_rt_report_alloc_error(const char *kind, const void *ptr) {
+  kasan_rt_puts("KASAN: invalid ");
+  kasan_rt_puts(kind);
+  kasan_rt_puts(" of ");
+  kasan_rt_putaddr(reinterpret_cast<uintptr_t>(ptr));
+  kasan_rt_puts(" (recovered)\n");
+}
+
+// Define a test for each type of error
+
+static constexpr size_t buffer_size = 16;
+static volatile unsigned out_of_bounds_index = buffer_size;
+
+__attribute__((noinline)) static void test_stack_overflow(void) {
+  uint8_t buffer[buffer_size] = {0};
+
+  puts("Writing one byte past a stack buffer");
   volatile uint8_t *access = buffer;
   access[out_of_bounds_index] = 0xff;
 }
 
-__attribute__((noinline)) static void heap_overflow_test(void) {
-  uint8_t *buffer = static_cast<uint8_t *>(malloc(16));
-  if (!buffer) {
-    puts("malloc failed");
+__attribute__((noinline)) static void test_heap_overflow(void) {
+  uint8_t *buffer = static_cast<uint8_t *>(malloc(buffer_size));
+  if (!buffer)
     abort();
-  }
 
-  puts("Writing one byte past a 16-byte malloc allocation");
+  puts("Writing one byte past a malloc allocation");
   volatile uint8_t *access = buffer;
   access[out_of_bounds_index] = 0xff;
-  free(buffer);
 }
 
-__attribute__((noinline)) static void heap_use_after_free_test(void) {
-  uint8_t *buffer = static_cast<uint8_t *>(calloc(16, 1));
-  if (!buffer) {
-    puts("calloc failed");
+__attribute__((noinline)) static void test_heap_use_after_free(void) {
+  uint8_t *buffer = static_cast<uint8_t *>(calloc(buffer_size, 1));
+  if (!buffer)
     abort();
-  }
 
-  puts("Freeing a 16-byte allocation");
+  puts("Freeing an allocation");
   free(buffer);
 
-  puts("Writing to the freed allocation");
+  puts("Attempting use-after-free");
   volatile uint8_t *access = buffer;
   access[0] = 0xff;
+}
+
+__attribute__((noinline)) static void test_heap_realloc_overflow(void) {
+  uint8_t *buffer = static_cast<uint8_t *>(malloc(buffer_size));
+  if (!buffer)
+    abort();
+
+  buffer = static_cast<uint8_t *>(realloc(buffer, buffer_size / 2));
+  if (!buffer)
+    abort();
+
+  puts("Writing one byte past a resized malloc allocation");
+  volatile uint8_t *access = buffer;
+  access[buffer_size / 2] = 0xff;
 }
 
 int main(void) {
   puts("C++ KASan shadow-memory sample");
 
-#if KASAN_TEST == 1
   puts("Test 1: automatic stack redzone");
-  stack_overflow_test();
-#elif KASAN_TEST == 2
-  puts("Test 2: LLVM libc heap buffer overflow");
-  heap_overflow_test();
-#elif KASAN_TEST == 3
-  puts("Test 3: LLVM libc heap use-after-free");
-  heap_use_after_free_test();
-#else
-#error "Unsupported KASAN_TEST value"
-#endif
+  test_stack_overflow();
 
-  puts("This line is not expected to be reached");
+  puts("Test 2: heap buffer overflow");
+  test_heap_overflow();
+
+  puts("Test 3: heap use-after-free");
+  test_heap_use_after_free();
+
+  puts("Test 4: realloc buffer overflow");
+  test_heap_realloc_overflow();
+
+  puts("All KASan tests completed");
   return 0;
 }

@@ -8,10 +8,6 @@
 LIBC=llvmlibc
 include ../../Makefile.conf
 
-ifneq ($(LIBC),llvmlibc)
-$(error This sample targets LLVM libc only. Use LIBC=llvmlibc)
-endif
-
 KASAN_FLAGS=\
 	-fsanitize=kernel-address \
 	-mllvm -asan-instrumentation-with-call-threshold=0 \
@@ -26,17 +22,13 @@ KASAN_ALLOC_WRAPS=\
 	-Wl,--wrap=realloc \
 	-Wl,--wrap=free
 
-ifndef KASAN_TEST
-KASAN_TEST=1
-endif
-
 build: hello.elf
 
 microbit-kasan-shadow.ld:
 	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) microbit-kasan-shadow.ld.in -o $@
 
 hello.o: hello.cpp
-	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CPP_FLAGS) --std=c++17 $(KASAN_FLAGS) -DKASAN_TEST=$(KASAN_TEST) -g -c -o $@ $<
+	$(BIN_PATH)/clang++ $(CFG_FILE) $(MICROBIT_OPTIONS) $(CPP_FLAGS) --std=c++17 $(KASAN_FLAGS) -g -c -o $@ $<
 
 kasan_shadow_runtime.o: kasan_shadow_runtime.c
 	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) -g -c -o $@ $<
