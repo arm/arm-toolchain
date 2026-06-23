@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright (c) 2023, Arm Limited and affiliates.
 
 import subprocess
