@@ -1003,30 +1003,6 @@ def main():
             description="wrong lane indices for SIMD mask on BE target (LLVMAENG-6202)",
         ),
         XFail(
-            name="ldexp/scalbn FP rounding",
-            testnames=[
-                "src/math/libc.test.src.math.ldexp_test.__hermetic__.__build__",
-                "src/math/libc.test.src.math.ldexpl_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.ldexp_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.ldexpl_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.scalbln_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.scalblnl_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.scalbn_test.__hermetic__.__build__",
-                "src/math/smoke/libc.test.src.math.smoke.scalbnl_test.__hermetic__.__build__",
-            ],
-            result=NewResult.XFAILED,
-            project="llvmlibc",
-            variants=[
-                "armebv7m_hard_fpv4_sp_d16_exn_rtti_size",
-                "armebv7m_hard_fpv4_sp_d16_size",
-                "armebv7m_soft_fpv4_sp_d16_exn_rtti_size",
-                "armebv7m_soft_fpv4_sp_d16_size",
-                "armebv7m_soft_nofp_exn_rtti_size",
-                "armebv7m_soft_nofp_size",
-            ],
-            description="ldexp/scalbn Floating point rounding failures on BE Variants (LLVMAENG-6364)",
-        ),
-        XFail(
             name="variadic vector type arguments",
             testnames=[
                 "src/__support/libc.test.src.__support.arg_list_test.__hermetic__.__build__",
