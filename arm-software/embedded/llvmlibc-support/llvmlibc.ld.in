@@ -267,6 +267,14 @@ SECTIONS
 	PROVIDE( __data_size = __data_end - __data_start );
 	PROVIDE( __data_source_size = __data_source_end - __data_source );
 
+	/* ATfE:begin */
+        /* Page tables are initialized before .bss is cleared, so keep them
+	 * outside the zero-initialized sections. */
+	.noinit.page_table (NOLOAD) : {
+		KEEP (*(.noinit.page_table .noinit.page_table.*))
+	} >ram AT>ram :ram
+	/* ATfE:end */
+
 	.tbss (NOLOAD) : {
 		*(.tbss .tbss.* .gnu.linkonce.tb.*)
 		*(.tcommon)
