@@ -54,6 +54,6 @@ fi
 
 # Upgrade pip and install Python tooling inside the virtual environment
 python -m pip install --upgrade pip
-python -m pip install cmake==4.3.0 meson==1.2.3 pyyaml==6.0.3 ruff==0.8.6
+python -m pip install cmake==4.3.0 meson==1.2.3 psutil==7.2.2 pyyaml==6.0.3 ruff==0.8.6
 
 cmake --version
