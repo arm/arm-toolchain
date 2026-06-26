@@ -9,12 +9,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define KASAN_SHADOW_SCALE 3U
-#define KASAN_SHADOW_GRANULE_SIZE (1U << KASAN_SHADOW_SCALE)
-
+#ifndef KASAN_SHADOW_SCALE
+#error "KASAN_SHADOW_SCALE must be defined"
+#endif
 #ifndef KASAN_SHADOW_OFFSET
 #error "KASAN_SHADOW_OFFSET must be defined"
 #endif
+
+#define KASAN_SHADOW_GRANULE_SIZE (1U << KASAN_SHADOW_SCALE)
 
 #define KASAN_USER_POISON 0xf7U
 #define KASAN_HEAP_LEFT_REDZONE 0xfaU

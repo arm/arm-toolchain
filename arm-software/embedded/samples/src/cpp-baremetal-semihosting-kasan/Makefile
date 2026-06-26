@@ -48,7 +48,9 @@ print(f"KASAN_SHADOW_SIZE=0x{shadow_size:x} " \
       f"KASAN_RAM_SIZE=0x{ram_size:x}")')
 $(foreach var,$(KASAN_LAYOUT),$(eval $(var)))
 
-KASAN_DEFINES=-DKASAN_SHADOW_OFFSET=$(KASAN_SHADOW_OFFSET)
+KASAN_DEFINES=\
+	-DKASAN_SHADOW_SCALE=$(KASAN_SHADOW_SCALE) \
+	-DKASAN_SHADOW_OFFSET=$(KASAN_SHADOW_OFFSET)
 KASAN_MEMORY_MAP=\
 	-Wl,--defsym=__boot_flash=$(BOOT_FLASH_ORIGIN) \
 	-Wl,--defsym=__boot_flash_size=$(BOOT_FLASH_SIZE) \
