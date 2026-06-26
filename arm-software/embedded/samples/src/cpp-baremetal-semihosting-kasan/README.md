@@ -10,11 +10,13 @@ report an error if the accessed address is poisoned. See Clang's
 [AddressSanitizer documentation](https://clang.llvm.org/docs/AddressSanitizer.html)
 for more detail on the sanitizer model.
 
-The sample reserves the last 2 KiB of RAM for shadow memory in
-`microbit-kasan-shadow.ld.in` and compiles with
-`-mllvm -asan-mapping-offset=0x1c003800`, so the application RAM maps into that
-reserved shadow region without moving the normal RAM origin. The remaining RAM
-is exposed to the selected C library for data, heap, and stack.
+The Makefile reserves the last 2 KiB of RAM for shadow memory. It uses Python
+to calculate the shadow start, end, size, and offset from the RAM origin, total
+RAM size, and KASan shadow scale. It passes the calculated offset to Clang's
+`-asan-mapping-offset` and the KASan runtime, and passes the full memory map to
+the linker with `-Wl,--defsym`, so the application RAM maps into the reserved
+shadow region without moving the normal RAM origin. The remaining RAM is
+exposed to the selected C library for data, heap, and stack.
 
 ## Build and run
 
@@ -30,17 +32,21 @@ is exposed to the selected C library for data, heap, and stack.
 ## Customizing the runtime
 
 The shadow memory runtime is sensitive to the target memory map. If the RAM
-origin, RAM size, or shadow placement changes, update
-`microbit-kasan-shadow.ld.in`, `KASAN_SHADOW_OFFSET`, and the compiler
-`-asan-mapping-offset` together so `shadow = (address >> 3) + offset` lands in
-valid RAM for every covered application address. Keep the linker script as the
-source of truth for which application regions are actually covered.
+origin or RAM size changes, override `RAM_ORIGIN` or `HW_RAM_SIZE` when
+invoking `make`, for example:
+`make run RAM_ORIGIN=<origin> HW_RAM_SIZE=<size>`. The Makefile
+recalculates `KASAN_SHADOW_OFFSET` from those values. If the shadow placement
+policy changes, update the Makefile calculation and `KASAN_MEMORY_MAP` symbols
+together, because Clang's instrumentation, the runtime, and the linker must all
+use the same `shadow = (address >> 3) + offset` mapping. Keep the Makefile
+memory-map variables as the source of truth for which application regions are
+actually covered.
 
 Tune heap checking by changing `KASAN_HEAP_REDZONE_SIZE` and the quarantine
 policy. The sample keeps freed blocks poisoned forever so use-after-free is
 reliable in a demo; a practical runtime should use a bounded quarantine or
-return old blocks to the allocator once the diagnostic value is no longer worth the
-RAM cost. Keep the runtime and allocator wrappers unsanitized, otherwise the
+return old blocks to the allocator once the diagnostic value is no longer worth
+the RAM cost. Keep the runtime and allocator wrappers unsanitized, otherwise the
 reporting path can recursively instrument itself.
 
 The reporting path avoids `printf` and formats messages through weak output
