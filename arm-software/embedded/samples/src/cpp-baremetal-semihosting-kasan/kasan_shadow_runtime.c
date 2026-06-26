@@ -26,77 +26,51 @@
 extern uint8_t __kasan_shadow_start[];
 extern uint8_t __kasan_shadow_end[];
 
-/** @name Shadow-memory helpers
- * These are sample-internal helpers for the linker-defined shadow region.
- * They are not Clang ASan/KASan ABI entry points.
- * @{ */
+/* Shadow-memory internal helpers. */
 
-/**
- * @brief Convert an application address to its ASan shadow address.
- * @param addr Application address.
- * @return Shadow-memory address for the application address.
- */
+/* Convert an application address to its ASan shadow address. */
 static uintptr_t shadow_addr(uintptr_t addr) {
   return (addr >> KASAN_SHADOW_SCALE) + KASAN_SHADOW_OFFSET;
 }
 
-/**
- * @brief Convert an application address to a shadow byte pointer.
- * @param addr Application address.
- * @return Pointer to the corresponding shadow byte.
- */
+/* Convert an application address to a shadow byte pointer. */
 static uint8_t *shadow_for(uintptr_t addr) {
   return (uint8_t *)shadow_addr(addr);
 }
 
-/**
- * @brief Return non-zero if a shadow pointer is inside reserved shadow RAM.
- * @param shadow Shadow byte pointer to test.
- */
+/* Check if a shadow pointer is inside reserved shadow RAM. */
 static int shadow_in_range(uint8_t *shadow) {
   return shadow >= __kasan_shadow_start && shadow < __kasan_shadow_end;
 }
 
-/** @brief Clear the reserved shadow RAM so all covered memory starts valid. */
+/* Clear the reserved shadow RAM so all covered memory starts as valid. */
 static void clear_shadow(void) {
   for (uint8_t *shadow = __kasan_shadow_start; shadow < __kasan_shadow_end;
        ++shadow)
     *shadow = 0;
 }
 
-/** @brief Pre-initialization hook that clears shadow before constructors run. */
+/* Pre-initialization hook that clears shadow before constructors run. */
 static void kasan_preinit(void) { clear_shadow(); }
 
-/** @brief Register the sample shadow clear hook in the C preinit array. */
+/* Register the sample shadow clear hook in the C preinit array. */
 void (*const __kasan_preinit)(void) __attribute__((section(".preinit_array"),
                                                   used)) = kasan_preinit;
 
-/** @} */
+/* Retargettable report output hooks.
+ * Application can provide non-weak definitions of these functions to route
+ * output to UART, ITM/SWO, retained RAM, or another target-specific sink. */
 
-/** @name Retargettable report output hooks
- * Users can provide non-weak definitions of these functions to route reports to
- * UART, ITM/SWO, retained RAM, or another target-specific sink.
- * @{ */
-
-/**
- * @brief Output one report character.
- * @param c Character to output.
- */
+/* Output one report character. */
 __attribute__((weak)) void kasan_rt_putc(char c) { putc(c, stdout); }
 
-/**
- * @brief Output a NUL-terminated report string.
- * @param s String to output.
- */
+/* Output a NUL-terminated string. */
 __attribute__((weak)) void kasan_rt_puts(const char *s) {
   while (*s)
     kasan_rt_putc(*s++);
 }
 
-/**
- * @brief Output an address-sized value in fixed-width hexadecimal.
- * @param addr Value to output.
- */
+/* Output an address-sized value in fixed-width hexadecimal. */
 __attribute__((weak)) void kasan_rt_putaddr(uintptr_t addr) {
   static const char hex[] = "0123456789abcdef";
 
@@ -106,16 +80,13 @@ __attribute__((weak)) void kasan_rt_putaddr(uintptr_t addr) {
     kasan_rt_putc(hex[(addr >> (unsigned)shift) & 0xfU]);
 }
 
-/** @} */
+/* Retargettable report handlers.
+ * Application can provide non-weak definitions of these functions to change
+ * whether reports abort or recover. 
+ * Returning from a handler lets the invalid access continue (recover),
+ * which is useful for diagnostics but unsafe for production. */
 
-/** @name Retargettable report handlers
- * Users can provide non-weak definitions of these functions to change whether
- * reports abort or recover. Returning from a handler lets the invalid access
- * continue, which is useful for diagnostics but unsafe for production.
- * @{ */
-
-/**
- * @brief Report a poisoned memory access and stop the program by default.
+/* Report a poisoned memory access and abort the program by default.
  * @param kind Access kind, such as "load" or "store".
  * @param addr Address reported by the instrumentation callback.
  * @param size Access size in bytes.
@@ -133,8 +104,7 @@ __attribute__((weak)) void kasan_rt_report_access(const char *kind,
   abort();
 }
 
-/**
- * @brief Report allocator API misuse and stop the program by default.
+/* Report allocator API misuse and abort the program by default.
  * @param kind Allocator error kind, such as "double free".
  * @param ptr Pointer passed to the allocator wrapper.
  */
@@ -148,31 +118,17 @@ __attribute__((weak)) void kasan_rt_report_alloc_error(const char *kind,
   abort();
 }
 
-/** @} */
-
-/**
- * @brief Dispatch a KASan access report to the retargettable handler.
- * @param kind Access kind, such as "load" or "store".
- * @param addr Address reported by the instrumentation callback.
- * @param size Access size in bytes.
- */
+/* Dispatch a KASan access report to the retargettable handler. */
 static void report_access(const char *kind, uintptr_t addr, uintptr_t size) {
   kasan_rt_report_access(kind, addr, size);
 }
 
-/**
- * @brief Dispatch allocator misuse reports to the retargettable handler.
- * @param kind Allocator error kind, such as "double free".
- * @param ptr Pointer passed to the allocator wrapper.
- */
+/* Dispatch allocator misuse reports to the retargettable handler. */
 static void report_alloc_error(const char *kind, const void *ptr) {
   kasan_rt_report_alloc_error(kind, ptr);
 }
 
-/**
- * @brief Return non-zero if an application address is poisoned in shadow memory.
- * @param addr Application address to test.
- */
+/* Check if an application address is poisoned in shadow memory. */
 static int address_is_poisoned(uintptr_t addr) {
   uint8_t *shadow = shadow_for(addr);
   if (!shadow_in_range(shadow))
@@ -188,8 +144,7 @@ static int address_is_poisoned(uintptr_t addr) {
   return 1;
 }
 
-/**
- * @brief Shared implementation for Clang's outlined access callbacks.
+/* Shared implementation for Clang's outlined access callbacks.
  * @param kind Access kind, such as "load" or "store".
  * @param addr Address reported by the instrumentation callback.
  * @param size Access size in bytes.
@@ -201,13 +156,10 @@ static void check_access(const char *kind, uintptr_t addr, uintptr_t size) {
   }
 }
 
-/** @name Sample poisoning helpers
- * These helpers update shadow memory for sample code and allocator wrappers.
- * Clang stack instrumentation writes shadow bytes directly instead.
- * @{ */
+/* Poisoning helpers to update shadow memory for allocator wrappers.
+ * Clang stack instrumentation writes shadow bytes directly instead. */
 
-/**
- * @brief Mark an address range as addressable in shadow memory.
+/* Mark an address range as valid (unpoisoned) in shadow memory.
  * @param addr Start of the range to unpoison.
  * @param size Number of bytes to unpoison.
  */
@@ -239,8 +191,7 @@ void kasan_unpoison(void *addr, size_t size) {
   }
 }
 
-/**
- * @brief Mark an address range as poisoned in shadow memory.
+/* Mark an address range as invalid (poisoned) in shadow memory.
  * @param addr Start of the range to poison.
  * @param size Number of bytes to poison.
  */
@@ -272,8 +223,7 @@ void kasan_poison(void *addr, size_t size) {
   }
 }
 
-/**
- * @brief Fill shadow bytes for an address range with a specific poison value.
+/* Fill shadow bytes for an address range with a specific poison value.
  * @param addr Start of the range to poison.
  * @param size Number of bytes to poison.
  * @param value ASan poison byte to write to shadow memory.
@@ -293,12 +243,9 @@ static void kasan_poison_with_value(void *addr, size_t size, uint8_t value) {
   }
 }
 
-/** @} */
-
-/** @name Allocator wrappers
+/* Allocator wrappers for the C library malloc family of functions.
  * These functions are reached through linker --wrap options. They are not
- * Clang ASan/KASan ABI entry points.
- * @{ */
+ * Clang ASan/KASan ABI entry points. */
 
 #define KASAN_HEAP_MAGIC 0x4b41534eU
 #define KASAN_HEAP_FREED_MAGIC 0x4b415346U
@@ -321,8 +268,7 @@ void *__wrap_calloc(size_t nmemb, size_t size);
 void *__wrap_realloc(void *ptr, size_t size);
 void __wrap_free(void *ptr);
 
-/**
- * @brief Round a size up to an allocator metadata alignment.
+/* Round a size up to an allocator metadata alignment.
  * @param value Value to align.
  * @param alignment Power-of-two alignment.
  */
@@ -330,8 +276,7 @@ static size_t align_up(size_t value, size_t alignment) {
   return (value + alignment - 1U) & ~(alignment - 1U);
 }
 
-/**
- * @brief Recover and validate the heap metadata for a user pointer.
+/* Find and validate the heap metadata for a user pointer.
  * @param ptr Pointer passed to a wrapped allocator function.
  * @return Heap header that owns the user pointer.
  */
@@ -349,8 +294,7 @@ static struct heap_header *header_from_payload(void *ptr) {
   return header;
 }
 
-/**
- * @brief Allocate a block with poisoned heap redzones.
+/* Allocate a block with poisoned heap redzones.
  * @param size User payload size in bytes.
  * @return Pointer to the unpoisoned user payload, or NULL on allocation failure.
  */
@@ -380,8 +324,7 @@ void *__wrap_malloc(size_t size) {
   return payload;
 }
 
-/**
- * @brief Allocate and zero a block with poisoned heap redzones.
+/* Allocate and zero a block with poisoned heap redzones.
  * @param nmemb Number of elements.
  * @param size Size of each element in bytes.
  * @return Pointer to the zeroed user payload, or NULL on allocation failure.
@@ -402,8 +345,7 @@ void *__wrap_calloc(size_t nmemb, size_t size) {
   return payload;
 }
 
-/**
- * @brief Allocate a resized block, copy old contents, and poison the old block.
+/* Allocate a resized block, copy old contents, and poison the old block.
  * @param ptr Previous user pointer, or NULL.
  * @param size New user payload size in bytes.
  * @return Pointer to the resized user payload, or NULL on allocation failure.
@@ -435,8 +377,7 @@ void *__wrap_realloc(void *ptr, size_t size) {
   return new_payload;
 }
 
-/**
- * @brief Poison a freed block and keep it quarantined for this demo.
+/* Poison a freed block and keep it quarantined.
  * @param ptr User pointer to free, or NULL.
  */
 void __wrap_free(void *ptr) {
@@ -458,16 +399,11 @@ void __wrap_free(void *ptr) {
   (void)__real_free;
 }
 
-/** @} */
+/* Clang ASan/KASan ABI callbacks: Clang emits calls to these symbols when
+ * outlined instrumentation is enabled. The _noabort variants are provided
+ * because Clang may reference them for recoverable instrumentation modes. */
 
-/** @name Clang ASan/KASan ABI callbacks
- * Clang emits calls to these symbols when outlined instrumentation is enabled.
- * The _noabort variants are provided because Clang may reference them for
- * recoverable instrumentation modes.
- * @{ */
-
-/**
- * @brief Generate load/store access-check callbacks for one access kind.
+/* Generate load/store access-check callbacks for one access kind.
  * @param kind Callback kind token: load or store.
  */
 #define DEFINE_ACCESS_CALLBACKS(kind)                                          \
@@ -501,18 +437,16 @@ void __wrap_free(void *ptr) {
 DEFINE_ACCESS_CALLBACKS(load)
 DEFINE_ACCESS_CALLBACKS(store)
 
-/** @brief Called by Clang before code paths that do not return. */
+/* Called by Clang before code paths that do not return. */
 void __asan_handle_no_return(void) {}
 
-/** @brief ASan runtime initialization hook emitted by Clang. */
+/* ASan runtime initialization hook emitted by Clang. */
 void __asan_init(void) { clear_shadow(); }
 
-/** @brief Version check hook expected by some ASan-instrumented objects. */
+/* Version check hook expected by some ASan-instrumented objects. */
 void __asan_version_mismatch_check(void) {}
 
-/**
- * @brief Clang ASan global descriptor layout used by __asan_register_globals.
- */
+/* Clang ASan global descriptor layout used by __asan_register_globals. */
 struct asan_global {
   uintptr_t beg;
   uintptr_t size;
@@ -524,8 +458,7 @@ struct asan_global {
   uintptr_t odr_indicator;
 };
 
-/**
- * @brief Register globals and poison their trailing redzones.
+/* Register globals and poison their trailing redzones.
  * @param globals Pointer to an array of Clang ASan global descriptors.
  * @param n Number of descriptors in the array.
  */
@@ -552,8 +485,7 @@ void __asan_register_globals(uintptr_t globals, uintptr_t n) {
   }
 }
 
-/**
- * @brief Unpoison global ranges when Clang unregisters global descriptors.
+/* Unpoison global ranges when Clang unregisters global descriptors.
  * @param globals Pointer to an array of Clang ASan global descriptors.
  * @param n Number of descriptors in the array.
  */
@@ -563,5 +495,3 @@ void __asan_unregister_globals(uintptr_t globals, uintptr_t n) {
   for (uintptr_t i = 0; i < n; ++i)
     kasan_unpoison((void *)global[i].beg, global[i].size_with_redzone);
 }
-
-/** @} */
