@@ -552,8 +552,8 @@ check_lit_xml_results() {
         fi
 
         if grep -Eq '<failure([ >])| failures="[1-9][0-9]*"| errors="[1-9][0-9]*"' "${result_file}"; then
-            # Test failures does not mean abort!
-            echo "WARNING: lit reported failures in: ${result_file}" >&2
+            echo "lit reported failures in: ${result_file}" >&2
+            failed=true
         fi
     done
 
@@ -642,7 +642,10 @@ package() {
 ## Main Logic ##
 ################
 
+BUILD_SH_STATUS=0
 main() {
+    local test_status=0
+
     echo_bold "Patching sources for ATfL...."
     apply_patches
     echo_bold "Done"
@@ -653,10 +656,16 @@ main() {
         echo_bold "Completed stage: ${stage}."
     done
     echo_bold "Executed build stages."
-    check_lit_xml_results
+    if ! check_lit_xml_results; then
+	test_status=2
+    fi
     echo_bold "Packaging...."
     package
     echo_bold "Packaged."
+    if [[ "${test_status}" -ne 0 ]]; then
+        echo "ATfL build completed, but lit tests failed." >&2
+        BUILD_SH_STATUS="${test_status}"
+    fi
     echo_bold "Done."
 }
 
@@ -745,7 +754,9 @@ make_and_clean_directory "${LOGS_DIR:?}"
 export LIT_OPTS="${LIT_OPTS:+${LIT_OPTS} }--ignore-fail"
 
 main
+main_status="${BUILD_SH_STATUS}"
 trap : 0
 if ${INTERACTIVE}; then
     bash
 fi
+exit "${main_status}"
