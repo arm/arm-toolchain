@@ -1,6 +1,6 @@
 # Experimental LLVM libc support
 
-Arm Toolchain for Embedded uses
+Arm Toolchain for Embedded (ATfE) uses
 [`picolibc`](https://github.com/picolibc/picolibc) as the standard C
 library. For experimental and evaluation purposes, you can instead
 choose to use the LLVM project's own C library.
@@ -104,9 +104,64 @@ clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m -nostartfiles -
 > `-lsemihost`.
 > * `-lcrt0-none` an empty library, you have to provide the `_start` symbol.
 
+## Migrating from `picolibc` to LLVM libc
+
+The C standard leaves some C library behavior implementation-defined, which might
+impact your project during migration from `picolibc` to LLVM libc.
+The following sections summarize some of the differences.
+
+#### Zero-size allocation with `malloc(0)` and `calloc(0, size)`
+
+Standard reference: C17 7.22.3.
+
+The standard permits either a null pointer or a non-null pointer that must not
+be used to access an object. `picolibc` rounds `malloc(0)` up to its minimum
+allocation size and can return a non-null pointer. LLVM libc returns `NULL` for
+zero-size allocation.
+
+#### Zero-size reallocation with `realloc(ptr, 0)`
+
+Standard reference: C17 7.22.3 and 7.22.3.5.
+
+C17 permits implementation-defined zero-size allocation behavior. In the current
+implementations, both `picolibc` and LLVM libc free `ptr` and return `NULL`.
+
+#### Locale support
+
+Standard reference: C17 7.11.1.1 and 7.11.2.1.
+
+Locale names other than `"C"` are implementation-defined. `picolibc` supports
+several locale names and character sets. LLVM libc in ATfE currently accepts
+only the `"C"` locale and returns `NULL` for other locale names.
+
+#### Signal support
+
+Standard reference: C17 7.14 and 7.14.1.1.
+
+The set of supported signals and parts of `signal` handler behavior are
+implementation-defined. `picolibc` provides fallback signal state for bare-metal
+and semihosted environments. The ATfE bare-metal entrypoint set for LLVM libc
+does not currently include a comparable `signal` implementation.
+
+#### Clock and calendar-time sources
+
+Standard reference: C17 7.27.2.1, 7.27.2.4, and 7.27.2.5.
+
+The availability, range, precision, and platform source of time values are
+implementation choices. `picolibc` time functions are normally backed by OS or
+semihosting hooks such as `gettimeofday`, `times`, or semihosting calls. LLVM
+libc bare-metal `clock` and `timespec_get` call ATfE retargeting hooks.
+
+#### Other implementation-defined choices
+
+Other examples of standard-library implementation-defined choices that might
+impact migration are the exact values of library macros, the supported set of
+error numbers, the value used by `EXIT_FAILURE`, and the representation and
+range of library typedefs such as `size_t`, `wchar_t`, `time_t`, and `clock_t`.
+
 ## LLVM libc initialization
 
-When used with ATfE provided `crt0` startup code, LLVM libc calls the following
+When used with ATfE-provided `crt0` startup code, LLVM libc calls the following
 functions in this order:
 1. `void _platform_setup_exceptions()`
 1. `void _platform_setup_memory()`
@@ -147,6 +202,12 @@ your own startup code:
 * Copy read-write and zero-initialized data.
 * Call `__libc_init_array()` to run constructors.
 * Call the main function.
+
+> [!NOTE]
+> For the Memory Management Unit setup LLVM libc startup code constructs the
+> initial translation table at runtime and therefore uses RAM (up to 4KB for
+> AArch64), in contrast to `picolibc` that provides the table as part of the ROM
+> image.
 
 ## LLVM libc finalization
 
