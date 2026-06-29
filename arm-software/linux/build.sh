@@ -51,6 +51,7 @@ fi
 OS_NAME=${OS_NAME:-"linux"}
 TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-$(uname -m).tar.gz"}
 ATFL_ASSERTIONS=${ATFL_ASSERTIONS:-"ON"}
+ATFL_BOLTED=${ATFL_BOLTED:-"OFF"}
 ATFL_TARGET_TRIPLE=${ATFL_TARGET_TRIPLE:-"$(uname -m)-unknown-linux-gnu"}
 ARM_TOOLCHAIN_ID=$(cmake -DLLVM_TOOLCHAIN_PROJECT_CODE=L -P "${SOURCES_DIR}"/arm-software/shared/cmake/generate_toolchain_id.cmake)
 PROCESSOR_COUNT=$(getconf _NPROCESSORS_ONLN)
@@ -63,6 +64,7 @@ STAGES=(
     "static_libomp_build"
 )
 ZLIB_STATIC_PATH=${ZLIB_STATIC_PATH:-"/usr/lib/$(uname -m)-linux-gnu/libz.a"}
+RELOCS_LINKER_FLAGS="-Wl,--emit-relocs,-znow"
 COMMON_LINKER_FLAGS="-Wl,--build-id"
 
 # Safe to use by all stages
@@ -285,6 +287,8 @@ Environment Variables:
                         (default: ${PARALLEL_JOBS})
     ATFL_ASSERTIONS     Enable assertions in the build ON/OFF
                         (default: ${ATFL_ASSERTIONS})
+    ATFL_BOLTED         Specify whether the clang and flang compilers should be bolted
+                        (default: ${ATFL_BOLTED})
     ATFL_VERSION        Specify the version string
                         (default: ${ATFL_VERSION})
     ATFL_TARGET_TRIPLE  Specify the default target triple
@@ -416,7 +420,7 @@ libcpp_build() {
       print_forced_cmake_flags_cache "LIBUNWIND_NOSHARED_CMAKE_FLAGS"
     } > flags.cmake
 
-    local libs="-rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed ${COMMON_LINKER_FLAGS}"
+    local libs="-rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed ${COMMON_LINKER_FLAGS} ${RELOCS_LINKER_FLAGS}"
     run_command cmake "${CMAKE_ARGS[@]}" -G Ninja "${SOURCES_DIR}/runtimes" \
         -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
@@ -454,6 +458,33 @@ product_build() {
     cd "${BUILD_DIR}/stage/product_build"
     bootstrap_compiler_default_config
 
+    local libs="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
+    local cmake_caches="${BUILD_DIR}/stage/product_build/cmake_caches"
+
+    mkdir -p "${cmake_caches}"
+    cp "${SOURCES_DIR}/flang/cmake/caches/BOLT.cmake" "${cmake_caches}"
+    { print_forced_cmake_flags_cache "COMMON_CMAKE_FLAGS"
+      print_forced_cmake_flags_cache "USE_RPATH_CMAKE_FLAGS"
+      print_forced_cmake_flags_cache "COMPILER_CMAKE_FLAGS"
+      print_forced_cmake_flags_cache "COMPILER_RT_CMAKE_FLAGS"
+      print_forced_cmake_flags_cache "FLANG_RT_CMAKE_FLAGS"
+      print_forced_cmake_flags_cache "LIBOMP_SHARED_CMAKE_FLAGS"
+      print_forced_cmake_flags_cache "LIBUNWIND_SHARED_CMAKE_FLAGS"
+      print_forced_cached_flag "CMAKE_EXE_LINKER_FLAGS:STRING" "\"${libs} ${RELOCS_LINKER_FLAGS}\""
+      print_forced_cached_flag "CMAKE_MODULE_LINKER_FLAGS:STRING" "\"${libs} ${RELOCS_LINKER_FLAGS}\""
+      print_forced_cached_flag "CMAKE_SHARED_LINKER_FLAGS:STRING" "\"${libs} ${RELOCS_LINKER_FLAGS}\""
+      print_forced_cached_flag "LLVM_ENABLE_RUNTIMES:STRING" "\"compiler-rt;flang-rt;libunwind;openmp\""
+      print_forced_cached_flag "RUNTIMES_CMAKE_ARGS:STRING" "\"-DCMAKE_C_COMPILER=${ATFL_DIR}/bin/clang;-DCMAKE_CXX_COMPILER=${ATFL_DIR}/bin/clang++;-DCMAKE_Fortran_COMPILER=${ATFL_DIR}/bin/flang;-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${libs};-DCMAKE_MODULE_LINKER_FLAGS=${libs};-DCMAKE_SHARED_LINKER_FLAGS=${libs}\""
+    } >> ${cmake_caches}/BOLT.cmake
+
+    if [[ "${RELEASE_FLAGS}" == "true" ]]; then
+        print_forced_cached_flag "LLVM_APPEND_VC_REV:BOOL" OFF >> ${cmake_caches}/BOLT.cmake
+    else
+        print_forced_cached_flag "LLVM_APPEND_VC_REV:BOOL" ON >> ${cmake_caches}/BOLT.cmake
+    fi
+    mkdir -p tools/clang/stage2-instrumented-bins/lib
+    cp -d "${BUILD_DIR}"/stage/libcpp_build/lib/lib* tools/clang/stage2-instrumented-bins/lib
+
     { print_forced_cmake_flags_cache "COMMON_CMAKE_FLAGS"
       print_forced_cmake_flags_cache "USE_BOOTSTRAP_CMAKE_FLAGS"
       print_forced_cmake_flags_cache "USE_RPATH_CMAKE_FLAGS"
@@ -465,8 +496,9 @@ product_build() {
       print_forced_cmake_flags_cache "BOLT_CMAKE_FLAGS"
     } > flags.cmake
 
-    local libs="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
     run_command cmake "${CMAKE_ARGS[@]}" -G Ninja "${SOURCES_DIR}/llvm" \
+        -DPGO_BUILD_CONFIGURATION="${cmake_caches}/BOLT.cmake" \
+        -C "${SOURCES_DIR}/flang/cmake/caches/BOLT-PGO.cmake" \
         -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
         -DCMAKE_BUILD_TYPE=Release \
@@ -484,8 +516,22 @@ product_build() {
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     cp -d "${ATFL_DIR}"/lib/clang/*/lib/"${ATFL_TARGET_TRIPLE}"/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
+    if [[ "${ATFL_BOLTED}" == "ON" ]]; then
+       run_command ninja stage2-flang-bolt 2>&1 | tee "${LOGS_DIR}/product-bolted.txt"
+    fi
     echo "-Wl,-rpath=${ATFL_DIR}/lib" >> "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
     run_test_command "${LOGS_DIR}/product_check_all.xml" "${LOGS_DIR}/product.txt" check-all
+    if [[ "${ATFL_BOLTED}" == "ON" ]]; then
+      run_test_command "${LOGS_DIR}/product_bolted_check_flang.xml" "${LOGS_DIR}/product-bolted.txt" stage2-check-flang
+      run_test_command "${LOGS_DIR}/product_bolted_check_clang.xml" "${LOGS_DIR}/product-bolted.txt" stage2-check-clang
+      # We insist that clang and flang are symlinks. This should fail if they are not.
+      local clang_name="$(readlink "${ATFL_DIR}/bin/clang")"
+      local flang_name="$(readlink "${ATFL_DIR}/bin/flang")"
+      mv "${ATFL_DIR}/bin/${clang_name}" "${ATFL_DIR}/bin/${clang_name}.not_bolted"
+      mv "${ATFL_DIR}/bin/${flang_name}" "${ATFL_DIR}/bin/${flang_name}.not_bolted"
+      cp "${BUILD_DIR}/stage/product_build/tools/clang/stage2-instrumented-bins/tools/clang/stage2-bins/bin/${clang_name}" "${ATFL_DIR}/bin"
+      cp "${BUILD_DIR}/stage/product_build/tools/clang/stage2-instrumented-bins/tools/clang/stage2-bins/bin/${flang_name}" "${ATFL_DIR}/bin"
+    fi
 
     bootstrap_compiler_default_config
 }
@@ -542,6 +588,12 @@ check_lit_xml_results() {
         # OpenMP tests do not get executed currently
         # "${LOGS_DIR}/check_openmp.xml"
     )
+    if [[ "${ATFL_BOLTED}" == "ON" ]]; then
+        result_files+=(
+            "${LOGS_DIR}/product_bolted_check_flang.xml"
+            "${LOGS_DIR}/product_bolted_check_clang.xml"
+        )
+    fi
 
     echo_bold "Checking lit XML test results...."
     for result_file in "${result_files[@]}"; do
