@@ -165,6 +165,8 @@ The `build.sh` script reads the following environment variables:
   (default: number of the available CPU cores)
 - `ATFL_ASSERTIONS` - Enable assertions in the build ON/OFF
   (default: ON), set this to `OFF` when doing a proper release (not nightly) build
+- `ATFL_BOLTED` - Specify whether the clang and flang compilers should be bolted
+  (default: OFF), set this to `ON` when doing a proper release (not nightly) build
 - `ATFL_TARGET_TRIPLE` - Specify the default target triple
   (default: aarch64-unknown-linux-gnu), Set it to aarch64-amazon-linux when building for Amazon Linux
 - `OS_NAME` - Specify the OS name
