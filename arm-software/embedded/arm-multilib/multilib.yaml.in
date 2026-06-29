@@ -21,7 +21,7 @@
 MultilibVersion: '1.0'
 
 # Make the main library selection exclusive, to make sure we don't
-# accidentally include two or more base variants at once.But allow
+# accidentally include two or more base variants at once. But allow
 # specialised overlay layers such as string/startup deltas to be
 # selected in parallel with the base layer.
 #
@@ -34,9 +34,9 @@ MultilibVersion: '1.0'
 # nothing will ever include the _libc_ stdio.h, which was what the
 # #include_next was really looking for.
 Groups:
-- Name: base_stdlibs
+- Name: base_libs
   Type: Exclusive
-- Name: string_minor_libs
+- Name: string_libs
   Type: Exclusive
 - Name: startup_libs
   Type: Exclusive
@@ -55,7 +55,7 @@ Variants:
 - Error: Arm Toolchain for Embedded does not provide RWPI library variants
   Flags:
   - -frwpi
-  Group: base_stdlibs
+  Group: base_libs
 
 Mappings:
 
