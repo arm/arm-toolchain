@@ -657,7 +657,7 @@ main() {
     done
     echo_bold "Executed build stages."
     if ! check_lit_xml_results; then
-	test_status=2
+        test_status=2
     fi
     echo_bold "Packaging...."
     package
@@ -754,9 +754,8 @@ make_and_clean_directory "${LOGS_DIR:?}"
 export LIT_OPTS="${LIT_OPTS:+${LIT_OPTS} }--ignore-fail"
 
 main
-main_status="${BUILD_SH_STATUS}"
 trap : 0
 if ${INTERACTIVE}; then
     bash
 fi
-exit "${main_status}"
+exit "${BUILD_SH_STATUS}"
