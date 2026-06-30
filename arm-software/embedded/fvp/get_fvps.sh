@@ -50,14 +50,14 @@ MACHINE_HARDWARE=$(uname -m)
 
 if [ "$MACHINE_HARDWARE" == 'x86_64' ]; then
     URL_CORSTONE_310='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64.tgz'
-    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.28/FVP_Base_RevC-2xAEMvA_11.28_23_Linux64.tgz'
-    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.28/FVP_Base_AEMv8R_11.28_23_Linux64.tgz'
-    URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.27/FastModels_crypto_11.27.019_Linux64.tgz'
+    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.31/FVP_Base_RevC_AEMvA_11.31_28_Linux_x86.tar.gz'
+    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.31/FVP_Base_AEMv8R_11.31_28_Linux_x86.tar.gz'
+    URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.31/FastModels_crypto_11.31_28_Linux_x86.tar.gz'
 elif [ "$MACHINE_HARDWARE" == 'aarch64' ]; then
     URL_CORSTONE_310='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64_armv8l.tgz'
-    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.28/FVP_Base_RevC-2xAEMvA_11.28_23_Linux64_armv8l.tgz'
-    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.28/FVP_Base_AEMv8R_11.28_23_Linux64_armv8l.tgz'
-    URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.27/FastModels_crypto_11.27.019_Linux64_armv8l.tgz'
+    URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.31/FVP_Base_RevC_AEMvA_11.31_28_Linux_armv8.tar.gz'
+    URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.31/FVP_Base_AEMv8R_11.31_28_Linux_armv8.tar.gz'
+    URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.31/FastModels_crypto_11.31_28_Linux_armv8.tar.gz'
 else
     echo Unknown architecture: $MACHINE_HARDWARE
     exit 1
@@ -67,7 +67,6 @@ FILENAME_CORSTONE_310=$(basename "$URL_CORSTONE_310")
 FILENAME_BASE_AEM_A=$(basename "$URL_BASE_AEM_A")
 FILENAME_BASE_AEM_R=$(basename "$URL_BASE_AEM_R")
 FILENAME_CRYPTO=$(basename "$URL_CRYPTO")
-EXTRACTEDNAME_CRYPTO=$(basename "$URL_CRYPTO" .tgz)
 
 mkdir -p download
 pushd download
@@ -86,25 +85,19 @@ tar -xf ${DOWNLOAD_DIR}/${FILENAME_CORSTONE_310}
 ./FVP_Corstone_SSE-310.sh --destination ./Corstone-310 "${INSTALLER_FLAGS_CORSTONE[@]}"
 fi
 
-if [ ! -d "Base_RevC_AEMvA_pkg" ]; then
+if [ ! -d "FVP_Base_RevC_AEMvA_11.31_28" ]; then
 tar -xf ${DOWNLOAD_DIR}/${FILENAME_BASE_AEM_A}
-# (Extracted directly into ./Base_RevC_AEMvA_pkg/, no installer)
+# (Extracted directly into the directory named above, no installer)
 fi
 
-if [ ! -d "AEMv8R_base_pkg" ]; then
+if [ ! -d "FVP_Base_AEMv8R_11.31_28" ]; then
 tar -xf ${DOWNLOAD_DIR}/${FILENAME_BASE_AEM_R}
-# (Extracted directly into ./AEMv8R_base_pkg/, no installer)
+# (Extracted directly into the directory named above, no installer)
 fi
 
-if [ ! -d "FastModelsPortfolio_11.27" ]; then
+if [ ! -d "FastModels_11.31_28" ]; then
 tar -xf ${DOWNLOAD_DIR}/${FILENAME_CRYPTO}
-# SDDKW-93582: Non-interactive installation fails if cwd is different.
-pushd ${EXTRACTEDNAME_CRYPTO}
-# This installer doesn't allow providing a default path for
-# interactive installation. The user will have to enter the install
-# directory as the target by hand.
-./setup.bin "${INSTALLER_FLAGS_CRYPTO[@]}"
-popd
+# (Extracted directly into the directory named above, no installer)
 fi
 
 popd
