@@ -48,9 +48,16 @@ print(f"KASAN_SHADOW_SIZE=0x{shadow_size:x} " \
       f"KASAN_RAM_SIZE=0x{ram_size:x}")')
 $(foreach var,$(KASAN_LAYOUT),$(eval $(var)))
 
+# Number of freed heap blocks to keep poisoned before returning the oldest one
+# to the allocator. Larger values improve recent use-after-free detection but
+# retain more heap memory.
+KASAN_HEAP_QUARANTINE_SIZE=4
+
 KASAN_DEFINES=\
 	-DKASAN_SHADOW_SCALE=$(KASAN_SHADOW_SCALE) \
-	-DKASAN_SHADOW_OFFSET=$(KASAN_SHADOW_OFFSET)
+	-DKASAN_SHADOW_OFFSET=$(KASAN_SHADOW_OFFSET) \
+	-DKASAN_HEAP_QUARANTINE_SIZE=$(KASAN_HEAP_QUARANTINE_SIZE)
+
 KASAN_MEMORY_MAP=\
 	-Wl,--defsym=__boot_flash=$(BOOT_FLASH_ORIGIN) \
 	-Wl,--defsym=__boot_flash_size=$(BOOT_FLASH_SIZE) \

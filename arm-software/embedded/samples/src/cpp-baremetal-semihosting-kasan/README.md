@@ -10,13 +10,9 @@ report an error if the accessed address is poisoned. See Clang's
 [AddressSanitizer documentation](https://clang.llvm.org/docs/AddressSanitizer.html)
 for more detail on the sanitizer model.
 
-The Makefile reserves the last 2 KiB of RAM for shadow memory. It uses Python
-to calculate the shadow start, end, size, and offset from the RAM origin, total
-RAM size, and KASan shadow scale. It passes the calculated offset to Clang's
-`-asan-mapping-offset` and the KASan runtime, and passes the full memory map to
-the linker with `-Wl,--defsym`, so the application RAM maps into the reserved
-shadow region without moving the normal RAM origin. The remaining RAM is
-exposed to the selected C library for data, heap, and stack.
+The Makefile reserves the last 2 KB of RAM for shadow memory. It calculates the
+shadow memory layout based on provided target memory map. The remaining RAM is
+exposed to the C library for data, heap, and stack.
 
 ## Build and run
 
@@ -31,58 +27,70 @@ exposed to the selected C library for data, heap, and stack.
 
 ## Customizing the runtime
 
+### Shadow memory
+
 The shadow memory runtime is sensitive to the target memory map. If the RAM
 origin or RAM size changes, override `RAM_ORIGIN` or `HW_RAM_SIZE` when
 invoking `make`, for example:
-`make run RAM_ORIGIN=<origin> HW_RAM_SIZE=<size>`. The Makefile
-recalculates `KASAN_SHADOW_OFFSET` from those values. If the shadow placement
-policy changes, update the Makefile calculation and `KASAN_MEMORY_MAP` symbols
-together, because Clang's instrumentation, the runtime, and the linker must all
-use the same `shadow = (address >> 3) + offset` mapping. Keep the Makefile
-memory-map variables as the source of truth for which application regions are
-actually covered.
+`make run RAM_ORIGIN=<origin> HW_RAM_SIZE=<size>`.
+The Makefile calculates `KASAN_SHADOW_OFFSET` from those values.
 
-Tune heap checking by changing `KASAN_HEAP_REDZONE_SIZE` and the quarantine
-policy. The sample keeps freed blocks poisoned forever so use-after-free is
-reliable in a demo; a practical runtime should use a bounded quarantine or
-return old blocks to the allocator once the diagnostic value is no longer worth
-the RAM cost. Keep the runtime and allocator wrappers unsanitized, otherwise the
-reporting path can recursively instrument itself.
+### Heap
 
-The reporting path avoids `printf` and formats messages through weak output
+The sample keeps recently freed blocks in a bounded quarantine queue so
+use-after-free remains detectable. When the quarantine is full, the oldest
+poisoned block is returned to the real allocator.
+
+Use `make KASAN_HEAP_QUARANTINE_SIZE=<n>` to change the
+number of retained freed blocks, or `0` to disable quarantine and free blocks
+immediately.
+
+### Redirecting messages
+
+Error reporting avoids `printf` and formats messages through weak output
 hooks. The default `kasan_rt_putc` implementation uses libc `putc`, while
-`kasan_rt_puts` and `kasan_rt_putaddr` build on top of it. A target can redirect
-reports by defining its own non-weak hooks, usually just `kasan_rt_putc`:
+`kasan_rt_puts`, `kasan_rt_putaddr`, and `kasan_rt_putsize` build on top of it.
+
+A target can redirect reports by defining its own non-weak hooks, usually just
+`kasan_rt_putc`:
 
 ```cpp
+#include "kasan_shadow_runtime.h"
+
 extern "C" void kasan_rt_putc(char c) {
   // Write c to UART, ITM/SWO, retained RAM, or another target-specific sink.
 }
 ```
 
-The runtime provides weak report handlers, `kasan_rt_report_access` and
-`kasan_rt_report_alloc_error`. The default handlers print a report and abort.
-This sample overrides them in `hello.cpp` with unsanitized handlers (to avoid
-infinite recursion) that print `(recovered)` and return, so every demo can run
-in one process:
+### Error reporting and recovery
+
+The runtime provides weak report handlers: `kasan_rt_report_access`,
+`kasan_rt_report_alloc_error`, and `kasan_rt_report_shadow_update_error`. The
+default handlers print a report and abort. 
+
+This sample overrides the access and allocator handlers in `hello.cpp` to print
+`(recovered)` and return, so every demo can run in one process:
 
 ```cpp
+#include "kasan_shadow_runtime.h"
+
+// Handlers must be unsanitized to avoid infinite recursion
 extern "C" __attribute__((no_sanitize("kernel-address"))) void
-kasan_rt_report_access(const char *kind, uintptr_t addr, uintptr_t size) {
+kasan_rt_report_access(const char *kind, uintptr_t addr, size_t size,
+                       size_t offset) {
   // Report the access and return to recover, or abort to stop.
 }
 ```
 
-C code does not need the `extern "C"` wrapper. Keep these hooks small and avoid
-allocating memory from them, because they run after KASan has found memory
-corruption. Returning from a report handler allows the invalid access to
-continue, so recovery is useful for diagnostics but is not a safe production
-policy. Add symbolization only if the target has enough storage and the extra
-report detail is worth the code-size cost.
+Avoid allocating memory in these hooks, because they run after KASan has found
+memory corruption.
+
+Returning from a report handler allows the invalid access to continue: recovery
+is useful for diagnostics but is not a safe in production.
 
 ## Limitations
 
-Dynamic stack allocations remain disabled with
+Dynamic stack allocations are disabled with
 `-mllvm -asan-instrument-dynamic-allocas=0` to keep the runtime small.
 
 The reserved shadow memory covers the application RAM range only. Stack, heap,

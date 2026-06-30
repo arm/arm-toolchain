@@ -8,20 +8,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "kasan_shadow_runtime.h"
+
 // Override the default aborting report hooks so this sample can recover and
 // continue through all demo tests in one run.
 
-extern "C" void kasan_rt_puts(const char *s);
-extern "C" void kasan_rt_putaddr(uintptr_t addr);
-
 extern "C" __attribute__((no_sanitize("kernel-address"))) void
-kasan_rt_report_access(const char *kind, uintptr_t addr, uintptr_t size) {
+kasan_rt_report_access(const char *kind, uintptr_t addr, size_t size,
+                       size_t offset) {
   kasan_rt_puts("KASAN: invalid ");
   kasan_rt_puts(kind);
   kasan_rt_puts(" at ");
   kasan_rt_putaddr(addr);
   kasan_rt_puts(", size ");
-  kasan_rt_putaddr(size);
+  kasan_rt_putsize(size);
+  kasan_rt_puts(", offset ");
+  kasan_rt_putsize(offset);
   kasan_rt_puts(" (recovered)\n");
 }
 
