@@ -25,6 +25,7 @@ set(ENABLE_VARIANTS "all" CACHE STRING "Semicolon separated list of variants to 
 set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
 set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 set(PROJECT_PREFIX "${CMAKE_BINARY_DIR}/lib-builds" CACHE STRING "Directory to build subprojects in.")
+set(LLVM_LIBC_TEST_SYSROOT "${PROJECT_PREFIX}/test-sysroot" CACHE PATH "Build-tree package-style sysroot for LLVM libc tests.")
 option(
     NUMERICAL_BUILD_NAMES
     "Instead of using the full variant name to label build directories, use an index number. This may help shorten paths."
@@ -120,6 +121,24 @@ add_dependencies(
     check-cxxabi
     check-unwind
 )
+
+if(C_LIBRARY STREQUAL llvmlibc)
+    if(ENABLE_MULTILIB_HEADER_OPTIMISATION)
+        set(LLVM_LIBC_TEST_SYSROOT_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised")
+    else()
+        set(LLVM_LIBC_TEST_SYSROOT_SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/multilib")
+    endif()
+    list(APPEND passthrough_dirs "-DLLVM_LIBC_TEST_SYSROOT=${LLVM_LIBC_TEST_SYSROOT}")
+    add_custom_target(
+        llvmlibc-test-sysroot
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${LLVM_LIBC_TEST_SYSROOT}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${LLVM_LIBC_TEST_SYSROOT}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${LLVM_LIBC_TEST_SYSROOT_SOURCE_DIR}"
+            "${LLVM_LIBC_TEST_SYSROOT}"
+        COMMENT "Generating llvm-libc test sysroot"
+    )
+endif()
 
 if(ENABLE_PARALLEL_LIB_CONFIG OR ENABLE_PARALLEL_LIB_BUILD)
     # Additional targets to build the variant subprojects in parallel.
@@ -247,6 +266,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 ${passthrough_dirs}
                 ${additional_cmake_args}
                 -DVARIANT_JSON=${variant_json_file}
+                -DVARIANT_MULTILIB_FLAGS=${variant_multilib_flags}
                 -DC_LIBRARY=${C_LIBRARY}
                 -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                 -DPROJECT_PREFIX=${PROJECT_PREFIX}
@@ -334,6 +354,13 @@ foreach(lib_idx RANGE ${lib_count_dec})
                     ${check_target}
                     runtimes-${variant}-build
                 )
+                if(C_LIBRARY STREQUAL llvmlibc AND check_target STREQUAL check-llvmlibc)
+                    ExternalProject_Add_StepDependencies(
+                        runtimes-${variant}
+                        ${check_target}
+                        llvmlibc-test-sysroot
+                    )
+                endif()
                 add_custom_target(${check_target}-${variant})
                 add_dependencies(${check_target} runtimes-${variant}-${check_target})
                 add_dependencies(${check_target}-${variant} runtimes-${variant}-${check_target})
@@ -431,4 +458,12 @@ if(ENABLE_MULTILIB_HEADER_OPTIMISATION)
         DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised/"
         DESTINATION .
     )
+endif()
+
+if(C_LIBRARY STREQUAL llvmlibc)
+    if(ENABLE_MULTILIB_HEADER_OPTIMISATION)
+        add_dependencies(llvmlibc-test-sysroot generate-multilib-common-headers)
+    else()
+        add_dependencies(llvmlibc-test-sysroot ${all_runtime_targets} multilib-yaml)
+    endif()
 endif()

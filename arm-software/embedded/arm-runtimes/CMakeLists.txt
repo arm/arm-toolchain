@@ -59,6 +59,7 @@ endif()
 set(TARGET_ARCH ${TARGET_ARCH_def} CACHE STRING "Architecture being targetted.")
 set(VARIANT ${VARIANT_def} CACHE STRING "Name for the variant, usually architecture + suffix.")
 set(COMPILE_FLAGS ${COMPILE_FLAGS_def} CACHE STRING "Flags required to build the variant.")
+set(VARIANT_MULTILIB_FLAGS "" CACHE STRING "Flags that select this variant in multilib.yaml.")
 set(TEST_EXECUTOR ${TEST_EXECUTOR_def} CACHE STRING "Program used to run tests.")
 set_property(CACHE TEST_EXECUTOR PROPERTY STRINGS fvp qemu)
 set(FVP_MODEL ${FVP_MODEL_def} CACHE STRING "FVP model to use, if FVP is the test executor.")
@@ -100,6 +101,7 @@ set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (pi
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
+set(LLVM_LIBC_TEST_SYSROOT "" CACHE PATH "Build-tree package-style sysroot for LLVM libc tests.")
 option(LLVM_USE_RELATIVE_PATHS_IN_MACROS "Use relative paths in macro expansions" ON)
 
 set(PROJECT_PREFIX "subproj" CACHE STRING "Directory to build subprojects in.")
@@ -798,6 +800,18 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -T
         llvmlibc.ld
     )
+    set(llvmlibc_test_compile_options "")
+    if(LLVM_LIBC_TEST_SYSROOT)
+        set(llvmlibc_test_sysroot "--sysroot=${LLVM_LIBC_TEST_SYSROOT}")
+        list(APPEND llvmlibc_test_compile_options ${llvmlibc_test_sysroot})
+        list(APPEND llvmlibc_test_link_options ${llvmlibc_test_sysroot})
+    endif()
+    if(VARIANT_MULTILIB_FLAGS)
+        separate_arguments(llvmlibc_test_multilib_flags NATIVE_COMMAND ${VARIANT_MULTILIB_FLAGS})
+        list(APPEND llvmlibc_test_compile_options ${llvmlibc_test_multilib_flags})
+        list(APPEND llvmlibc_test_link_options ${llvmlibc_test_multilib_flags})
+    endif()
+    list(JOIN llvmlibc_test_compile_options "," llvmlibc_test_compile_options_default)
     if(NOT target_supports_lock_free_atomics)
         list(APPEND llvmlibc_test_link_options -latomic-fallback)
     endif()
@@ -882,6 +896,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_ENABLE_RUNTIMES=libc
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
+        -DLIBC_TEST_COMPILE_OPTIONS_DEFAULT=${llvmlibc_test_compile_options_default}
         -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
         -DLIBC_TEST_CMD=${test_cmd}
         -DLIBC_TEST_HERMETIC_ONLY=ON
