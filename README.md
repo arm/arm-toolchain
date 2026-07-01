@@ -9,12 +9,19 @@ the LLVM project.
 
 The binaries built under this project are compatible with RHEL 8.
 
-# Limitations
+# Supported Variants
 
-For compactness, this toolchain supports only armv7m_hard_fpv4_sp_d16_unaligned_size
-and armv7m_hard_fpv4_sp_d16_unaligned_badstrb, not any other ARM variants.
-Other variants will need to be added to LLVM_TOOLCHAIN_LIBRARY_VARIANTS in
-arm-software/embedded/CMakeLists.txt.
+For compactness, this toolchain supports only the following ARMv7-M variants:
+
+- `armv7m_hard_fpv4_sp_d16_unaligned_size` - Unaligned access enabled, no badstrb workaround
+- `armv7m_hard_fpv4_sp_d16_unaligned_badstrb` - Unaligned access enabled, with badstrb workaround
+- `armv7m_hard_fpv4_sp_d16_size` - Aligned access only (no unaligned), no badstrb workaround
+- `armv7m_hard_fpv4_sp_d16_badstrb` - Aligned access only (no unaligned), with badstrb workaround
+
+All variants use hard float ABI with FPv4-SP-D16, and disable C++ exceptions and RTTI.
+
+Other ARM variants will need to be added to `LLVM_TOOLCHAIN_LIBRARY_VARIANTS` in
+`arm-software/embedded/CMakeLists.txt`.
 
 # Release builds
 
