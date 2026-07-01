@@ -412,6 +412,7 @@ set(
 
 add_custom_target(check-compiler-rt)
 add_dependencies(check-all check-compiler-rt)
+set(compiler_rt_install_dependency)
 if(ENABLE_COMPILER_RT_LIBS)
     ExternalProject_Add(
         compiler_rt
@@ -467,10 +468,7 @@ if(ENABLE_COMPILER_RT_LIBS)
         )
         add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
     endif()
-else()
-    add_custom_target(compiler_rt-configure)
-    add_custom_target(compiler_rt-build)
-    add_custom_target(compiler_rt-install)
+    set(compiler_rt_install_dependency compiler_rt-install)
 endif()
 
 # Build compiler-rt profile library after the C library is available.
@@ -483,7 +481,7 @@ if(ENABLE_COMPILER_RT_LIBS)
         TMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR compiler-rt-profile/install
-        DEPENDS compiler_rt-install clib-install
+        DEPENDS ${compiler_rt_install_dependency} clib-install
         CMAKE_ARGS
         ${compiler_rt_common_flags}
         ${compiler_launcher_cmake_args}
@@ -504,10 +502,6 @@ if(ENABLE_COMPILER_RT_LIBS)
             <INSTALL_DIR>/lib/${normalized_target_triple}
             "${TEMP_LIB_DIR}/lib"
     )
-else()
-    add_custom_target(compiler_rt_profile-configure)
-    add_custom_target(compiler_rt_profile-build)
-    add_custom_target(compiler_rt_profile-install)
 endif()
 
 ###############################################################################
@@ -562,7 +556,7 @@ if(C_LIBRARY STREQUAL picolibc)
         TMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${picolibc_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
-        DEPENDS compiler_rt-install
+        DEPENDS ${compiler_rt_install_dependency}
         CONFIGURE_COMMAND
             ${MESON_EXECUTABLE}
             setup
@@ -608,7 +602,7 @@ if(C_LIBRARY STREQUAL picolibc)
             picolibc
             compile-tests
             picolibc-build
-            compiler_rt-install
+            ${compiler_rt_install_dependency}
         )
 
         # Timeout multipliers. The actual timeout value used in testing is:
@@ -1018,9 +1012,6 @@ if(C_LIBRARY STREQUAL llvmlibc)
             LIST_SEPARATOR ,
             CONFIGURE_HANDLED_BY_BUILD TRUE
         )
-    else()
-        add_custom_target(llvmlibc-support-build)
-        add_custom_target(llvmlibc-support-install)
     endif()
 
     if(ENABLE_LIBC_TESTS)
@@ -1056,7 +1047,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ExternalProject_Add_StepTargets(llvmlibc check-lit)
         set(llvmlibc_test_dependencies
             llvmlibc-build
-            compiler_rt-install
+            ${compiler_rt_install_dependency}
             cxxlibs-install
         )
         if(ENABLE_LLVMLIBC_SUPPORT_LIBS)
@@ -1181,7 +1172,7 @@ if(ENABLE_CXX_LIBS)
         TMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR ${TEMP_LIB_DIR}
-        DEPENDS compiler_rt-install clib-install
+        DEPENDS ${compiler_rt_install_dependency} clib-install
         CMAKE_ARGS
         ${compiler_launcher_cmake_args}
         -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
