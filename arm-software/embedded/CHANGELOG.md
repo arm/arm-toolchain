@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 definitions can be overridden by users on platforms without native atomic
 operation support.
 ### Changed
+- LLVM libc support is no longer marked experimental and is considered
+production quality for typical embedded use cases.
+
 ### Deprecated
 - `picolibc` will be superseded with LLVM libc as the default C library in
   ATfE 24. Further in ATfE 25 `picolibc` will be moved out of the main ATfE
