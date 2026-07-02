@@ -90,19 +90,40 @@ jobs:
           path: packaging.log
           if-no-files-found: warn
 
+      - name: Get tarball name
+        if: ${{ success() && !env.ACT }}
+        id: tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          path=$(find arm-software/linux/output -maxdepth 1 -type f -name 'atfl-*.tar.gz')
+          test "$(printf '%s\n' "$path" | wc -l)" -eq 1
+          echo "name=$(basename "$path")" >> "$GITHUB_OUTPUT"
+          echo "path=$path" >> "$GITHUB_OUTPUT"
+
       - name: Upload tar-ball
         uses: actions/upload-artifact@v7
         if: ${{ success() && !env.ACT }}
         with:
-          name: atfl-${{ matrix.build_script }}-${{ matrix.target_os }}
-          path: |
-            arm-software/linux/output/atfl-*.tar.gz
+          name: ${{ steps.tarball.outputs.name }}
+          path: ${{ steps.tarball.outputs.path }}
           if-no-files-found: error
+
+      - name: Get deb package name
+        if: ${{ success() && !env.ACT && startsWith(matrix.target_os, 'Ubuntu') }}
+        id: deb
+        shell: bash
+        run: |
+          set -euo pipefail
+          path=$(find arm-software/linux/output -type f -name '*.deb')
+          test "$(printf '%s\n' "$path" | wc -l)" -eq 1
+          echo "name=$(basename "$path")" >> "$GITHUB_OUTPUT"
+          echo "path=$path" >> "$GITHUB_OUTPUT"
 
       - name: Upload deb package
         if: ${{ success() && !env.ACT && startsWith(matrix.target_os, 'Ubuntu') }}
         uses: actions/upload-artifact@v7
         with:
-          name: atfl-deb-${{ matrix.target_os }}
-          path: arm-software/linux/output/**/*.deb
+          name: ${{ steps.deb.outputs.name }}
+          path: ${{ steps.deb.outputs.path }}
           if-no-files-found: error
