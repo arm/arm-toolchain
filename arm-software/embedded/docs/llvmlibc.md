@@ -1,13 +1,10 @@
-# Experimental LLVM libc support
+# LLVM libc support
 
 Arm Toolchain for Embedded (ATfE) uses
 [`picolibc`](https://github.com/picolibc/picolibc) as the standard C
-library. For experimental and evaluation purposes, you can instead
-choose to use the LLVM project's own C library.
-
-> [!WARNING]
-> `llvmlibc` support in Arm Toolchain for Embedded is
-> an experimental technology preview, with significant limitations.
+library. This will change in a future version to use the [LLVM project's own
+C library](https://libc.llvm.org/) that is now provided with ATfE to facilitate
+the migration.
 
 ## Building the toolchain with LLVM libc
 
@@ -300,10 +297,11 @@ $ LIBC=llvmlibc make build
 
 ## Limitations of LLVM libc in Arm Toolchain for Embedded
 
-At present, this toolchain builds the C++ libraries limited to what is supported
-in conjunction with LLVM libc. For example, file I/O and fstream are not
-available - only console iostream can be used.
+LLVM libc is a production-quality implementation, but it currently provides only
+a subset of the functions defined by the C standard.
+Its coverage is sufficient for typical embedded use cases and continues to grow
+based on user needs and requests.
 
-LLVM libc is a work in
-progress. It is incomplete: not all standard C library functionality
-is provided yet.
+ATfE builds of the C++ libraries are limited to what is supported
+in conjunction with LLVM libc. For example, file I/O and `fstream` are not
+available - only console `iostream` can be used.

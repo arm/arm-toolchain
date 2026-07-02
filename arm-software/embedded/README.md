@@ -104,6 +104,10 @@ Install appropriate latest supported Microsoft Visual C++ Redistributable packag
 > If you are using the toolchain in a shared environment with untrusted input,
 > make sure it is sufficiently sandboxed.
 
+> [!NOTE]
+> See [Using LLVM libc](docs/llvmlibc.md#using-llvm-libc) for details about
+> using LLVM Project standard C library provided with ATfE.
+
 To use the toolchain, on the command line you need to provide the following options:
 * The target triple.
 * The FPU to use.
