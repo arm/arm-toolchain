@@ -23,6 +23,8 @@ jobs:
   build-and-test-toolchain:
     name: Build ${{ matrix.build_script }} for ${{ matrix.target_os }} on ${{ matrix.runner }}
     runs-on: ${{ matrix.runner }}
+    env:
+      ATFL_VERSION: "0.0"
 
     # Allow manual runs on Fork for testing, and
     # scheduled runs only on arm/arm-toolchain
