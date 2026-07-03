@@ -168,6 +168,11 @@ static bool address_is_poisoned(uintptr_t addr) {
   if (value == 0)
     return false;
 
+  /* Shadow byte encoding:
+   *   0      all bytes in this granule are valid
+   *   1..N   only the first N bytes in this granule are valid
+   *   other  granule is poisoned
+   */
   if (value < KASAN_SHADOW_GRANULE_SIZE)
     return (addr & (KASAN_SHADOW_GRANULE_SIZE - 1U)) >= value;
 
@@ -285,17 +290,17 @@ void __wrap_free(void *ptr);
 
 #if KASAN_HEAP_QUARANTINE_SIZE > 0
 static struct heap_header
-    *heap_quarantine[KASAN_HEAP_QUARANTINE_SIZE];
-static size_t heap_quarantine_head;
-static size_t heap_quarantine_count;
+    *heap_quarantine[KASAN_HEAP_QUARANTINE_SIZE] = {0};
+static size_t heap_quarantine_oldest = 0;
+static size_t heap_quarantine_count = 0;
 
 /* Return the oldest quarantined block to the real allocator. */
 static void release_oldest_quarantined_block(void) {
-  struct heap_header *header = heap_quarantine[heap_quarantine_head];
+  struct heap_header *header = heap_quarantine[heap_quarantine_oldest];
 
-  heap_quarantine[heap_quarantine_head] = NULL;
-  heap_quarantine_head =
-      (heap_quarantine_head + 1U) % KASAN_HEAP_QUARANTINE_SIZE;
+  heap_quarantine[heap_quarantine_oldest] = NULL;
+  heap_quarantine_oldest =
+      (heap_quarantine_oldest + 1U) % KASAN_HEAP_QUARANTINE_SIZE;
   --heap_quarantine_count;
 
   __real_free(header);
@@ -306,7 +311,7 @@ static void quarantine_block(struct heap_header *header) {
   if (heap_quarantine_count == KASAN_HEAP_QUARANTINE_SIZE)
     release_oldest_quarantined_block();
 
-  size_t index = (heap_quarantine_head + heap_quarantine_count) %
+  size_t index = (heap_quarantine_oldest + heap_quarantine_count) %
                  KASAN_HEAP_QUARANTINE_SIZE;
   heap_quarantine[index] = header;
   ++heap_quarantine_count;
