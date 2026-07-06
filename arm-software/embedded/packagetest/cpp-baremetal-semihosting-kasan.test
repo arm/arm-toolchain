@@ -1,0 +1,15 @@
+# RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-kasan clean
+# RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-kasan run BIN_PATH=%unpack_directory/bin %sample_libc > %t.out 2>&1
+# RUN: FileCheck %s < %t.out
+# RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-kasan clean
+
+# CHECK: C++ KASan shadow-memory sample
+# CHECK: Test 1: automatic stack redzone
+# CHECK: KASAN: invalid store{{.*}}(recovered)
+# CHECK: Test 2: heap buffer overflow
+# CHECK: KASAN: invalid store{{.*}}(recovered)
+# CHECK: Test 3: heap use-after-free
+# CHECK: KASAN: invalid store{{.*}}(recovered)
+# CHECK: Test 4: realloc buffer overflow
+# CHECK: KASAN: invalid store{{.*}}(recovered)
+# CHECK: All KASan tests completed
