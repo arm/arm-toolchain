@@ -304,6 +304,14 @@ $ chrpath -l ./example
 ./example: RUNPATH=$HOME/armpl/armpl_24.10_flang-new/lib/pkgconfig/../../lib:$HOME/atfl/lib/clang/20/lib/aarch64-unknown-linux-gnu:$HOME/atfl/bin/../lib/aarch64-unknown-linux-gnu
 ```
 
+## Nightly build binary distribution
+
+[ATfL Nightly Build and Test](https://github.com/arm/arm-toolchain/actions/workflows/atfl_nightly_build_and_test.yml) hosts daily nightly builds, and provides binary artifacts in form of tar-balls.
+
+Verify sha256 checksum of tar-ball, before further usage.
+
+ATfL binaries must be used on trusted inputs (such as the customer's own source code). If it is run on untrusted code, then the customer must sandbox the compiler. 
+
 ## Providing feedback and reporting issues
 
 Please see the [Contribution Guide](../../CONTRIBUTING.md#report-an-issue) for guidance on how to report an issue or raise a feature request.

@@ -37,7 +37,6 @@ jobs:
           # Complete Toolchain Build & Test
           - build_script: build.sh
             install_script: install_dependencies_ubuntu.sh
-            packaging_script: github_packaging_ubuntu.sh
             target_os: Ubuntu-24.04-arm64
             runner: ah-ubuntu_24_04-c7g_8x-100
 
@@ -63,12 +62,6 @@ jobs:
           set -euo pipefail
           ./arm-software/linux/${{ matrix.build_script }} 2>&1 | tee build.log
 
-      - name: Create deb package
-        shell: bash
-        run: |
-          set -euo pipefail
-          ./arm-software/linux/scripts/${{ matrix.packaging_script }} 2>&1 | tee packaging.log
-
       - name: List built artifacts
         if: ${{ success() }}
         shell: bash
@@ -84,14 +77,6 @@ jobs:
           path: build.log
           if-no-files-found: warn
 
-      - name: Upload packaging log
-        uses: actions/upload-artifact@v7
-        if: ${{ always() && !env.ACT }}
-        with:
-          name: packaging-log-${{ matrix.target_os }}
-          path: packaging.log
-          if-no-files-found: warn
-
       - name: Get tarball name
         if: ${{ success() && !env.ACT }}
         id: tarball
@@ -100,7 +85,14 @@ jobs:
           set -euo pipefail
           path=$(find arm-software/linux/output -maxdepth 1 -type f -name 'atfl-*.tar.gz')
           test "$(printf '%s\n' "$path" | wc -l)" -eq 1
-          echo "name=$(basename "$path")" >> "$GITHUB_OUTPUT"
+
+          filename=$(basename "$path")
+          date=$(date -u +%Y%m%d)
+
+          # Strip .tar.gz, append date, then add extension back.
+          artifact_name="${filename%.tar.gz}-${date}.tar.gz"
+
+          echo "name=$artifact_name" >> "$GITHUB_OUTPUT"
           echo "path=$path" >> "$GITHUB_OUTPUT"
 
       - name: Upload tar-ball
@@ -109,23 +101,4 @@ jobs:
         with:
           name: ${{ steps.tarball.outputs.name }}
           path: ${{ steps.tarball.outputs.path }}
-          if-no-files-found: error
-
-      - name: Get deb package name
-        if: ${{ success() && !env.ACT && startsWith(matrix.target_os, 'Ubuntu') }}
-        id: deb
-        shell: bash
-        run: |
-          set -euo pipefail
-          path=$(find arm-software/linux/output -type f -name '*.deb')
-          test "$(printf '%s\n' "$path" | wc -l)" -eq 1
-          echo "name=$(basename "$path")" >> "$GITHUB_OUTPUT"
-          echo "path=$path" >> "$GITHUB_OUTPUT"
-
-      - name: Upload deb package
-        if: ${{ success() && !env.ACT && startsWith(matrix.target_os, 'Ubuntu') }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ steps.deb.outputs.name }}
-          path: ${{ steps.deb.outputs.path }}
           if-no-files-found: error
