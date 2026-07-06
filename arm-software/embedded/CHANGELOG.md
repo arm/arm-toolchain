@@ -7,20 +7,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-<<<<<<< HEAD
 
 - Shared support libraries now provide `libatomic-fallback.a` whose weak
 definitions can be overridden by users on platforms without native atomic
 operation support.
 - Bare-metal semihosting KASan sample with a minimal sanitizer runtime added.
+- SME support added to the LLVM libc startup code by providing
+[__arm_sme_state](https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst#811__arm_sme_state).
+- Static TLS (Thread Local Storage) support added in LLVM libc startup code to
+enable language conformance testing. This did not add multithreading support.
+- `clangd` was added to the binary package.
+- [Guidance](docs/llvmlibc.md#migrating-from-picolibc-to-llvm-libc) added for
+migrating projects from `picolibc` to LLVM libc.
 
-=======
-- C++ bare-metal semihosting KASan sample added, covering a shadow-memory
-  runtime with automatic stack poisoning.
->>>>>>> 011f6a5e5e7f (Addressed review feedback)
 ### Changed
+
 - LLVM libc support is no longer marked experimental and is considered
 production quality for typical embedded use cases.
+- Modular `printf` was implemented in LLVM libc so that floating point
+conversion code is not linked in if it is not used by the application,
+significantly reducing the code size.
+- `clang_rt.profile` profiling and code coverage library is now automatically
+added to the command line when profiling instrumentation is enabled.
 
 ### Deprecated
 
