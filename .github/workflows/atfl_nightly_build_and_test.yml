@@ -95,7 +95,7 @@ jobs:
           echo "name=$artifact_name" >> "$GITHUB_OUTPUT"
           echo "path=$path" >> "$GITHUB_OUTPUT"
 
-      - name: Upload tar-ball
+      - name: Upload tarball
         uses: actions/upload-artifact@v7
         if: ${{ success() && !env.ACT }}
         with:

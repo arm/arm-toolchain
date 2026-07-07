@@ -306,11 +306,13 @@ $ chrpath -l ./example
 
 ## Nightly build binary distribution
 
-[ATfL Nightly Build and Test](https://github.com/arm/arm-toolchain/actions/workflows/atfl_nightly_build_and_test.yml) hosts daily nightly builds, and provides binary artifacts in form of tar-balls.
+[ATfL Nightly Build and Test](https://github.com/arm/arm-toolchain/actions/workflows/atfl_nightly_build_and_test.yml) hosts daily nightly builds, and provides binary artifacts in form of tarball.
 
-Verify sha256 checksum of tar-ball, before further usage.
+Verify sha256 checksum of tarball, before further usage.
 
-ATfL binaries must be used on trusted inputs (such as the customer's own source code). If it is run on untrusted code, then the customer must sandbox the compiler. 
+ATfL binaries must be used on trusted inputs (such as the customer's own source code). If it is run on untrusted code, then the customer must sandbox the compiler.
+
+It is recommended to use latest binaries from daily nightly builds.
 
 ## Providing feedback and reporting issues
 
