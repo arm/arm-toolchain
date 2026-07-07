@@ -24,7 +24,7 @@ migrating projects from `picolibc` to LLVM libc.
 
 - LLVM libc support is no longer marked experimental and is considered
 production quality for typical embedded use cases.
-- Modular `printf` was implemented in LLVM libc so that floating point
+- Modular `printf` is implemented in LLVM libc so that floating point
 conversion code is not linked in if it is not used by the application,
 significantly reducing the code size.
 - `clang_rt.profile` profiling and code coverage library is now automatically
