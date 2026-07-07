@@ -1,6 +1,0 @@
-${PRODUCT_NAME} (${PACKAGE_BRANCH_VERSION}-${PACKAGE_BUILD_NUMBER}~${DISTRO_TAG}) ${DISTRO_TAG}; urgency=low
-
-  * $PRODUCT_NAME version $PACKAGE_BRANCH_VERSION build $PACKAGE_BUILD_NUMBER
-
- -- Arm HPC Software <support-hpc-sw@arm.com>  ${PACK_DATE}
-
