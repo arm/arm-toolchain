@@ -16,10 +16,12 @@
 namespace {
 
 void stdio_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
-  size_t args[3];
-  args[0] = reinterpret_cast<size_t>(":tt");
-  args[1] = mode;
-  args[2] = static_cast<size_t>(3); /* name length */
+  const char std_stream_name[] = ":tt";
+  size_t args[] = {
+      reinterpret_cast<size_t>(std_stream_name),
+      mode,
+      sizeof(std_stream_name) - 1UL,
+  };
   cookie->handle = semihosting_call(SYS_OPEN, args);
 }
 } // namespace
@@ -29,9 +31,10 @@ extern "C" {
 static void semihosting_call_exit(int status) {
 
 #if defined(__ARM_64BIT_STATE) && __ARM_64BIT_STATE
-  size_t block[2];
-  block[0] = ADP_Stopped_ApplicationExit;
-  block[1] = status;
+  size_t block[] = {
+      ADP_Stopped_ApplicationExit,
+      static_cast<size_t>(status),
+  };
   semihosting_call(SYS_EXIT, block);
 #else
   if (status == 0) {
@@ -78,10 +81,11 @@ ssize_t __llvm_libc_stdio_read(struct __llvm_libc_stdio_cookie *cookie,
 
 ssize_t __llvm_libc_stdio_write(struct __llvm_libc_stdio_cookie *cookie,
                                 const char *buf, size_t size) {
-  size_t args[4];
-  args[0] = static_cast<size_t>(cookie->handle);
-  args[1] = reinterpret_cast<size_t>(buf);
-  args[2] = size;
+  size_t args[] = {
+      static_cast<size_t>(cookie->handle),
+      reinterpret_cast<size_t>(buf),
+      size,
+  };
   ssize_t retval = semihosting_call(SYS_WRITE, args);
   if (retval >= 0)
     retval = size - retval;
