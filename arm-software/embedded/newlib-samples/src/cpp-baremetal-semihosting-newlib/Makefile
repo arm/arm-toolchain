@@ -10,13 +10,14 @@ include ../../Makefile.conf
 CRT_SEMIHOST_NEWLIB=--config=newlib.cfg -lcrt0-rdimon -lrdimon
 TARGET=--target=arm-none-eabi -march=armv6m -mfpu=none -mfloat-abi=soft
 LD_SCRIPT=-T ../../ldscripts/newlib-cm4.ld
+LIBS=-latomic-fallback
 STARTUP=../../startup/startup_ARMCM4.S
 
 build: hello.elf
 
 hello.elf: *.cpp
-	$(BIN_PATH)/clang++ $(TARGET) $(CRT_SEMIHOST_NEWLIB) $(CPP_FLAGS) -g $(LD_SCRIPT) -nostartfiles -o hello.elf $(STARTUP) $^
-	$(BIN_PATH)/clang++ $(TARGET) $(CRT_SEMIHOST_NEWLIB) -fexceptions -DTEST_EXN -g $(LD_SCRIPT) -nostartfiles -o hello-exn.elf $(STARTUP) $^
+	$(BIN_PATH)/clang++ $(TARGET) $(CRT_SEMIHOST_NEWLIB) $(CPP_FLAGS) -g $(LD_SCRIPT) $(LIBS) -nostartfiles -o hello.elf $(STARTUP) $^
+	$(BIN_PATH)/clang++ $(TARGET) $(CRT_SEMIHOST_NEWLIB) -fexceptions -DTEST_EXN -g $(LD_SCRIPT) $(LIBS) -nostartfiles -o hello-exn.elf $(STARTUP) $^
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@
