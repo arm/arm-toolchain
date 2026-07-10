@@ -107,6 +107,7 @@ set(ENABLE_COMPILER_RT_LIBS ${ENABLE_COMPILER_RT_LIBS_def} CACHE BOOL "Build and
 set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
+set(LIBC_CONFIG_PATH "${LIBC_CONFIG_PATH_def}" CACHE PATH "Path to an LLVM libc config directory.")
 set(ENABLE_LLVMLIBC_MINOR_VARIANT ${ENABLE_LLVMLIBC_MINOR_VARIANT_def} CACHE BOOL "Install only the llvm-libc minor variant payload for this variant.")
 set(LLVMLIBC_SUBARCHIVE_NAME ${LLVMLIBC_SUBARCHIVE_NAME_def} CACHE STRING "llvm-libc subarchive to install when ENABLE_LLVMLIBC_MINOR_VARIANT is enabled.")
 set(ENABLE_LLVMLIBC_CORE_LIBS ${ENABLE_LLVMLIBC_CORE_LIBS_def} CACHE BOOL "Build and install the library archives from the llvm-libc build.")
@@ -173,7 +174,8 @@ if(ENABLE_LLVMLIBC_MINOR_VARIANT)
         message(FATAL_ERROR "ENABLE_LLVMLIBC_MINOR_VARIANT is only supported with C_LIBRARY=llvmlibc.")
     endif()
     if(NOT LLVMLIBC_SUBARCHIVE_NAME)
-        message(FATAL_ERROR "ENABLE_LLVMLIBC_MINOR_VARIANT requires LLVMLIBC_SUBARCHIVE_NAME to be set.")
+        message(FATAL_ERROR
+            "ENABLE_LLVMLIBC_MINOR_VARIANT requires LLVMLIBC_SUBARCHIVE_NAME to be set")
     endif()
 endif()
 if(NOT ENABLE_COMPILER_RT_LIBS)
@@ -891,6 +893,28 @@ if(C_LIBRARY STREQUAL llvmlibc)
         set(llvmlibc_lit_args "@${llvmlibc_lit_xfails_path} ${llvmlibc_lit_args}")
     endif()
 
+    set(llvmlibc_config_cmake_args "")
+    if(LIBC_CONFIG_PATH)
+        set(llvmlibc_config_path "${TOOLCHAIN_SOURCE_DIR}/${LIBC_CONFIG_PATH}")
+
+        if(EXISTS "${llvmlibc_config_path}")
+            list(APPEND llvmlibc_config_cmake_args "-DLIBC_CONFIG_PATH=${llvmlibc_config_path}")
+        elseif(LLVMLIBC_SUBARCHIVE_NAME)
+            message(FATAL_ERROR
+                "LLVMLIBC_SUBARCHIVE_NAME requires LIBC_CONFIG_PATH to "
+                "exist, but '${llvmlibc_config_path}' was not found.")
+        endif()
+    elseif(LLVMLIBC_SUBARCHIVE_NAME)
+        message(FATAL_ERROR
+            "LLVMLIBC_SUBARCHIVE_NAME requires LIBC_CONFIG_PATH to be set.")
+    endif()
+
+    if(ENABLE_LLVMLIBC_MINOR_VARIANT)
+        set(llvmlibc_include_startup OFF)
+    else()
+        set(llvmlibc_include_startup ON)
+    endif()
+
     set(common_llvmlibc_cmake_args
         -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_ASM_COMPILER=${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX}
@@ -910,12 +934,14 @@ if(C_LIBRARY STREQUAL llvmlibc)
         # Let CMake know we're cross-compiling
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-        -DLLVM_LIBC_ENABLE_MINOR_VARIANT=${ENABLE_LLVMLIBC_MINOR_VARIANT}
+        ${llvmlibc_config_cmake_args}
         -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVMLIBC_SUBARCHIVE_NAME}
+        -DLLVM_LIBC_INCLUDE_STARTUP=${llvmlibc_include_startup}
     )
 
     set(llvmlibc_build_install_args)
     if(ENABLE_LLVMLIBC_CORE_LIBS OR ENABLE_LLVMLIBC_MINOR_VARIANT)
+        # Run full llvmlibc install, then copy lib + include.
         list(APPEND llvmlibc_build_install_args
             INSTALL_COMMAND ${CMAKE_COMMAND} --install .
             COMMAND
@@ -930,6 +956,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
                 "${TEMP_LIB_DIR}/include"
         )
     else()
+        # Build only install-libc-headers, then copy include.
         list(APPEND llvmlibc_build_install_args
             BUILD_COMMAND
                 ${CMAKE_COMMAND}
