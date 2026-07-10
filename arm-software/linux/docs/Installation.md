@@ -15,9 +15,9 @@ managers and the Arm Toolchains package repositories. Installing the
 `arm-toolchain-for-linux` package also installs the Arm Performance Libraries,
 which are a required dependency.
 
-### Arm Toolchains Linux package repository signing key change
+### Arm Toolchains Linux package repository signing key change July 2026
 
-Arm has recently reviewed and strengthened its repository management processes.
+Arm regularly reviews and strengthens its repository management processes.
 As a result, Arm has revoked and replaced the Arm Toolchains repository signing
 key used up to July 2026.
 
@@ -54,19 +54,19 @@ $ sudo dnf upgrade arm-toolchain-for-linux
 To configure the Arm Toolchains repository on Red Hat Enterprise Linux 8:
 
 ```
-$ sudo dnf install https://developer.arm.com/packages/arm-toolchains/arm-toolchains/rhel/el8/aarch64/arm-toolchains-repository-2-2.el8.noarch.rpm
+$ sudo dnf install https://developer.arm.com/packages/arm-toolchains/rhel/el8/aarch64/arm-toolchains-repository-2-2.el8.noarch.rpm
 ```
 
 To configure the Arm Toolchains repository on Red Hat Enterprise Linux 9:
 
 ```
-$ sudo dnf install https://developer.arm.com/packages/arm-toolchains/arm-toolchains/rhel/el9/aarch64/arm-toolchains-repository-2-2.el9.noarch.rpm
+$ sudo dnf install https://developer.arm.com/packages/arm-toolchains/rhel/el9/aarch64/arm-toolchains-repository-2-2.el9.noarch.rpm
 ```
 
 To configure the Arm Toolchains repository on Red Hat Enterprise Linux 10:
 
 ```
-$ sudo dnf install https://developer.arm.com/packages/arm-toolchains/arm-toolchains/rhel/el10/aarch64/arm-toolchains-repository-2-2.el10.noarch.rpm
+$ sudo dnf install https://developer.arm.com/packages/arm-toolchains/rhel/el10/aarch64/arm-toolchains-repository-2-2.el10.noarch.rpm
 ```
 
 Install the latest Arm Toolchain for Linux release:
@@ -86,26 +86,27 @@ $ sudo dnf upgrade arm-toolchain-for-linux
 To configure the Arm Toolchains repository on SUSE Linux Enterprise Server 15:
 
 ```
-$ sudo rpm -U --nosignature https://developer.arm.com/packages/arm-toolchains/arm-toolchains/arm-toolchains/sles/sles15/aarch64/arm-toolchains-repository-2-2.sles15.noarch.rpm
+$ sudo rpm -U https://developer.arm.com/packages/arm-toolchains/sles/sles15/aarch64/arm-toolchains-repository-2-2.sles15.noarch.rpm
 ```
 
 To configure the Arm Toolchains repository on SUSE Linux Enterprise Server 16:
 
 ```
-$ sudo rpm -U --nosignature https://developer.arm.com/packages/arm-toolchains/arm-toolchains/arm-toolchains/sles/sles16/aarch64/arm-toolchains-repository-2-2.sles16.noarch.rpm
+$ sudo rpm -U https://developer.arm.com/packages/arm-toolchains/sles/sles16/aarch64/arm-toolchains-repository-2-2.sles16.noarch.rpm
 ```
 
 Install the latest Arm Toolchain for Linux release:
 
 ```
-$ sudo zypper --gpg-auto-import-keys install arm-toolchain-for-linux
+$ sudo zypper install arm-toolchain-for-linux
 ```
 
 Upgrade an existing package-manager installation:
 
 ```
-$ sudo zypper up --allow-vendor-change arm-toolchain-for-linux
+$ sudo zypper up arm-toolchain-for-linux
 ```
+
 
 ### Ubuntu Linux 22.04 and 24.04
 
@@ -162,8 +163,7 @@ to install into the current directory:
 $ bash user_install.sh --yes .
 ```
 
-As a convenience, you can also download and run the script in a single command
-using Bash process substitution:
+For convenience, you can also download and run the script in a single command:
 
 ```
 $ bash <(curl -L https://developer.arm.com/-/cdn-downloads/permalink/Arm-Toolchain-for-Linux/Package/user_install.sh) --yes <installation_directory>
@@ -175,5 +175,4 @@ For example, to install into the current directory:
 $ bash <(curl -L https://developer.arm.com/-/cdn-downloads/permalink/Arm-Toolchain-for-Linux/Package/user_install.sh) --yes .
 ```
 
-After completion, the `opt` directory tree is unpacked into the installation
-directory.
+After completion, the `opt` directory tree is unpacked into the installation directory.
