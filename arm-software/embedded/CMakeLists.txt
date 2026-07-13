@@ -474,7 +474,6 @@ set(CLANG_TEST_EXTRA_ARGS "@${clang_lit_xfails_path}")
 # Product code 'E' for Embedded.
 # This must be done before the llvm directory is included.
 set(LLVM_TOOLCHAIN_PROJECT_CODE "E")
-set(LLVM_TOOLCHAIN_VERSION_SUFFIX "pre")
 include(${CMAKE_CURRENT_SOURCE_DIR}/../shared/cmake/generate_toolchain_id.cmake)
 
 add_subdirectory(
