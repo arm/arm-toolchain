@@ -3562,9 +3562,6 @@ class OffloadingActionBuilder final {
       CudaDeviceActions.clear();
     }
 
-    virtual std::optional<std::pair<llvm::StringRef, llvm::StringRef>>
-    getConflictOffloadArchCombination(const std::set<StringRef> &GpuArchs) = 0;
-
     bool initialize() override {
       assert(AssociatedOffloadKind == Action::OFK_Cuda ||
              AssociatedOffloadKind == Action::OFK_HIP);
@@ -3621,12 +3618,6 @@ class OffloadingActionBuilder final {
                       const InputList &Inputs)
         : CudaActionBuilderBase(C, Args, Inputs, Action::OFK_Cuda) {
       DefaultOffloadArch = OffloadArch::CudaDefault;
-    }
-
-    std::optional<std::pair<llvm::StringRef, llvm::StringRef>>
-    getConflictOffloadArchCombination(
-        const std::set<StringRef> &GpuArchs) override {
-      return std::nullopt;
     }
 
     ActionBuilderReturnCode
@@ -3781,12 +3772,6 @@ class OffloadingActionBuilder final {
     }
 
     bool canUseBundlerUnbundler() const override { return true; }
-
-    std::optional<std::pair<llvm::StringRef, llvm::StringRef>>
-    getConflictOffloadArchCombination(
-        const std::set<StringRef> &GpuArchs) override {
-      return getConflictTargetIDCombination(GpuArchs);
-    }
 
     ActionBuilderReturnCode
     getDeviceDependences(OffloadAction::DeviceDependences &DA,
