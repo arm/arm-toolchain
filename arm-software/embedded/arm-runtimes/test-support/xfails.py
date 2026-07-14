@@ -905,27 +905,6 @@ def main():
             description="The test expects serial port activity to end the test and times out without it.",
         ),
         XFail(
-            name="lane indices for SIMD mask",
-            testnames=[
-                "src/__support/CPP/libc.test.src.__support.CPP.simd_test.__hermetic__.__build__",
-            ],
-            result=NewResult.XFAILED,
-            project="llvmlibc",
-            variants=[
-                "aarch64a_be",
-                "aarch64a_be_exn_rtti",
-                "aarch64r_be",
-                "aarch64r_be_exn_rtti",
-                "armebv7m_hard_fpv4_sp_d16_exn_rtti_size",
-                "armebv7m_hard_fpv4_sp_d16_size",
-                "armebv7m_soft_fpv4_sp_d16_exn_rtti_size",
-                "armebv7m_soft_fpv4_sp_d16_size",
-                "armebv7m_soft_nofp_exn_rtti_size",
-                "armebv7m_soft_nofp_size",
-            ],
-            description="wrong lane indices for SIMD mask on BE target (LLVMAENG-6202)",
-        ),
-        XFail(
             name="variadic vector type arguments",
             testnames=[
                 "src/__support/libc.test.src.__support.arg_list_test.__hermetic__.__build__",
