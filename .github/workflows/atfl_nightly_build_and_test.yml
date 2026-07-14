@@ -3,13 +3,12 @@
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
-# This workflow runs all build scripts in parallel for multiple operating
-# systems and architectures.
+# This workflow builds Docker images for multiple operating systems and runs
+# the Linux build script inside each image.
 # It is intended to be triggered as part of a **nightly build** to
 # validate all build configurations and test them automatically.
 #
-# Each build script is paired with a corresponding test script using
-# a matrix strategy. Each build+test pair runs as a separate job,
+# Each Docker image and build script pair runs as a separate matrix job,
 # allowing for concurrency and clear traceability of failures.
 
 name: (ATfL) Nightly Build and Test
@@ -19,10 +18,17 @@ on:
   schedule:
     - cron: '0 6 * * *'  # Every day at 06:00 UTC
 
+# GitHub queues the second run until the first one finishes, 
+# preventing overlapping executions.
+concurrency:
+  group: atfl-nightly-build
+  cancel-in-progress: false
+
 jobs:
   build-and-test-toolchain:
-    name: Build ${{ matrix.build_script }} for ${{ matrix.target_os }} on ${{ matrix.runner }}
-    runs-on: ${{ matrix.runner }}
+    name: Build ${{ matrix.build_script }} in ${{ matrix.image_name }}
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 240
     env:
       ATFL_VERSION: "0.0"
 
@@ -34,11 +40,17 @@ jobs:
       fail-fast: false  # Prevents one job failure from cancelling all
       matrix:
         include:
-          # Complete Toolchain Build & Test
+          # Ubuntu Build & Test
           - build_script: build.sh
-            install_script: install_dependencies_ubuntu.sh
             target_os: Ubuntu-24.04-arm64
-            runner: ah-ubuntu_24_04-c7g_8x-100
+            dockerfile: Dockerfile_ubuntu2404
+            image_name: ubuntu2404_docker
+
+          # RHEL10 Build & Test
+          - build_script: build.sh
+            target_os: RHEL10-arm64
+            dockerfile: Dockerfile_rhel10
+            image_name: rhel10_docker
 
     steps:
       - name: Checkout
@@ -47,34 +59,64 @@ jobs:
       - name: Add ~/.local/bin to PATH
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Install Dependencies
-        run: ./arm-software/linux/scripts/${{ matrix.install_script }}
-
       - name: Clean previous artifacts
-        run: rm -rf arm-software/linux/output arm-software/linux/build
+        run: rm -rf arm-software/linux/output arm-software/linux/build arm-software/linux/logs
 
       - name: Mark workspace as safe for git
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Build (Unix)
+      - name: Build Docker image
         shell: bash
         run: |
           set -euo pipefail
-          ./arm-software/linux/${{ matrix.build_script }} 2>&1 | tee build.log
+
+          docker build \
+            --file "arm-software/linux/scripts/Docker_Files/${{ matrix.dockerfile }}" \
+            --tag "${{ matrix.image_name }}" \
+            --build-arg USER_ID="$(id -u)" \
+            --build-arg GROUP_ID="$(id -g)" \
+            arm-software/linux/scripts/Docker_Files
+
+      - name: Run build.sh in Docker image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            --volume "$GITHUB_WORKSPACE:/workspace/src" \
+            --workdir /workspace/src \
+            "${{ matrix.image_name }}" \
+            bash -lc '
+              set -euo pipefail
+              git config --global --add safe.directory /workspace/src
+
+              if [[ "${{ matrix.target_os }}" == RHEL10-* ]]; then
+                export ZLIB_STATIC_PATH=/usr/lib64/libz.a
+              fi
+
+              ./arm-software/linux/${{ matrix.build_script }}
+            ' 2>&1 | tee build-${{ matrix.target_os }}.log
 
       - name: List built artifacts
         if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
-          find arm-software/linux/output -maxdepth 3 -type f \( -name '*.tar.gz' -o -name '*.deb' \) | sort
+          if [[ -d arm-software/linux/output ]]; then
+            find arm-software/linux/output -maxdepth 3 -type f \( -name '*.tar.gz' \) | sort
+          fi
 
-      - name: Upload build log
+      - name: Upload build log and test reports
         uses: actions/upload-artifact@v7
         if: ${{ always() && !env.ACT }}
         with:
           name: build-log-${{ matrix.target_os }}
-          path: build.log
+          path: |
+            build-${{ matrix.target_os }}.log
+            arm-software/linux/logs/bootstrap_check_all.xml
+            arm-software/linux/logs/check_cxx.xml
+            arm-software/linux/logs/check_cxxabi.xml
+            arm-software/linux/logs/product_check_all.xml
           if-no-files-found: warn
 
       - name: Get tarball name
@@ -89,8 +131,8 @@ jobs:
           filename=$(basename "$path")
           date=$(date -u +%Y%m%d)
 
-          # Strip .tar.gz, append date, then add extension back.
-          artifact_name="${filename%.tar.gz}-${date}.tar.gz"
+          # Strip .tar.gz, append OS and date, then add extension back.
+          artifact_name="${filename%.tar.gz}-${{ matrix.target_os }}-${date}.tar.gz"
 
           echo "name=$artifact_name" >> "$GITHUB_OUTPUT"
           echo "path=$path" >> "$GITHUB_OUTPUT"
