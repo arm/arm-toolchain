@@ -2245,7 +2245,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
 //  #409
   if (LTOExtraLoopUnroll) {
     LoopPassManager OmaxLPM;
-    OmaxLPM.addPass(LoopFullUnrollPass(Level.getSpeedupLevel(),
+    OmaxLPM.addPass(LoopFullUnrollPass(static_cast<int>(Level),
                                        /*OnlyWhenForced=*/!PTO.LoopUnrolling,
                                        PTO.ForgetAllSCEVInLoopUnroll));
     FPM.addPass(
