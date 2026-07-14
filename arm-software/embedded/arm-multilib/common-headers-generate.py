@@ -4,15 +4,15 @@
 Identifies and extracts header files that are common across multiple multilib variant directories.
 
 This script scans all variant folders within a multilib target directory
-(e.g., `arm-none-eabi/variant1/include`, `arm-none-eabi/variant2/include`, etc.) and compares all
+(e.g., `arm-unknown-none-eabi/variant1/include`, `arm-unknown-none-eabi/variant2/include`, etc.) and compares all
 `.h` files. If the same file (by name and content) appears in multiple variants, it will be moved
 to a shared include directory at:
 
     <CMAKE_BINARY_DIR>/multilib-optimised/<target>/include/
 
 for the following multilib targets:
-- arm-none-eabi
-- aarch64-none-elf
+- arm-unknown-none-eabi
+- aarch64-unknown-none-elf
 
 Arguments:
     <CMAKE_BINARY_DIR>/multilib Path to the CMake build directory containing non optmised multilib.
@@ -30,7 +30,7 @@ import filecmp
 import shutil
 
 # Define the multilib target dirs which want to process
-MULTILIB_TARGET_DIRS = ["arm-none-eabi", "aarch64-none-elf"]
+MULTILIB_TARGET_DIRS = ["arm-unknown-none-eabi", "aarch64-unknown-none-elf"]
 
 
 def files_are_identical(f1, f2):
@@ -64,7 +64,7 @@ def extract_common_headers_for_targets(args):
         ]
         if not existing_target_dirs:
             raise Exception(
-                f"Error: Expected to find either arm-none-eabi or aarch64-none-elf in '{args.multilib_non_optimised_dir}', but folder is empty."
+                f"Error: Expected to find either arm-unknown-none-eabi or aarch64-unknown-none-elf in '{args.multilib_non_optimised_dir}', but folder is empty."
             )
         src_yaml = os.path.join(args.multilib_non_optimised_dir, "multilib.yaml")
         if not os.path.exists(src_yaml):
