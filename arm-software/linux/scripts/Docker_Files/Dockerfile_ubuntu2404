@@ -10,8 +10,8 @@ ARG GROUP_ID=1002
 ARG USER=cicd
 ARG WORKSPACE=/workspace
 
-RUN groupadd -g ${GROUP_ID} ${USER} || true && \
-    useradd -u ${USER_ID} -g ${GROUP_ID} -m ${USER} && \
+RUN getent group ${GROUP_ID} >/dev/null || groupadd -g ${GROUP_ID} ${USER} && \
+    getent passwd ${USER_ID} >/dev/null || useradd -u ${USER_ID} -g ${GROUP_ID} -m ${USER} && \
     mkdir -p ${WORKSPACE}/build  \
              ${WORKSPACE}/lib \
              ${WORKSPACE}/logs \
@@ -19,7 +19,7 @@ RUN groupadd -g ${GROUP_ID} ${USER} || true && \
              ${WORKSPACE}/patches \
              ${WORKSPACE}/python \
              ${WORKSPACE}/src && \
-    chown -R ${USER}:${GROUP_ID} ${WORKSPACE}
+    chown -R ${USER_ID}:${GROUP_ID} ${WORKSPACE}
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -85,7 +85,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 WORKDIR ${WORKSPACE}
 
 # Set the user to run the build
-USER ${USER}
+USER ${USER_ID}
 
 # Set the entrypoint
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
