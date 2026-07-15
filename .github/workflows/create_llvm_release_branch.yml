@@ -5,7 +5,7 @@
 
 # This workflow creates a branch to mirror an upstream LLVM release branch.
 
-name: "[arm-toolchain] Create LLVM Release Branch"
+name: "(arm-toolchain) Create LLVM Release Branch"
 on:
   workflow_dispatch:
     inputs:
