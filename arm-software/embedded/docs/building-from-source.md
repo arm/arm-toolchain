@@ -173,6 +173,8 @@ ninja package-llvm-toolchain
 
 ### Cross-compiling the toolchain for Windows
 
+#### GCC-based Mingw-w64
+
 The Arm Toolchain for Embedded can be cross-compiled to run on Windows.
 The compilation itself still happens on Linux. In addition to the prerequisites
 mentioned in the [Installing prerequisites](#installing-prerequisites) section
@@ -201,6 +203,32 @@ cmake . -DLLVM_TOOLCHAIN_CROSS_BUILD_MINGW=ON
 ninja package-llvm-toolchain
 ```
 The same build directory can be used for both native and MinGW toolchains.
+
+#### LLVM-based MinGW
+
+To use [LLVM MinGW](https://github.com/mstorsjo/llvm-mingw) toolchain instead,
+download LLVM MinGW, extract and add it to `PATH`.
+
+Set `LLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW` and
+`LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE` CMake options.
+Use a separate build directory per Windows host architecture:
+
+```
+export PATH=/path/to/llvm-mingw/bin:$PATH
+
+cmake . -GNinja \
+  -DLLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW=ON \
+  -DLLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE=x86_64-w64-mingw32
+ninja package-llvm-toolchain
+
+cmake . -GNinja \
+  -DLLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW=ON \
+  -DLLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE=aarch64-w64-mingw32
+ninja package-llvm-toolchain
+```
+
+LLVM MinGW runtime DLLs are copied from the LLVM MinGW sysroot and their license
+notices are installed in the package under `third-party-licenses/llvm-mingw`.
 
 ## Known limitations
 * Depending on the state of the sources, build errors may occur when

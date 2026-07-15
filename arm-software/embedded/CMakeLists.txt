@@ -54,12 +54,20 @@
 #
 #
 # Cross-building from Linux to Windows MinGW is supported.
-# Note that a build created this way includes GCC & MinGW DLLs which
+# Note that a build created this way includes MinGW runtime DLLs which
 # come under a different license. See building-from-source.md for
 # details.
 #
-# To enable cross-building run:
+# To enable cross-building with GCC-based Mingw-w64 run:
 #   cmake . -DLLVM_TOOLCHAIN_CROSS_BUILD_MINGW=ON -DCMAKE_INSTALL_PREFIX=$(pwd)/install-mingw
+#
+# To cross-build with LLVM MinGW toolchain, set:
+#   -DLLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW=ON
+# and specify the target triple
+# (x86_64-w64-mingw32 is the default for both MinGW toolchains):
+#   -DLLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE=x86_64-w64-mingw32
+# or:
+#   -DLLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE=aarch64-w64-mingw32
 #
 # If cross-building, there will be two toolchains built:
 # 1. The "build" toolchain. This is used to build the libraries.
@@ -102,8 +110,23 @@ cmake_minimum_required(VERSION 3.20)
 
 option(
     LLVM_TOOLCHAIN_CROSS_BUILD_MINGW
-    "Cross-build for Windows. Using this option implies that you accept the GCC & MinGW licenses."
+    "Cross-build for Windows. Using this option implies that you accept the MinGW runtime licenses."
 )
+option(
+    LLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW
+    "Use LLVM MinGW instead of the GCC-based toolchain when cross-building for Windows."
+)
+if(LLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW AND NOT LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
+    set(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW ON CACHE BOOL "" FORCE)
+endif()
+
+set(LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE
+    "x86_64-w64-mingw32" CACHE STRING
+    "MinGW target triple to use when cross-building Windows packages."
+)
+set_property(CACHE LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE
+    PROPERTY STRINGS x86_64-w64-mingw32 aarch64-w64-mingw32)
+
 option(
     PREBUILT_TARGET_LIBRARIES
     "Target libraries are prebuilt so no need to build them"
@@ -559,8 +582,21 @@ endif()
 set(CPACK_THREADS 0 CACHE STRING "")
 
 # set processor_name
-string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} processor_name)
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
+    if(LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE MATCHES "^x86_64-")
+        set(processor_name "x86_64")
+        set(LLVM_TOOLCHAIN_MINGW_CMAKE_SYSTEM_PROCESSOR "x86_64")
+    elseif(LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE MATCHES "^aarch64-")
+        set(processor_name "AArch64")
+        set(LLVM_TOOLCHAIN_MINGW_CMAKE_SYSTEM_PROCESSOR "aarch64")
+    else()
+        message(FATAL_ERROR
+            "Unsupported LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE "
+            "'${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}'. Supported values are "
+            "x86_64-w64-mingw32 and aarch64-w64-mingw32.")
+    endif()
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} processor_name)
     # If we're compiling on OSX we need to understand what targets we're
     #  building for.
     string(FIND "${CMAKE_OSX_ARCHITECTURES}" "x86_64" x86_result)
@@ -577,6 +613,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # otherwise processor_name is already the system processor name
     endif()
 else()
+    string(TOLOWER ${CMAKE_SYSTEM_PROCESSOR} processor_name)
     string(REGEX MATCH "amd64|x64|x86" x86_match ${processor_name})
     if(x86_match)
         set(processor_name "x86_64")
@@ -933,8 +970,13 @@ unset(_has_external_source_libc)
 
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
     set(_mingw_license_dir third-party-licenses)
-    string(APPEND LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES
-        " - MinGW runtime DLLs: ${_mingw_license_dir}/COPYING.MinGW-w64-runtime.txt, ${_mingw_license_dir}/COPYING3.GCC, ${_mingw_license_dir}/COPYING.RUNTIME\n")
+    if(LLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW)
+        string(APPEND LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES
+            " - LLVM MinGW runtime DLLs: ${_mingw_license_dir}/llvm-mingw/LICENSE.TXT, ${_mingw_license_dir}/llvm-mingw/mingw32/\n")
+    else()
+        string(APPEND LLVM_TOOLCHAIN_LICENSE_SUMMARY_LINES
+            " - MinGW runtime DLLs: ${_mingw_license_dir}/COPYING.MinGW-w64-runtime.txt, ${_mingw_license_dir}/COPYING3.GCC, ${_mingw_license_dir}/COPYING.RUNTIME\n")
+    endif()
     unset(_mingw_license_dir)
 endif()
 configure_file(cmake/THIRD-PARTY-LICENSES.txt.in THIRD-PARTY-LICENSES.txt @ONLY)
@@ -1141,9 +1183,71 @@ add_dependencies(check-llvm-toolchain check-llvm-toolchain-lit)
 add_subdirectory(packagetest)
 
 if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
-    find_program(MINGW_C_EXECUTABLE x86_64-w64-mingw32-gcc-posix REQUIRED)
-    find_program(MINGW_CXX_EXECUTABLE x86_64-w64-mingw32-g++-posix REQUIRED)
-    cmake_path(SET MINGW_SYSROOT NORMALIZE "${MINGW_C_EXECUTABLE}/../../x86_64-w64-mingw32")
+    if(LLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW)
+        find_program(LLVM_MINGW_C_EXECUTABLE
+            ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-clang
+            REQUIRED)
+        find_program(LLVM_MINGW_CXX_EXECUTABLE
+            ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-clang++
+            REQUIRED)
+        find_program(LLVM_MINGW_RC_EXECUTABLE
+            ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-windres
+            REQUIRED)
+        find_program(LLVM_MINGW_AR_EXECUTABLE
+            ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-llvm-ar
+            REQUIRED)
+        find_program(LLVM_MINGW_RANLIB_EXECUTABLE
+            ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-llvm-ranlib
+            REQUIRED)
+
+        cmake_path(GET LLVM_MINGW_C_EXECUTABLE PARENT_PATH MINGW_TOOLCHAIN_BIN_DIR)
+        cmake_path(GET MINGW_TOOLCHAIN_BIN_DIR PARENT_PATH MINGW_TOOLCHAIN_ROOT)
+        set(MINGW_SYSROOT "${MINGW_TOOLCHAIN_ROOT}/${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}")
+        if(NOT IS_DIRECTORY "${MINGW_SYSROOT}")
+            message(FATAL_ERROR
+                "LLVM MinGW sysroot '${MINGW_SYSROOT}' does not exist. "
+                "Put a complete LLVM MinGW toolchain on PATH.")
+        endif()
+
+        file(GLOB MINGW_RUNTIME_DLLS "${MINGW_SYSROOT}/bin/*.dll")
+        set(MINGW_RUNTIME_DLL_LOOKUP_EXECUTABLE ${LLVM_MINGW_C_EXECUTABLE})
+
+        set(mingw_cmake_tool_args
+            -DCMAKE_C_COMPILER=${LLVM_MINGW_C_EXECUTABLE}
+            -DCMAKE_CXX_COMPILER=${LLVM_MINGW_CXX_EXECUTABLE}
+            -DCMAKE_RC_COMPILER=${LLVM_MINGW_RC_EXECUTABLE}
+            -DCMAKE_AR=${LLVM_MINGW_AR_EXECUTABLE}
+            -DCMAKE_RANLIB=${LLVM_MINGW_RANLIB_EXECUTABLE}
+            -DCMAKE_FIND_ROOT_PATH=${MINGW_SYSROOT}
+            -DCMAKE_SYSTEM_PROCESSOR=${LLVM_TOOLCHAIN_MINGW_CMAKE_SYSTEM_PROCESSOR}
+        )
+    else()
+        find_program(GCC_MINGW_C_EXECUTABLE
+            NAMES
+                ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-gcc-posix
+                ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-gcc
+            REQUIRED)
+        find_program(GCC_MINGW_CXX_EXECUTABLE
+            NAMES
+                ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-g++-posix
+                ${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}-g++
+            REQUIRED)
+
+        cmake_path(SET MINGW_SYSROOT NORMALIZE "${GCC_MINGW_C_EXECUTABLE}/../../${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}")
+        set(MINGW_RUNTIME_DLLS
+            libwinpthread-1.dll # POSIX thread API implementation
+            libgcc_s_seh-1.dll  # GCC runtime
+            libstdc++-6.dll     # C++ Standard Library
+        )
+        set(MINGW_RUNTIME_DLL_LOOKUP_EXECUTABLE ${GCC_MINGW_C_EXECUTABLE})
+
+        set(mingw_cmake_tool_args
+            -DCMAKE_C_COMPILER=${GCC_MINGW_C_EXECUTABLE}
+            -DCMAKE_CXX_COMPILER=${GCC_MINGW_CXX_EXECUTABLE}
+            -DCMAKE_FIND_ROOT_PATH=${MINGW_SYSROOT}
+            -DCMAKE_SYSTEM_PROCESSOR=${LLVM_TOOLCHAIN_MINGW_CMAKE_SYSTEM_PROCESSOR}
+        )
+    endif()
 
     string(REPLACE ";" "," LLVM_ENABLE_PROJECTS_comma "${LLVM_ENABLE_PROJECTS}")
     string(REPLACE ";" "," LLVM_DISTRIBUTION_COMPONENTS_comma "${LLVM_DISTRIBUTION_COMPONENTS}")
@@ -1158,9 +1262,9 @@ if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
         -DBUG_REPORT_URL=${BUG_REPORT_URL}
         -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
         -DCMAKE_CROSSCOMPILING=ON
-        -DCMAKE_C_COMPILER=${MINGW_C_EXECUTABLE}
-        -DCMAKE_CXX_COMPILER=${MINGW_CXX_EXECUTABLE}
-        -DCMAKE_FIND_ROOT_PATH=${MINGW_SYSROOT}
+        -DCLANG_DEFAULT_LINKER=lld
+        ${mingw_cmake_tool_args}
+        -DLLVM_HOST_TRIPLE=${LLVM_TOOLCHAIN_MINGW_TARGET_TRIPLE}
         -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER
         -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
         -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
@@ -1205,24 +1309,37 @@ if(LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
     )
 
     # Copy MinGW licenses
-    install(
-        DIRECTORY mingw-licenses/
-        DESTINATION third-party-licenses
-        COMPONENT llvm-toolchain-third-party-licenses
-    )
+    if(LLVM_TOOLCHAIN_CROSS_BUILD_LLVM_MINGW)
+        install(
+            FILES "${MINGW_TOOLCHAIN_ROOT}/LICENSE.TXT"
+            DESTINATION third-party-licenses/llvm-mingw
+            COMPONENT llvm-toolchain-third-party-licenses
+        )
+        install(
+            DIRECTORY "${MINGW_SYSROOT}/share/mingw32/"
+            DESTINATION third-party-licenses/llvm-mingw/mingw32
+            COMPONENT llvm-toolchain-third-party-licenses
+            FILES_MATCHING
+                PATTERN "COPYING*"
+        )
+    else()
+        install(
+            DIRECTORY mingw-licenses/
+            DESTINATION third-party-licenses
+            COMPONENT llvm-toolchain-third-party-licenses
+        )
+    endif()
 
     # Copy MinGW runtime DLLs
-    foreach(mingw_runtime_dll
-        libwinpthread-1.dll # POSIX thread API implementation
-        libgcc_s_seh-1.dll  # GCC runtime
-        libstdc++-6.dll     # C++ Standard Library
-    )
-        execute_process(
-            COMMAND ${MINGW_C_EXECUTABLE} -print-file-name=${mingw_runtime_dll}
-            OUTPUT_VARIABLE mingw_runtime_dll
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            COMMAND_ERROR_IS_FATAL ANY
-        )
+    foreach(mingw_runtime_dll IN LISTS MINGW_RUNTIME_DLLS)
+        if(NOT IS_ABSOLUTE "${mingw_runtime_dll}")
+            execute_process(
+                COMMAND ${MINGW_RUNTIME_DLL_LOOKUP_EXECUTABLE} -print-file-name=${mingw_runtime_dll}
+                OUTPUT_VARIABLE mingw_runtime_dll
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                COMMAND_ERROR_IS_FATAL ANY
+            )
+        endif()
         install(
             FILES ${mingw_runtime_dll}
             TYPE BIN
