@@ -27,7 +27,7 @@ concurrency:
 jobs:
   build-and-test-toolchain:
     name: Build ${{ matrix.build_script }} in ${{ matrix.image_name }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ah-ubuntu_24_04-c7g_8x-100
     timeout-minutes: 240
     env:
       ATFL_VERSION: "0.0"
