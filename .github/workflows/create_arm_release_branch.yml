@@ -7,7 +7,7 @@
 # The branch should be created at the commit where the upstream branch
 # point was merged on to the arm-software branch.
 
-name: "[arm-toolchain] Create arm-toolchain Release Branch"
+name: "(arm-toolchain) Create arm-toolchain Release Branch"
 on:
   workflow_dispatch:
     inputs:
@@ -42,8 +42,9 @@ jobs:
       - name: Create Branch
         run: |
           llvmbranchpoint=$(git merge-base remotes/llvm/main remotes/llvm/release/${{ inputs.release-version }}.x)
-          armbranchpoint=$(git rev-list --reverse --ancestry-path --min-parents=2 $llvmbranchpoint..arm-software | head -n 1)
-          if echo $armbranchpoint | grep "[0-9a-z]\{40\}"; then
+          echo "release/${{ inputs.release-version }}.x branched at $llvmbranchpoint"
+          armbranchpoint=$(git rev-list --reverse --ancestry-path --min-parents=2 "$llvmbranchpoint"..arm-software | head -n 1)
+          if echo "$armbranchpoint" | grep "[0-9a-z]\{40\}"; then
             echo "Branching release/arm-software/${{ inputs.release-version }}.x at $armbranchpoint"
           else
             echo "Unexpected git rev-list result: $armbranchpoint"
