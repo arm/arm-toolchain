@@ -2,12 +2,12 @@
 
 ## Clang OpenMP support
 
-See the [status page](https://clang.llvm.org/docs/OpenMPSupport.html)
+See the [status page](https://github.com/llvm/llvm-project/blob/release/23.x/clang/docs/OpenMPSupport.md)
 for the details on Clang OpenMP support.
 
 ## Flang OpenMP support
 
-See the [status page](https://flang.llvm.org/docs/OpenMPSupport.html)
+See the [status page](https://github.com/llvm/llvm-project/blob/release/23.x/flang/docs/OpenMPSupport.md)
 for the details on Flang OpenMP support. Note that ATfL does not support
 offloading.
 
