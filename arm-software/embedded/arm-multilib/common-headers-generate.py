@@ -198,7 +198,9 @@ def select_common_header_group(content_hash_groups, primary_variant_count):
     return common_group
 
 
-def generate_common_headers(variant_includes, variant_groups, target, output_target_dir):
+def generate_common_headers(
+    variant_includes, variant_groups, target, output_target_dir
+):
     output_include_dir = os.path.join(output_target_dir, "include")
     os.makedirs(output_include_dir, exist_ok=False)
 
