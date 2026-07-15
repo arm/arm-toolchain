@@ -84,7 +84,7 @@ jobs:
 
           docker run --rm \
             --volume "$GITHUB_WORKSPACE:/workspace/src" \
-            --workdir /workspace/src \
+            --workdir /workspace \
             "${{ matrix.image_name }}" \
             bash -lc '
               set -euo pipefail
@@ -94,7 +94,7 @@ jobs:
                 export ZLIB_STATIC_PATH=/usr/lib64/libz.a
               fi
 
-              ./arm-software/linux/${{ matrix.build_script }}
+              ./src/arm-software/linux/${{ matrix.build_script }}
             ' 2>&1 | tee build-${{ matrix.target_os }}.log
 
       - name: List built artifacts
