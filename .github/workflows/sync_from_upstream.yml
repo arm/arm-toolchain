@@ -1,7 +1,7 @@
 # This workflow fetches changes from relevant branches from the
 # llvm/llvm-project repository (upstream) into the corresponding branches
 # in the arm/arm-toolchain repository (downstream), keeping them in sync.
-name: Sync from Upstream LLVM
+name: (arm-toolchain) Sync from Upstream LLVM
 on:
   schedule:
     - cron: '0,30 * * * *'

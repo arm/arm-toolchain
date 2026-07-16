@@ -12,7 +12,7 @@
 # a matrix strategy. Each build+test pair runs as a separate job,
 # allowing for concurrency and clear traceability of failures.
 
-name: ATfE Nightly Build and Test
+name: (ATfE) Nightly Build and Test
 
 on:
   workflow_dispatch:

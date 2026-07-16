@@ -11,7 +11,7 @@
 # itself are part of the check.
 # The script requires the GitHub CLI to be available, and authenticated.
 
-name: check-downstream-changes
+name: (arm-toolchain) check-downstream-changes
 
 on:
   # Trigger whenever a pull request is opened or changed.

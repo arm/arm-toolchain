@@ -1,7 +1,7 @@
 # This workflow executes the automerge python script to automatically merge
 # changes from the `main` branch of upstream LLVM into the `arm-software`
 # branch of the arm/arm-toolchain repository.
-name: Automerge
+name: (arm-toolchain) Automerge
 on:
   workflow_run:
     workflows: [Sync from Upstream LLVM]

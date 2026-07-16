@@ -12,7 +12,7 @@
 # It builds and tests the Arm Toolchain for Embedded (ATfE) to validate that the
 # merged changes do not introduce regressions and that the build remains stable.
 
-name: ATfE Post-Merge
+name: (ATfE) Post-Merge
 
 on:
   # Trigger when a pull request is closed
