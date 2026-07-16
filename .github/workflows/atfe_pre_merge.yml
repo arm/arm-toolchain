@@ -11,7 +11,7 @@
 # changes do not introduce regressions and that the build remains stable before
 # merging.
 
-name: ATfE Pre-Merge
+name: (ATfE) Pre-Merge
 
 on:
   # Trigger when a pull request is opened, updated, or reopened
