@@ -1,8 +1,8 @@
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y ca-certificates curl
 RUN sed -i 's|http://ports.ubuntu.com/ubuntu-ports|https://ports.ubuntu.com/ubuntu-ports|g' /etc/apt/sources.list.d/ubuntu.sources
-RUN apt-get update && apt-get install -y curl
 
 # Enable the running user to own the build
 # And creates required directories
@@ -52,7 +52,7 @@ RUN version=4.3.4 \
     && gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys C6C265324BBEBDC350B513D02D2CEF1034921684 \
     && gpg --verify cmake-$version-SHA-256.txt.asc cmake-$version-SHA-256.txt \
     && tar -xzvf cmake-$version-linux-aarch64.tar.gz -C /opt \
-    && cd $HOME; rm -rfv /tmp/temp \
+    && cd $HOME && rm -rfv /tmp/temp \
     && update-alternatives \
         --install /usr/local/bin/cmake cmake /opt/cmake-$version-linux-aarch64/bin/cmake 10 \
         --slave /usr/local/bin/ctest ctest /opt/cmake-$version-linux-aarch64/bin/ctest \
