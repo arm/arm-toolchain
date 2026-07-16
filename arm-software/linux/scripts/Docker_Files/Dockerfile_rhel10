@@ -18,38 +18,26 @@ RUN groupadd -g ${GROUP_ID} ${USER} || true && \
     chown -R ${USER}:${GROUP_ID} ${WORKSPACE}
 
 # Install dependencies
-ADD RPM-GPG-KEY-AlmaLinux-10 /etc/pki/rpm-gpg/
+ADD --checksum=sha256:de57c3c0a2dcde88ff5b894e74335f55a0ec074815f36d472270d937c16f077b \
+    https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux-10 \
+    /etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
 ADD *.repo /etc/yum.repos.d/
 
 RUN sed -i '/^\[.*\]/a priority=1' /etc/yum.repos.d/ubi.repo
 
 RUN dnf install -y dnf-plugins-core && \
     dnf config-manager --set-enabled crb && \
-    dnf update -y && \
     dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm && \
     dnf install -y --allowerasing --nobest \
     binutils-devel \
-    cpio \
     diffutils \
-    graphviz \
-    environment-modules \
-    file \
     gnupg2 \
     glibc-common \
-    isl-devel \
-    libgcc \
-    libmpc \
-    libmpc-devel \
-    libzstd \
     libzstd-devel \
     libzstd-static \
     gcc \
     gcc-c++ \
     git \
-    isl \
-    make \
-    mpfr \
-    mpfr-devel \
     patch \
     perl \
     perl-File-Copy \
@@ -61,7 +49,7 @@ RUN dnf install -y dnf-plugins-core && \
     wget \
     zlib-devel \
     zlib-static \
-    zstd
+    && dnf clean all
 
 # Install cmake from precompiled-binaries
 RUN version=4.3.4 \
@@ -83,7 +71,8 @@ RUN version=4.3.4 \
         --family cmake \
     && cmake --version \
     && ctest --version \
-    && cpack --version
+    && cpack --version \
+    && ccmake --version
 
 RUN ninja_version=1.12.1 \
     && wget https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux-aarch64.zip \
@@ -102,11 +91,6 @@ RUN python3.12 -m pip install --no-cache-dir poetry \
     && poetry install --no-root --no-interaction --no-ansi
 
 ENV PATH="${WORKSPACE}/python/.venv/bin:$PATH"
-ENV PYTHON_HOME=${WORKSPACE}/python/.venv
-
-# On some of our machines, the host configuration created issues with the permissions of the filesystem
-# Those permission issues prevented the normal initialization of the modules
-RUN echo "source /usr/share/Modules/init/bash" >> /home/${USER}/.bashrc
 
 # Copy the entrypoint into the container and make it executable
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

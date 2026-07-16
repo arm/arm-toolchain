@@ -7,6 +7,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.9"
+furo = ">=2024.1.29"
 myst-parser = ">=0.16.1"
 pyyaml = "^6.0.2"
 pygments = "^2.19.1"

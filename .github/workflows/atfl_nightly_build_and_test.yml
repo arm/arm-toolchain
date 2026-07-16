@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   build-and-test-toolchain:
-    name: Build ${{ matrix.build_script }} in ${{ matrix.image_name }}
+    name: Build ATfL in ${{ matrix.image_name }}
     runs-on: ah-ubuntu_24_04-c7g_8x-100
     timeout-minutes: 240
     env:
@@ -41,16 +41,16 @@ jobs:
       matrix:
         include:
           # Ubuntu Build & Test
-          - build_script: build.sh
-            target_os: Ubuntu-24.04-arm64
+          - target_os: Ubuntu-24.04-arm64
             dockerfile: Dockerfile_ubuntu2404
             image_name: ubuntu2404_docker
+            zlib_path: /usr/lib/aarch64-linux-gnu/libz.a
 
           # RHEL10 Build & Test
-          - build_script: build.sh
-            target_os: RHEL10-arm64
+          - target_os: RHEL10-arm64
             dockerfile: Dockerfile_rhel10
             image_name: rhel10_docker
+            zlib_path: /usr/lib64/libz.a
 
     steps:
       - name: Checkout
@@ -75,6 +75,7 @@ jobs:
             --tag "${{ matrix.image_name }}" \
             --build-arg USER_ID="$(id -u)" \
             --build-arg GROUP_ID="$(id -g)" \
+            --build-arg USER="$(id -un)" \
             arm-software/linux/scripts/Docker_Files
 
       - name: Run build.sh in Docker image
@@ -85,17 +86,10 @@ jobs:
           docker run --rm \
             --volume "$GITHUB_WORKSPACE:/workspace/src" \
             --workdir /workspace \
+            --env "ZLIB_STATIC_PATH=${{ matrix.zlib_path }}" \
             "${{ matrix.image_name }}" \
-            bash -lc '
-              set -euo pipefail
-              git config --global --add safe.directory /workspace/src
-
-              if [[ "${{ matrix.target_os }}" == RHEL10-* ]]; then
-                export ZLIB_STATIC_PATH=/usr/lib64/libz.a
-              fi
-
-              ./src/arm-software/linux/${{ matrix.build_script }}
-            ' 2>&1 | tee build-${{ matrix.target_os }}.log
+            ./src/arm-software/linux/build.sh \
+            2>&1 | tee build-${{ matrix.target_os }}.log
 
       - name: List built artifacts
         if: ${{ success() }}
@@ -125,8 +119,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          path=$(find arm-software/linux/output -maxdepth 1 -type f -name 'atfl-*.tar.gz')
-          test "$(printf '%s\n' "$path" | wc -l)" -eq 1
+          mapfile -t paths < <(
+            find arm-software/linux/output -maxdepth 1 -type f -name 'atfl-*.tar.gz'
+          )
+          test "${#paths[@]}" -eq 1
+          path="${paths[0]}"
 
           filename=$(basename "$path")
           date=$(date -u +%Y%m%d)

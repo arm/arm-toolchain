@@ -1,7 +1,7 @@
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y ca-certificates curl
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 RUN sed -i 's|http://ports.ubuntu.com/ubuntu-ports|https://ports.ubuntu.com/ubuntu-ports|g' /etc/apt/sources.list.d/ubuntu.sources
 
 # Enable the running user to own the build
@@ -23,12 +23,10 @@ RUN getent group ${GROUP_ID} >/dev/null || groupadd -g ${GROUP_ID} ${USER} && \
     chown -R ${USER_ID}:${GROUP_ID} ${WORKSPACE}
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     binutils-dev \
     build-essential \
-    ca-certificates \
     gnupg \
-    graphviz \
     git \
     libzstd-dev \
     python3.12 \
@@ -37,7 +35,8 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     unzip \
     wget \
-    zlib1g-dev
+    zlib1g-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install cmake from precompiled-binaries: https://cmake.org/download/
 RUN version=4.3.4 \
@@ -45,9 +44,7 @@ RUN version=4.3.4 \
     && cd /tmp/temp \
     && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-linux-aarch64.tar.gz \
     && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-SHA-256.txt \
-    && sed -i '/.* cmake-'"$version"'-linux-aarch64.tar.gz/!d' cmake-$version-SHA-256.txt \
-    && sha256sum -c cmake-$version-SHA-256.txt \
-    && curl -OL https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-SHA-256.txt \
+    && sha256sum -c --ignore-missing cmake-$version-SHA-256.txt \
     && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-SHA-256.txt.asc \
     && gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys C6C265324BBEBDC350B513D02D2CEF1034921684 \
     && gpg --verify cmake-$version-SHA-256.txt.asc cmake-$version-SHA-256.txt \
@@ -77,7 +74,6 @@ RUN python3.12 -m venv .venv && \
     .venv/bin/poetry install --no-root --no-interaction --no-ansi
 
 ENV PATH="${WORKSPACE}/python/.venv/bin:$PATH"
-ENV PYTHON_HOME=${WORKSPACE}/python/.venv
 
 # Copy the entrypoint into the container and make it executable
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
