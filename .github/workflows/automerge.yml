@@ -4,7 +4,7 @@
 name: (arm-toolchain) Automerge
 on:
   workflow_run:
-    workflows: [Sync from Upstream LLVM]
+    workflows: ["(arm-toolchain) Sync from Upstream LLVM"]
     types:
       - completed
   workflow_dispatch:
