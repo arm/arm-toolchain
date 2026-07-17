@@ -44,7 +44,7 @@ on:
 
   # Trigger after the Automerge workflow completes
   workflow_run:
-    workflows: [Automerge]
+    workflows: ["(arm-toolchain) Automerge"]
     types: [completed]
 
 jobs:
