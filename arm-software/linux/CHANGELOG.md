@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [23.1.0]
+
+- The `armclang` and `armflang` executable binaries are now optimized with BOLT.
+
 ## [22.1.0]
 
 This is the third release of the Arm Toolchain for Linux (ATfL), a successor of
