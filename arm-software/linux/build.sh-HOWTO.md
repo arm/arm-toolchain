@@ -159,6 +159,8 @@ The `build.sh` script reads the following environment variables:
   (default: `arm-software/linux/logs`)
 - `OUTPUT_DIR` - The directory where all build output will be stored
   (default: `arm-software/linux/output`)
+- `BOOTSTRAP_COMPILER_DIR` - The bootstrap compiler directory (must be writable!)
+  (default: `arm-software/linux/build/bootstrap_compiler`)
 - `RELEASE_FLAGS` - Enable release flags in the build `true`/`false`
   (default: false), set this to `true` when doing a proper release (not nightly) build
 - `PARALLEL_JOBS` - The number of parallel jobs to run during the build

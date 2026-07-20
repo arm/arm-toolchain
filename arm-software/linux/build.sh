@@ -22,6 +22,7 @@ BUILD_DIR=${BUILD_DIR:-"${BASE_DIR}/build"}
 ATFL_DIR=${ATFL_DIR:-"${BUILD_DIR}/atfl"}
 LOGS_DIR=${LOGS_DIR:-"${BASE_DIR}/logs"}
 OUTPUT_DIR=${OUTPUT_DIR:-"${BASE_DIR}/output"}
+BOOTSTRAP_COMPILER_DIR=${BOOTSTRAP_COMPILER_DIR:-"${BUILD_DIR}/bootstrap_compiler"}
 
 #########################
 ## Configuration: Mode ##
@@ -87,8 +88,8 @@ declare -A COMMON_CMAKE_FLAGS=(
 )
 
 declare -A USE_BOOTSTRAP_CMAKE_FLAGS=(
-    ["CMAKE_C_COMPILER:FILEPATH"]="\"${BUILD_DIR}/bootstrap_compiler/bin/clang\""
-    ["CMAKE_CXX_COMPILER:FILEPATH"]="\"${BUILD_DIR}/bootstrap_compiler/bin/clang++\""
+    ["CMAKE_C_COMPILER:FILEPATH"]="\"${BOOTSTRAP_COMPILER_DIR}/bin/clang\""
+    ["CMAKE_CXX_COMPILER:FILEPATH"]="\"${BOOTSTRAP_COMPILER_DIR}/bin/clang++\""
     ["CMAKE_INSTALL_PREFIX:PATH"]="\"${ATFL_DIR}\""
     ["LLVM_ENABLE_LLD:BOOL"]=ON
 )
@@ -259,46 +260,48 @@ Options:
 
 Environment Variables:
 
-    CHANGELOG_MD_PATH   Specifies the location of the CHANGELOG.md file to bundle
-                        (default: ${CHANGELOG_MD_PATH})
-    SBOM_FILE_PATH      Specifies the location of the SBOM JSON file to bundle
-                        (default: ${SBOM_FILE_PATH})
-    MKMODULEDIRS_PATH   Specifies the location of mkmoduledirs.sh.var to tweak
-                        (default: ${MKMODULEDIRS_PATH})
-    SOURCES_DIR         The directory where all source code will be stored
-                        (default: ${SOURCES_DIR})
-    BOLTTESTS_DIR       The optional directory where the bolt-tests repo has been cloned
-                        (default: ${BOLTTESTS_DIR})
-    LIBRARIES_DIR       The optional directory where the ArmPL veclibs will be stored
-                        (default: ${LIBRARIES_DIR})
-    PATCHES_DIR         The optional directory where all patches will be stored
-                        (default: ${PATCHES_DIR})
-    DOCS_DIR            The directory where ATfL documents will be stored
-                        (default: ${DOCS_DIR})
-    BUILD_DIR           The directory where all build output will be stored
-                        (default: ${BUILD_DIR})
-    LOGS_DIR            The directory where all build logs will be stored
-                        (default: ${LOGS_DIR})
-    OUTPUT_DIR          The directory where all build output will be stored
-                        (default: ${OUTPUT_DIR})
-    RELEASE_FLAGS       Enable release flags in the build true/false
-                        (default: ${RELEASE_FLAGS})
-    PARALLEL_JOBS       The number of parallel jobs to run during the build
-                        (default: ${PARALLEL_JOBS})
-    ATFL_ASSERTIONS     Enable assertions in the build ON/OFF
-                        (default: ${ATFL_ASSERTIONS})
-    ATFL_BOLTED         Specify whether the clang and flang compilers should be bolted
-                        (default: ${ATFL_BOLTED})
-    ATFL_VERSION        Specify the version string
-                        (default: ${ATFL_VERSION})
-    ATFL_TARGET_TRIPLE  Specify the default target triple
-                        (default: ${ATFL_TARGET_TRIPLE})
-    OS_NAME             Specify the OS name
-                        (default: ${OS_NAME})
-    TAR_NAME            The name of the tarball to be created
-                        (default: ${TAR_NAME})
-    ZLIB_STATIC_PATH    Specifies the location of the static zlib library (libz.a)
-                        (default: ${ZLIB_STATIC_PATH})
+    CHANGELOG_MD_PATH       Specifies the location of the CHANGELOG.md file to bundle
+                            (default: ${CHANGELOG_MD_PATH})
+    SBOM_FILE_PATH          Specifies the location of the SBOM JSON file to bundle
+                            (default: ${SBOM_FILE_PATH})
+    MKMODULEDIRS_PATH       Specifies the location of mkmoduledirs.sh.var to tweak
+                            (default: ${MKMODULEDIRS_PATH})
+    SOURCES_DIR             The directory where all source code will be stored
+                            (default: ${SOURCES_DIR})
+    BOLTTESTS_DIR           The optional directory where the bolt-tests repo has been cloned
+                            (default: ${BOLTTESTS_DIR})
+    LIBRARIES_DIR           The optional directory where the ArmPL veclibs will be stored
+                            (default: ${LIBRARIES_DIR})
+    PATCHES_DIR             The optional directory where all patches will be stored
+                            (default: ${PATCHES_DIR})
+    DOCS_DIR                The directory where ATfL documents will be stored
+                            (default: ${DOCS_DIR})
+    BUILD_DIR               The directory where all build output will be stored
+                            (default: ${BUILD_DIR})
+    LOGS_DIR                The directory where all build logs will be stored
+                            (default: ${LOGS_DIR})
+    OUTPUT_DIR              The directory where all build output will be stored
+                            (default: ${OUTPUT_DIR})
+    BOOTSTRAP_COMPILER_DIR  The bootstrap compiler directory (must be writable!)
+                            (default: ${BOOTSTRAP_COMPILER_DIR})
+    RELEASE_FLAGS           Enable release flags in the build true/false
+                            (default: ${RELEASE_FLAGS})
+    PARALLEL_JOBS           The number of parallel jobs to run during the build
+                            (default: ${PARALLEL_JOBS})
+    ATFL_ASSERTIONS         Enable assertions in the build ON/OFF
+                            (default: ${ATFL_ASSERTIONS})
+    ATFL_BOLTED             Specify whether the clang and flang compilers should be bolted
+                            (default: ${ATFL_BOLTED})
+    ATFL_VERSION            Specify the version string
+                            (default: ${ATFL_VERSION})
+    ATFL_TARGET_TRIPLE      Specify the default target triple
+                            (default: ${ATFL_TARGET_TRIPLE})
+    OS_NAME                 Specify the OS name
+                            (default: ${OS_NAME})
+    TAR_NAME                The name of the tarball to be created
+                            (default: ${TAR_NAME})
+    ZLIB_STATIC_PATH        Specifies the location of the static zlib library (libz.a)
+                            (default: ${ZLIB_STATIC_PATH})
 EOF
 }
 
@@ -356,13 +359,19 @@ print_forced_cmake_flags_cache() {
 }
 
 bootstrap_compiler_default_config() {
-    echo "-fuse-ld=lld" >"${BUILD_DIR}"/bootstrap_compiler/bin/clang.cfg
-    echo "-fuse-ld=lld" >"${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
+    echo "-fuse-ld=lld" >"${BOOTSTRAP_COMPILER_DIR}/bin/clang.cfg"
+    echo "-fuse-ld=lld" >"${BOOTSTRAP_COMPILER_DIR}/bin/clang++.cfg"
 }
 
 bootstrap_compiler_build() {
-    mkdir -p "${BUILD_DIR}/stage/bootstrap_compiler"
-    cd "${BUILD_DIR}/stage/bootstrap_compiler"
+    if [[ -e "${BOOTSTRAP_COMPILER_DIR}/bin/clang++" ]]; then
+      echo "Using the existing bootstrap compiler."
+      export PATH="${BOOTSTRAP_COMPILER_DIR}/bin:${PATH}"
+      bootstrap_compiler_default_config
+      return
+    fi
+    mkdir -p "${BOOTSTRAP_COMPILER_DIR}"
+    cd "${BOOTSTRAP_COMPILER_DIR}"
 
     { print_forced_cmake_flags_cache "COMMON_CMAKE_FLAGS"
       print_forced_cmake_flags_cache "USE_RPATH_CMAKE_FLAGS"
@@ -376,7 +385,7 @@ bootstrap_compiler_build() {
         -DCMAKE_ASM_FLAGS_RELEASE="-O2 -DNDEBUG" \
         -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG" \
         -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG" \
-        -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/bootstrap_compiler" \
+        -DCMAKE_INSTALL_PREFIX="${BOOTSTRAP_COMPILER_DIR}" \
         -DLLVM_ENABLE_LLD=OFF \
         -DLLVM_ENABLE_LIBCXX=OFF \
         -DLLVM_ENABLE_PROJECTS="llvm;clang;lld" \
@@ -403,7 +412,7 @@ bootstrap_compiler_build() {
         2>&1 | tee "${LOGS_DIR}/bootstrap_compiler.txt"
     run_command cmake --build . "${CMAKE_BUILD_ARGS[@]}" 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
-    export PATH="${BUILD_DIR}/bootstrap_compiler/bin:${PATH}"
+    export PATH="${BOOTSTRAP_COMPILER_DIR}/bin:${PATH}"
     bootstrap_compiler_default_config
     run_test_command "${LOGS_DIR}/bootstrap_check_all.xml" "${LOGS_DIR}/bootstrap_compiler.txt" check-all
 }
@@ -519,7 +528,7 @@ product_build() {
     if [[ "${ATFL_BOLTED}" == "ON" ]]; then
        run_command ninja stage2-flang-bolt 2>&1 | tee "${LOGS_DIR}/product-bolted.txt"
     fi
-    echo "-Wl,-rpath=${ATFL_DIR}/lib" >> "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
+    echo "-Wl,-rpath=${ATFL_DIR}/lib" >> "${BOOTSTRAP_COMPILER_DIR}/bin/clang++.cfg"
     run_test_command "${LOGS_DIR}/product_check_all.xml" "${LOGS_DIR}/product.txt" check-all
     if [[ "${ATFL_BOLTED}" == "ON" ]]; then
       run_test_command "${LOGS_DIR}/product_bolted_check_flang.xml" "${LOGS_DIR}/product-bolted.txt" stage2-check-flang
