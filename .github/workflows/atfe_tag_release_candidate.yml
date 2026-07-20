@@ -28,14 +28,14 @@ jobs:
     steps:
       - name: Validate Inputs
         env:
-          RCNUM: ${{github.event.inputs.rc-number}}
-          ATFEV: ${{github.event.inputs.atfe-version}}
+          RC_NUM: ${{github.event.inputs.rc-number}}
+          ATFE_VERS: ${{github.event.inputs.atfe-version}}
         run: |
-          if ! echo "$RCNUM" | grep -qx "[0-9]\+"; then
+          if ! echo "$RC_NUM" | grep -qx "[0-9]\+"; then
             echo "Error: Release Candidate Number must be numeric"
             exit 1
           fi
-          if ! echo "$ATFEV" | grep -qx "[0-9]\+\.[0-9]\+\.[0-9]\+"; then
+          if ! echo "$ATFE_VERS" | grep -qx "[0-9]\+\.[0-9]\+\.[0-9]\+"; then
             echo "Error: ATfE Version should use x.x.x format"
             exit 1
           fi
@@ -56,17 +56,17 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Check if tag exists
         env:
-          TAGNAME: RC${{ inputs.rc-number }}-${{ inputs.atfe-version }}-ATfE
+          TAG_NAME: RC${{ inputs.rc-number }}-${{ inputs.atfe-version }}-ATfE
         run: |
-          if git tag | grep -qF "$TAGNAME"; then
-            echo "Error: Tag $TAGNAME already exists"
+          if git tag | grep -qF "$TAG_NAME"; then
+            echo "Error: Tag $TAG_NAME already exists"
             exit 1
           fi
       - name: Check hash is on release branch
         env:
-          ATFEV: ${{github.event.inputs.atfe-version}}
+          ATFE_VERS: ${{github.event.inputs.atfe-version}}
         run: |
-          majorv=$(echo "$ATFEV" | grep -o "^[0-9]\+")
+          majorv=$(echo "$ATFE_VERS" | grep -o "^[0-9]\+")
           releaseb="release/arm-software/$majorv.x"
           if ! git branch --contains ${{ inputs.target-commit }} | grep -qF "$releaseb"; then
             echo "Error: Commit ${{ inputs.target-commit }} not found on branch $releaseb"
@@ -74,7 +74,8 @@ jobs:
           fi
       - name: Create Tag
         env:
-          TAGNAME: RC${{ inputs.rc-number }}-${{ inputs.atfe-version }}-ATfE
+          TAG_NAME: RC${{ inputs.rc-number }}-${{ inputs.atfe-version }}-ATfE
+          TAG_MSG: release-${{ inputs.atfe-version }}-ATfE Release Candidate ${{ inputs.rc-number }}
         run: |
-          git tag -a "$TAGNAME" ${{ inputs.target-commit }}
-          git push origin "$TAGNAME"
+          git tag -a "$TAG_NAME" ${{ inputs.target-commit }} -m "$TAG_MSG"
+          git push origin "$TAG_NAME"
