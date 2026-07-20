@@ -22,7 +22,7 @@ on:
         required: true
         type: string
 jobs:
-  create-arm-release-branch:
+  atfe-tag-release-candidate:
     runs-on: ubuntu-24.04-arm
     if: github.repository == 'arm/arm-toolchain'
     steps:
@@ -62,12 +62,13 @@ jobs:
             echo "Error: Tag $TAG_NAME already exists"
             exit 1
           fi
-      - name: Check hash is on release branch
+      - name: Check commit is on release branch
         env:
           ATFE_VERS: ${{github.event.inputs.atfe-version}}
         run: |
           majorv=$(echo "$ATFE_VERS" | grep -o "^[0-9]\+")
           releaseb="release/arm-software/$majorv.x"
+          git fetch origin "$releaseb:$releaseb"
           if ! git branch --contains ${{ inputs.target-commit }} | grep -qF "$releaseb"; then
             echo "Error: Commit ${{ inputs.target-commit }} not found on branch $releaseb"
             exit 1
