@@ -1,4 +1,4 @@
-Arm Toolchain for Embedded ${armtoolchain_VERSION}
+Arm Toolchain for Embedded ${ArmToolchainForEmbedded_VERSION}
 
 Sources:
 * arm-toolchain: https://github.com/arm/arm-toolchain (commit ${armtoolchain_COMMIT})
