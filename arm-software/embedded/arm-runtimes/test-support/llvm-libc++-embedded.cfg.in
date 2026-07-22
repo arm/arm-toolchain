@@ -1,8 +1,6 @@
 # This testing configuration handles running the test suite against LLVM's libc++
 # using a static library.
 
-lit_config.load_config(config, '@CMAKE_CURRENT_BINARY_DIR@/cmake-bridge.cfg')
-
 config.name = 'libc++-@RUNTIME_VARIANT_NAME@'
 
 config.substitutions.append(('%{libc-include}', '@CMAKE_INSTALL_PREFIX@/include'))
