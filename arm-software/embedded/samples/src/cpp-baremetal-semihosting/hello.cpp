@@ -15,7 +15,7 @@ int main(void) {
   for (int elem: v) {
     std::cout << elem << " ";
   }
-  std::puts("\n");
+  std::puts(""); // puts will append a newline
 
   return 0;
 }
