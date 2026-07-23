@@ -173,14 +173,10 @@ add_custom_target(check-all)
 if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
     # Flags required to link tests.
     if(C_LIBRARY STREQUAL picolibc)
-        if(TEST_EXECUTOR STREQUAL qemu)
-            set(picocrt "crt0-semihost")
-        # For Arm, picolibc only builds one semihosting startup object because
-        # the same startup code works for both QEMU and FVP. AArch64 still uses
-        # the FVP-specific startup object.
-        elseif(TEST_EXECUTOR STREQUAL fvp AND TARGET_ARCH MATCHES "^aarch64")
+        # AArch64 uses the FVP-specific startup object.
+        if(TEST_EXECUTOR STREQUAL fvp AND TARGET_ARCH MATCHES "^aarch64")
             set(picocrt "crt0-semihost-fvp")
-        elseif(TEST_EXECUTOR STREQUAL fvp)
+        else()
             set(picocrt "crt0-semihost")
         endif()
         set(runtime_test_link_options
