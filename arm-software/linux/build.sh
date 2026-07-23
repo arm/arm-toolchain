@@ -517,7 +517,7 @@ product_build() {
     cp -d "${ATFL_DIR}"/lib/clang/*/lib/"${ATFL_TARGET_TRIPLE}"/libflang_rt* \
         "${ATFL_DIR}/lib/${ATFL_TARGET_TRIPLE}"
     if [[ "${ATFL_BOLTED}" == "ON" ]]; then
-       run_command ninja stage2-flang-bolt 2>&1 | tee "${LOGS_DIR}/product-bolted.txt"
+       run_command ninja "${NINJA_ARGS[@]}" stage2-flang-bolt 2>&1 | tee "${LOGS_DIR}/product-bolted.txt"
     fi
     echo "-Wl,-rpath=${ATFL_DIR}/lib" >> "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
     run_test_command "${LOGS_DIR}/product_check_all.xml" "${LOGS_DIR}/product.txt" check-all
