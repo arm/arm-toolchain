@@ -92,9 +92,13 @@ def IEEEModeDisabled : Predicate<"!MF->getInfo<SIMachineFunctionInfo>()->getMode
 
 def FMA : Predicate<"Subtarget->hasFMA()">;
 
-def InstFlag : OperandWithDefaultOps <i32, (ops (i32 0))>;
+def InstFlag : OperandWithDefaultOps <i32, (ops (i32 0))> {
+  let OperandType = "OPERAND_IMMEDIATE";
+}
 
-def i1imm_0 : OperandWithDefaultOps<i1, (ops (i1 0))>;
+def i1imm_0 : OperandWithDefaultOps<i1, (ops (i1 0))> {
+  let OperandType = "OPERAND_IMMEDIATE";
+}
 
 class CustomOperandClass<string name, bit optional, string predicateMethod,
                          string parserMethod, string defaultMethod>
