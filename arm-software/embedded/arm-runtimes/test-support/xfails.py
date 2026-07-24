@@ -932,7 +932,7 @@ def main():
         XFail(
             name="Crash on Float128 to integer conversion",
             testnames=[
-                "src/__support/libc.test.src.__support.FPUtil.float128_test.__hermetic__.__build__",
+                "src/__support/FPUtil/libc.test.src.__support.FPUtil.float128_test.__hermetic__.__build__",
             ],
             result=NewResult.XFAILED,
             project="llvmlibc",
