@@ -1058,6 +1058,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBCXX_ENABLE_FILESYSTEM=OFF
             -DLIBCXX_ENABLE_LOCALIZATION=ON
             -DLIBCXX_ENABLE_UNICODE=OFF
+            -DLIBCXX_HAS_RT_LIB=OFF
             -DLIBUNWIND_ENABLE_THREADS=OFF
             -DLIBCXXABI_ENABLE_EXCEPTIONS=${ENABLE_EXCEPTIONS}
             -DLIBCXXABI_ENABLE_STATIC_UNWINDER=${ENABLE_EXCEPTIONS}
@@ -1106,6 +1107,7 @@ if(ENABLE_CXX_LIBS)
             -DLIBUNWIND_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libunwind-embedded.cfg.in
             -DLIBUNWIND_TEST_PARAMS=executor=${lit_test_executor}
             -DRUNTIME_TEST_ARCH_FLAGS=${compile_arch_flags}
+            -DRUNTIME_LIBC=${C_LIBRARY}
             -DRUNTIME_TEST_LINK_FLAGS=${runtime_test_link_flags}
             -DRUNTIME_TEST_EXTRA_COMPILE_FLAGS=${runtime_test_extra_compile_flags}
             -DLLVM_LIT_ARGS=${libcxx_lit_args}
