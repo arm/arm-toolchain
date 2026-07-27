@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2025, Arm Limited and affiliates.
+# Copyright (c) 2025-2026, Arm Limited and affiliates.
 # Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
@@ -32,7 +32,7 @@ if command -v hdiutil > /dev/null; then
     # maps to a path in `/Volumes/`. E.g.:
     # /dev/disk4     GUID_partition_scheme
     # /dev/disk4s1   EFI
-    # /dev/disk4s2   Apple_HFS              /Volumes/ATfE-21.0.0-pre-Darwin-universal
+    # /dev/disk4s2   Apple_HFS              /Volumes/ATfE-24.0.0-Darwin-arm64
     MOUNT_PATH=$( echo "${ATTACH_OUTPUT}" | grep '/Volumes/' | sed -r 's!.*(/Volumes/.*)!\1!' )
     if [[ -z "${MOUNT_PATH}" ]]; then
         >&2 echo "ERROR: Path to mounted volume not found."

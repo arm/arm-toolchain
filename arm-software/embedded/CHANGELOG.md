@@ -8,6 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 ### Changed
+
+- macOS package provides Apple Silicon binaries only.
+  It is possible to build the universal package from sources by setting the
+  `CMAKE_OSX_ARCHITECTURES` CMake option.
+
 ### Deprecated
 ### Removed
 ### Fixed

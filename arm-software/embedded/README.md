@@ -79,7 +79,7 @@ models, which have their own licenses. These are not used by default, see
 
 Arm Toolchain for Embedded is built and tested on:
 * Linux Ubuntu 22.04 LTS on x86_64 and AArch64.
-* macOS on x86_64 and Apple Silicon.
+* macOS on Apple Silicon.
 * Windows Server 2019 with Visual Studio on x86_64.
 
 [Binary packages](https://github.com/arm/arm-toolchain/releases)
