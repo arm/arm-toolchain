@@ -336,7 +336,7 @@ All available -march extensions for AArch64
 
 
 def generate_extensions(args):
-    aarch64_features = get_extension_list(args.clang, "aarch64-none-eabi")
+    aarch64_features = get_extension_list(args.clang, "aarch64-unknown-none-elf")
     aarch32_features = get_extension_list(args.clang, "arm-none-eabi")
     all_features = list(aarch64_features)
     # Combine the aarch64 and aarch32 lists without duplication.
