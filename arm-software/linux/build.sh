@@ -497,8 +497,7 @@ product_build() {
     } > flags.cmake
 
     run_command cmake "${CMAKE_ARGS[@]}" -G Ninja "${SOURCES_DIR}/llvm" \
-        -DPGO_BUILD_CONFIGURATION="${cmake_caches}/BOLT.cmake" \
-        -C "${SOURCES_DIR}/flang/cmake/caches/BOLT-PGO.cmake" \
+        -C "${SOURCES_DIR}/flang/cmake/caches/BOLT.cmake" \
         -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
         -DCMAKE_BUILD_TYPE=Release \
