@@ -382,15 +382,6 @@ static bool preservesUniformity(unsigned Opcode) {
   }
 }
 
-bool vputils::isElementwise(const VPValue *V) {
-  unsigned Opcode = TypeSwitch<const VPValue *, unsigned>(V)
-                        .Case<VPInstruction, VPWidenRecipe>(
-                            [](auto *R) { return R->getOpcode(); })
-                        .Default([](auto *) { return 0; });
-  // TODO: Handle more opcodes and recipes.
-  return Instruction::isUnaryOp(Opcode) || Instruction::isBinaryOp(Opcode);
-}
-
 bool vputils::isSingleScalar(const VPValue *VPV) {
   // Live-in, symbolic and canonical-IV region values are single-scalar.
   if (auto *RV = dyn_cast<VPRegionValue>(VPV))

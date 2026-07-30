@@ -53,7 +53,6 @@
 ; CHECK: VPlan for loop in 'foo' [[BEFORE_OR_AFTER]] reassociateHeaderMask
 ; CHECK: VPlan for loop in 'foo' [[BEFORE_OR_AFTER]] simplifyRecipes
 ; CHECK: VPlan for loop in 'foo' [[BEFORE_OR_AFTER]] removeBranchOnConst
-; CHECK: VPlan for loop in 'foo' [[BEFORE_OR_AFTER]] simplifyReverses
 ; CHECK: VPlan for loop in 'foo' [[BEFORE_OR_AFTER]] removeDeadRecipes
 ; CHECK: VPlan for loop in 'foo' [[BEFORE_OR_AFTER]] createAndOptimizeReplicateRegions
 ; CHECK: VPlan for loop in 'foo' [[BEFORE_OR_AFTER]] mergeBlocksIntoPredecessors
