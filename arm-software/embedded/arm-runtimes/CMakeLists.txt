@@ -740,6 +740,14 @@ if(C_LIBRARY MATCHES "^newlib")
         set(make_flags -j${nproc})
     endif()
 
+    # Newlib does not recognize the target triple spelled as it is, hence we
+    # must correct it.
+    if(target_triple STREQUAL "aarch64-unknown-none-elf")
+      set(newlib_target_triple "aarch64-none-elf")
+    else()
+      set(newlib_target_triple "${target_triple}")
+    endif()
+
     ExternalProject_Add(
         ${C_LIBRARY}
         STAMP_DIR ${PROJECT_PREFIX}/${C_LIBRARY}/${VARIANT_BUILD_ID}/stamp
@@ -751,7 +759,7 @@ if(C_LIBRARY MATCHES "^newlib")
         CONFIGURE_COMMAND
             ${CMAKE_COMMAND} -E env ${build_env}
             <SOURCE_DIR>/configure
-            --target=${target_triple}
+            --target=${newlib_target_triple}
             --prefix "${TEMP_LIB_DIR}"
             --exec_prefix <BINARY_DIR>/tmpinstall
             ${newlib_flags}
@@ -760,25 +768,25 @@ if(C_LIBRARY MATCHES "^newlib")
             make ${make_flags}
             &&
             "${LLVM_BINARY_DIR}/bin/llvm-ar" rcs
-            <BINARY_DIR>/${target_triple}/libgloss/${cpu_family}/libcrt0-rdimon.a
-            <BINARY_DIR>/${target_triple}/libgloss/${cpu_family}/rdimon-crt0.o
+            <BINARY_DIR>/${newlib_target_triple}/libgloss/${cpu_family}/libcrt0-rdimon.a
+            <BINARY_DIR>/${newlib_target_triple}/libgloss/${cpu_family}/rdimon-crt0.o
             &&
             "${LLVM_BINARY_DIR}/bin/llvm-ar" rcs
-            <BINARY_DIR>/${target_triple}/libgloss/${cpu_family}/libcrt0-nosys.a
-            <BINARY_DIR>/${target_triple}/libgloss/${cpu_family}/crt0.o
+            <BINARY_DIR>/${newlib_target_triple}/libgloss/${cpu_family}/libcrt0-nosys.a
+            <BINARY_DIR>/${newlib_target_triple}/libgloss/${cpu_family}/crt0.o
         INSTALL_COMMAND
             make install
             &&
             ${CMAKE_COMMAND} -E copy_directory
-            <BINARY_DIR>/tmpinstall/${target_triple}
+            <BINARY_DIR>/tmpinstall/${newlib_target_triple}
             ${TEMP_LIB_DIR}
             &&
             ${CMAKE_COMMAND} -E copy
-            <BINARY_DIR>/${target_triple}/libgloss/${cpu_family}/libcrt0-rdimon.a
+            <BINARY_DIR>/${newlib_target_triple}/libgloss/${cpu_family}/libcrt0-rdimon.a
             ${TEMP_LIB_DIR}/lib
             &&
             ${CMAKE_COMMAND} -E copy
-            <BINARY_DIR>/${target_triple}/libgloss/${cpu_family}/libcrt0-nosys.a
+            <BINARY_DIR>/${newlib_target_triple}/libgloss/${cpu_family}/libcrt0-nosys.a
             ${TEMP_LIB_DIR}/lib
         # FIXME: TEST_COMMAND?
         USES_TERMINAL_CONFIGURE TRUE
