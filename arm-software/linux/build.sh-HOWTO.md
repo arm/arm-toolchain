@@ -26,6 +26,7 @@ The following packages need to be installed (using `apt`):
 - `python3-pip`
 - `python3-pygments`
 - `python3-yaml`
+- `furo`
 - `zlib1g-dev`
 
 ### `.rpm`-based systems (RHEL, CentOS, Alma, Amazon)
@@ -77,6 +78,7 @@ The following packages need to be installed (using `apt`):
 - `python3-pygments`
 - `python3-pyyaml`
 - `python3-myst-parser` (since RHEL10)
+- `python3-furo`
 
 ## Optional: obtaining libamath.a and libamath.so
 
