@@ -542,10 +542,10 @@ bool AArch64PointerAuthImpl::run(MachineFunction &MF) {
 
 // Begin downstream change #910
   Modified |= emitSignReturnAddressHardening(MF);
-
+// End downstream change #910
   return Modified;
 }
-
+// Begin downstream change #910
 bool AArch64PointerAuthImpl::emitSignReturnAddressHardening(
     MachineFunction &MF) {
   const auto *FI = MF.getInfo<AArch64FunctionInfo>();
@@ -619,9 +619,9 @@ bool AArch64PointerAuthImpl::emitSignReturnAddressHardening(
     Modified = true;
   }
 
-// End downstream change #910
   return Modified;
 }
+// End downstream change #910
 
 bool AArch64PointerAuthLegacy::runOnMachineFunction(MachineFunction &MF) {
   return AArch64PointerAuthImpl().run(MF);

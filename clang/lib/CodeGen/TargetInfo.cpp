@@ -216,9 +216,6 @@ void TargetCodeGenInfo::setBranchProtectionFnAttributes(
   // Called on already created and initialized function where attributes already
   // set from command line attributes but some might need to be removed as the
   // actual BPI is different.
-// Begin downstream change #910
-
-// End downstream change #910
   if (BPI.SignReturnAddr != LangOptions::SignReturnAddressScopeKind::None) {
     F.addFnAttr("sign-return-address", BPI.getSignReturnAddrStr());
     F.addFnAttr("sign-return-address-key", BPI.getSignKeyStr());

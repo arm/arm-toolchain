@@ -1529,8 +1529,6 @@ static void CollectARMPACBTIOptions(const ToolChain &TC, const ArgList &Args,
       BranchProtectionPAuthLR = PBP.BranchProtectionPAuthLR;
       IndirectBranches = PBP.BranchTargetEnforcement;
       GuardedControlStack = PBP.GuardedControlStack;
-// End downstream change #910
-// Begin downstream change #910
 //    if (!llvm::ARM::parseBranchProtection(A->getValue(), PBP, DiagMsg, Triple,
 //                                          EnablePAuthLR))
 //      D.Diag(diag::err_drv_unsupported_option_argument)
