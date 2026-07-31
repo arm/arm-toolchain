@@ -935,23 +935,6 @@ def main():
             ],
             description="Clang ARM AAPCS mislowers variadic vector type arguments (LLVMAENG-6240)",
         ),
-        XFail(
-            name="Crash on Float128 to integer conversion",
-            testnames=[
-                "src/__support/FPUtil/libc.test.src.__support.FPUtil.float128_test.__hermetic__.__build__",
-            ],
-            result=NewResult.XFAILED,
-            project="llvmlibc",
-            variants=[
-                "armv7m_hard_fpv5_d16_exn_rtti_unaligned_size",
-                "armv7m_hard_fpv5_d16_unaligned_size",
-                "armv8m.main_hard_fp_exn_rtti_unaligned_size",
-                "armv8m.main_hard_fp_unaligned_size",
-                "armv8m.main_soft_nofp_exn_rtti_unaligned_size",
-                "armv8m.main_soft_nofp_unaligned_size",
-            ],
-            description="Float128 conversion to integer performs an out-of-bounds array access (LLVMAENG-6784)",
-        ),
     ]
 
     tests_to_xfail = []
