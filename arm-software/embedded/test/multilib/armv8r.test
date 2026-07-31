@@ -8,7 +8,7 @@
 # RUN: %clang -print-multi-directory --target=armv8r-none-eabi -mfpu=none -mthumb -munaligned-access | FileCheck --check-prefix=SOFT-NOFP-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=armv8r-none-eabi -mfpu=none -march=armv8-r+ras -munaligned-access | FileCheck --check-prefix=SOFT-NOFP-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=armv8r-none-eabi -mfpu=none -mcpu=cortex-r52 -munaligned-access | FileCheck --check-prefix=SOFT-NOFP-UNALIGNED %s
-#SOFT-NOFP-UNALIGNED: arm-unknown-none-eabi/armv7r_soft_nofp_exn_rtti_unaligned{{$}}
+#SOFT-NOFP-UNALIGNED: arm-none-eabi/armv7r_soft_nofp_exn_rtti_unaligned{{$}}
 #SOFT-NOFP-UNALIGNED-EMPTY:
 
 # RUN: %clang -print-multi-directory --target=armv8r-none-eabi | FileCheck --check-prefix=SOFT-VFPV3-UNALIGNED %s
@@ -25,7 +25,7 @@
 # RUN: %clang -print-multi-directory --target=arm-none-eabi -march=armv8-r -marm -munaligned-access | FileCheck --check-prefix=SOFT-VFPV3-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=arm-none-eabi -march=armv8-r -mthumb -munaligned-access | FileCheck --check-prefix=SOFT-VFPV3-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=arm-none-eabi -march=armv8-r -mfpu=fpv5-d16 -munaligned-access | FileCheck --check-prefix=SOFT-VFPV3-UNALIGNED %s
-# SOFT-VFPV3-UNALIGNED: arm-unknown-none-eabi/armv7r_soft_vfpv3xd_exn_rtti_unaligned{{$}}
+# SOFT-VFPV3-UNALIGNED: arm-none-eabi/armv7r_soft_vfpv3xd_exn_rtti_unaligned{{$}}
 # SOFT-VFPV3-UNALIGNED-EMPTY:
 
 # RUN: %clang -print-multi-directory --target=armv8r-none-eabihf -mfpu=vfpv3-d16 | FileCheck --check-prefix=VFPV3-UNALIGNED %s
@@ -56,7 +56,7 @@
 # RUN: %clang -print-multi-directory --target=armv8r-none-eabihf -mcpu=cortex-r52 -munaligned-access | FileCheck --check-prefix=VFPV3-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=arm-none-eabihf -march=armv8-r -mfpu=fpv5-d16 -munaligned-access | FileCheck --check-prefix=VFPV3-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=arm-none-eabihf -march=armv8-r -mfpu=fp-armv8 -munaligned-access | FileCheck --check-prefix=VFPV3-UNALIGNED %s
-# VFPV3-UNALIGNED: arm-unknown-none-eabi/armv7r_hard_vfpv3_d16_exn_rtti_unaligned{{$}}
+# VFPV3-UNALIGNED: arm-none-eabi/armv7r_hard_vfpv3_d16_exn_rtti_unaligned{{$}}
 # VFPV3-UNALIGNED-EMPTY:
 
 # RUN: %clang -print-multi-directory --target=armv8r-none-eabihf | FileCheck --check-prefix=VFPV3XD-UNALIGNED %s
@@ -71,5 +71,5 @@
 # RUN: %clang -print-multi-directory --target=arm-none-eabihf -march=armv8-r -mthumb -munaligned-access | FileCheck --check-prefix=VFPV3XD-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=arm-none-eabihf -march=armv8-r -mfpu=fpv4-sp-d16 -munaligned-access | FileCheck --check-prefix=VFPV3XD-UNALIGNED %s
 # RUN: %clang -print-multi-directory --target=arm-none-eabihf -march=armv8-r -mfpu=fpv5-sp-d16 -munaligned-access | FileCheck --check-prefix=VFPV3XD-UNALIGNED %s
-# VFPV3XD-UNALIGNED: arm-unknown-none-eabi/armv7r_hard_vfpv3xd_exn_rtti_unaligned{{$}}
+# VFPV3XD-UNALIGNED: arm-none-eabi/armv7r_hard_vfpv3xd_exn_rtti_unaligned{{$}}
 # VFPV3XD-UNALIGNED-EMPTY:

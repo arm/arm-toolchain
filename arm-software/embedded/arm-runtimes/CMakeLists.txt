@@ -129,7 +129,7 @@ if(CMAKE_CXX_COMPILER_LAUNCHER)
 endif()
 
 if(TARGET_ARCH MATCHES "^aarch64")
-    set(target_triple "aarch64-unknown-none-elf")
+    set(target_triple "aarch64-none-elf")
     set(cpu_family aarch64)
 else()
     # Choose the target triple so that compiler-rt will do the
@@ -144,7 +144,7 @@ else()
     if(TARGET_ARCH MATCHES "^armv[4-6]")
         set(target_triple "${TARGET_ARCH}-none-eabi")
     else()
-        set(target_triple "arm-unknown-none-eabi")
+        set(target_triple "arm-none-eabi")
     endif()
     if(COMPILE_FLAGS MATCHES "-mfloat-abi=hard")
         # Also, compiler-rt looks in the ABI component of the
@@ -293,7 +293,7 @@ endif()
 # Exceptions are architectures pre-armv7, which compiler-rt expects to
 # see in the triple because that's where it looks to decide whether to
 # use specific assembly sources.
-if(NOT target_triple MATCHES "^(aarch64-unknown-none-elf|arm-unknown-none-eabi|armv[4-6])")
+if(NOT target_triple MATCHES "^(aarch64-none-elf|arm-none-eabi|armv[4-6])")
     message(FATAL_ERROR "\
 Target triple name \"${target_triple}\" not compatible with compiler-rt.
 Use -march to specify the architecture.")
@@ -304,11 +304,7 @@ if(flags MATCHES "-mfloat-abi=hard" AND NOT target_triple MATCHES "-eabihf$")
     message(FATAL_ERROR "\
 Hard-float library with target triple \"${target_triple}\" must end \"-eabihf\"")
 endif()
-if(target_triple MATCHES "-unknown-none-")
-    set(normalized_target_triple "${target_triple}")
-else()
-    string(REPLACE "-none-" "-unknown-none-" normalized_target_triple "${target_triple}")
-endif()
+string(REPLACE "-none-" "-unknown-none-" normalized_target_triple ${target_triple})
 
 if(ENABLE_COMPILER_RT_TESTS)
     # Generate xfails for compiler-rt.

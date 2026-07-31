@@ -336,10 +336,22 @@ void BareMetal::AddClangSystemIncludeArgs(const ArgList &DriverArgs,
   const SmallString<128> SysRootDir(computeSysRoot());
   if (!SysRootDir.empty()) {
     for (const Multilib &M : getOrderedMultilibs()) {
-      SmallString<128> Dir(SysRootDir);
-      llvm::sys::path::append(Dir, M.includeSuffix());
-      llvm::sys::path::append(Dir, "include");
-      addSystemInclude(DriverArgs, CC1Args, Dir.str());
+      // Downstream issue: #446 (Extend the Multilib system to support an
+      // IncludeDirs field)
+      if (!M.includeDirs().empty()) {
+        // Add include directories specified in multilib.yaml under the
+        // 'IncludeDirs' field
+        for (const std::string &Path : M.includeDirs()) {
+          SmallString<128> Dir(SysRoot);
+          llvm::sys::path::append(Dir, Path);
+          addSystemInclude(DriverArgs, CC1Args, Dir.str());
+        }
+      } else {
+        SmallString<128> Dir(SysRootDir);
+        llvm::sys::path::append(Dir, M.includeSuffix());
+        llvm::sys::path::append(Dir, "include");
+        addSystemInclude(DriverArgs, CC1Args, Dir.str());
+      }
     }
     SmallString<128> Dir(SysRootDir);
     llvm::sys::path::append(Dir, getTripleString());
@@ -424,6 +436,18 @@ void BareMetal::AddClangCXXStdlibIncludeArgs(const ArgList &DriverArgs,
       llvm::sys::path::append(TargetDir, "usr", "include", "c++", "v1");
       if (D.getVFS().exists(TargetDir)) {
         addSystemInclude(DriverArgs, CC1Args, TargetDir.str());
+        break;
+      }
+      // Downstream issue: #446 (Extend the Multilib system to support an
+      // IncludeDirs field)
+      if (!M.includeDirs().empty()) {
+        // Add include directories specified in multilib.yaml under the
+        // 'IncludeDirs' field
+        for (const std::string &Path : M.includeDirs()) {
+          Dir = SysRoot;
+          llvm::sys::path::append(Dir, Path, "c++", "v1");
+          addSystemInclude(DriverArgs, CC1Args, Dir.str());
+        }
         break;
       }
       // Add generic paths if nothing else succeeded so far.
