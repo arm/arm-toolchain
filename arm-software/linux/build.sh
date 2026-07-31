@@ -474,7 +474,6 @@ product_build() {
       print_forced_cached_flag "CMAKE_MODULE_LINKER_FLAGS:STRING" "\"${libs} ${RELOCS_LINKER_FLAGS}\""
       print_forced_cached_flag "CMAKE_SHARED_LINKER_FLAGS:STRING" "\"${libs} ${RELOCS_LINKER_FLAGS}\""
       print_forced_cached_flag "LLVM_ENABLE_RUNTIMES:STRING" "\"compiler-rt;flang-rt;libunwind;openmp\""
-      print_forced_cached_flag "LLVM_LIT_ARGS:STRING" "\"-sv -j1\""
       print_forced_cached_flag "RUNTIMES_CMAKE_ARGS:STRING" "\"-DCMAKE_C_COMPILER=${ATFL_DIR}/bin/clang;-DCMAKE_CXX_COMPILER=${ATFL_DIR}/bin/clang++;-DCMAKE_Fortran_COMPILER=${ATFL_DIR}/bin/flang;-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${libs};-DCMAKE_MODULE_LINKER_FLAGS=${libs};-DCMAKE_SHARED_LINKER_FLAGS=${libs}\""
     } >> ${cmake_caches}/BOLT.cmake
 
