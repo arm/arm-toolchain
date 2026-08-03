@@ -68,7 +68,7 @@ The Fortran part of this library has been compiled with Flang (known as
 library-compatible with the ATfL's Fortran compiler.
 
 A tarball matching with the installed Linux distribution should be downloaded
-(for example, `arm-performance-libraries_24.10_deb_flang-new.tar`). In this
+(for example, `arm-performance-libraries_26.07_deb_gcc.tar`). In this
 guide, Ubuntu is being used as an example.
 
 By default, ArmPL is installed to the globally accessible `/opt/arm` directory.
@@ -82,9 +82,9 @@ To proceed with the installation, unpack the tarball and run the installation
 script:
 
 ```
-$ tar -xf arm-performance-libraries_24.10_deb_flang-new.tar
+$ tar -xf arm-performance-libraries_26.07_deb_gcc.tar
 
-$ arm-performance-libraries_24.10_deb/arm-performance-libraries_24.10_deb.sh -a -i $HOME/armpl
+$ arm-performance-libraries_26.07_deb/arm-performance-libraries_26.07_deb.sh -a -i $HOME/armpl
 ```
 
 Note that the installation script will extract the ArmPL files into your
@@ -99,8 +99,8 @@ other critical environment variables: `LD_LIBRARY_PATH`  and `PKG_CONFIG_PATH`:
 
 ```
 $ MODULEPATH=$HOME/armpl/modulefiles module avail
----- $HOME/armpl/modulefiles ----
-armpl/24.10.0_flang-new
+---- ~/armpl/modulefiles ----
+armpl/26.07.0_gcc
 
 Key:
 modulepath
@@ -108,50 +108,52 @@ modulepath
 $ MODULEPATH=$HOME/armpl/modulefiles module load armpl
 
 $ set | grep ARMPL
-ARMPL_BUILD=16
-ARMPL_DIR=/home/pawosm01/armpl/armpl_24.10_flang-new
-ARMPL_INCLUDES=/home/pawosm01/armpl/armpl_24.10_flang-new/include
-ARMPL_LIBRARIES=/home/pawosm01/armpl/armpl_24.10_flang-new/lib
+ARMPL_BUILD=5643
+ARMPL_DIR=~/armpl/armpl_26.07_gcc
+ARMPL_INCLUDES=~/armpl/armpl_26.07_gcc/include
+ARMPL_LIBRARIES=~/armpl/armpl_26.07_gcc/lib
 
 $ echo $LD_LIBRARY_PATH
-$HOME/armpl/armpl_24.10_flang-new/lib
+~/armpl/armpl_26.07_gcc/lib
 
 $ echo $PKG_CONFIG_PATH
-$HOME/armpl/armpl_24.10_flang-new/lib/pkgconfig
+~/armpl/armpl_26.07_gcc/lib/pkgconfig
 
 $ pkg-config armpl --modversion
-24.10.0
+26.07.0
 
 $ pkg-config armpl --variable=libdir
-$HOME/armpl/armpl_24.10_flang-new/lib/pkgconfig/../../lib
+~/armpl/armpl_26.07_gcc/lib/pkgconfig/../../lib
 
 $ ls -1 `pkg-config armpl --variable=libdir`
 libamath.a
+libamath_repro.a
+libamath_repro.so
 libamath.so
 libarmpl.a
-libarmpl.so
 libarmpl_ilp64.a
-libarmpl_ilp64.so
-libarmpl_ilp64.so.3
-libarmpl_ilp64.so.3.12.0
 libarmpl_ilp64_mp.a
 libarmpl_ilp64_mp.so
 libarmpl_ilp64_mp.so.3
-libarmpl_ilp64_mp.so.3.12.0
+libarmpl_ilp64_mp.so.3.12.1
+libarmpl_ilp64.so
+libarmpl_ilp64.so.3
+libarmpl_ilp64.so.3.12.1
 libarmpl_int64.a
-libarmpl_int64.so
 libarmpl_int64_mp.a
 libarmpl_int64_mp.so
+libarmpl_int64.so
 libarmpl_lp64.a
-libarmpl_lp64.so
-libarmpl_lp64.so.3
-libarmpl_lp64.so.3.12.0
 libarmpl_lp64_mp.a
 libarmpl_lp64_mp.so
 libarmpl_lp64_mp.so.3
-libarmpl_lp64_mp.so.3.12.0
+libarmpl_lp64_mp.so.3.12.1
+libarmpl_lp64.so
+libarmpl_lp64.so.3
+libarmpl_lp64.so.3.12.1
 libarmpl_mp.a
 libarmpl_mp.so
+libarmpl.so
 libastring.a
 libastring.so
 pkgconfig
@@ -162,42 +164,30 @@ picking the one that you really need, particularly when you plan to use OpenMP:
 
 ```
 $ pkg-config --list-all | grep armpl
-armpl                           ArmPL - Arm Performance Libraries
-armpl-Fortran-dynamic-ilp64-omp ArmPL - Arm Performance Libraries
-armpl-Fortran-dynamic-ilp64-seq ArmPL - Arm Performance Libraries
-armpl-Fortran-dynamic-lp64-omp  ArmPL - Arm Performance Libraries
-armpl-Fortran-dynamic-lp64-seq  ArmPL - Arm Performance Libraries
-armpl-Fortran-static-ilp64-omp  ArmPL - Arm Performance Libraries
-armpl-Fortran-static-ilp64-seq  ArmPL - Arm Performance Libraries
-armpl-Fortran-static-lp64-omp   ArmPL - Arm Performance Libraries
-armpl-Fortran-static-lp64-seq   ArmPL - Arm Performance Libraries
-armpl-dynamic-ilp64-omp         ArmPL - Arm Performance Libraries
-armpl-dynamic-ilp64-seq         ArmPL - Arm Performance Libraries
-armpl-dynamic-lp64-omp          ArmPL - Arm Performance Libraries
-armpl-dynamic-lp64-seq          ArmPL - Arm Performance Libraries
-armpl-static-ilp64-omp          ArmPL - Arm Performance Libraries
-armpl-static-ilp64-seq          ArmPL - Arm Performance Libraries
-armpl-static-lp64-omp           ArmPL - Arm Performance Libraries
-armpl-static-lp64-seq           ArmPL - Arm Performance Libraries
+armpl                          ArmPL - Arm Performance Libraries
+armpl-Fortran-ilp64-omp        ArmPL - Arm Performance Libraries
+armpl-Fortran-ilp64-seq        ArmPL - Arm Performance Libraries
+armpl-Fortran-lp64-omp         ArmPL - Arm Performance Libraries
+armpl-Fortran-lp64-seq         ArmPL - Arm Performance Libraries
+armpl-ilp64-omp                ArmPL - Arm Performance Libraries
+armpl-ilp64-seq                ArmPL - Arm Performance Libraries
+armpl-lp64-omp                 ArmPL - Arm Performance Libraries
+armpl-lp64-seq                 ArmPL - Arm Performance Libraries
 
-$ pkg-config armpl-dynamic-ilp64-omp --cflags
--DINTEGER64 -fopenmp -I$HOME/armpl/armpl_24.10_flang-new/lib/pkgconfig/../../include
+$ pkg-config armpl-ilp64-omp --cflags
+-DINTEGER64 -I~/armpl/armpl_26.07_gcc/lib/pkgconfig/../../include
 ```
 
-The default `armpl` module is an equivalent of `armpl-static-lp64-seq.pc`:
+The default `armpl` module is an equivalent of `armpl-lp64-seq.pc`:
 
 ```
 $ pkg-config armpl --cflags
--static -I$HOME/armpl/armpl_24.10_flang-new/lib/pkgconfig/../../include
+-I~/armpl/armpl_26.07_gcc/lib/pkgconfig/../../include
 ```
 
 ### Examples of use
 
 #### Compiling and linking an example C/C++ program
-
-Note that the `--libs` flag is not yet supported by the ArmPL's `pkg-config`
-modules, hence the examples below make use only of the `--libs-only-L` flag
-instead and the libraries to link are being listed explicitly.
 
 ##### Plain C file
 
@@ -210,7 +200,7 @@ $ armclang -c example.c `pkg-config armpl --cflags`
 Linking:
 
 ```
-$ armclang -o example example.o `pkg-config armpl --libs-only-L` -larmpl -lm -static
+$ armclang -o example example.o `pkg-config armpl --libs` -lm
 ```
 
 ##### Plain C++ file
@@ -224,7 +214,7 @@ $ armclang++ -c example.cc `pkg-config armpl --cflags`
 Linking:
 
 ```
-$ armclang++ -o example example.o `pkg-config armpl --libs-only-L` -larmpl -lm -static
+$ armclang++ -o example example.o `pkg-config armpl --libs` -lm
 ```
 
 ##### An OpenMP C example
@@ -232,23 +222,21 @@ $ armclang++ -o example example.o `pkg-config armpl --libs-only-L` -larmpl -lm -
 Compiling:
 
 ```
-$ armclang -fopenmp -c example.c `pkg-config armpl-dynamic-lp64-omp --cflags`
+$ armclang -fopenmp -c example.c `pkg-config armpl-lp64-omp --cflags`
 ```
 
 Linking:
 
 ```
-$ armclang -fopenmp -o example example.o `pkg-config armpl-dynamic-lp64-omp --libs-only-L` -larmpl -lm
+$ armclang -fopenmp -o example example.o `pkg-config armpl-lp64-omp --libs` -lm
 
 $ ldd ./example
-    linux-vdso.so.1 (0x0000f76d2927d000)
-    libarmpl.so => $HOME/armpl/armpl_24.10_flang-new/lib/libarmpl.so (0x0000f76d25200000)
-    libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000f76d25160000)
-    libomp.so => $HOME/atfl/bin/../lib/aarch64-unknown-linux-gnu/libomp.so (0x0000f76d25050000)
-    libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000f76d24ea0000)
-    librt.so.1 => /lib/aarch64-linux-gnu/librt.so.1 (0x0000f76d29210000)
-    libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000f76d24e70000)
-    /lib/ld-linux-aarch64.so.1 (0x0000f76d29244000)
+    linux-vdso.so.1 (0x0000e1da0185d000)
+    libarmpl_mp.so => ~/armpl/armpl_26.07_gcc/lib/libarmpl_mp.so (0x0000e1d9f4640000)
+    libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000e1d9f4590000)
+    libomp.so => ~/atfl/bin/../lib/aarch64-unknown-linux-gnu/libomp.so (0x0000e1d9f4460000)
+    libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000e1d9f42a0000)
+    /lib/ld-linux-aarch64.so.1 (0x0000e1da01820000)
 ```
 
 #### Compiling and linking example Fortran program
@@ -262,29 +250,25 @@ $ armflang -c example.f90 `pkg-config armpl --cflags`
 Linking:
 
 ```
-$ armflang -o example example.o `pkg-config armpl --libs-only-L` -larmpl -lm -static
+$ armflang -o example example.o `pkg-config armpl --libs` -lm
 ```
 
 An OpenMP Fortran example:
 
 ```
-$ armflang -fopenmp -c example.f90 `pkg-config armpl-Fortran-dynamic-lp64-omp --cflags`
-flang-20: warning: OpenMP support in flang is still experimental [-Wexperimental-option]
+$ armflang -fopenmp -c example.f90 `pkg-config armpl-Fortran-lp64-omp --cflags`
 
-$ armflang -fopenmp -o example example.o `pkg-config armpl-Fortran-dynamic-lp64-omp --libs-only-L` -larmpl -lm
+$ armflang -fopenmp -o example example.o `pkg-config armpl-Fortran-lp64-omp --libs` -lm
 
 $ ldd ./example
-    linux-vdso.so.1 (0x0000f0bd2175a000)
-    libarmpl.so => $HOME/armpl/armpl_24.10_flang-new/lib/libarmpl.so (0x0000f0bd1d600000)
-    libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000f0bd21660000)
-    libFortranRuntime.so.20.0 => $HOME/atfl/bin/../lib/aarch64-unknown-linux-gnu/libFortranRuntime.so.20.0 (0x0000f0bd1cc00000)
-    libFortranDecimal.so.20.0 => $HOME/atfl/bin/../lib/aarch64-unknown-linux-gnu/libFortranDecimal.so.20.0 (0x0000f0bd21610000)
-    libatomic.so.1 => /lib/aarch64-linux-gnu/libatomic.so.1 (0x0000f0bd215f0000)
-    libomp.so => $HOME/atfl/bin/../lib/aarch64-unknown-linux-gnu/libomp.so (0x0000f0bd1caf0000)
-    libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000f0bd1c940000)
-    librt.so.1 => /lib/aarch64-linux-gnu/librt.so.1 (0x0000f0bd1d5e0000)
-    libgcc_s.so.1 => /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000f0bd1c910000)
-    /lib/ld-linux-aarch64.so.1 (0x0000f0bd21721000)
+    linux-vdso.so.1 (0x0000e57539a3f000)
+    libarmpl_mp.so => ~/armpl/armpl_26.07_gcc/lib/pkgconfig/../../lib/libarmpl_mp.so (0x0000e5752c820000)
+    libm.so.6 => /lib/aarch64-linux-gnu/libm.so.6 (0x0000e5752c770000)
+    libflang_rt.runtime.so => ~/atfl/lib/clang/*major_version*/lib/aarch64-unknown-linux-gnu/libflang_rt.runtime.so (0x0000e5752c0a0000)
+    libatomic.so.1 => /lib/aarch64-linux-gnu/libatomic.so.1 (0x0000e5752c070000)
+    libomp.so => ~/atfl/bin/../lib/aarch64-unknown-linux-gnu/libomp.so (0x0000e5752bf40000)
+    libc.so.6 => /lib/aarch64-linux-gnu/libc.so.6 (0x0000e5752bd80000)
+    /lib/ld-linux-aarch64.so.1 (0x0000e575399f0000)
 ```
 
 #### Using ArmPL without loading the environment module
@@ -292,16 +276,16 @@ $ ldd ./example
 In the examples above it was assumed that the environment module for ArmPL has
 been loaded, therefore the `LD_LIBRARY_PATH` variable has been set. This helps
 the dynamic linker to find the ArmPL shared object file when an executable
-program is being loaded. Yet if loading a module is not desirable, the `RPATH`
+program is being loaded. Yet if loading a module is not desirable, the `RUNPATH`
 needs to be set for the non-static builds at the link time.
 
 An OpenMP C example:
 
 ```
-$ armclang -fopenmp -o example example.o `pkg-config armpl-dynamic-lp64-omp --libs-only-L` -larmpl -lm -Wl,-rpath=`pkg-config armpl-dynamic-lp64-omp --variable=libdir`
+$ armclang -fopenmp -o example example.o `pkg-config armpl-lp64-omp --libs` -lm -Wl,-rpath=`pkg-config armpl-lp64-omp --variable=libdir`
 
 $ chrpath -l ./example
-./example: RUNPATH=$HOME/armpl/armpl_24.10_flang-new/lib/pkgconfig/../../lib:$HOME/atfl/lib/clang/20/lib/aarch64-unknown-linux-gnu:$HOME/atfl/bin/../lib/aarch64-unknown-linux-gnu
+./example: RUNPATH=$HOME/armpl/armpl_26.07_gcc/lib/pkgconfig/../../lib:$HOME/atfl/lib/clang/*major_version*/lib/aarch64-unknown-linux-gnu:$HOME/atfl/bin/../lib/aarch64-unknown-linux-gnu
 ```
 
 ## Nightly build binary distribution
