@@ -400,15 +400,6 @@ def main():
             description="test too large for embedded targets",
         ),
         XFail(
-            name="at_exit",
-            testnames=[
-                "std/language.support/support.start.term/quick_exit.pass.cpp",
-            ],
-            result=NewResult.XFAILED,
-            project="libcxx",
-            description="at_quick_exit symbol is not found",
-        ),
-        XFail(
             name="demangle",
             testnames=[
                 "test_demangle.pass.cpp",
