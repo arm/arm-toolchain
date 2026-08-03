@@ -294,8 +294,8 @@ def main():
                 "std/atomics/atomics.ref/exchange.pass.cpp",
                 "std/atomics/atomics.ref/fetch_add.pass.cpp",
                 "std/atomics/atomics.ref/fetch_and.pass.cpp",
-                "std/atomics/atomics.ref/fetch_max.pass.cpp"
-                "std/atomics/atomics.ref/fetch_min.pass.cpp"
+                "std/atomics/atomics.ref/fetch_max.pass.cpp",
+                "std/atomics/atomics.ref/fetch_min.pass.cpp",
                 "std/atomics/atomics.ref/fetch_or.pass.cpp",
                 "std/atomics/atomics.ref/fetch_sub.pass.cpp",
                 "std/atomics/atomics.ref/fetch_xor.pass.cpp",
