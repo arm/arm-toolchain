@@ -2644,6 +2644,8 @@ public:
     OS << " with assertions";
 #endif
     OS << ".\n";
+    // Downstream change issue: #124 (Arm Toolchain ID)
+    OS << "Arm Toolchain ID: " << ARM_TOOLCHAIN_ID << '\n';
 
     // Iterate over any registered extra printers and call them to add further
     // information.

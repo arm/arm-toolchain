@@ -35,12 +35,18 @@ class Driver;
 class Multilib {
 public:
   using flags_list = std::vector<std::string>;
+  // Downstream issue: #446 (Extend the Multilib system to support an
+  // IncludeDirs field)
+  using includedirs_list = std::vector<std::string>;
 
 private:
   std::string GCCSuffix;
   std::string OSSuffix;
   std::string IncludeSuffix;
   flags_list Flags;
+  // Downstream issue: #446 (Extend the Multilib system to support an
+  // IncludeDirs field)
+  includedirs_list IncludeDirs;
 
   // Optionally, a multilib can be assigned a string tag indicating that it's
   // part of a group of mutually exclusive possibilities. If two or more
@@ -62,6 +68,9 @@ public:
   /// This is enforced with an assert in the constructor.
   Multilib(StringRef GCCSuffix = {}, StringRef OSSuffix = {},
            StringRef IncludeSuffix = {}, const flags_list &Flags = flags_list(),
+           // Downstream issue: #446 (Extend the Multilib system to support an
+           // IncludeDirs field)
+           const includedirs_list &IncludeDirs = includedirs_list(),
            StringRef ExclusiveGroup = {},
            std::optional<StringRef> Error = std::nullopt);
 
@@ -80,6 +89,12 @@ public:
   /// Get the flags that indicate or contraindicate this multilib's use
   /// All elements begin with either '-' or '!'
   const flags_list &flags() const { return Flags; }
+
+  // Downstream issue: #446 (Extend the Multilib system to support an
+  // IncludeDirs field)
+  /// Get the include directories specified in multilib.yaml under the
+  /// 'IncludeDirs' field
+  const includedirs_list &includeDirs() const { return IncludeDirs; }
 
   /// Get the exclusive group label.
   const std::string &exclusiveGroup() const { return ExclusiveGroup; }
