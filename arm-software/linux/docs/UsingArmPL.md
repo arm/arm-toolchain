@@ -44,23 +44,15 @@ the `seq` and `omp` name parts:
 
 ```
 $ pkg-config --list-all | grep armpl
-armpl                           ArmPL - Arm Performance Libraries
-armpl-Fortran-dynamic-ilp64-omp ArmPL - Arm Performance Libraries
-armpl-Fortran-dynamic-ilp64-seq ArmPL - Arm Performance Libraries
-armpl-Fortran-dynamic-lp64-omp  ArmPL - Arm Performance Libraries
-armpl-Fortran-dynamic-lp64-seq  ArmPL - Arm Performance Libraries
-armpl-Fortran-static-ilp64-omp  ArmPL - Arm Performance Libraries
-armpl-Fortran-static-ilp64-seq  ArmPL - Arm Performance Libraries
-armpl-Fortran-static-lp64-omp   ArmPL - Arm Performance Libraries
-armpl-Fortran-static-lp64-seq   ArmPL - Arm Performance Libraries
-armpl-dynamic-ilp64-omp         ArmPL - Arm Performance Libraries
-armpl-dynamic-ilp64-seq         ArmPL - Arm Performance Libraries
-armpl-dynamic-lp64-omp          ArmPL - Arm Performance Libraries
-armpl-dynamic-lp64-seq          ArmPL - Arm Performance Libraries
-armpl-static-ilp64-omp          ArmPL - Arm Performance Libraries
-armpl-static-ilp64-seq          ArmPL - Arm Performance Libraries
-armpl-static-lp64-omp           ArmPL - Arm Performance Libraries
-armpl-static-lp64-seq           ArmPL - Arm Performance Libraries
+armpl                          ArmPL - Arm Performance Libraries
+armpl-Fortran-ilp64-omp        ArmPL - Arm Performance Libraries
+armpl-Fortran-ilp64-seq        ArmPL - Arm Performance Libraries
+armpl-Fortran-lp64-omp         ArmPL - Arm Performance Libraries
+armpl-Fortran-lp64-seq         ArmPL - Arm Performance Libraries
+armpl-ilp64-omp                ArmPL - Arm Performance Libraries
+armpl-ilp64-seq                ArmPL - Arm Performance Libraries
+armpl-lp64-omp                 ArmPL - Arm Performance Libraries
+armpl-lp64-seq                 ArmPL - Arm Performance Libraries
 ```
 
 ### C/C++ examples
@@ -70,7 +62,7 @@ integer interface, and include compiler and library optimizations for an
 Neoverse N1-based system, use:
 
 ```
-$ armclang -fopenmp -o binary code_with_math_routines.c -mcpu=neoverse-n1 `pkg-config armpl-dynamic-ilp64-omp --cflags --libs`
+$ armclang -fopenmp -o binary code_with_math_routines.c -mcpu=neoverse-n1 `pkg-config armpl-ilp64-omp --cflags --libs`
 ```
 
 To link to the OpenMP multi-threaded Arm Performance Libraries with a 32-bit
@@ -78,7 +70,7 @@ integer interface, and build portable output that is suitable for any
 Armv8-A-based system, use:
 
 ```
-$ armclang -fopenmp -o binary code_with_math_routines.c -mcpu=generic `pkg-config armpl-dynamic-lp64-omp --cflags --libs`
+$ armclang -fopenmp -o binary code_with_math_routines.c -mcpu=generic `pkg-config armpl-lp64-omp --cflags --libs`
 ```
 
 To link to the serial implementation of Arm Performance Libraries with a 32-bit
@@ -86,7 +78,7 @@ integer interface, and include compiler and library optimizations for an
 Neoverse V2-based system, use:
 
 ```
-$ armclang -o binary code_with_math_routines.c -mcpu=neoverse-v2 `pkg-config armpl-dynamic-lp64-seq --cflags --libs`
+$ armclang -o binary code_with_math_routines.c -mcpu=neoverse-v2 `pkg-config armpl-lp64-seq --cflags --libs`
 ```
 
 ### Fortran examples
@@ -96,7 +88,7 @@ integer interface, and include compiler and library optimizations for an
 Neoverse N2-based system, use:
 
 ```
-$ armflang -fopenmp -o binary code_with_math_routines.f90 -mcpu=neoverse-n2 `pkg-config armpl-dynamic-ilp64-omp --cflags --libs`
+$ armflang -fopenmp -o binary code_with_math_routines.f90 -mcpu=neoverse-n2 `pkg-config armpl-ilp64-omp --cflags --libs`
 ```
 
 To link to the OpenMP multi-threaded Arm Performance Libraries with a 32-bit
@@ -104,7 +96,7 @@ integer interface, and build portable output that is suitable for any
 Armv8-A-based system, use:
 
 ```
-$ armflang -fopenmp -o binary code_with_math_routines.f90 -mcpu=generic `pkg-config armpl-dynamic-lp64-omp --cflags --libs`
+$ armflang -fopenmp -o binary code_with_math_routines.f90 -mcpu=generic `pkg-config armpl-lp64-omp --cflags --libs`
 ```
 
 To link to the serial implementation of Arm Performance Libraries with a 32-bit
@@ -112,7 +104,7 @@ integer interface, and include compiler and library optimizations for an
 Neoverse V1-based system, use:
 
 ```
-$ armflang -o binary code_with_math_routines.f90 -mcpu=neoverse-v1 `pkg-config armpl-dynamic-lp64-seq --cflags --libs`
+$ armflang -o binary code_with_math_routines.f90 -mcpu=neoverse-v1 `pkg-config armpl-lp64-seq --cflags --libs`
 ```
 
 ### More information
