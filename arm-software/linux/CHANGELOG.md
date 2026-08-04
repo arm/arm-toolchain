@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [23.1.0]
 
-- The `armclang` executable binary now optimized with BOLT.
+- The `armclang` and `armflang` executable binaries are now optimized with BOLT.
 
 ## [22.1.0]
 
