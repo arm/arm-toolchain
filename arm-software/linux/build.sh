@@ -669,9 +669,9 @@ package() {
     ln -sf flang armflang
     ln -sf llvm-objdump armllvm-objdump
     if ! libraries_present; then
-      echo "-mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0" > atfl-performance.cfg
+      echo "-mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0 -mllvm -use-dereferenceable-at-point-semantics=false" > atfl-performance.cfg
     else
-      echo "-fveclib=ArmPL -mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0" > atfl-performance.cfg
+      echo "-fveclib=ArmPL -mllvm -gvn-add-phi-translation=1 -mllvm -store-to-load-forwarding-conflict-detection=0 -mllvm -use-dereferenceable-at-point-semantics=false" > atfl-performance.cfg
     fi
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang.cfg
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang++.cfg
