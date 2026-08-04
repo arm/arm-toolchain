@@ -675,7 +675,7 @@ package() {
     fi
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang.cfg
     echo "-frtlib-add-rpath @atfl-performance.cfg" > clang++.cfg
-    echo "-frtlib-add-rpath @atfl-performance.cfg" > flang.cfg
+    echo "-frtlib-add-rpath -freal-sum-reassociation @atfl-performance.cfg" > flang.cfg
     cd -
 {
     echo "complete -F _clang armclang"
