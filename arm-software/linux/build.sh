@@ -522,16 +522,19 @@ product_build() {
     fi
     echo "-Wl,-rpath=${ATFL_DIR}/lib" >> "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
     run_test_command "${LOGS_DIR}/product_check_all.xml" "${LOGS_DIR}/product.txt" check-all
+    # We insist that clang and flang are symlinks. This should fail if they are not.
+    local clang_name="$(readlink "${ATFL_DIR}/bin/clang")"
+    local flang_name="$(readlink "${ATFL_DIR}/bin/flang")"
     if [[ "${ATFL_BOLTED}" == "ON" ]]; then
       run_test_command "${LOGS_DIR}/product_bolted_check_flang.xml" "${LOGS_DIR}/product-bolted.txt" stage2-check-flang
       run_test_command "${LOGS_DIR}/product_bolted_check_clang.xml" "${LOGS_DIR}/product-bolted.txt" stage2-check-clang
-      # We insist that clang and flang are symlinks. This should fail if they are not.
-      local clang_name="$(readlink "${ATFL_DIR}/bin/clang")"
-      local flang_name="$(readlink "${ATFL_DIR}/bin/flang")"
       mv "${ATFL_DIR}/bin/${clang_name}" "${ATFL_DIR}/bin/${clang_name}.not_bolted"
       mv "${ATFL_DIR}/bin/${flang_name}" "${ATFL_DIR}/bin/${flang_name}.not_bolted"
       cp "${BUILD_DIR}/stage/product_build/tools/clang/stage2-instrumented-bins/tools/clang/stage2-bins/bin/${clang_name}" "${ATFL_DIR}/bin"
       cp "${BUILD_DIR}/stage/product_build/tools/clang/stage2-instrumented-bins/tools/clang/stage2-bins/bin/${flang_name}" "${ATFL_DIR}/bin"
+    else
+      cp "${ATFL_DIR}/bin/${clang_name}" "${ATFL_DIR}/bin/${clang_name}.not_bolted"
+      cp "${ATFL_DIR}/bin/${flang_name}" "${ATFL_DIR}/bin/${flang_name}.not_bolted"
     fi
 
     bootstrap_compiler_default_config
