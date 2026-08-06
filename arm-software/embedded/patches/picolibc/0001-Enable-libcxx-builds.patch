@@ -36,8 +36,8 @@ index 416eeebdf..c79e3efed 100644
  		*(.literal.startup .text.startup .literal.startup.* .text.startup.*)
  		*(SORT(.text.sorted.*))
  		*(.literal .text .literal.* .text.* .opd .opd.* .branch_lt .branch_lt.* @EXTRA_TEXT_SECTIONS@)
-+		/* This is used by C++ library to determine if new(), etc is overridden or not in situationr
-+		 * when direct pointer comparison does not work, e.g. with PAC pointers are signed, thus haver
++		/* This is used by C++ library to determine if new(), etc is overridden or not in situation
++		 * when direct pointer comparison does not work, e.g. with PAC pointers are signed, thus have
 +		 * a random component to them. */
 +		PROVIDE (__start___lcxx_override = .);
 +		*(__lcxx_override)
