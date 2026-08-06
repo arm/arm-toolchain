@@ -30,9 +30,9 @@ export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 
 # Command for each test is splitted across individual lines, to aid in debugging.
 cd "${REPO_ROOT}"/build
-ninja check-all
-ninja check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
-ninja check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
-ninja check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
-ninja check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
-ninja check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja -k 0 check-all \
+    check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
+    check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
+    check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
+    check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
+    check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
