@@ -3712,10 +3712,21 @@ bool Sema::checkTargetAttr(SourceLocation LiteralLoc, StringRef AttrStr) {
              << Unsupported << None << CurFeature << Target;
   }
 
+// Begin downstream change #977
+  if (ParsedAttrs.BranchProtection.empty()) {
+    if (!ParsedAttrs.SignReturnAddrHardening.empty())
+      Diag(LiteralLoc, diag::warn_attribute_harden_pac_ret_requires_pac_ret);
+    return false;
+  }
+
+// End downstream change #977
   TargetInfo::BranchProtectionInfo BPI{};
   StringRef DiagMsg;
-  if (ParsedAttrs.BranchProtection.empty())
-    return false;
+// Begin downstream change #977
+//  if (ParsedAttrs.BranchProtection.empty())
+//    return false;
+
+// End downstream change #977
   if (!Context.getTargetInfo().validateBranchProtection(
           ParsedAttrs.BranchProtection, ParsedAttrs.CPU, BPI,
           Context.getLangOpts(), DiagMsg)) {
@@ -3728,6 +3739,21 @@ bool Sema::checkTargetAttr(SourceLocation LiteralLoc, StringRef AttrStr) {
   if (!DiagMsg.empty())
     Diag(LiteralLoc, diag::warn_unsupported_branch_protection_spec) << DiagMsg;
 
+// Begin downstream change #977
+  if (!ParsedAttrs.SignReturnAddrHardening.empty()) {
+    auto SignReturnAddrHardenOpt =
+        Context.getTargetInfo().parseSignReturnAddressHardening(
+            ParsedAttrs.SignReturnAddrHardening);
+    if (!SignReturnAddrHardenOpt)
+      return Diag(LiteralLoc, diag::err_invalid_harden_pac_ret_spec)
+             << ParsedAttrs.SignReturnAddrHardening;
+
+    if (BPI.SignReturnAddr == LangOptions::SignReturnAddressScopeKind::None)
+      return Diag(LiteralLoc,
+                  diag::warn_attribute_harden_pac_ret_requires_pac_ret);
+  }
+
+// End downstream change #977
   return false;
 }
 

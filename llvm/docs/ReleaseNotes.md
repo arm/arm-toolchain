@@ -205,7 +205,13 @@ Makes programs 10x faster by doing Special New Thing.
   ([#167783](https://github.com/llvm/llvm-project/pull/167783))
 * On AArch64 Windows targets, return address signing now uses the B-key by
   default because Windows unwind information only supports B-key signing.
+<!-- Begin downstream change #977 -->
+* Added support for hardening return address signing against PACMAN attacks.
+  Functions with the `"sign-return-address-harden"="load-return-address"`
+  attribute perform a load of the return address before returning, reducing the
+  cache side channel used to guess pointer authentication codes.
 
+<!-- End downstream change #977 -->
 ### Changes to the AMDGPU Backend
 
 * Initial support for gfx1310

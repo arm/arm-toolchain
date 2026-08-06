@@ -455,6 +455,16 @@ latest release, please see the [Clang Web Site](https://clang.llvm.org) or the
   necessary. `/d1nodatetime-` can be used to turn this feature off if
   necessary to override the common build settings.
 
+<!-- Begin downstream change #977 -->
+- Added the AArch64 option `-mharden-pac-ret=load-return-address` to harden
+  return address signing against PACMAN attacks. The option requires return
+  address signing to be enabled and emits a load of the return address before
+  returning, reducing the cache side channel used to guess pointer
+  authentication codes. See
+  {doc}`Return Address Signing Hardening <ReturnAddressSigningHardening>` for
+  more information.
+
+<!-- End downstream change #977 -->
 ### Deprecated Compiler Flags
 
 ### Modified Compiler Flags

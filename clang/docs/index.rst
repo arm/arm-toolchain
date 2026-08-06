@@ -51,6 +51,9 @@ Using Clang as a Compiler
    ControlFlowIntegrity
    LTOVisibility
    PointerAuthentication
+// Begin downstream change #977
+   ReturnAddressSigningHardening
+// End downstream change #977
    SafeStack
    ShadowCallStack
    StructureProtection
@@ -135,4 +138,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`search`
-
