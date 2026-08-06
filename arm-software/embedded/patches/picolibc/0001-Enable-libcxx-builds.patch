@@ -1,46 +1,44 @@
-From 16cdfded8054ebc099bce628292c1530aaba01b1 Mon Sep 17 00:00:00 2001
-From: Simi Pallipurath <simi.pallipurath@arm.com>
-Date: Thu, 14 Nov 2024 10:07:08 +0000
-Subject: Enable libcxx builds
+From 37f65bfe8b4a5d6b639475b6f38be91c61cfc6f4 Mon Sep 17 00:00:00 2001
+From: Mark Murray <Mark.Murray@arm.com>
+Date: Thu, 6 Aug 2026 13:40:48 +0100
+Subject: [PATCH] Modifications to linker script required to enable libc++
+ builds.
 
-Modifications to build config and linker script required to enable
-libc++ builds.
 ---
- meson.build    | 12 ++++++++++++
- picolibc.ld.in |  3 +++
- 2 files changed, 15 insertions(+)
+ meson.build    | 8 ++++++++
+ picolibc.ld.in | 6 ++++++
+ 2 files changed, 14 insertions(+)
 
 diff --git a/meson.build b/meson.build
-index 37bdf8b407..3026dac4ae 100644
+index 93daa5dae..e024324b8 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -1545,6 +1545,18 @@ NEWLIB_MAJOR_VERSION=4
+@@ -1450,6 +1450,14 @@ NEWLIB_MAJOR_VERSION=4
  NEWLIB_MINOR_VERSION=3
  NEWLIB_PATCHLEVEL_VERSION=0
  
-+conf_data.set('_GNU_SOURCE', '',
-+        description: '''Enable GNU functions like strtof_l.
-+It's necessary to set this globally because inline functions in
-+libc++ headers call the GNU functions.'''
-+)
-+
-+conf_data.set('_PICOLIBC_CTYPE_SMALL', '0',
-+        description: '''Disable picolibc's small ctype implementation.
-+libc++ expects newlib-style ctype tables, and also expects support for locales
-+and extended character sets, so picolibc's small ctype is not compatible with it'''
-+)
++if host_cpu_family == 'aarch64'
++  conf_data.set('_GNU_SOURCE', '',
++        description: '''Enable GNU/POSIX locale functions needed by libc++ on AArch64.
++libc++ newlib locale support uses inline calls such as strtof_l,
++newlocale, uselocale and nl_langinfo_l.'''
++  )
++endif
 +
  conf_data.set('__HAVE_CC_INHIBIT_LOOP_TO_LIBCALL',
  	      cc.has_argument('-fno-tree-loop-distribute-patterns'),
  	      description: 'Compiler flag to prevent detecting memcpy/memset patterns')
 diff --git a/picolibc.ld.in b/picolibc.ld.in
-index 25bced6eee..f05195c119 100644
+index 416eeebdf..c79e3efed 100644
 --- a/picolibc.ld.in
 +++ b/picolibc.ld.in
-@@ -70,6 +70,9 @@ SECTIONS
+@@ -70,6 +70,12 @@ SECTIONS
  		*(.literal.startup .text.startup .literal.startup.* .text.startup.*)
  		*(SORT(.text.sorted.*))
  		*(.literal .text .literal.* .text.* .opd .opd.* .branch_lt .branch_lt.* @EXTRA_TEXT_SECTIONS@)
++		/* This is used by C++ library to determine if new(), etc is overridden or not in situationr
++		 * when direct pointer comparison does not work, e.g. with PAC pointers are signed, thus haver
++		 * a random component to them. */
 +		PROVIDE (__start___lcxx_override = .);
 +		*(__lcxx_override)
 +		PROVIDE (__stop___lcxx_override = .);
