@@ -27,8 +27,8 @@ export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 
 # Run all relevant test targets using Ninja.
 cd "${REPO_ROOT}"/build
-ninja check-all
-ninja check-llvm-toolchain
-ninja check-cxxabi
-ninja check-unwind
-ninja check-package-llvm-toolchain
+ninja -k 0 check-all \
+    check-llvm-toolchain \
+    check-cxxabi \
+    check-unwind \
+    check-package-llvm-toolchain

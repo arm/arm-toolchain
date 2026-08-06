@@ -27,14 +27,14 @@ export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
 
 # Run all relevant test targets using Ninja.
 cd "${REPO_ROOT}"/build
-ninja check-all
-ninja check-compiler-rt-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
-ninja check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
-ninja check-cxx-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
-ninja check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
-ninja check-cxxabi-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
-ninja check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
-ninja check-picolibc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
-ninja check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
-ninja check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned
-ninja check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
+ninja -k 0 check-all \
+    check-compiler-rt-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
+    check-cxx-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
+    check-cxxabi-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
+    check-picolibc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size \
+    check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
+    check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
