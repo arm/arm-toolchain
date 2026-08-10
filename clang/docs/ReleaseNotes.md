@@ -184,6 +184,16 @@ features cannot lower the translation-unit ABI level;
   `-fsanitize=shadow-call-stack`. The selected register must also be reserved
   with the matching `-ffixed-<reg>`.
 
+<!-- Begin downstream change #910 -->
+- Added the AArch64 option `-mharden-pac-ret=load-return-address` to harden
+  return address signing against PACMAN attacks. The option requires return
+  address signing to be enabled and emits a load of the return address before
+  returning, reducing the cache side channel used to guess pointer
+  authentication codes. See
+  {doc}`Return Address Signing Hardening <ReturnAddressSigningHardening>` for
+  more information.
+
+<!-- End downstream change #910 -->
 ### Deprecated Compiler Flags
 
 ### Modified Compiler Flags

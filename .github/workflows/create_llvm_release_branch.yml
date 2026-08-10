@@ -1,0 +1,40 @@
+# Copyright (c) 2026, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow creates a branch to mirror an upstream LLVM release branch.
+
+name: "(arm-toolchain) Create LLVM Release Branch"
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: Release Major Version
+        required: true
+        type: string
+jobs:
+  create-llvm-release-branch:
+    runs-on: ubuntu-24.04-arm
+    if: github.repository == 'arm/arm-toolchain'
+    steps:
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v3
+        id: generate-token
+        with:
+          client-id: ${{ secrets.SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+      - name: Configure Git Identity
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Create Branch
+        run: |
+          git remote add llvm https://github.com/llvm/llvm-project.git
+          git fetch llvm main
+          git fetch llvm release/${{ inputs.release-version }}.x
+          git push origin FETCH_HEAD:refs/heads/release/${{ inputs.release-version }}.x
