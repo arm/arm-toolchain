@@ -54,8 +54,8 @@ define i1 @icmp_select_var_select(i8 %x, i8 %y, i1 %c) !prof !0 {
 ; CHECK-NEXT:    [[CMP1:%.*]] = icmp eq i8 [[X:%.*]], 0
 ; CHECK-NEXT:    [[CMP212:%.*]] = icmp eq i8 [[X]], [[Y:%.*]]
 ; CHECK-NEXT:    [[NOT_C:%.*]] = xor i1 [[C:%.*]], true
-; CHECK-NEXT:    [[TMP1:%.*]] = select i1 [[CMP1]], i1 true, i1 [[NOT_C]], !prof [[PROF1:![0-9]+]]
-; CHECK-NEXT:    [[CMP2:%.*]] = select i1 [[TMP1]], i1 true, i1 [[CMP212]], !prof [[PROF2:![0-9]+]]
+; CHECK-NEXT:    [[TMP1:%.*]] = select i1 [[CMP1]], i1 true, i1 [[NOT_C]]
+; CHECK-NEXT:    [[CMP2:%.*]] = select i1 [[TMP1]], i1 true, i1 [[CMP212]], !prof [[PROF1:![0-9]+]]
 ; CHECK-NEXT:    ret i1 [[CMP2]]
 ;
   %z = select i1 %c, i8 %x, i8 %y, !prof !1
@@ -608,7 +608,7 @@ define i1 @discr_eq(i8 %a, i8 %b) !prof !0 {
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[CMP1:%.*]] = icmp ugt i8 [[A:%.*]], 1
 ; CHECK-NEXT:    [[CMP2:%.*]] = icmp ugt i8 [[B:%.*]], 1
-; CHECK-NEXT:    [[TMP0:%.*]] = select i1 [[CMP1]], i8 [[A]], i8 3, !prof [[PROF3:![0-9]+]]
+; CHECK-NEXT:    [[TMP0:%.*]] = select i1 [[CMP1]], i8 [[A]], i8 3, !prof [[PROF2:![0-9]+]]
 ; CHECK-NEXT:    [[TMP1:%.*]] = select i1 [[CMP2]], i8 [[B]], i8 3, !prof [[PROF1]]
 ; CHECK-NEXT:    [[RES:%.*]] = icmp eq i8 [[TMP0]], [[TMP1]]
 ; CHECK-NEXT:    ret i1 [[RES]]
@@ -964,6 +964,5 @@ end:
 ;.
 ; CHECK: [[META0:![0-9]+]] = !{!"function_entry_count", i64 1000}
 ; CHECK: [[PROF1]] = !{!"branch_weights", i32 5, i32 7}
-; CHECK: [[PROF2]] = !{!"unknown", !"instcombine"}
-; CHECK: [[PROF3]] = !{!"branch_weights", i32 2, i32 3}
+; CHECK: [[PROF2]] = !{!"branch_weights", i32 2, i32 3}
 ;.
