@@ -13,13 +13,7 @@ Toolchain for Linux can be found in `arm-toolchain-features.md`.
 The following features are experimental. Experimental features may
 change or be removed at any point in the future.
 
-## PAC-RET hardening against the PACMAN attack
-
-Arm Toolchain for Embedded provides the command-line option
-`-mharden-pac-ret=load-return-address`, which can be used to harden return
-address signing with a load of the return address, effectively reducing the
-attack surface for the PACMAN attack. A function attribute that follows the same
-naming scheme is also introduced.
+There are no experimental features implemented.
 
 # Features
 
@@ -30,3 +24,4 @@ from an ELF executable file, and outputs it in various forms suitable
 for loading into embedded targets, such as Intel Hex, Motorola
 S-records, or raw binary files. The documentation for `elf2bin` can be
 found in `elf2bin.md`.
+

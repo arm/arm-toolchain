@@ -319,15 +319,6 @@ public:
     BKey
   };
 
-// Begin downstream change #910
-  enum class SignReturnAddressHardeningKind {
-    /// Regular return address signing.
-    None,
-    /// Hardened return address signing with load of return address.
-    LoadReturnAddress
-  };
-
-// End downstream change #910
   enum class ThreadModelKind {
     /// POSIX Threads.
     POSIX,
