@@ -1157,9 +1157,7 @@ public:
     return VF;
   }
 
-  virtual bool preferFixedOverScalableIfEqualCost(bool IsEpilogue) const {
-    return false;
-  }
+  virtual bool preferFixedOverScalableIfEqualCost() const { return false; }
 
   virtual bool preferInLoopReduction(RecurKind Kind, Type *Ty) const {
     return false;
