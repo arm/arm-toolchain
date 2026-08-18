@@ -127,6 +127,12 @@ TEST(TripleTest, ParsedIDs) {
   EXPECT_EQ(Triple::Hurd, T.getOS());
   EXPECT_EQ(Triple::GNU, T.getEnvironment());
 
+  // Downstream issue: #533 (Amazon Linux still not recognized correctly)
+  T = Triple("aarch64-amazon-linux");
+  EXPECT_EQ(Triple::aarch64, T.getArch());
+  EXPECT_EQ(Triple::Amazon, T.getVendor());
+  EXPECT_EQ(Triple::Linux, T.getOS());
+
   T = Triple("arm-unknown-linux-android16");
   EXPECT_EQ(Triple::arm, T.getArch());
   EXPECT_EQ(Triple::UnknownVendor, T.getVendor());

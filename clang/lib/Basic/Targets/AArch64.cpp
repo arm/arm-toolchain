@@ -282,6 +282,18 @@ bool AArch64TargetInfo::validateBranchProtection(StringRef Spec, StringRef,
   return true;
 }
 
+// Begin downstream change #977
+std::optional<LangOptions::SignReturnAddressHardeningKind>
+AArch64TargetInfo::parseSignReturnAddressHardening(StringRef Spec) const {
+  return llvm::StringSwitch<
+             std::optional<LangOptions::SignReturnAddressHardeningKind>>(Spec)
+      .Case("load-return-address",
+            LangOptions::SignReturnAddressHardeningKind::LoadReturnAddress)
+      .Case("none", LangOptions::SignReturnAddressHardeningKind::None)
+      .Default(std::nullopt);
+}
+
+// End downstream change #977
 bool AArch64TargetInfo::isValidCPUName(StringRef Name) const {
   return llvm::AArch64::parseCpu(Name).has_value();
 }
@@ -1412,6 +1424,13 @@ ParsedTargetAttr AArch64TargetInfo::parseTargetAttr(StringRef Features) const {
       continue;
     }
 
+// Begin downstream change #977
+    if (Feature.starts_with("harden-pac-ret=")) {
+      Ret.SignReturnAddrHardening = Feature.split('=').second.trim();
+      continue;
+    }
+
+// End downstream change #977
     if (Feature.starts_with("arch=")) {
       if (FoundArch)
         Ret.Duplicate = "arch=";

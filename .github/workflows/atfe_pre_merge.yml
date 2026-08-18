@@ -1,0 +1,94 @@
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+# This workflow runs automatically when a PR is opened, updated, or reopened against:
+#   - arm-toolchain branch
+#   - any release/arm-software/** branch
+#
+# It builds and tests the Arm Toolchain for Embedded (ATfE) to ensure that the
+# changes do not introduce regressions and that the build remains stable before
+# merging.
+
+name: ATfE Pre-Merge
+
+on:
+  # Trigger when a pull request is opened, updated, or reopened
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - 'arm-software'
+      - 'release/arm-software/**'
+    paths:
+      # Run workflow if the PR modifies any of the following directories
+      - 'arm-software/embedded/**'
+      - 'clang/**'
+      - 'cmake/**'
+      - 'compiler-rt/**'
+      - 'libc/**'
+      - 'libcxx/**'
+      - 'libcxxabi/**'
+      - 'libunwind/**'
+      - 'lld/**'
+      - 'llvm/**'
+      - 'runtimes/**'
+      - 'utils/**'
+      # Exclude directories that are not relevant for ATfE
+      - '!arm-software/linux/**'
+      # Exclude changes in files with these extensions
+      - '!**/*.cfg'
+      - '!**/*.md'
+      - '!**/*.rst'
+
+jobs:
+  build-and-test:
+    name: Pre-Merge - Branch ${{ github.head_ref }} SHA ${{ github.event.pull_request.head.sha }}
+    # Ensure the workflow only runs on the arm-toolchain repository and not on forks
+    if: github.repository == 'arm/arm-toolchain'
+    # Arm64 runner
+    runs-on: ah-ubuntu_22_04-c7g_8x-100
+
+    # Set environment variables for ccache
+    env:
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_DIR: ${{ github.workspace }}/ccache
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # Checks out the merge commit for the PR
+          ref: refs/pull/${{ github.event.pull_request.number }}/merge
+
+      # Restore ccache cache from previous runs
+      - name: Restore ccache cache
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          # key for a cache entry
+          key: ccache-${{ runner.os }}-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ github.ref_name }}-
+            ccache-${{ runner.os }}-
+
+      - name: Install Dependencies
+        run: ./arm-software/embedded/scripts/install_dependencies.sh
+
+      - name: Add ~/.local/bin to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Apply llvm-project patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project
+
+      - name: Apply llvm-project-perf patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
+
+      - name: Check Python formatting (ruff)
+        run: ruff format --check arm-software
+
+      - name: Build
+        run: ./arm-software/embedded/scripts/build_pre_merge.sh
+
+      - name: Test
+        run: ./arm-software/embedded/scripts/test_pre_merge.sh

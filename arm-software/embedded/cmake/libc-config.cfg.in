@@ -1,0 +1,3 @@
+# libc-config.cfg.in
+# @LLVM_TOOLCHAIN_CFG_LIBC_NAME@ config for ATfE
+--sysroot <CFGDIR>/../lib/clang-runtimes/@LLVM_TOOLCHAIN_CFG_LIBC_SUBDIR@

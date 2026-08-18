@@ -568,6 +568,10 @@ def warn_ignoring_verify_debuginfo_preserve_export : Warning<
   InGroup<UnusedCommandLineArgument>;
 def warn_unsupported_branch_protection: Warning <
   "invalid branch protection option '%0' in '%1'">, InGroup<BranchProtection>;
+// Begin downstream change #977
+def warn_harden_pac_ret_requires_pac_ret: Warning<
+  "ignoring '-mharden-pac-ret' as it requires return address signing">, InGroup<UnusedCommandLineArgument>;
+// End downstream change #977
 def err_sls_hardening_arm_not_supported : Error<
   "-mharden-sls is only supported on armv7-a or later">;
 def warn_drv_large_data_threshold_invalid_code_model: Warning<

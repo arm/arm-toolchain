@@ -1,0 +1,20 @@
+{
+  "comment": [
+    "Release branches of Arm Toolchain for Embedded will use",
+    "specific revisions of the repos it depends on. This file provides",
+    "a single source of truth for which revisions to use that can be",
+    "queried by CMake and other automation software."
+  ],
+  "repos": {
+    "picolibc": {
+      "url": "https://github.com/picolibc/picolibc.git",
+      "tagType": "commithash",
+      "tag": "7971005696aff8bc8244dfce503510705fed1fd7"
+    },
+    "newlib": {
+      "url": "https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git",
+      "tagType": "commithash",
+      "tag": "8ba4275b83ec27529f67e0d477611fa6d8d6e6bd"
+    }
+  }
+}

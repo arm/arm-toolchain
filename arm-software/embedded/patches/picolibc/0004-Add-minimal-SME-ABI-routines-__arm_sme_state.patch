@@ -1,0 +1,74 @@
+From 1919a3a74be87a2efed57a22e1bd5561de85daae Mon Sep 17 00:00:00 2001
+From: Benjamin Maxwell <benjamin.maxwell@arm.com>
+Date: Mon, 20 Apr 2026 13:28:58 +0000
+Subject: [PATCH 2/2] Add minimal SME ABI routines (__arm_sme_state)
+
+---
+ libc/machine/aarch64/CMakeLists.txt |  1 +
+ libc/machine/aarch64/meson.build    |  1 +
+ libc/machine/aarch64/sme-abi.S      | 29 +++++++++++++++++++++++++++++
+ 3 files changed, 31 insertions(+)
+ create mode 100644 libc/machine/aarch64/sme-abi.S
+
+diff --git a/libc/machine/aarch64/CMakeLists.txt b/libc/machine/aarch64/CMakeLists.txt
+index f0e48595d..0736785db 100644
+--- a/libc/machine/aarch64/CMakeLists.txt
++++ b/libc/machine/aarch64/CMakeLists.txt
+@@ -68,6 +68,7 @@ picolibc_sources_flags("-fno-builtin"
+   strnlen.S
+   strrchr-stub.c
+   strrchr.S
++  sme-abi.S
+   tls.c
+   )
+ 
+diff --git a/libc/machine/aarch64/meson.build b/libc/machine/aarch64/meson.build
+index 8a11d7d15..e5ee1989a 100644
+--- a/libc/machine/aarch64/meson.build
++++ b/libc/machine/aarch64/meson.build
+@@ -70,6 +70,7 @@ srcs_machine = [
+   'strnlen.S',
+   'strrchr-stub.c',
+   'strrchr.S',
++  'sme-abi.S',
+   'tls.c'
+ ]
+ 
+diff --git a/libc/machine/aarch64/sme-abi.S b/libc/machine/aarch64/sme-abi.S
+new file mode 100644
+index 000000000..956d8d4c8
+--- /dev/null
++++ b/libc/machine/aarch64/sme-abi.S
+@@ -0,0 +1,29 @@
++/*
++ * sme-abi.S - minimal SME ABI routines implementation
++ *
++ * Copyright (c) 2026, Arm Limited.
++ * SPDX-License-Identifier: MIT OR Apache-2.0 WITH LLVM-exception
++ */
++
++#include "asmdefs.h"
++
++// __arm_sme_state fills the result registers based on id_aa64pfr1_el1.
++ENTRY (__arm_sme_state)
++  .variant_pcs __arm_sme_state
++  mov x0, xzr
++  mov x1, xzr
++
++  /* Check if we have SME (global initialized in crt0.c) */
++  adrp x16, __arm64_has_sme
++  ldrb w16, [x16, :lo12:__arm64_has_sme]
++  cbz w16, L(no_sme)
++
++  orr x0, x0, #0xC000000000000000
++  /* Read SVCR */
++  mrs x16, s3_3_c4_c2_2
++  bfxil x0, x16, #0, #2
++  /* Read TPIDR2_EL0 */
++  mrs x1, s3_3_c13_c0_5
++L(no_sme):
++  ret
++END (__arm_sme_state)
+-- 
+2.43.0
+

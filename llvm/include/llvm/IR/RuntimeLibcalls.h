@@ -232,7 +232,9 @@ private:
 
   /// Return true if the target has sincosf/sincos/sincosl functions
   static bool hasSinCos(const Triple &TT) {
-    return TT.isGNUEnvironment() || TT.isOSFuchsia() || TT.isAndroid();
+    // Downstream issue: #533 (Amazon Linux still not recognized correctly)
+    return TT.isGNUEnvironment() || TT.isOSFuchsia() || TT.isAmazonLinux() ||
+           TT.isAndroid();
   }
 
   static bool hasSinCos_f32_f64(const Triple &TT) {
