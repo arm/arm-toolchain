@@ -11,6 +11,7 @@
 #ifndef BOOTCODE_SYSTEM_REGISTERS_A_H
 #define BOOTCODE_SYSTEM_REGISTERS_A_H
 
+#include "platform_setup_pcs.h"
 #include "system_registers_common.h"
 #include <arm_acle.h>
 
@@ -27,17 +28,17 @@ enum class ExceptionLevel : unsigned long {
 
 class CurrentEL_Class : public SysRegBase<CurrentEL_Class> {
 public:
-  [[clang::always_inline]] static unsigned long read() {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS unsigned long read() {
     return __arm_rsr("CurrentEL");
   }
 
   Field<2, 3> EL;
 
-  [[clang::always_inline]] ExceptionLevel value() {
+  [[clang::always_inline]] PLATFORM_SETUP_PCS ExceptionLevel value() {
     return static_cast<ExceptionLevel>(static_cast<unsigned long>(EL));
   }
 
-  [[clang::always_inline]] bool is(ExceptionLevel level) {
+  [[clang::always_inline]] PLATFORM_SETUP_PCS bool is(ExceptionLevel level) {
     return value() == level;
   }
 };
@@ -46,15 +47,17 @@ extern CurrentEL_Class CurrentEL;
 
 class TPIDR2_Class : public SysRegBase<TPIDR2_Class> {
 public:
-  [[clang::always_inline]] static unsigned long read() {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS unsigned long read() {
     return __arm_rsr64("s3_3_c13_c0_5");
   }
 
-  [[clang::always_inline]] static void write(unsigned long val) {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS void
+  write(unsigned long val) {
     __arm_wsr64("s3_3_c13_c0_5", val);
   }
 
-  [[clang::always_inline]] TPIDR2_Class &operator=(unsigned long val) {
+  [[clang::always_inline]] PLATFORM_SETUP_PCS TPIDR2_Class &
+  operator=(unsigned long val) {
     write(val);
     return *this;
   }
@@ -62,15 +65,17 @@ public:
 
 class SVCR_Class : public SysRegBase<SVCR_Class> {
 public:
-  [[clang::always_inline]] static unsigned long read() {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS unsigned long read() {
     return __arm_rsr64("s3_3_c4_c2_2");
   }
 
-  [[clang::always_inline]] static void write(unsigned long val) {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS void
+  write(unsigned long val) {
     __arm_wsr64("s3_3_c4_c2_2", val);
   }
 
-  [[clang::always_inline]] SVCR_Class &operator=(unsigned long val) {
+  [[clang::always_inline]] PLATFORM_SETUP_PCS SVCR_Class &
+  operator=(unsigned long val) {
     write(val);
     return *this;
   }
@@ -84,15 +89,17 @@ extern SVCR_Class SVCR;
 
 class SMCR_EL2_Class : public SysRegBase<SMCR_EL2_Class> {
 public:
-  [[clang::always_inline]] static unsigned long read() {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS unsigned long read() {
     return __arm_rsr64("s3_4_c1_c2_6");
   }
 
-  [[clang::always_inline]] static void write(unsigned long val) {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS void
+  write(unsigned long val) {
     __arm_wsr64("s3_4_c1_c2_6", val);
   }
 
-  [[clang::always_inline]] SMCR_EL2_Class &operator=(unsigned long val) {
+  [[clang::always_inline]] PLATFORM_SETUP_PCS SMCR_EL2_Class &
+  operator=(unsigned long val) {
     write(val);
     return *this;
   }
@@ -102,15 +109,17 @@ public:
 
 class SMCR_EL3_Class : public SysRegBase<SMCR_EL3_Class> {
 public:
-  [[clang::always_inline]] static unsigned long read() {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS unsigned long read() {
     return __arm_rsr64("s3_6_c1_c2_6");
   }
 
-  [[clang::always_inline]] static void write(unsigned long val) {
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS void
+  write(unsigned long val) {
     __arm_wsr64("s3_6_c1_c2_6", val);
   }
 
-  [[clang::always_inline]] SMCR_EL3_Class &operator=(unsigned long val) {
+  [[clang::always_inline]] PLATFORM_SETUP_PCS SMCR_EL3_Class &
+  operator=(unsigned long val) {
     write(val);
     return *this;
   }
@@ -170,9 +179,10 @@ template <SysRegName Name> class SysReg : public SysRegBase<SysReg<Name>> {
 public:
   // The system register read/write intrinsics need a string literal argument,
   // so we have to specialize the read/write functions for each register name.
-  static unsigned long read();
-  static void write(unsigned long val);
-  [[clang::always_inline]] SysReg &operator=(unsigned long val) {
+  static PLATFORM_SETUP_PCS unsigned long read();
+  static PLATFORM_SETUP_PCS void write(unsigned long val);
+  [[clang::always_inline]] PLATFORM_SETUP_PCS SysReg &
+  operator=(unsigned long val) {
     write(val);
     return *this;
   }
@@ -182,13 +192,13 @@ public:
 
 #define REGNAME(X, Y)                                                          \
   template <>                                                                  \
-  [[clang::always_inline]] inline unsigned long                          \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS unsigned long             \
   SysReg<SysRegName::X>::read() {                                              \
     return __arm_rsr64(#X "_EL0");                                             \
   }                                                                            \
   template <>                                                                  \
-  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
-      unsigned long val) {                                                     \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS void                      \
+  SysReg<SysRegName::X>::write(unsigned long val) {                            \
     __arm_wsr64(#X "_EL0", val);                                               \
   }
 EL0_REGNAMES
@@ -196,13 +206,13 @@ EL0_REGNAMES
 
 #define REGNAME(X, Y)                                                          \
   template <>                                                                  \
-  [[clang::always_inline]] inline unsigned long                          \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS unsigned long             \
   SysReg<SysRegName::X>::read() {                                              \
     return __arm_rsr64(#X "_EL1");                                             \
   }                                                                            \
   template <>                                                                  \
-  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
-      unsigned long val) {                                                     \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS void                      \
+  SysReg<SysRegName::X>::write(unsigned long val) {                            \
     __arm_wsr64(#X "_EL1", val);                                               \
   }
 EL1_REGNAMES
@@ -210,7 +220,7 @@ EL1_REGNAMES
 
 #define REGNAME(X, Y)                                                          \
   template <>                                                                  \
-  [[clang::always_inline]] inline unsigned long                          \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS unsigned long             \
   SysReg<SysRegName::X>::read() {                                              \
     if (CurrentEL.is(ExceptionLevel::EL3))                                     \
       return __arm_rsr64(#X "_EL3");                                           \
@@ -218,8 +228,8 @@ EL1_REGNAMES
       return __arm_rsr64(#X "_EL2");                                           \
   }                                                                            \
   template <>                                                                  \
-  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
-      unsigned long val) {                                                     \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS void                      \
+  SysReg<SysRegName::X>::write(unsigned long val) {                            \
     if (CurrentEL.is(ExceptionLevel::EL3))                                     \
       __arm_wsr64(#X "_EL3", val);                                             \
     else                                                                       \
@@ -232,13 +242,13 @@ EL23_REGNAMES
 
 #define REGNAME(X, Y)                                                          \
   template <>                                                                  \
-  [[clang::always_inline]] inline unsigned long                          \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS unsigned long             \
   SysReg<SysRegName::X>::read() {                                              \
     return __arm_rsr(Y);                                                       \
   }                                                                            \
   template <>                                                                  \
-  [[clang::always_inline]] inline void SysReg<SysRegName::X>::write(     \
-      unsigned long val) {                                                     \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS void                      \
+  SysReg<SysRegName::X>::write(unsigned long val) {                            \
     __arm_wsr(Y, val);                                                         \
   }
 EL0_REGNAMES
