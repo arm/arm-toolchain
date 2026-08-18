@@ -454,7 +454,10 @@ latest release, please see the [Clang Web Site](https://clang.llvm.org) or the
   reproducable builds. These macros can be redefined from the command line if
   necessary. `/d1nodatetime-` can be used to turn this feature off if
   necessary to override the common build settings.
-
+- Added `-mscs-reg=<reg>` on Hexagon to select which callee-saved register
+  (`r16`-`r27`, default `r18`) holds the shadow call stack pointer under
+  `-fsanitize=shadow-call-stack`. The selected register must also be reserved
+  with the matching `-ffixed-<reg>`.
 <!-- Begin downstream change #977 -->
 - Added the AArch64 option `-mharden-pac-ret=load-return-address` to harden
   return address signing against PACMAN attacks. The option requires return
