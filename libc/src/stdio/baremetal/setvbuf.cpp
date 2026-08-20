@@ -1,4 +1,4 @@
-//===-- Implementation of fflush for baremetal -----------------*- C++ -*-===//
+//===-- Bare-metal implementation of setvbuf -----------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,15 +6,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "src/stdio/fflush.h"
-
+#include "src/stdio/setvbuf.h"
 #include "src/__support/OSUtil/io.h"
 #include "src/__support/common.h"
 
 namespace LIBC_NAMESPACE_DECL {
 
-LLVM_LIBC_FUNCTION(int, fflush, (::FILE * stream)) {
-  return __llvm_libc_stdio_flush(stream);
+LLVM_LIBC_FUNCTION(int, setvbuf,
+                   (::FILE *__restrict stream, char *__restrict buffer,
+                    int mode, size_t size)) {
+  return __llvm_libc_stdio_set_buffer(stream, buffer, size, mode);
 }
 
 } // namespace LIBC_NAMESPACE_DECL

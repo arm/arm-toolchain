@@ -192,7 +192,7 @@ typedef basic_fstream<wchar_t> wfstream;
 #  include <__config>
 
 // Downstream issue: #375 (Enable fstream independently of filesystem)
-#  if _LIBCPP_HAS_FILESYSTEM && _LIBCPP_HAS_LOCALIZATION || _LIBCPP_LIBC_NEWLIB
+#  if _LIBCPP_HAS_FILESYSTEM && _LIBCPP_HAS_LOCALIZATION || _LIBCPP_LIBC_NEWLIB || _LIBCPP_LIBC_LLVM_LIBC
 
 #    include <__algorithm/max.h>
 #    include <__assert>
@@ -242,6 +242,8 @@ public:
   using native_handle_type = void*; // HANDLE
 #      elif __has_include(<unistd.h>)
   using native_handle_type = int; // POSIX file descriptor
+#      elif _LIBCPP_LIBC_LLVM_LIBC
+  using native_handle_type = FILE*;
 #      else
 #        error "Provide a native file handle!"
 #      endif
@@ -278,6 +280,8 @@ public:
     return std::__filebuf_windows_native_handle(__file_);
 #      elif __has_include(<unistd.h>)
     return fileno(__file_);
+#      elif _LIBCPP_LIBC_LLVM_LIBC
+    return __file_;
 #      else
 #        error "Provide a way to determine the file native handle!"
 #      endif
@@ -1640,7 +1644,7 @@ _LIBCPP_END_NAMESPACE_STD
 
 _LIBCPP_POP_MACROS
 
-#  endif // _LIBCPP_HAS_FILESYSTEM && _LIBCPP_HAS_LOCALIZATION
+#  endif // _LIBCPP_HAS_FILESYSTEM && _LIBCPP_HAS_LOCALIZATION || _LIBCPP_LIBC_NEWLIB || _LIBCPP_LIBC_LLVM_LIBC
 
 #endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
 
