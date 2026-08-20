@@ -30,3 +30,4 @@ ARM fault: hardfault
         XPSR: 0x01000000
 make: *** [Makefile:26: run] Error 1
 ```
+_Note: The format of the dump may differ depending on the C library used._

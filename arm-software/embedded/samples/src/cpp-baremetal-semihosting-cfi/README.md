@@ -19,6 +19,8 @@ ARM fault: hardfault
         XPSR: 0x01000000
 make: [Makefile:28: run] Error 1 (ignored)
 ```
+_Note: The format of the dump may differ depending on the C library used._
+
 Running `make build-no-cfi` followed by `make run` will demonstrate the
 behavior without CFI, displaying a message as the undefined behaviour is not
 caught:
