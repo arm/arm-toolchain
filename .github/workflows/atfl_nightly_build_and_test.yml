@@ -1,0 +1,143 @@
+# Copyright (c) 2026, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow builds Docker images for multiple operating systems and runs
+# the Linux build script inside each image.
+# It is intended to be triggered as part of a **nightly build** to
+# validate all build configurations and test them automatically.
+#
+# Each Docker image and build script pair runs as a separate matrix job,
+# allowing for concurrency and clear traceability of failures.
+
+name: (ATfL) Nightly Build and Test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'  # Every day at 06:00 UTC
+
+# GitHub queues the second run until the first one finishes, 
+# preventing overlapping executions.
+concurrency:
+  group: atfl-nightly-build
+  cancel-in-progress: false
+
+jobs:
+  build-and-test-toolchain:
+    name: Build ATfL in ${{ matrix.image_name }}
+    runs-on: ah-ubuntu_24_04-c7g_8x-100
+    timeout-minutes: 240
+    env:
+      ATFL_VERSION: "0.0"
+
+    # Allow manual runs on Fork for testing, and
+    # scheduled runs only on arm/arm-toolchain
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'arm/arm-toolchain'
+
+    strategy:
+      fail-fast: false  # Prevents one job failure from cancelling all
+      matrix:
+        include:
+          # Ubuntu Build & Test
+          - target_os: Ubuntu-24.04-arm64
+            dockerfile: Dockerfile_ubuntu2404
+            image_name: ubuntu2404_docker
+            zlib_path: /usr/lib/aarch64-linux-gnu/libz.a
+
+          # RHEL10 Build & Test
+          - target_os: RHEL10-arm64
+            dockerfile: Dockerfile_rhel10
+            image_name: rhel10_docker
+            zlib_path: /usr/lib64/libz.a
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Add ~/.local/bin to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Clean previous artifacts
+        run: rm -rf arm-software/linux/output arm-software/linux/build arm-software/linux/logs
+
+      - name: Mark workspace as safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Build Docker image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker build \
+            --file "arm-software/linux/scripts/Docker_Files/${{ matrix.dockerfile }}" \
+            --tag "${{ matrix.image_name }}" \
+            --build-arg USER_ID="$(id -u)" \
+            --build-arg GROUP_ID="$(id -g)" \
+            --build-arg USER="$(id -un)" \
+            arm-software/linux/scripts/Docker_Files
+
+      - name: Run build.sh in Docker image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          docker run --rm \
+            --volume "$GITHUB_WORKSPACE:/workspace/src" \
+            --workdir /workspace \
+            --env "ZLIB_STATIC_PATH=${{ matrix.zlib_path }}" \
+            "${{ matrix.image_name }}" \
+            ./src/arm-software/linux/build.sh \
+            2>&1 | tee build-${{ matrix.target_os }}.log
+
+      - name: List built artifacts
+        if: ${{ success() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -d arm-software/linux/output ]]; then
+            find arm-software/linux/output -maxdepth 3 -type f \( -name '*.tar.gz' \) | sort
+          fi
+
+      - name: Upload build log and test reports
+        uses: actions/upload-artifact@v7
+        if: ${{ always() && !env.ACT }}
+        with:
+          name: build-log-${{ matrix.target_os }}
+          path: |
+            build-${{ matrix.target_os }}.log
+            arm-software/linux/logs/bootstrap_check_all.xml
+            arm-software/linux/logs/check_cxx.xml
+            arm-software/linux/logs/check_cxxabi.xml
+            arm-software/linux/logs/product_check_all.xml
+          if-no-files-found: warn
+
+      - name: Get tarball name
+        if: ${{ success() && !env.ACT }}
+        id: tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t paths < <(
+            find arm-software/linux/output -maxdepth 1 -type f -name 'atfl-*.tar.gz'
+          )
+          test "${#paths[@]}" -eq 1
+          path="${paths[0]}"
+
+          filename=$(basename "$path")
+          date=$(date -u +%Y%m%d)
+
+          # Strip .tar.gz, append OS and date, then add extension back.
+          artifact_name="${filename%.tar.gz}-${{ matrix.target_os }}-${date}.tar.gz"
+
+          echo "name=$artifact_name" >> "$GITHUB_OUTPUT"
+          echo "path=$path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload tarball
+        uses: actions/upload-artifact@v7
+        if: ${{ success() && !env.ACT }}
+        with:
+          name: ${{ steps.tarball.outputs.name }}
+          path: ${{ steps.tarball.outputs.path }}
+          if-no-files-found: error

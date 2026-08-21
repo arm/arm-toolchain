@@ -353,6 +353,11 @@ namespace llvm {
 extern cl::opt<unsigned> MaxDevirtIterations;
 } // namespace llvm
 
+// #409
+static cl::opt<bool> LTOExtraLoopUnroll(
+    "extra-LTO-loop-unroll", cl::init(false), cl::Hidden,
+    cl::desc("Perform extra loop unrolling pass to assist SROA"));
+
 void PassBuilder::invokePeepholeEPCallbacks(FunctionPassManager &FPM,
                                             OptimizationLevel Level) {
   for (auto &C : PeepholeEPCallbacks)
@@ -2224,6 +2229,18 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
   MPM.addPass(createModuleToPostOrderCGSCCPassAdaptor(std::move(CGPM)));
 
   FunctionPassManager FPM;
+
+//  #409
+  if (LTOExtraLoopUnroll) {
+    LoopPassManager OmaxLPM;
+    OmaxLPM.addPass(LoopFullUnrollPass(static_cast<int>(Level),
+                                       /*OnlyWhenForced=*/!PTO.LoopUnrolling,
+                                       PTO.ForgetAllSCEVInLoopUnroll));
+    FPM.addPass(
+        createFunctionToLoopPassAdaptor(std::move(OmaxLPM),
+                                        /*UseMemorySSA=*/false));
+  }
+
   // The IPO Passes may leave cruft around. Clean up after them.
   FPM.addPass(InstCombinePass());
   invokePeepholeEPCallbacks(FPM, Level);

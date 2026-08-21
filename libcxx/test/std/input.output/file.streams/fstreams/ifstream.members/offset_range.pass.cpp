@@ -18,6 +18,9 @@
 //
 // XFAIL: target={{i686|arm.*}}-{{.+}}-android{{.*}}
 
+// Downstream issue: #375 (Enable fstream independently of filesystem)
+// UNSUPPORTED: baremetal
+
 #include <fstream>
 #include <iostream>
 #include <cassert>

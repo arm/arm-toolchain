@@ -279,6 +279,9 @@ def get_cc1_command_for_args(cmd, env):
             or ln.startswith("clang: warning:")
             or ln.startswith("clang: note:")
             or ln.startswith("clang: remark:")
+            # Begin downstream change #805
+            or ln.startswith("Arm Toolchain ID:")
+            # End downstream change #805
             or " version " in ln
         ):
             continue
