@@ -1,13 +1,18 @@
 # This workflow executes the automerge python script to automatically merge
-# changes from the `main` branch of upstream LLVM into the `arm-software`
+# changes from the `release/23.x` branch of upstream LLVM into the `release/arm-software/23.x`
 # branch of the arm/arm-toolchain repository.
-name: (arm-toolchain) Automerge
+name: (arm-toolchain) Automerge (23.x)
 on:
   workflow_run:
     workflows: ["(arm-toolchain) Sync from Upstream LLVM"]
     types:
       - completed
   workflow_dispatch:
+    inputs:
+      target-commit:
+        description: Merge up to this commit
+        required: true
+        type: string
 concurrency:
   group: automerge_workflows
   cancel-in-progress: false
@@ -27,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: arm-software
+          ref: release/arm-software/23.x
           token: ${{ steps.generate-token.outputs.token }}
       - name: Configure Git Identity
         run: |
@@ -35,10 +40,13 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Fetch Branches
         run: |
-          git remote set-branches --add origin main
-          git fetch origin main:main
-          git pull --unshallow --ff-only origin arm-software
+          git remote set-branches --add origin release/23.x
+          git fetch origin release/23.x:release/23.x
+          git pull --unshallow --ff-only origin release/arm-software/23.x
       - name: Run automerge
-        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch main --to-branch arm-software --verbose
+        run: |
+          TARGET_COMMIT_INPUT=${{ github.event.inputs.target-commit }}
+          TARGET_COMMIT=${TARGET_COMMIT_INPUT:-"release/23.x"}
+          python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch "$TARGET_COMMIT" --to-branch release/arm-software/23.x --verbose
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
