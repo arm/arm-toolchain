@@ -3,10 +3,6 @@
 # branch of the arm/arm-toolchain repository.
 name: (arm-toolchain) Automerge (23.x)
 on:
-  workflow_run:
-    workflows: ["(arm-toolchain) Sync from Upstream LLVM"]
-    types:
-      - completed
   workflow_dispatch:
     inputs:
       target-commit:
