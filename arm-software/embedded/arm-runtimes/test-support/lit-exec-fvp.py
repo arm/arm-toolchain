@@ -81,7 +81,7 @@ def main():
         args.fvp_model,
         args.fvp_config,
         args.image,
-        [args.image] + args.arguments,
+        [pathlib.Path(args.image).name] + args.arguments,
         args.timeout,
         args.execdir,
         args.verbose,

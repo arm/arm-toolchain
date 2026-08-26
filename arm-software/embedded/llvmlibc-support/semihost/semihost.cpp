@@ -116,7 +116,7 @@ bool __llvm_libc_timespec_get_utc(struct timespec *ts) {
 void _platform_init(void) {
   stdio_open(&__llvm_libc_stdin_cookie, OPENMODE_R);
   stdio_open(&__llvm_libc_stdout_cookie, OPENMODE_W);
-  stdio_open(&__llvm_libc_stderr_cookie, OPENMODE_W);
+  stdio_open(&__llvm_libc_stderr_cookie, OPENMODE_A);
 }
 
 // Debug output

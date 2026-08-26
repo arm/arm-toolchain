@@ -77,7 +77,7 @@ def main():
         args.qemu_cpu,
         args.qemu_params.split(":") if args.qemu_params else [],
         args.image,
-        [args.image] + args.arguments,
+        [pathlib.Path(args.image).name] + args.arguments,
         args.timeout,
         args.execdir,
         args.verbose,
