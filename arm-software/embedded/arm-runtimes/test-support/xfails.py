@@ -1085,17 +1085,19 @@ def main():
             description="AArch64 LLVM libc uses long double for these complex arg tests and is missing atan2l.",
         ),
         XFail(
-            name="llvmlibc aarch64 coroutine runtime behavior",
+            name="llvmlibc missing quick_exit support",
             testnames=[
-                "std/language.support/support.coroutines/end.to.end/expected.pass.cpp",
+                "std/language.support/support.start.term/quick_exit.pass.cpp",
             ],
             result=NewResult.XFAILED,
             project="libcxx",
             variants=[
                 "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
             ],
             conditional=check_llvmlibc,
-            description="AArch64 LLVM libc/FVP run fails this coroutine end-to-end test at runtime; c1.value() remains the default value instead of the co_return value.",
+            description="LLVM libc does not provide at_quick_exit required by libc++ quick_exit tests.",
         ),
         XFail(
             name="llvmlibc disabled scanf floating point support",
