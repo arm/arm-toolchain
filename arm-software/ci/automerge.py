@@ -48,9 +48,13 @@ class Git:
     def run_cmd(self, args: list[str], check: bool = True) -> str:
         git_cmd = ["git", "-C", str(self.repo_path)] + args
         logger.debug("Running git command: %s", git_cmd)
-        git_process = subprocess.run(
-            git_cmd, check=check, capture_output=True, text=True
-        )
+        try:
+            git_process = subprocess.run(
+                git_cmd, check=check, capture_output=True, text=True
+            )
+        except subprocess.CalledProcessError as e:
+            logger.debug("Stdout:\n%s\nStderr:\n%s", e.output, e.stderr)
+            raise
         logger.debug("Stdout:\n%s\nStderr:\n%s", git_process.stdout, git_process.stderr)
         return git_process.stdout
 

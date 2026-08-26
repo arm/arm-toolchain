@@ -68,13 +68,22 @@ FILENAME_BASE_AEM_A=$(basename "$URL_BASE_AEM_A")
 FILENAME_BASE_AEM_R=$(basename "$URL_BASE_AEM_R")
 FILENAME_CRYPTO=$(basename "$URL_CRYPTO")
 
+if which curl >&/dev/null; then
+    download_to() { curl --retry 5 --no-clobber "$1" -o "$2"; }
+elif which wget >&/dev/null; then
+    download_to() { wget --no-clobber "$1" -O "$2"; }
+else
+    echo "Need one of curl and wget installed to download files" >&2
+    exit 1
+fi
+
 mkdir -p download
 pushd download
 DOWNLOAD_DIR="$(pwd)"
-wget --content-disposition --no-clobber "${URL_CORSTONE_310}"
-wget --content-disposition --no-clobber "${URL_BASE_AEM_A}"
-wget --content-disposition --no-clobber "${URL_BASE_AEM_R}"
-wget --content-disposition --no-clobber "${URL_CRYPTO}"
+download_to "${URL_CORSTONE_310}" "${FILENAME_CORSTONE_310}"
+download_to "${URL_BASE_AEM_A}" "${FILENAME_BASE_AEM_A}"
+download_to "${URL_BASE_AEM_R}" "${FILENAME_BASE_AEM_R}"
+download_to "${URL_CRYPTO}" "${FILENAME_CRYPTO}"
 popd
 
 mkdir -p install

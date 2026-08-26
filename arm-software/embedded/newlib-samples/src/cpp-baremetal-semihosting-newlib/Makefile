@@ -22,9 +22,9 @@ hello.elf: *.cpp
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@
 
-run: hello.hex
+run: hello.hex hello-exn.hex
 	qemu-system-arm -M mps2-an386 -semihosting -nographic -device loader,file=hello.hex
-	qemu-system-arm -M mps2-an386 -semihosting -nographic -device loader,file=hello-exn.elf
+	qemu-system-arm -M mps2-an386 -semihosting -nographic -device loader,file=hello-exn.hex
 
 debug: hello.hex
 	qemu-system-arm -M mps2-an386 -semihosting -nographic -device loader,file=$< -s -S
