@@ -17,7 +17,7 @@
 
 namespace {
 // File cookies
-inline constexpr size_t DEFAULT_FILE_COOKIE_COUNT = 4;
+constexpr size_t DEFAULT_FILE_COOKIE_COUNT = 4;
 __llvm_libc_semihost_file_cookie
     default_file_cookies[DEFAULT_FILE_COOKIE_COUNT];
 } // namespace
@@ -69,9 +69,8 @@ void set_file_position(void *cookie, off_t position) {
   static_cast<__llvm_libc_semihost_file_cookie *>(cookie)->position = position;
 }
 
-void advance_file_position(void *cookie, size_t amount) {
-  set_file_position(cookie,
-                    get_file_position(cookie) + static_cast<off_t>(amount));
+void advance_file_position(void *cookie, off_t amount) {
+  set_file_position(cookie, get_file_position(cookie) + amount);
 }
 } // namespace
 
@@ -116,7 +115,7 @@ ssize_t semihost_read(size_t handle, char *buf, size_t size) {
 ssize_t semihost_read_console(char *buf, size_t size) {
   for (size_t i = 0; i < size; ++i) {
     long ch = semihosting_call(SYS_READC, nullptr);
-    buf[i] = static_cast<char>(ch & 0xff);
+    buf[i] = static_cast<char>(ch);
     if (buf[i] == '\r')
       buf[i] = '\n';
   }
@@ -203,7 +202,7 @@ ssize_t __llvm_libc_stdio_read(void *cookie, char *buf, size_t size) {
   ssize_t result = semihost_read(get_handle(cookie), buf, size);
   if (result < 0)
     return result;
-  advance_file_position(cookie, static_cast<size_t>(result));
+  advance_file_position(cookie, result);
   return result;
 }
 
@@ -212,7 +211,7 @@ ssize_t __llvm_libc_stdio_write(void *cookie, const char *buf, size_t size) {
   if (result < 0)
     return result;
   if (!is_std_stream(cookie))
-    advance_file_position(cookie, static_cast<size_t>(result));
+    advance_file_position(cookie, result);
   return result;
 }
 
@@ -239,7 +238,7 @@ int __llvm_libc_stdio_open(const char *path, const char *mode, void **cookie) {
     return static_cast<int>(handle);
   }
   file_cookie->stdio_cookie.handle = static_cast<size_t>(handle);
-  if (mode[0] == 'a') {
+  if (open_mode & OPENMODE_A) {
     off_t length = semihost_file_length(get_handle(file_cookie));
     if (length < 0) {
       semihost_close(get_handle(file_cookie));
@@ -268,8 +267,8 @@ off_t __llvm_libc_stdio_seek(void *cookie, off_t offset, int whence) {
   } else
     return -EINVAL;
 
-  off_t position = base + offset;
-  if (position < 0)
+  off_t position;
+  if (__builtin_add_overflow(base, offset, &position) || position < 0)
     return -EINVAL;
   int error = semihost_seek(get_handle(cookie), position);
   if (error)

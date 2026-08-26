@@ -9,9 +9,9 @@
 #ifndef LLVM_LIBC_SRC___SUPPORT_OSUTIL_BAREMETAL_IO_H
 #define LLVM_LIBC_SRC___SUPPORT_OSUTIL_BAREMETAL_IO_H
 
-#include "include/llvm-libc-types/off_t.h"
-#include "include/llvm-libc-types/size_t.h"
-#include "include/llvm-libc-types/ssize_t.h"
+#include "hdr/types/off_t.h"
+#include "hdr/types/size_t.h"
+#include "hdr/types/ssize_t.h"
 #include "src/__support/CPP/string_view.h"
 #include "src/__support/macros/config.h"
 
