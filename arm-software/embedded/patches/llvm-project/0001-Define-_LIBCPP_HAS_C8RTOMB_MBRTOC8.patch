@@ -1,7 +1,7 @@
 From 3f847ac6d71dbe36ddbda74c200f9cccb47bfb42 Mon Sep 17 00:00:00 2001
 From: Simi Pallipurath <simi.pallipurath@arm.com>
 Date: Wed, 26 Nov 2025 09:26:52 +0000
-Subject: Define _LIBCPP_HAS_C8RTOMB_MBRTOC8
+Subject: Define _LIBCPP_HAS_C8RTOMB_MBRTOC8 for picolibc 1.8.8+
 
 LLVM libcxx does not define the `char8_t` related functions, instead
 delegating their definitions to the underlying C library.
@@ -10,42 +10,41 @@ libcxx defines a macro called `_LIBCPP_HAS_C8RTOMB_MBRTOC8` when it
 infers that the underlying C library provides these functions.
 
 picolibc provides the `char8_t` related functions regardless of the C++
-version used, but this support only landed after version 1.8.8 and, at
-the time of writing, has not made into any released version yet.
+version used, but this support only landed in version 1.8.8.
 
-This is a temporary fix and should be removed when a picolibc release
-includes the support for `char8_t` and its related functions. When it's
-time to implement a proper solution, one needs to create logic to detect
-the picolibc version and define the macro accordingly. The macros that
-govern picolibc version are in `picolibc.h`.
+Use the version macros from `picolibc.h` to enable the macro only for
+picolibc versions where these functions are declared.
 ---
- libcxx/include/__config | 13 ++-----------
- 1 file changed, 2 insertions(+), 11 deletions(-)
+ libcxx/include/__config | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/libcxx/include/__config b/libcxx/include/__config
 index e758acfa870a..e8b9132c323a 100644
 --- a/libcxx/include/__config
 +++ b/libcxx/include/__config
-@@ -820,17 +820,8 @@ typedef __char32_t char32_t;
+@@ -820,17 +820,23 @@ typedef __char32_t char32_t;
  // functions is gradually being added to existing C libraries. The conditions
  // below check for known C library versions and conditions under which these
  // functions are declared by the C library.
--//
--// GNU libc 2.36 and newer declare c8rtomb() and mbrtoc8() in C++ modes if
--// __cpp_char8_t is defined or if C2X extensions are enabled. Determining
--// the latter depends on internal GNU libc details that are not appropriate
--// to depend on here, so any declarations present when __cpp_char8_t is not
--// defined are ignored.
--#  if _LIBCPP_GLIBC_PREREQ(2, 36) && defined(__cpp_char8_t)
--#    define _LIBCPP_HAS_C8RTOMB_MBRTOC8 1
--#  else
--#    define _LIBCPP_HAS_C8RTOMB_MBRTOC8 0
--#  endif
-+// For picolibc:
-+#define _LIBCPP_HAS_C8RTOMB_MBRTOC8 1
+ //
+ // GNU libc 2.36 and newer declare c8rtomb() and mbrtoc8() in C++ modes if
+ // __cpp_char8_t is defined or if C2X extensions are enabled. Determining
+ // the latter depends on internal GNU libc details that are not appropriate
+ // to depend on here, so any declarations present when __cpp_char8_t is not
+ // defined are ignored.
+ #  if _LIBCPP_GLIBC_PREREQ(2, 36) && defined(__cpp_char8_t)
+ #    define _LIBCPP_HAS_C8RTOMB_MBRTOC8 1
++#  elif defined(__PICOLIBC__) &&                                                                               \
++      (__PICOLIBC__ > 1 || (__PICOLIBC__ == 1 && __PICOLIBC_MINOR__ > 8) ||                                    \
++       (__PICOLIBC__ == 1 && __PICOLIBC_MINOR__ == 8 && __PICOLIBC_PATCHLEVEL__ >= 8))
++// picolibc 1.8.8 and newer declare c8rtomb() and mbrtoc8() in C++ modes
++// regardless of whether __cpp_char8_t is defined.
++#    define _LIBCPP_HAS_C8RTOMB_MBRTOC8 1
+ #  else
+ #    define _LIBCPP_HAS_C8RTOMB_MBRTOC8 0
+ #  endif
  
  // There are a handful of public standard library types that are intended to
  // support CTAD but don't need any explicit deduction guides to do so. This
 -- 
 2.34.1
-
