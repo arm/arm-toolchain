@@ -108,7 +108,7 @@ $ sudo zypper up arm-toolchain-for-linux
 ```
 
 
-### Ubuntu Linux 22.04 and 24.04
+### Ubuntu Linux 22.04, 24.04, 26.04
 
 To configure the Arm Toolchains repository on Ubuntu 22.04:
 
@@ -123,6 +123,14 @@ To configure the Arm Toolchains repository on Ubuntu 24.04:
 ```
 $ curl -O https://developer.arm.com/packages/arm-toolchains/ubuntu/pool/arm-toolchains-repository_2-2~noble_all.deb
 $ sudo dpkg -i arm-toolchains-repository_2-2~noble_all.deb
+$ sudo apt update
+```
+
+To configure the Arm Toolchains repository on Ubuntu 26.04:
+
+```
+$ curl -O https://developer.arm.com/packages/arm-toolchains/ubuntu/pool/arm-toolchains-repository_2-2~resolute_all.deb
+$ sudo dpkg -i arm-toolchains-repository_2-2~resolute_all.deb
 $ sudo apt update
 ```
 
