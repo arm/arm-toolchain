@@ -108,7 +108,7 @@ $ sudo zypper up arm-toolchain-for-linux
 ```
 
 
-### Ubuntu Linux 22.04, 24.04, 26.04
+### Ubuntu Linux 22.04, 24.04, and 26.04
 
 To configure the Arm Toolchains repository on Ubuntu 22.04:
 
