@@ -1249,9 +1249,7 @@ def main():
         if xfail.conditional is not None:
             if not xfail.conditional():
                 continue
-        testnames = [
-            lit_qualified_test_name(xfail, test) for test in xfail.testnames
-        ]
+        testnames = [lit_qualified_test_name(xfail, test) for test in xfail.testnames]
         if xfail.result == NewResult.XFAILED:
             tests_to_xfail.extend(testnames)
         elif xfail.result == NewResult.PASSED:
