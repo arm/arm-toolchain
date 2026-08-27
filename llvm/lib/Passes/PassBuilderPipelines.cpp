@@ -572,7 +572,8 @@ PassBuilder::buildO1FunctionSimplificationPipeline(OptimizationLevel Level,
       PGOOpt->Action != PGOOptions::SampleUse)
     LPM2.addPass(LoopFullUnrollPass(static_cast<int>(Level),
                                     /* OnlyWhenForced= */ !PTO.LoopUnrolling,
-                                    PTO.ForgetAllSCEVInLoopUnroll));
+                                    PTO.ForgetAllSCEVInLoopUnroll,
+                                    /* PrepareForLTO= */ isLTOPreLink(Phase)));
 
   invokeLoopOptimizerEndEPCallbacks(LPM2, Level);
 
@@ -754,7 +755,8 @@ PassBuilder::buildFunctionSimplificationPipeline(OptimizationLevel Level,
       PGOOpt->Action != PGOOptions::SampleUse)
     LPM2.addPass(LoopFullUnrollPass(static_cast<int>(Level),
                                     /* OnlyWhenForced= */ !PTO.LoopUnrolling,
-                                    PTO.ForgetAllSCEVInLoopUnroll));
+                                    PTO.ForgetAllSCEVInLoopUnroll,
+                                    /* PrepareForLTO= */ isLTOPreLink(Phase)));
 
   invokeLoopOptimizerEndEPCallbacks(LPM2, Level);
 
