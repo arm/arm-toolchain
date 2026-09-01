@@ -98,6 +98,28 @@ def main():
     def check_not_llvmlibc():
         return args.libc != "llvmlibc"
 
+    xfail_project_to_cxx_testsuite = {
+        "libcxx": "libc++",
+        "libcxxabi": "libc++abi",
+        "libunwind": "libunwind",
+    }
+
+    def xfail_applies_to_project(xfail):
+        if args.project == "libcxx":
+            return xfail.project in xfail_project_to_cxx_testsuite
+        return args.project == xfail.project
+
+    def lit_qualified_test_name(xfail, testname):
+        if (
+            args.project == "libcxx"
+            and xfail.project != args.project
+            and xfail.project in xfail_project_to_cxx_testsuite
+            and args.variant is not None
+            and " :: " not in testname
+        ):
+            return f"{xfail_project_to_cxx_testsuite[xfail.project]}-{args.variant} :: {testname}"
+        return testname
+
     xfails = [
         XFail(
             name="no frwpi",
@@ -409,7 +431,7 @@ def main():
                 "test_demangle.pass.cpp",
             ],
             result=NewResult.PASSED,
-            project="libcxx",
+            project="libcxxabi",
             variants=[
                 "aarch64a_unaligned",
                 "aarch64a_exn_rtti_unaligned",
@@ -524,7 +546,7 @@ def main():
                 "test_demangle.pass.cpp",
             ],
             result=NewResult.XFAILED,
-            project="libcxx",
+            project="libcxxabi",
             variants=[
                 "aarch64a",
                 "aarch64a_exn_rtti",
@@ -789,7 +811,7 @@ def main():
                 "unwind_leaffunction.pass.cpp",
             ],
             result=NewResult.XFAILED,
-            project="libcxx",
+            project="libunwind",
             variants=[
                 "aarch64a",
                 "aarch64a_exn_rtti",
@@ -1146,6 +1168,52 @@ def main():
             description="This selftest is annotated with LLVM-LIBC-FIXME upstream for stderr/stdout conflation, but ATfE's executors route stderr separately.",
         ),
         XFail(
+            name="llvmlibc libcxxabi demangle test passes in ATfE",
+            testnames=[
+                "test_demangle.pass.cpp",
+            ],
+            result=NewResult.PASSED,
+            project="libcxxabi",
+            variants=[
+                "aarch64a_exn_rtti",
+            ],
+            conditional=check_llvmlibc,
+            description="LLVM libc formats the demangler FP literal cases correctly on this FVP configuration, so override the generic demangle-fvp xfail.",
+        ),
+        XFail(
+            name="llvmlibc libcxxabi exhaustive pointer catch test timeout",
+            testnames=[
+                "catch_multi_level_pointer.pass.cpp",
+            ],
+            result=NewResult.EXCLUDE,
+            project="libcxxabi",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="This exhaustive exception matching test does not complete within the embedded executor timeout.",
+        ),
+        XFail(
+            name="llvmlibc libunwind missing POSIX headers",
+            testnames=[
+                "aarch64_za_unwind.pass.cpp",
+                "forceunwind.pass.cpp",
+                "ra_sign_state.pass.cpp",
+                "signal_unwind.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libunwind",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="These libunwind tests include POSIX headers not provided by LLVM libc bare-metal, such as signal.h, sys/types.h, and alloca.h.",
+        ),
+        XFail(
             name="variadic vector type arguments non-hermetic",
             testnames=[
                 "src/__support/libc.test.src.__support.arg_list_test.__build__",
@@ -1169,7 +1237,7 @@ def main():
     tests_to_exclude = []
 
     for xfail in xfails:
-        if args.project != xfail.project:
+        if not xfail_applies_to_project(xfail):
             continue
         if xfail.variants is not None:
             if args.variant is None:
@@ -1181,12 +1249,13 @@ def main():
         if xfail.conditional is not None:
             if not xfail.conditional():
                 continue
+        testnames = [lit_qualified_test_name(xfail, test) for test in xfail.testnames]
         if xfail.result == NewResult.XFAILED:
-            tests_to_xfail.extend(xfail.testnames)
+            tests_to_xfail.extend(testnames)
         elif xfail.result == NewResult.PASSED:
-            tests_to_upass.extend(xfail.testnames)
+            tests_to_upass.extend(testnames)
         elif xfail.result == NewResult.EXCLUDE:
-            tests_to_exclude.extend(xfail.testnames)
+            tests_to_exclude.extend(testnames)
 
     tests_to_xfail.sort()
     tests_to_upass.sort()
