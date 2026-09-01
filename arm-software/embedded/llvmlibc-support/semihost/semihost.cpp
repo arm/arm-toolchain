@@ -15,7 +15,7 @@
 
 namespace {
 
-void stdio_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
+bool stdio_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
   const char std_stream_name[] = ":tt";
   size_t args[] = {
       reinterpret_cast<size_t>(std_stream_name),
@@ -23,6 +23,7 @@ void stdio_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
       sizeof(std_stream_name) - 1UL,
   };
   cookie->handle = semihosting_call(SYS_OPEN, args);
+  return cookie->handle >= 0;
 }
 } // namespace
 
@@ -116,7 +117,12 @@ bool __llvm_libc_timespec_get_utc(struct timespec *ts) {
 void _platform_init(void) {
   stdio_open(&__llvm_libc_stdin_cookie, OPENMODE_R);
   stdio_open(&__llvm_libc_stdout_cookie, OPENMODE_W);
-  stdio_open(&__llvm_libc_stderr_cookie, OPENMODE_A);
+  // The convention of opening ":tt" in append mode to specify stderr is not
+  // supported by all semihosting implementations. If this open fails, retry in
+  // write mode, because having stderr squashed into stdout is better than not
+  // having it at all.
+  if (!stdio_open(&__llvm_libc_stderr_cookie, OPENMODE_A))
+    stdio_open(&__llvm_libc_stderr_cookie, OPENMODE_W);
 }
 
 // Debug output
