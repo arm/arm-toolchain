@@ -13,10 +13,12 @@ LD_SCRIPT=-T ../../ldscripts/newlib-cm4.ld
 LIBS=-latomic-fallback
 STARTUP=../../startup/startup_ARMCM4.S
 
-build: hello.elf
+build: hello.elf hello-exn.elf
 
 hello.elf: *.cpp
 	$(BIN_PATH)/clang++ $(TARGET) $(CRT_SEMIHOST_NEWLIB) $(CPP_FLAGS) -g $(LD_SCRIPT) $(LIBS) -nostartfiles -o hello.elf $(STARTUP) $^
+
+hello-exn.elf: *.cpp
 	$(BIN_PATH)/clang++ $(TARGET) $(CRT_SEMIHOST_NEWLIB) -fexceptions -DTEST_EXN -g $(LD_SCRIPT) $(LIBS) -nostartfiles -o hello-exn.elf $(STARTUP) $^
 
 %.hex: %.elf
