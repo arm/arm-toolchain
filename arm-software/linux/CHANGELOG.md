@@ -29,6 +29,8 @@ the Arm Compiler for Linux (ACfL).
 
 - Based on LLVM version 23.1.0.
 
+- Ubuntu 26.04 package added.
+
 - The `armclang` and `armflang` executable binaries are now optimized with BOLT.
 
 - The ATfL package repositories have transitioned to a new and improved
