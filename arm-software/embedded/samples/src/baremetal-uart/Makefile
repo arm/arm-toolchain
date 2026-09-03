@@ -11,7 +11,7 @@ build: hello.elf
 
 hello.elf: *.c
 	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) ../../ldscripts/microbit.ld.in -o microbit.ld
-	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_TARGET) -nostartfiles -lcrt0 -g -T microbit.ld -o hello.elf $^
+	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) -nostartfiles -lcrt0 -g -T microbit.ld -o hello.elf $^
 
 %.hex: %.elf
 	$(BIN_PATH)/llvm-objcopy -O ihex $< $@

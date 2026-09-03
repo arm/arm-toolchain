@@ -92,6 +92,34 @@ def main():
         p = subprocess.run(test_args, capture_output=True, check=False)
         return p.returncode != 0
 
+    def check_llvmlibc():
+        return args.libc == "llvmlibc"
+
+    def check_not_llvmlibc():
+        return args.libc != "llvmlibc"
+
+    xfail_project_to_cxx_testsuite = {
+        "libcxx": "libc++",
+        "libcxxabi": "libc++abi",
+        "libunwind": "libunwind",
+    }
+
+    def xfail_applies_to_project(xfail):
+        if args.project == "libcxx":
+            return xfail.project in xfail_project_to_cxx_testsuite
+        return args.project == xfail.project
+
+    def lit_qualified_test_name(xfail, testname):
+        if (
+            args.project == "libcxx"
+            and xfail.project != args.project
+            and xfail.project in xfail_project_to_cxx_testsuite
+            and args.variant is not None
+            and " :: " not in testname
+        ):
+            return f"{xfail_project_to_cxx_testsuite[xfail.project]}-{args.variant} :: {testname}"
+        return testname
+
     xfails = [
         XFail(
             name="no frwpi",
@@ -241,7 +269,6 @@ def main():
                 "armv6m_soft_nofp_size",
                 "armebv6m_soft_nofp_exn_rtti_size",
                 "armebv6m_soft_nofp_size",
-                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_unaligned_size",
                 "armv7m_hard_fpv4_sp_d16_size",
                 "armv7m_hard_fpv4_sp_d16_unaligned_size",
@@ -251,7 +278,6 @@ def main():
                 "armv7m_soft_fpv4_sp_d16_exn_rtti_unaligned_size",
                 "armv7m_soft_fpv4_sp_d16_size",
                 "armv7m_soft_fpv4_sp_d16_unaligned_size",
-                "armv7m_soft_nofp_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_unaligned_size",
                 "armv7m_soft_nofp_size",
                 "armv7m_soft_nofp_unaligned_size",
@@ -405,7 +431,7 @@ def main():
                 "test_demangle.pass.cpp",
             ],
             result=NewResult.PASSED,
-            project="libcxx",
+            project="libcxxabi",
             variants=[
                 "aarch64a_unaligned",
                 "aarch64a_exn_rtti_unaligned",
@@ -520,7 +546,7 @@ def main():
                 "test_demangle.pass.cpp",
             ],
             result=NewResult.XFAILED,
-            project="libcxx",
+            project="libcxxabi",
             variants=[
                 "aarch64a",
                 "aarch64a_exn_rtti",
@@ -552,6 +578,7 @@ def main():
             ],
             result=NewResult.PASSED,
             project="libcxx",
+            conditional=check_not_llvmlibc,
             description="More recent picolibc versions do now support char16_t and char32_t",
         ),
         XFail(
@@ -634,6 +661,7 @@ def main():
                 "aarch64r_be_soft_nofp",
                 "aarch64r_be_soft_nofp_exn_rtti",
             ],
+            conditional=check_not_llvmlibc,
             description="Broken conversion between 128-bit types and string.",
         ),
         XFail(
@@ -665,6 +693,7 @@ def main():
                 "aarch64r_soft_nofp_exn_rtti",
                 "aarch64r_soft_nofp_exn_rtti_unaligned",
             ],
+            conditional=check_not_llvmlibc,
             description="Broken conversion between 128-bit types and string.",
         ),
         XFail(
@@ -691,6 +720,7 @@ def main():
                 "aarch64r_soft_nofp_exn_rtti",
                 "aarch64r_soft_nofp_exn_rtti_unaligned",
             ],
+            conditional=check_not_llvmlibc,
             description="Broken conversion between 128-bit types and string.",
         ),
         XFail(
@@ -781,7 +811,7 @@ def main():
                 "unwind_leaffunction.pass.cpp",
             ],
             result=NewResult.XFAILED,
-            project="libcxx",
+            project="libunwind",
             variants=[
                 "aarch64a",
                 "aarch64a_exn_rtti",
@@ -935,24 +965,265 @@ def main():
             description="The test expects serial port activity to end the test and times out without it.",
         ),
         XFail(
-            name="variadic vector type arguments",
+            name="llvmlibc missing signal.h",
             testnames=[
-                "src/__support/libc.test.src.__support.arg_list_test.__hermetic__.__build__",
+                "extensions/libcxx/depr/depr.c.headers/extern_c.pass.cpp",
+                "libcxx/assertions/default_verbose_abort.pass.cpp",
+                "std/depr/depr.c.headers/stdint_h.pass.cpp",
+                "std/language.support/cstdint/cstdint.syn/cstdint.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="LLVM libc does not provide signal.h/csignal; the stdint/cstdint tests fail because they include csignal transitively.",
+        ),
+        XFail(
+            name="llvmlibc missing file IO support",
+            testnames=[
+                "libcxx/input.output/file.streams/fstreams/fstream.close.pass.cpp",
+                "libcxx/input.output/file.streams/fstreams/nodiscard.verify.cpp",
+                "libcxx/input.output/filesystems/convert_file_time.pass.cpp",
+                "std/input.output/file.streams/c.files/cstdio.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.assign/member_swap.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.assign/move_assign.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.assign/nonmember_swap.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.assign/nonmember_swap_min.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.cons/default.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.cons/move.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.members/close.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.members/open_path.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.virtuals/pbackfail.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.virtuals/seekoff.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.virtuals/setbuf.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf.virtuals/xsputn.pass.cpp",
+                "std/input.output/file.streams/fstreams/filebuf/types.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.assign/member_swap.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.assign/move_assign.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.assign/nonmember_swap.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.cons/default.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.cons/move.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.cons/path.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.cons/string.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.members/close.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.members/open_path.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.members/open_string.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream.members/rdbuf.pass.cpp",
+                "std/input.output/file.streams/fstreams/fstream/types.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.assign/member_swap.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.assign/move_assign.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.assign/nonmember_swap.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.cons/default.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.cons/move.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.cons/path.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.cons/pointer.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.cons/string.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.members/buffered_reads.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.members/close.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.members/open_path.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.members/open_pointer.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.members/open_string.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.members/rdbuf.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream.members/xsgetn.pass.cpp",
+                "std/input.output/file.streams/fstreams/ifstream/types.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.assign/member_swap.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.assign/move_assign.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.assign/nonmember_swap.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.cons/default.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.cons/move.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.cons/path.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.cons/string.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.members/buffered_writes.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.members/close.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.members/open_path.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.members/open_string.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream.members/rdbuf.pass.cpp",
+                "std/input.output/file.streams/fstreams/ofstream/types.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="LLVM libc for bare-metal does not provide FILE and filesystem support required by libc++ file I/O tests.",
+        ),
+        XFail(
+            name="llvmlibc system_error category behavior",
+            testnames=[
+                "std/diagnostics/syserr/syserr.syserr/syserr.syserr.members/ctor_error_code.pass.cpp",
+                "std/diagnostics/syserr/syserr.syserr/syserr.syserr.members/ctor_error_code_const_char_pointer.pass.cpp",
+                "std/diagnostics/syserr/syserr.syserr/syserr.syserr.members/ctor_error_code_string.pass.cpp",
+                "std/diagnostics/syserr/syserr.syserr/syserr.syserr.members/ctor_int_error_category.pass.cpp",
+                "std/diagnostics/syserr/syserr.syserr/syserr.syserr.members/ctor_int_error_category_const_char_pointer.pass.cpp",
+                "std/diagnostics/syserr/syserr.syserr/syserr.syserr.members/ctor_int_error_category_string.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="LLVM libc system_error category and strerror text behavior differs from hosted libc++ expectations.",
+        ),
+        XFail(
+            name="llvmlibc embedded executor stdin/runtime failures",
+            testnames=[
+                "std/containers/unord/unord.multiset/local_iterators.pass.cpp",
+                "std/input.output/iostream.objects/narrow.stream.objects/cin.readmany.sh.cpp",
+                "std/input.output/iostream.objects/narrow.stream.objects/cin.sh.cpp",
+                "std/input.output/iostream.objects/narrow.stream.objects/cin.sync_with_stdio.sh.cpp",
+            ],
+            result=NewResult.EXCLUDE,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="Runtime tests depend on stdin/runtime behavior that hangs with semihosting, thus EXCLUDED.",
+        ),
+        XFail(
+            name="llvmlibc aarch64 missing long double atan2",
+            testnames=[
+                "std/numerics/complex.number/cmplx.over/arg.pass.cpp",
+                "std/numerics/complex.number/complex.value.ops/arg.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+            ],
+            conditional=check_llvmlibc,
+            description="AArch64 LLVM libc uses long double for these complex arg tests and is missing atan2l.",
+        ),
+        XFail(
+            name="llvmlibc missing quick_exit support",
+            testnames=[
+                "std/language.support/support.start.term/quick_exit.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="LLVM libc does not provide at_quick_exit required by libc++ quick_exit tests.",
+        ),
+        XFail(
+            name="llvmlibc disabled scanf floating point support",
+            testnames=[
+                "std/localization/locale.categories/category.monetary/locale.money.get/locale.money.get.members/get_long_double_overlong.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="LLVM libc bare-metal disables scanf floating-point conversions with LIBC_CONF_SCANF_DISABLE_FLOAT, but libc++ money_get<long double> uses it.",
+        ),
+        XFail(
+            name="llvmlibc stdlib upstream xfails that pass in ATfE",
+            testnames=[
+                "std/depr/depr.c.headers/stdlib_h.pass.cpp",
+                "std/language.support/support.runtime/cstdlib.pass.cpp",
+            ],
+            result=NewResult.PASSED,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="These tests are annotated with LLVM-LIBC-FIXME upstream for a missing system declaration, but ATfE's LLVM libc headers provide it.",
+        ),
+        XFail(
+            name="llvmlibc executor stderr upstream xfail that passes in ATfE",
+            testnames=[
+                "selftest/dsl/dsl.sh.py",
+            ],
+            result=NewResult.PASSED,
+            project="libcxx",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="This selftest is annotated with LLVM-LIBC-FIXME upstream for stderr/stdout conflation, but ATfE's executors route stderr separately.",
+        ),
+        XFail(
+            name="llvmlibc libcxxabi demangle test passes in ATfE",
+            testnames=[
+                "test_demangle.pass.cpp",
+            ],
+            result=NewResult.PASSED,
+            project="libcxxabi",
+            variants=[
+                "aarch64a_exn_rtti",
+            ],
+            conditional=check_llvmlibc,
+            description="LLVM libc formats the demangler FP literal cases correctly on this FVP configuration, so override the generic demangle-fvp xfail.",
+        ),
+        XFail(
+            name="llvmlibc libcxxabi exhaustive pointer catch test timeout",
+            testnames=[
+                "catch_multi_level_pointer.pass.cpp",
+            ],
+            result=NewResult.EXCLUDE,
+            project="libcxxabi",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="This exhaustive exception matching test does not complete within the embedded executor timeout.",
+        ),
+        XFail(
+            name="llvmlibc libunwind missing POSIX headers",
+            testnames=[
+                "aarch64_za_unwind.pass.cpp",
+                "forceunwind.pass.cpp",
+                "ra_sign_state.pass.cpp",
+                "signal_unwind.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libunwind",
+            variants=[
+                "aarch64a_exn_rtti",
+                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
+                "armv7m_soft_nofp_exn_rtti_size",
+            ],
+            conditional=check_llvmlibc,
+            description="These libunwind tests include POSIX headers not provided by LLVM libc bare-metal, such as signal.h, sys/types.h, and alloca.h.",
+        ),
+        XFail(
+            name="variadic vector type arguments non-hermetic",
+            testnames=[
+                "src/__support/libc.test.src.__support.arg_list_test.__build__",
             ],
             result=NewResult.XFAILED,
             project="llvmlibc",
             variants=[
-                "aarch64a_be",
-                "aarch64a_be_exn_rtti",
-                "aarch64r_be",
-                "aarch64r_be_exn_rtti",
                 "armv8.1m.main_hard_nofp_mve_exn_rtti_size",
                 "armv8.1m.main_hard_nofp_mve_exn_rtti_unaligned",
                 "armv8.1m.main_hard_nofp_mve_exn_rtti_unaligned_size",
-                "armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_size",
-                "armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_unaligned_size",
-                "armv8.1m.main_hard_nofp_mve_pacret_bti_size",
-                "armv8.1m.main_hard_nofp_mve_pacret_bti_unaligned_size",
                 "armv8.1m.main_hard_nofp_mve_size",
                 "armv8.1m.main_hard_nofp_mve_unaligned",
                 "armv8.1m.main_hard_nofp_mve_unaligned_size",
@@ -966,7 +1237,7 @@ def main():
     tests_to_exclude = []
 
     for xfail in xfails:
-        if args.project != xfail.project:
+        if not xfail_applies_to_project(xfail):
             continue
         if xfail.variants is not None:
             if args.variant is None:
@@ -978,12 +1249,13 @@ def main():
         if xfail.conditional is not None:
             if not xfail.conditional():
                 continue
+        testnames = [lit_qualified_test_name(xfail, test) for test in xfail.testnames]
         if xfail.result == NewResult.XFAILED:
-            tests_to_xfail.extend(xfail.testnames)
+            tests_to_xfail.extend(testnames)
         elif xfail.result == NewResult.PASSED:
-            tests_to_upass.extend(xfail.testnames)
+            tests_to_upass.extend(testnames)
         elif xfail.result == NewResult.EXCLUDE:
-            tests_to_exclude.extend(xfail.testnames)
+            tests_to_exclude.extend(testnames)
 
     tests_to_xfail.sort()
     tests_to_upass.sort()

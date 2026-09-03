@@ -8,3 +8,8 @@ using `newlib`.
 
 A recent version of QEMU is required to run the sample, because of the
 dependency on details of semihosting implementation in QEMU.
+
+Running the sample using `make run` should print a message:
+```
+Hello World!
+```

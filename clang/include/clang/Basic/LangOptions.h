@@ -25,6 +25,7 @@
 #include "llvm/ADT/FloatingPointMode.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/BinaryFormat/DXContainer.h"
+#include "llvm/Frontend/OpenMP/OMPVersion.h"
 #include "llvm/Support/AllocToken.h"
 #include "llvm/TargetParser/Triple.h"
 #include <optional>
@@ -319,15 +320,6 @@ public:
     BKey
   };
 
-// Begin downstream change #910
-  enum class SignReturnAddressHardeningKind {
-    /// Regular return address signing.
-    None,
-    /// Hardened return address signing with load of return address.
-    LoadReturnAddress
-  };
-
-// End downstream change #910
   enum class ThreadModelKind {
     /// POSIX Threads.
     POSIX,
@@ -829,6 +821,11 @@ public:
   /// True when compiling for an offloading target device.
   bool isTargetDevice() const {
     return OpenMPIsTargetDevice || CUDAIsDevice || SYCLIsDevice;
+  }
+
+  /// Return the OpenMP version.
+  llvm::omp::Version getOpenMPVersion() const {
+    return llvm::omp::Version(OpenMP);
   }
 
   /// Returns the most applicable C standard-compliant language version code.

@@ -9,6 +9,14 @@
 // RUN: %clang --target=aarch64 -c %s -### -msign-return-address=all                              2>&1 | \
 // RUN: FileCheck %s --check-prefix=RA-ALL      --check-prefix=KEY-A --check-prefix=BTE-OFF --check-prefix=GCS-OFF --check-prefix=WARN
 
+// This spelling cannot express a key, so it has to pick the one the target
+// supports. AArch64 Windows only supports B-key.
+// RUN: %clang --target=aarch64-windows-msvc -c %s -### -msign-return-address=non-leaf            2>&1 | \
+// RUN: FileCheck %s --check-prefix=RA-NON-LEAF --check-prefix=KEY-B --check-prefix=BTE-OFF --check-prefix=GCS-OFF --check-prefix=WARN
+
+// RUN: %clang --target=aarch64-windows-msvc -c %s -### -msign-return-address=all                 2>&1 | \
+// RUN: FileCheck %s --check-prefix=RA-ALL      --check-prefix=KEY-B --check-prefix=BTE-OFF --check-prefix=GCS-OFF --check-prefix=WARN
+
 // -mbranch-protection with standard
 // RUN: %clang --target=aarch64 -c %s -### -mbranch-protection=standard                                2>&1 | \
 // RUN: FileCheck %s --check-prefix=RA-NON-LEAF --check-prefix=KEY-A --check-prefix=BTE-ON --check-prefix=GCS-ON --check-prefix=WARN
@@ -16,11 +24,6 @@
 // RUN: %clang --target=aarch64-windows-msvc -c %s -### -mbranch-protection=standard                  2>&1 | \
 // RUN: FileCheck %s --check-prefix=RA-NON-LEAF --check-prefix=KEY-B --check-prefix=BTE-ON --check-prefix=GCS-ON --check-prefix=WARN
 
-// Begin downstream change #910
-// RUN: not %clang -target arm64-apple-darwin -c %s -### -mbranch-protection=standard -fptrauth-returns 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=RA-INCOMPATIBLE-PTRAUTHRETURNS
-
-// End downstream change #910
 // If the -msign-return-address and -mbranch-protection are both used, the
 // right-most one controls return address signing.
 // RUN: %clang --target=aarch64 -c %s -### -msign-return-address=non-leaf -mbranch-protection=none     2>&1 | \
@@ -38,62 +41,20 @@
 // RUN: %clang --target=aarch64 -### -o /dev/null -mbranch-protection=standard /dev/null 2>&1 | \
 // RUN: FileCheck --allow-empty %s --check-prefix=LINKER-DRIVER
 
+// Check that Android enables PAC and BTI by default on AArch64.
+// RUN: %clang --target=aarch64-linux-android -### -c %s 2>&1 | \
+// RUN: FileCheck %s --check-prefix=RA-NON-LEAF --check-prefix=KEY-A --check-prefix=BTE-ON --check-prefix=GCS-OFF --check-prefix=WARN
+
+// Check that the Android default can be overridden.
+// RUN: %clang --target=aarch64-linux-android -mbranch-protection=none -### -c %s 2>&1 | \
+// RUN: FileCheck %s --check-prefix=RA-OFF --check-prefix=KEY --check-prefix=BTE-OFF --check-prefix=GCS-OFF --check-prefix=WARN
+
+// Check that Android enables BTI by default when -msign-return-address is passed.
+// RUN: %clang --target=aarch64-linux-android -msign-return-address=non-leaf -### -c %s 2>&1 | \
+// RUN: FileCheck %s --check-prefix=RA-NON-LEAF --check-prefix=KEY-A --check-prefix=BTE-ON --check-prefix=GCS-OFF --check-prefix=WARN
+
 // WARN-NOT: warning: ignoring '-mbranch-protection=' option because the 'aarch64' architecture does not support it [-Wbranch-protection]
 
-// Begin downstream change #910
-// RUN: %clang -target aarch64 -c %s -### 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=ABSENT-RA-HARDEN
-
-// RUN: %clang -target aarch64 -c %s -### -mharden-pac-ret=none 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=NO-RA-HARDEN
-
-// RUN: %clang -target aarch64 -c %s -### -mharden-pac-ret=load-return-address 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=NO-RA-HARDEN
-
-// RUN: %clang -target aarch64 -c %s -### -mbranch-protection=none -mharden-pac-ret=none 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=NO-RA-HARDEN
-// RUN: %clang -target arm64-apple-darwin -c %s -### -fno-ptrauth-returns -mharden-pac-ret=none 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=NO-RA-HARDEN
-
-// RUN: %clang -target aarch64 -c %s -### -mbranch-protection=none -mharden-pac-ret=load-return-address 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=NO-RA-HARDEN
-// RUN: %clang -target arm64-apple-darwin -c %s -### -fno-ptrauth-returns -mharden-pac-ret=load-return-address 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=NO-RA-HARDEN
-
-// RUN: %clang -target aarch64 -c %s -### -mbranch-protection=pac-ret -mharden-pac-ret=none 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=RA-HARDEN-NONE
-// RUN: %clang -target arm64-apple-darwin -c %s -### -fptrauth-returns -mharden-pac-ret=none 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=RA-HARDEN-NONE
-
-// RUN: %clang -target aarch64 -c %s -### -mbranch-protection=pac-ret -mharden-pac-ret=load-return-address 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=RA-HARDEN-LRA
-// RUN: %clang -target arm64-apple-darwin -c %s -### -fptrauth-returns -mharden-pac-ret=load-return-address 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=RA-HARDEN-LRA
-
-// RUN: %clang -target aarch64 -c %s -### -mbranch-protection=standard -mharden-pac-ret=none 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=RA-HARDEN-NONE
-
-// RUN: %clang -target aarch64 -c %s -### -mbranch-protection=standard -mharden-pac-ret=load-return-address 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=RA-HARDEN-LRA
-
-// RUN: not %clang -target aarch64 -c %s -### -mbranch-protection=standard -mharden-pac-ret=foo 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=BAD-HARDEN-PROTECTION
-// RUN: not %clang -target arm64-apple-darwin -c %s -### -fptrauth-returns -mharden-pac-ret=foo 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=BAD-HARDEN-PROTECTION
-
-// RUN: not %clang -target aarch64 -c %s -### -mbranch-protection=standard -mharden-pac-ret=load-return-address -mexecute-only 2>&1 | \
-// RUN: FileCheck %s --check-prefixes=RA-HARDEN-INCOMPATIBLE-EXEC-ONLY
-// RUN: %clang -target aarch64 -c %s -### -mbranch-protection=standard -mharden-pac-ret=none -mexecute-only
-
-// ABSENT-RA-HARDEN-NOT: "-mharden-pac-ret"
-// NO-RA-HARDEN:         ignoring '-mharden-pac-ret' as it requires return address signing
-// NO-RA-HARDEN-NOT:     "-mharden-pac-ret"
-// RA-HARDEN-NONE:       "-mharden-pac-ret=none"
-// RA-HARDEN-LRA:        "-mharden-pac-ret=load-return-address"
-// BAD-HARDEN-PROTECTION: unsupported argument 'foo' to option '-mharden-pac-ret='
-// RA-HARDEN-INCOMPATIBLE-EXEC-ONLY: the combination of '-mharden-pac-ret=load-return-address' and '-mexecute-only' is incompatible
-
-// End downstream change #910
 // RA-OFF: "-msign-return-address=none"
 // RA-NON-LEAF: "-msign-return-address=non-leaf"
 // RA-ALL: "-msign-return-address=all"
@@ -102,10 +63,6 @@
 // KEY-B: "-msign-return-address-key=b_key"
 // KEY-NOT: "-msign-return-address-key"
 
-// Begin downstream change #910
-// RA-INCOMPATIBLE-PTRAUTHRETURNS: the combination of '-mbranch-protection=standard' and '-fptrauth-returns' is incompatible
-
-// End downstream change #910
 // BTE-OFF-NOT: "-mbranch-target-enforce"
 // BTE-ON: "-mbranch-target-enforce"
 
