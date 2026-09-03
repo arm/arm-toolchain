@@ -1,0 +1,48 @@
+# This workflow executes the automerge python script to automatically merge
+# changes from the `release/23.x` branch of upstream LLVM into the `release/arm-software/23.x`
+# branch of the arm/arm-toolchain repository.
+name: (arm-toolchain) Automerge (23.x)
+on:
+  workflow_dispatch:
+    inputs:
+      target-commit:
+        description: Merge up to this commit
+        required: true
+        type: string
+concurrency:
+  group: automerge_workflows
+  cancel-in-progress: false
+jobs:
+  Run-Automerge:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      pull-requests: write
+    if: github.repository == 'arm/arm-toolchain'
+    steps:
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v3
+        id: generate-token
+        with:
+          client-id: ${{ secrets.SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: release/arm-software/23.x
+          token: ${{ steps.generate-token.outputs.token }}
+      - name: Configure Git Identity
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Fetch Branches
+        run: |
+          git remote set-branches --add origin release/23.x
+          git fetch origin release/23.x:release/23.x
+          git pull --unshallow --ff-only origin release/arm-software/23.x
+      - name: Run automerge
+        run: |
+          TARGET_COMMIT_INPUT=${{ github.event.inputs.target-commit }}
+          TARGET_COMMIT=${TARGET_COMMIT_INPUT:-"release/23.x"}
+          python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch "$TARGET_COMMIT" --to-branch release/arm-software/23.x --verbose
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}

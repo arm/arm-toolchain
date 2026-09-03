@@ -29,7 +29,7 @@ extern "C" {
 // Floating-point instructions aren't enabled yet
 [[gnu::target("no-fpregs")]]
 #endif
-[[gnu::weak]] void
+PLATFORM_SETUP_PCS [[gnu::weak]] void
 _platform_setup_exceptions() {
 #if __ARM_ARCH_PROFILE == 'A'
   VBAR = reinterpret_cast<unsigned long>(&vector_table);

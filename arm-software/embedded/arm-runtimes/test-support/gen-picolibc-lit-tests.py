@@ -77,6 +77,7 @@ def main():
         "test-long-long-int",
         "test-long-long-long",
         "test-long-long",
+        "test-many-malloc",
         "test-memchr",
         "test-memmem",
         "test-memset",

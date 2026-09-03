@@ -15,5 +15,5 @@
 #else
 // ARMv4T
 // TODO: fill in stub functions once we can start testing LLVM-libc
-extern "C" [[gnu::weak]] void _platform_setup_exceptions() {}
+extern "C" [[gnu::weak]] PLATFORM_SETUP_PCS void _platform_setup_exceptions() {}
 #endif

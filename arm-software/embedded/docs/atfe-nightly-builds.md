@@ -24,9 +24,10 @@ produced and uploaded.
 Nightly build artifacts are available through the GitHub Actions section of
 this repository. To locate them:
 
+1. Make sure you are signed in to GitHub.
 1. Navigate to the [“ATfE Nightly Build and Test”](https://github.com/arm/arm-toolchain/actions/workflows/atfe_nightly_build_and_test.yml) Workflow in the Github Actions tab
-3. Choose a specific workflow run e.g., the latest successful run
-4. Scroll to the bottom of the run page to find the list of generated build
+1. Choose a specific workflow run e.g., the latest successful run
+1. Scroll to the bottom of the run page to find the list of generated build
 artifacts
 
 ## Downloading Nightly Build Artifacts

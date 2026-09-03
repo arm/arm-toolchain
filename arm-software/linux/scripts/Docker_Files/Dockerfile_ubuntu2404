@@ -1,0 +1,88 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
+RUN sed -i 's|http://ports.ubuntu.com/ubuntu-ports|https://ports.ubuntu.com/ubuntu-ports|g' /etc/apt/sources.list.d/ubuntu.sources
+
+# Enable the running user to own the build
+# And creates required directories
+ARG USER_ID=1001
+ARG GROUP_ID=1002
+ARG USER=cicd
+ARG WORKSPACE=/workspace
+
+RUN getent group ${GROUP_ID} >/dev/null || groupadd -g ${GROUP_ID} ${USER} && \
+    getent passwd ${USER_ID} >/dev/null || useradd -u ${USER_ID} -g ${GROUP_ID} -m ${USER} && \
+    mkdir -p ${WORKSPACE}/build  \
+             ${WORKSPACE}/lib \
+             ${WORKSPACE}/logs \
+             ${WORKSPACE}/output \
+             ${WORKSPACE}/patches \
+             ${WORKSPACE}/python \
+             ${WORKSPACE}/src && \
+    chown -R ${USER_ID}:${GROUP_ID} ${WORKSPACE}
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    binutils-dev \
+    build-essential \
+    gnupg \
+    git \
+    libzstd-dev \
+    python3.12 \
+    python3.12-dev \
+    python3.12-venv \
+    python3-pip \
+    unzip \
+    wget \
+    zlib1g-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install cmake from precompiled-binaries: https://cmake.org/download/
+RUN version=4.3.4 \
+    && mkdir /tmp/temp \
+    && cd /tmp/temp \
+    && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-linux-aarch64.tar.gz \
+    && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-SHA-256.txt \
+    && sha256sum -c --ignore-missing cmake-$version-SHA-256.txt \
+    && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-SHA-256.txt.asc \
+    && gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys C6C265324BBEBDC350B513D02D2CEF1034921684 \
+    && gpg --verify cmake-$version-SHA-256.txt.asc cmake-$version-SHA-256.txt \
+    && tar -xzvf cmake-$version-linux-aarch64.tar.gz -C /opt \
+    && cd $HOME && rm -rfv /tmp/temp \
+    && update-alternatives \
+        --install /usr/local/bin/cmake cmake /opt/cmake-$version-linux-aarch64/bin/cmake 10 \
+        --slave /usr/local/bin/ctest ctest /opt/cmake-$version-linux-aarch64/bin/ctest \
+        --slave /usr/local/bin/cpack cpack /opt/cmake-$version-linux-aarch64/bin/cpack \
+        --slave /usr/local/bin/ccmake ccmake /opt/cmake-$version-linux-aarch64/bin/ccmake \
+    && cmake --version \
+    && ctest --version \
+    && cpack --version \
+    && ccmake --version
+
+RUN ninja_version=1.12.1 \
+    && wget https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux-aarch64.zip \
+    && unzip ninja-linux-aarch64.zip \
+    && mv ninja /usr/bin \
+    && rm ninja-linux-aarch64.zip
+
+ADD pyproject.toml poetry.lock ${WORKSPACE}/python/
+WORKDIR ${WORKSPACE}/python
+RUN python3.12 -m venv .venv && \
+    .venv/bin/pip3 install --no-cache-dir poetry && \
+    .venv/bin/poetry config virtualenvs.in-project true && \
+    .venv/bin/poetry install --no-root --no-interaction --no-ansi
+
+ENV PATH="${WORKSPACE}/python/.venv/bin:$PATH"
+
+# Copy the entrypoint into the container and make it executable
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+WORKDIR ${WORKSPACE}
+
+# Set the user to run the build
+USER ${USER_ID}
+
+# Set the entrypoint
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]

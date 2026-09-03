@@ -25,6 +25,25 @@ exposed to the C library for data, heap, and stack.
 | 3 | Heap use-after-free through `calloc` and `free` wrapping |
 | 4 | Heap buffer overflow after `realloc` wrapping |
 
+For example:
+```
+C++ KASan shadow-memory sample
+Test 1: automatic stack redzone
+Writing one byte past a stack buffer
+KASAN: invalid store at 0x200037a0, size 0x00000001, offset 0x00000000 (recovered)
+Test 2: heap buffer overflow
+Writing one byte past a malloc allocation
+KASAN: invalid store at 0x20000868, size 0x00000001, offset 0x00000000 (recovered)
+Test 3: heap use-after-free
+Freeing an allocation
+Attempting use-after-free
+KASAN: invalid store at 0x200008a0, size 0x00000001, offset 0x00000000 (recovered)
+Test 4: realloc buffer overflow
+Writing one byte past a resized malloc allocation
+KASAN: invalid store at 0x20000938, size 0x00000001, offset 0x00000000 (recovered)
+All KASan tests completed
+```
+
 ## Customizing the runtime
 
 ### Shadow memory

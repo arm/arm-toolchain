@@ -8,19 +8,15 @@ on:
     types:
       - completed
   workflow_dispatch:
+concurrency:
+  group: automerge_workflows
+  cancel-in-progress: false
 jobs:
   Run-Automerge:
     runs-on: ubuntu-24.04-arm
     permissions:
       pull-requests: write
     if: github.repository == 'arm/arm-toolchain'
-    strategy:
-      matrix:
-        branches:
-          - from_branch: main
-            to_branch: arm-software
-          - from_branch: release/23.x
-            to_branch: release/arm-software/23.x
     steps:
       - name: Configure Access Token
         uses: actions/create-github-app-token@v3
@@ -31,7 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ matrix.branches.to_branch }}
+          ref: arm-software
           token: ${{ steps.generate-token.outputs.token }}
       - name: Configure Git Identity
         run: |
@@ -39,10 +35,10 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - name: Fetch Branches
         run: |
-          git remote set-branches --add origin ${{ matrix.branches.from_branch }}
-          git fetch origin ${{ matrix.branches.from_branch }}:${{ matrix.branches.from_branch }}
-          git pull --unshallow --ff-only origin ${{ matrix.branches.to_branch }}
+          git remote set-branches --add origin main
+          git fetch origin main:main
+          git pull --unshallow --ff-only origin arm-software
       - name: Run automerge
-        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch ${{ matrix.branches.from_branch }} --to-branch ${{ matrix.branches.to_branch }} --verbose
+        run: python3 arm-software/ci/automerge.py --project-name ${{ github.repository }} --from-branch main --to-branch arm-software --verbose
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}

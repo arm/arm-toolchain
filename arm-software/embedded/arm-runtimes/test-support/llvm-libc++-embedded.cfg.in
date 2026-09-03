@@ -3,6 +3,10 @@
 
 config.name = 'libc++-@RUNTIME_VARIANT_NAME@'
 
+config.available_features.add('libc=@RUNTIME_LIBC@')
+if '@RUNTIME_LIBC@' == 'llvmlibc':
+    config.available_features.add('LLVM-LIBC-FIXME')
+
 config.substitutions.append(('%{libc-include}', '@CMAKE_INSTALL_PREFIX@/include'))
 config.substitutions.append(('%{libc-lib}', '@CMAKE_INSTALL_PREFIX@/lib'))
 config.substitutions.append(('%{libc-extra-link-flags}', '@RUNTIME_TEST_LINK_FLAGS@'))

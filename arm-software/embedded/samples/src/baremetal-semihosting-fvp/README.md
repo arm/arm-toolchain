@@ -21,3 +21,8 @@ files.
 The sample also downloads and uses ATfE multilib testing Python wrapper scripts
 from ATfE repository to construct the full FVP command line. The actual command
 line is printed before the invocation so that it can be inspected and reused.
+
+Running the sample using `make run` should print a message:
+```
+Hello World!
+```
