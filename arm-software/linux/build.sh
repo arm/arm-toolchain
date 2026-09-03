@@ -508,6 +508,7 @@ product_build() {
         -DLLVM_BUILD_DOCS=ON \
         -DLLVM_ENABLE_SPHINX=ON \
         -DSPHINX_WARNINGS_AS_ERRORS=OFF \
+        -DLLVM_SPHINX_THREADS=1 \
         -DLLVM_ENABLE_PROJECTS="llvm;clang;flang;bolt;lld" \
         -DLLVM_ENABLE_RUNTIMES="compiler-rt;flang-rt;libunwind;openmp" \
         -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${libs};-DCMAKE_MODULE_LINKER_FLAGS=${libs};-DCMAKE_SHARED_LINKER_FLAGS=${libs}" \
