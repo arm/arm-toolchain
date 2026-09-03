@@ -22,9 +22,18 @@ namespace memory {
 
 using namespace sysreg;
 
+static constexpr unsigned long MMU_BLOCK_DESC = 1UL;
+static constexpr unsigned long MMU_ATTR_INDEX_SHIFT = 2;
+static constexpr unsigned long MMU_ATTR_NORMAL =
+    1UL << MMU_ATTR_INDEX_SHIFT;
+static constexpr unsigned long MMU_ATTR_TAGGED_NORMAL =
+    3UL << MMU_ATTR_INDEX_SHIFT;
+static constexpr unsigned long MMU_BLOCK_AF = 1UL << 10;
 static constexpr unsigned long MMU_BLOCK_NSE = 1UL << 11;
-static constexpr unsigned long MMU_NORMAL_FLAGS = 0x405 | MMU_BLOCK_NSE;
-static constexpr unsigned long MMU_TAGGED_NORMAL_FLAGS = 0x40d | MMU_BLOCK_NSE;
+static constexpr unsigned long MMU_NORMAL_FLAGS =
+    MMU_BLOCK_DESC | MMU_ATTR_NORMAL | MMU_BLOCK_AF | MMU_BLOCK_NSE;
+static constexpr unsigned long MMU_TAGGED_NORMAL_FLAGS =
+    MMU_BLOCK_DESC | MMU_ATTR_TAGGED_NORMAL | MMU_BLOCK_AF | MMU_BLOCK_NSE;
 
 void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
                unsigned long stackheap_end) {
@@ -95,9 +104,10 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
     pagetable[i] = 0;
   }
 
-  // Page occupied by the image. The A-profile FVP crt0 runs at EL3. With
-  // FEAT_RME, descriptor bit 11 is NSE rather than nG; NS=0,NSE=1 selects
-  // Root PAS for EL3 execution.
+  // Page occupied by the image. AArch64 A-profile startup can run at EL3 on
+  // FVPs or real hardware. With FEAT_RME, descriptor bit 11 is NSE rather than
+  // nG; NS=0,NSE=1 selects Root PAS for EL3 execution. Without RME, setting
+  // the bit only makes the mapping non-global.
   unsigned long image_attrs = MMU_NORMAL_FLAGS; // Index = 1, AF=1, NSE=1
 #ifdef __ARM_FEATURE_MEMORY_TAGGING
   // If we have memory tagging and the stack/heap is in the same page
