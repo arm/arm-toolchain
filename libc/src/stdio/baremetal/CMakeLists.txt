@@ -295,7 +295,21 @@ add_entrypoint_object(
   HDRS
     ../remove.h
   DEPENDS
-    libc.include.stdio
+    libc.src.__support.OSUtil.osutil
+    libc.src.__support.libc_errno
+    libc.src.__support.macros.config
+)
+
+add_entrypoint_object(
+  rename
+  SRCS
+    rename.cpp
+  HDRS
+    ../rename.h
+  DEPENDS
+    libc.src.__support.OSUtil.osutil
+    libc.src.__support.libc_errno
+    libc.src.__support.macros.config
 )
 
 set(printf_srcs printf.cpp)

@@ -53,6 +53,15 @@ struct __llvm_libc_stdio_cookie;
 extern "C" int __llvm_libc_stdio_open(const char *path, const char *mode,
                                       void **cookie);
 
+// Remove the file named by `path`. Return 0 on success or a negative errno
+// value on failure.
+extern "C" int __llvm_libc_stdio_remove(const char *path);
+
+// Rename the file named by `old_path` to `new_path`. Return 0 on success or a
+// negative errno value on failure.
+extern "C" int __llvm_libc_stdio_rename(const char *old_path,
+                                        const char *new_path);
+
 // Return the number of bytes read, which can be less than `size` and is zero at
 // end-of-file. On failure, return a negative errno value.
 extern "C" ssize_t __llvm_libc_stdio_read(void *cookie, char *buf, size_t size);
@@ -74,6 +83,11 @@ extern "C" int __llvm_libc_stdio_set_buffer(void *cookie, char *buffer,
 // Flush buffered output for `cookie`, or all output streams if `cookie` is
 // null. Return 0 on success or EOF on failure, matching fflush.
 extern "C" int __llvm_libc_stdio_flush(void *cookie);
+
+// Push `c` back onto the input stream for `cookie`. Return `c` on success or
+// EOF on failure, matching ungetc. This hook is optional; when it is absent,
+// LLVM libc provides one byte of pushback for stdin.
+extern "C" [[gnu::weak]] int __llvm_libc_stdio_ungetc(void *cookie, int c);
 
 // Return 0 on success or EOF on failure, matching fclose.
 extern "C" int __llvm_libc_stdio_close(void *cookie);

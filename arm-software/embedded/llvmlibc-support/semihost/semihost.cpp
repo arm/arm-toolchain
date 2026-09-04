@@ -151,6 +151,27 @@ long semihost_open(const char *path, size_t length, size_t mode) {
   return handle < 0 ? semihost_errno_negative() : handle;
 }
 
+int semihost_remove(const char *path, size_t length) {
+  size_t args[] = {
+      reinterpret_cast<size_t>(path),
+      length,
+  };
+  return semihosting_call(SYS_REMOVE, args) == 0 ? 0
+                                                 : semihost_errno_negative();
+}
+
+int semihost_rename(const char *old_path, size_t old_length,
+                    const char *new_path, size_t new_length) {
+  size_t args[] = {
+      reinterpret_cast<size_t>(old_path),
+      old_length,
+      reinterpret_cast<size_t>(new_path),
+      new_length,
+  };
+  return semihosting_call(SYS_RENAME, args) == 0 ? 0
+                                                 : semihost_errno_negative();
+}
+
 int semihost_close(size_t handle) {
   size_t args[] = {handle};
   return semihosting_call(SYS_CLOSE, args);
@@ -249,6 +270,15 @@ int __llvm_libc_stdio_open(const char *path, const char *mode, void **cookie) {
   }
   *cookie = file_cookie;
   return 0;
+}
+
+int __llvm_libc_stdio_remove(const char *path) {
+  return semihost_remove(path, _strlen(path));
+}
+
+int __llvm_libc_stdio_rename(const char *old_path, const char *new_path) {
+  return semihost_rename(old_path, _strlen(old_path), new_path,
+                         _strlen(new_path));
 }
 
 off_t __llvm_libc_stdio_seek(void *cookie, off_t offset, int whence) {

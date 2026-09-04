@@ -7,11 +7,11 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// This file contains the bare-metal implementation of remove.
+/// This file contains the bare-metal implementation of rename.
 ///
 //===----------------------------------------------------------------------===//
 
-#include "src/stdio/remove.h"
+#include "src/stdio/rename.h"
 
 #include "src/__support/OSUtil/io.h"
 #include "src/__support/common.h"
@@ -20,8 +20,8 @@
 
 namespace LIBC_NAMESPACE_DECL {
 
-LLVM_LIBC_FUNCTION(int, remove, (const char *path)) {
-  int error = __llvm_libc_stdio_remove(path);
+LLVM_LIBC_FUNCTION(int, rename, (const char *old_path, const char *new_path)) {
+  int error = __llvm_libc_stdio_rename(old_path, new_path);
   if (error < 0) {
     libc_errno = -error;
     return -1;
