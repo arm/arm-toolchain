@@ -373,9 +373,9 @@ bootstrap_compiler_build() {
         -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_ASM_FLAGS_RELEASE="-O2 -DNDEBUG" \
-        -DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG" \
-        -DCMAKE_C_FLAGS_RELEASE="-O2 -DNDEBUG" \
+        -DCMAKE_ASM_FLAGS_RELEASE="-O3 -DNDEBUG" \
+        -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG" \
+        -DCMAKE_C_FLAGS_RELEASE="-O3 -DNDEBUG" \
         -DCMAKE_INSTALL_PREFIX="${BUILD_DIR}/bootstrap_compiler" \
         -DLLVM_ENABLE_LLD=OFF \
         -DLLVM_ENABLE_LIBCXX=OFF \
