@@ -13,6 +13,8 @@
 #ifndef LLVMET_LLVMLIBC_SUPPORT_SEMIHOST_H
 #define LLVMET_LLVMLIBC_SUPPORT_SEMIHOST_H
 
+#include <llvm-libc-types/off_t.h>
+#include <llvm-libc-types/size_t.h>
 #include <llvm-libc-types/ssize_t.h>
 #include <stdint.h>
 
@@ -112,6 +114,22 @@ inline constexpr uint32_t OPENMODE_B = 1;
 inline constexpr uint32_t OPENMODE_PLUS = 2;
 } // namespace
 
-struct __llvm_libc_stdio_cookie { int handle; };
+struct __llvm_libc_stdio_cookie {
+  size_t handle;
+};
+
+struct __llvm_libc_semihost_file_cookie {
+  __llvm_libc_stdio_cookie stdio_cookie;
+  bool in_use;
+  off_t position;
+};
+
+struct __llvm_libc_semihost_file_cookie_pool {
+  __llvm_libc_semihost_file_cookie *cookies;
+  size_t size;
+};
+
+extern "C" __llvm_libc_semihost_file_cookie_pool
+    __llvm_libc_semihost_file_cookie_storage;
 
 #endif // LLVMET_LLVMLIBC_SUPPORT_SEMIHOST_H
