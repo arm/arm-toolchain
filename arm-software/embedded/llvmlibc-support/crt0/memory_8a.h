@@ -104,10 +104,9 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
     pagetable[i] = 0;
   }
 
-  // Page occupied by the image. AArch64 A-profile startup can run at EL3 on
-  // FVPs or real hardware. With FEAT_RME, descriptor bit 11 is NSE rather than
-  // nG; NS=0,NSE=1 selects Root PAS for EL3 execution. Without RME, setting
-  // the bit only makes the mapping non-global.
+  // At EL3 with FEAT_RME, descriptor bit 11 is NSE, otherwise it is RES(0)
+  // and ignored by the hardware. At EL0 and EL1 bit 11 is non-global, but
+  // as we don't change ASID this has no effect.
   unsigned long image_attrs = MMU_NORMAL_FLAGS; // Index = 1, AF=1, NSE=1
 #ifdef __ARM_FEATURE_MEMORY_TAGGING
   // If we have memory tagging and the stack/heap is in the same page
