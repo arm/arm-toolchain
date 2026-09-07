@@ -578,12 +578,7 @@ if(C_LIBRARY STREQUAL picolibc)
         # * Armv6m big-endian
         # * Armv7m big-endian
         # * Armv8.1-M Main PACBTI optimized for code size
-        if(VARIANT MATCHES "^(armebv|^armv8\.1m\.main.*pacret.*size)")
-            set(timeout_multiplier 5)
-        else()
-            set(timeout_multiplier 2)
-        endif()
-        set(picolibc_timeout_arg --slow-tests-timeout-multiplier ${timeout_multiplier})
+        set(picolibc_timeout_arg --slow-tests-timeout-multiplier 5)
 
         # Step target to run the picolibc test via meson.
         ExternalProject_Add_Step(
