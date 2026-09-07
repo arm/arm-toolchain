@@ -9,6 +9,7 @@ from os import environ
 from os import path
 from dataclasses import dataclass
 from platform import uname
+from typing import Optional
 import shlex
 
 
@@ -18,7 +19,7 @@ class FVP:
     tarmac_plugin: str
     crypto_plugin: str
     cmdline_param: str
-    stderr_param: str | None = None
+    stderr_param: Optional[str] = None
 
 
 MODELS = {
