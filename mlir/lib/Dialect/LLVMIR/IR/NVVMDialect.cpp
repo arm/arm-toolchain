@@ -37,10 +37,12 @@
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/NVPTXAddrSpace.h"
 #include "llvm/Support/raw_ostream.h"
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <optional>
 #include <string>
+#include <utility>
 
 using namespace mlir;
 using namespace NVVM;
@@ -1399,7 +1401,9 @@ LogicalResult MmaOp::verify() {
   // Verify the operand types for segments of A, B, and C operands.
   std::array<StringRef, 3> operandNames{"A", "B", "C"};
   for (const auto &iter : llvm::enumerate(
-           SmallVector<AllowedTypes, 3>{expectedA, expectedB, expectedC})) {
+           std::array<AllowedTypes, 3>{std::move(expectedA),
+                                       std::move(expectedB),
+                                       std::move(expectedC)})) {
     auto spec = this->getODSOperandIndexAndLength(iter.index());
     SmallVector<Type, 4> operandTySeg(operand_type_begin() + spec.first,
                                       operand_type_begin() + spec.first +
@@ -1918,7 +1922,9 @@ LogicalResult MmaSpOp::verify() {
   // Verify the operand types for segments of A, B, and C operands.
   std::array<StringRef, 3> operandNames{"A", "B", "C"};
   for (const auto &iter : llvm::enumerate(
-           SmallVector<AllowedTypes, 3>{expectedA, expectedB, expectedC})) {
+           std::array<AllowedTypes, 3>{std::move(expectedA),
+                                       std::move(expectedB),
+                                       std::move(expectedC)})) {
     auto spec = this->getODSOperandIndexAndLength(iter.index());
     SmallVector<Type, 4> operandTySeg(operand_type_begin() + spec.first,
                                       operand_type_begin() + spec.first +
