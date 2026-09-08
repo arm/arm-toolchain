@@ -18,9 +18,11 @@ The sample makes use of ATfE multilib variants
 to get example settings for the memory map, FVP model and required configuration
 files.
 
-The sample also downloads and uses ATfE multilib testing Python wrapper scripts
-from ATfE repository to construct the full FVP command line. The actual command
-line is printed before the invocation so that it can be inspected and reused.
+The sample uses ATfE multilib testing Python wrapper scripts to construct the
+full FVP command line. In the source tree it uses the scripts and configuration
+files from their normal repository locations; release packages include matching
+copies alongside the sample. The actual command line is printed before the
+invocation so that it can be inspected and reused.
 
 Running the sample using `make run` should print a message:
 ```

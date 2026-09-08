@@ -1068,6 +1068,18 @@ install(
     FILES_MATCHING REGEX "${sample_files_regex}"
 )
 
+# The FVP sample uses these files directly from their normal locations in the
+# source tree. Install matching copies alongside the sample for packaged use.
+install(
+    FILES
+        arm-runtimes/test-support/lit-exec-fvp.py
+        arm-runtimes/test-support/run_fvp.py
+        fvp/config/cortex-m85.cfg
+        fvp/config/v8a-aarch64.cfg
+    DESTINATION samples/src/baremetal-semihosting-fvp
+    COMPONENT llvm-toolchain-samples
+)
+
 
 # LLVM-style install
 # To use it:
