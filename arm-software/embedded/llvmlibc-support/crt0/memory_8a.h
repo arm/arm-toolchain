@@ -22,6 +22,19 @@ namespace memory {
 
 using namespace sysreg;
 
+static constexpr unsigned long MMU_BLOCK_DESC = 1UL;
+static constexpr unsigned long MMU_ATTR_INDEX_SHIFT = 2;
+static constexpr unsigned long MMU_ATTR_NORMAL =
+    1UL << MMU_ATTR_INDEX_SHIFT;
+static constexpr unsigned long MMU_ATTR_TAGGED_NORMAL =
+    3UL << MMU_ATTR_INDEX_SHIFT;
+static constexpr unsigned long MMU_BLOCK_AF = 1UL << 10;
+static constexpr unsigned long MMU_BLOCK_NSE = 1UL << 11;
+static constexpr unsigned long MMU_NORMAL_FLAGS =
+    MMU_BLOCK_DESC | MMU_ATTR_NORMAL | MMU_BLOCK_AF | MMU_BLOCK_NSE;
+static constexpr unsigned long MMU_TAGGED_NORMAL_FLAGS =
+    MMU_BLOCK_DESC | MMU_ATTR_TAGGED_NORMAL | MMU_BLOCK_AF | MMU_BLOCK_NSE;
+
 void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
                unsigned long stackheap_end) {
   // Find the memory pages that the image and stackheap occupy
@@ -91,13 +104,15 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
     pagetable[i] = 0;
   }
 
-  // Page occupied by the image
-  unsigned long image_attrs = 0x405; // Index = 1, AF=1
+  // At EL3 with FEAT_RME, descriptor bit 11 is NSE, otherwise it is RES(0)
+  // and ignored by the hardware. At EL0 and EL1 bit 11 is non-global, but
+  // as we don't change ASID this has no effect.
+  unsigned long image_attrs = MMU_NORMAL_FLAGS; // Index = 1, AF=1, NSE=1
 #ifdef __ARM_FEATURE_MEMORY_TAGGING
   // If we have memory tagging and the stack/heap is in the same page
   // as the image then it needs to be tagged.
   if (start_page == stackheap_page)
-    image_attrs = 0x40d; // Index = 3, AF=1
+    image_attrs = MMU_TAGGED_NORMAL_FLAGS; // Index = 3, AF=1, NSE=1
 #endif
 #ifdef __ARM_FEATURE_BTI_DEFAULT
   // Set the Guarded Page bit
@@ -107,9 +122,10 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
 
   // Page occupied by stack/heap, if it's outside of the above
   if (start_page != stackheap_page) {
-    unsigned long stackheap_attrs = 0x405; // Index = 1, AF=1
+    unsigned long stackheap_attrs =
+        MMU_NORMAL_FLAGS; // Index = 1, AF=1, NSE=1
 #ifdef __ARM_FEATURE_MEMORY_TAGGING
-    stackheap_attrs = 0x40d; // Index = 3, AF=1
+    stackheap_attrs = MMU_TAGGED_NORMAL_FLAGS; // Index = 3, AF=1, NSE=1
 #endif
     stackheap_attrs |= (1UL << 54) | (1UL << 53); // UXN and PXN
     pagetable[stackheap_page] = stackheap_attrs | (stackheap_page << 30);
