@@ -22,32 +22,11 @@ else
     FVP_CONFIG_DIR:=.
 endif
 
-IN_TREE_FVP_CONFIG_NAME:=../../../fvp/config/cortex-m85.cfg
-ifneq ($(wildcard $(IN_TREE_FVP_CONFIG_NAME)),)
-    FVP_CONFIG_NAME:=$(IN_TREE_FVP_CONFIG_NAME)
-else
-    FVP_CONFIG_NAME:=cortex-m85.cfg
-endif
-
-IN_TREE_FVP_CONFIG_NAME_AARCH64:=../../../fvp/config/v8a-aarch64.cfg
-ifneq ($(wildcard $(IN_TREE_FVP_CONFIG_NAME_AARCH64)),)
-    FVP_CONFIG_NAME_AARCH64:=$(IN_TREE_FVP_CONFIG_NAME_AARCH64)
-else
-    FVP_CONFIG_NAME_AARCH64:=v8a-aarch64.cfg
-endif
-
 IN_TREE_LIT_EXEC_FVP:=../../../arm-runtimes/test-support/lit-exec-fvp.py
 ifneq ($(wildcard $(IN_TREE_LIT_EXEC_FVP)),)
     LIT_EXEC_FVP:=$(IN_TREE_LIT_EXEC_FVP)
 else
     LIT_EXEC_FVP:=lit-exec-fvp.py
-endif
-
-IN_TREE_RUN_FVP:=../../../arm-runtimes/test-support/run_fvp.py
-ifneq ($(wildcard $(IN_TREE_RUN_FVP)),)
-    RUN_FVP:=$(IN_TREE_RUN_FVP)
-else
-    RUN_FVP:=run_fvp.py
 endif
 
 # From https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/armebv6m_soft_nofp_size.json
@@ -68,24 +47,7 @@ build: hello.elf
 hello.elf: *.c
 	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_OPTIONS) $(CRT_SEMIHOST) $(MATH_LIB) -g $(CORSTONE_FVP_MEMORY_MAP) -T $(LIBC_LD_FILE) -o hello.elf $^
 
-setup:
-	# Download helper files and scripts to current folder if missing:
-	# - Not available in tree, and
-	# - Not yet downloaded to the current folder.
-	@if [ ! -f $(LIT_EXEC_FVP) ]; then \
-		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/arm-runtimes/test-support/lit-exec-fvp.py; \
-	fi
-	@if [ ! -f $(RUN_FVP) ]; then \
-		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/arm-runtimes/test-support/run_fvp.py; \
-	fi
-	@if [ ! -f $(FVP_CONFIG_NAME) ]; then \
-		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/fvp/config/cortex-m85.cfg; \
-	fi
-	@if [ ! -f $(FVP_CONFIG_NAME_AARCH64) ]; then \
-		wget https://raw.githubusercontent.com/arm/arm-toolchain/refs/heads/arm-software/arm-software/embedded/fvp/config/v8a-aarch64.cfg; \
-	fi
-
-run: setup hello.elf
+run: hello.elf
 # From https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/armebv6m_soft_nofp_size.json
 # see FVP_MODEL and FVP_CONFIG properties.
 	python3 $(LIT_EXEC_FVP) --verbose \
@@ -111,7 +73,7 @@ hello-aarch64.elf: *.c
 
 build-aarch64: hello-aarch64.elf
 
-run-aarch64: setup build-aarch64
+run-aarch64: build-aarch64
 	python3 $(LIT_EXEC_FVP) --verbose \
 		--fvp-install-dir=$(FVP_INSTALL_DIR) \
 		--fvp-config-dir=$(FVP_CONFIG_DIR) \
@@ -121,11 +83,7 @@ run-aarch64: setup build-aarch64
 
 clean:
 	rm -f *.elf
-	rm -f lit-exec-fvp.py
-	rm -f run_fvp.py
-	rm -f cortex-m85.cfg
-	rm -f v8a-aarch64.cfg
 	rm -f :semihosting-features
 	rm -fr __pycache__
 
-.PHONY: clean setup run run-aarch64
+.PHONY: clean run run-aarch64
