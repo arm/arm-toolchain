@@ -1,7 +1,7 @@
 # This testing configuration handles running the test suite against LLVM's libc++
 # using a static library.
 
-config.name = 'libc++-@RUNTIME_VARIANT_NAME@'
+config.name = 'libc++-@RUNTIME_LIBC_NAME@-@RUNTIME_VARIANT_NAME@'
 
 config.available_features.add('libc=@RUNTIME_LIBC@')
 if '@RUNTIME_LIBC@' == 'llvmlibc':
