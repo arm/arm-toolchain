@@ -1018,21 +1018,6 @@ add_dependencies(clib-install ${C_LIBRARY}-install)
 ###############################################################################
 
 if(ENABLE_CXX_LIBS)
-    if(ENABLE_LIBCXX_TESTS)
-        # Generate xfails for libcxx.
-        set(libcxx_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx_lit_xfails.txt")
-        set(libcxx_lit_args "@${libcxx_lit_xfails_path} ${LLVM_LIT_ARGS}"
-        )
-        add_custom_target(
-            libcxx-xfail-lit-args
-            COMMAND ${Python3_EXECUTABLE}
-                ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
-                --variant ${VARIANT}
-                --project libcxx
-                --libc ${C_LIBRARY}
-                --output-args ${libcxx_lit_xfails_path}
-        )
-    endif()
     set(runtime_test_extra_compile_flags "")
     if(C_LIBRARY STREQUAL picolibc)
         set(runtime_test_extra_compile_flags "-include picolibc.h")
@@ -1100,6 +1085,8 @@ if(ENABLE_CXX_LIBS)
     endif()
 
     if(ENABLE_LIBCXX_TESTS AND (C_LIBRARY STREQUAL picolibc OR C_LIBRARY STREQUAL llvmlibc))
+        set(libcxx_lit_xfails_path "${CMAKE_CURRENT_BINARY_DIR}/${VARIANT}_libcxx_lit_xfails.txt")
+        set(libcxx_lit_args "@${libcxx_lit_xfails_path} ${LLVM_LIT_ARGS}")
         set(cxxlibs_test_cmake_options
             -DLIBCXX_TEST_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/test-support/llvm-libc++-embedded.cfg.in
             -DLIBCXX_TEST_PARAMS=executor=${lit_test_executor}
@@ -1170,6 +1157,7 @@ if(ENABLE_CXX_LIBS)
         -DLLVM_LIT_ARGS=${LLVM_LIT_ARGS}
         -DLLVM_ENABLE_RUNTIMES=libcxxabi,libcxx,libunwind
         -DRUNTIME_VARIANT_NAME=${VARIANT}
+        -DRUNTIME_LIBC_NAME=${C_LIBRARY}
         ${cxxlibs_extra_cmake_options}
         ${cxxlibs_test_cmake_options}
         STEP_TARGETS configure build install
@@ -1186,23 +1174,28 @@ if(ENABLE_CXX_LIBS)
     add_custom_target(check-unwind)
     add_dependencies(check-all check-unwind)
     if(ENABLE_LIBCXX_TESTS)
-        foreach(check_target check-cxx check-cxxabi check-unwind)
+        foreach(check_target cxx cxxabi unwind)
             ExternalProject_Add_Step(
                 cxxlibs
-                ${check_target}
-                COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target ${check_target}
+                check-${check_target}
+                COMMAND ${Python3_EXECUTABLE}
+                    ${CMAKE_CURRENT_SOURCE_DIR}/test-support/xfails.py
+                    --variant ${VARIANT}
+                    --project lib${check_target}
+                    --libc ${C_LIBRARY}
+                    --output-args ${libcxx_lit_xfails_path}
+                COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-${check_target}
                 USES_TERMINAL TRUE
                 EXCLUDE_FROM_MAIN TRUE
                 ALWAYS TRUE
             )
-            ExternalProject_Add_StepTargets(cxxlibs ${check_target})
+            ExternalProject_Add_StepTargets(cxxlibs check-${check_target})
             ExternalProject_Add_StepDependencies(
                 cxxlibs
-                ${check_target}
+                check-${check_target}
                 cxxlibs-install
-                libcxx-xfail-lit-args
             )
-            add_dependencies(${check_target} cxxlibs-${check_target})
+            add_dependencies(check-${check_target} cxxlibs-check-${check_target})
         endforeach()
     endif()
 

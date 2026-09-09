@@ -3,7 +3,7 @@
 
 lit_config.load_config(config, '@CMAKE_CURRENT_BINARY_DIR@/cmake-bridge.cfg')
 
-config.name = 'libc++abi-@RUNTIME_VARIANT_NAME@'
+config.name = 'libc++abi-@RUNTIME_LIBC_NAME@-@RUNTIME_VARIANT_NAME@'
 
 config.substitutions.append(('%{libc-include}', '@CMAKE_INSTALL_PREFIX@/include'))
 config.substitutions.append(('%{libc-lib}', '@CMAKE_INSTALL_PREFIX@/lib'))

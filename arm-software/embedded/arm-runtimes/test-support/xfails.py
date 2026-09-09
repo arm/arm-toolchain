@@ -32,6 +32,7 @@ class XFail(NamedTuple):
     testnames: List[str]  # The tests to include.
     result: NewResult  # The expected result.
     project: str  # Affected project.
+    libc: str = None  # Affected C library.
     variants: List[str] = None  # Affected library variants, if applicable.
     conditional: Callable = None  # A function that will test whether an xfail applies.
     issue_link: str = None  # Optional link to a GitHub issue.
@@ -91,34 +92,6 @@ def main():
         ]
         p = subprocess.run(test_args, capture_output=True, check=False)
         return p.returncode != 0
-
-    def check_llvmlibc():
-        return args.libc == "llvmlibc"
-
-    def check_not_llvmlibc():
-        return args.libc != "llvmlibc"
-
-    xfail_project_to_cxx_testsuite = {
-        "libcxx": "libc++",
-        "libcxxabi": "libc++abi",
-        "libunwind": "libunwind",
-    }
-
-    def xfail_applies_to_project(xfail):
-        if args.project == "libcxx":
-            return xfail.project in xfail_project_to_cxx_testsuite
-        return args.project == xfail.project
-
-    def lit_qualified_test_name(xfail, testname):
-        if (
-            args.project == "libcxx"
-            and xfail.project != args.project
-            and xfail.project in xfail_project_to_cxx_testsuite
-            and args.variant is not None
-            and " :: " not in testname
-        ):
-            return f"{xfail_project_to_cxx_testsuite[xfail.project]}-{args.variant} :: {testname}"
-        return testname
 
     xfails = [
         XFail(
@@ -578,7 +551,7 @@ def main():
             ],
             result=NewResult.PASSED,
             project="libcxx",
-            conditional=check_not_llvmlibc,
+            libc="picolibc",
             description="More recent picolibc versions do now support char16_t and char32_t",
         ),
         XFail(
@@ -638,6 +611,7 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="picolibc",
             variants=[
                 "aarch64a",
                 "aarch64a_exn_rtti",
@@ -661,7 +635,6 @@ def main():
                 "aarch64r_be_soft_nofp",
                 "aarch64r_be_soft_nofp_exn_rtti",
             ],
-            conditional=check_not_llvmlibc,
             description="Broken conversion between 128-bit types and string.",
         ),
         XFail(
@@ -673,6 +646,7 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="picolibc",
             variants=[
                 "aarch64a",
                 "aarch64a_exn_rtti",
@@ -693,7 +667,6 @@ def main():
                 "aarch64r_soft_nofp_exn_rtti",
                 "aarch64r_soft_nofp_exn_rtti_unaligned",
             ],
-            conditional=check_not_llvmlibc,
             description="Broken conversion between 128-bit types and string.",
         ),
         XFail(
@@ -703,6 +676,7 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="picolibc",
             variants=[
                 "aarch64a",
                 "aarch64a_exn_rtti",
@@ -720,7 +694,6 @@ def main():
                 "aarch64r_soft_nofp_exn_rtti",
                 "aarch64r_soft_nofp_exn_rtti_unaligned",
             ],
-            conditional=check_not_llvmlibc,
             description="Broken conversion between 128-bit types and string.",
         ),
         XFail(
@@ -840,7 +813,7 @@ def main():
                 "unw_resume.pass.cpp",
             ],
             result=NewResult.XFAILED,
-            project="libcxx",
+            project="libunwind",
             variants=[
                 "armv8.1m.main_hard_fp_nomve_pacret_bti_exn_rtti_size",
                 "armv8.1m.main_hard_fp_nomve_pacret_bti_exn_rtti_unaligned_size",
@@ -974,12 +947,12 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="LLVM libc does not provide signal.h/csignal; the stdint/cstdint tests fail because they include csignal transitively.",
         ),
         XFail(
@@ -1046,12 +1019,12 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="LLVM libc for bare-metal does not provide FILE and filesystem support required by libc++ file I/O tests.",
         ),
         XFail(
@@ -1066,12 +1039,12 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="LLVM libc system_error category and strerror text behavior differs from hosted libc++ expectations.",
         ),
         XFail(
@@ -1084,12 +1057,12 @@ def main():
             ],
             result=NewResult.EXCLUDE,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="Runtime tests depend on stdin/runtime behavior that hangs with semihosting, thus EXCLUDED.",
         ),
         XFail(
@@ -1100,10 +1073,10 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
             ],
-            conditional=check_llvmlibc,
             description="AArch64 LLVM libc uses long double for these complex arg tests and is missing atan2l.",
         ),
         XFail(
@@ -1113,12 +1086,12 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="LLVM libc does not provide at_quick_exit required by libc++ quick_exit tests.",
         ),
         XFail(
@@ -1128,12 +1101,12 @@ def main():
             ],
             result=NewResult.XFAILED,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="LLVM libc bare-metal disables scanf floating-point conversions with LIBC_CONF_SCANF_DISABLE_FLOAT, but libc++ money_get<long double> uses it.",
         ),
         XFail(
@@ -1144,12 +1117,12 @@ def main():
             ],
             result=NewResult.PASSED,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="These tests are annotated with LLVM-LIBC-FIXME upstream for a missing system declaration, but ATfE's LLVM libc headers provide it.",
         ),
         XFail(
@@ -1159,12 +1132,12 @@ def main():
             ],
             result=NewResult.PASSED,
             project="libcxx",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="This selftest is annotated with LLVM-LIBC-FIXME upstream for stderr/stdout conflation, but ATfE's executors route stderr separately.",
         ),
         XFail(
@@ -1174,10 +1147,10 @@ def main():
             ],
             result=NewResult.PASSED,
             project="libcxxabi",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
             ],
-            conditional=check_llvmlibc,
             description="LLVM libc formats the demangler FP literal cases correctly on this FVP configuration, so override the generic demangle-fvp xfail.",
         ),
         XFail(
@@ -1187,12 +1160,12 @@ def main():
             ],
             result=NewResult.EXCLUDE,
             project="libcxxabi",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="This exhaustive exception matching test does not complete within the embedded executor timeout.",
         ),
         XFail(
@@ -1202,16 +1175,47 @@ def main():
                 "forceunwind.pass.cpp",
                 "ra_sign_state.pass.cpp",
                 "signal_unwind.pass.cpp",
+                "dwarf_expression_stack.pass.cpp",
             ],
             result=NewResult.XFAILED,
             project="libunwind",
+            libc="llvmlibc",
             variants=[
                 "aarch64a_exn_rtti",
                 "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
                 "armv7m_soft_nofp_exn_rtti_size",
             ],
-            conditional=check_llvmlibc,
             description="These libunwind tests include POSIX headers not provided by LLVM libc bare-metal, such as signal.h, sys/types.h, and alloca.h.",
+        ),
+        XFail(
+            name="picolibc libunwind link error",
+            testnames=[
+                "dwarf_expression_stack.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libunwind",
+            libc="picolibc",
+            variants=[
+                "aarch64a_exn_rtti",
+                "aarch64a",
+                "aarch64a_be",
+                "aarch64a_be_exn_rtti",
+                "aarch64a_be_soft_nofp",
+                "aarch64a_be_soft_nofp_exn_rtti",
+                "aarch64r",
+                "aarch64r_be",
+                "aarch64r_be_exn_rtti",
+                "aarch64r_be_soft_nofp",
+                "aarch64r_be_soft_nofp_exn_rtti",
+                "aarch64r_exn_rtti",
+                "aarch64r_exn_rtti_unaligned",
+                "aarch64r_soft_nofp",
+                "aarch64r_soft_nofp_exn_rtti",
+                "aarch64r_soft_nofp_exn_rtti_unaligned",
+                "aarch64r_soft_nofp_unaligned",
+                "aarch64r_unaligned",
+            ],
+            description="Link failure due to undefined symbols for POSIX functions fork and waitpid",
         ),
         XFail(
             name="variadic vector type arguments non-hermetic",
@@ -1227,8 +1231,27 @@ def main():
                 "armv8.1m.main_hard_nofp_mve_size",
                 "armv8.1m.main_hard_nofp_mve_unaligned",
                 "armv8.1m.main_hard_nofp_mve_unaligned_size",
+                "armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_size",
+                "armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_unaligned_size",
+                "armv8.1m.main_hard_nofp_mve_pacret_bti_size",
+                "armv8.1m.main_hard_nofp_mve_pacret_bti_unaligned_size",
             ],
             description="Clang ARM AAPCS mislowers variadic vector type arguments (LLVMAENG-6240)",
+        ),
+        XFail(
+            name="variadic primitive type arguments",
+            testnames=[
+                "src/__support/libc.test.src.__support.arg_list_test.__build__",
+            ],
+            result=NewResult.XFAILED,
+            project="llvmlibc",
+            variants=[
+                "aarch64a_be",
+                "aarch64a_be_exn_rtti",
+                "aarch64r_be",
+                "aarch64r_be_exn_rtti",
+            ],
+            description="TestPrimitiveTypes fails on big aarch64a endian.",
         ),
     ]
 
@@ -1237,7 +1260,7 @@ def main():
     tests_to_exclude = []
 
     for xfail in xfails:
-        if not xfail_applies_to_project(xfail):
+        if args.project != xfail.project:
             continue
         if xfail.variants is not None:
             if args.variant is None:
@@ -1246,16 +1269,20 @@ def main():
                 )
             if args.variant not in xfail.variants:
                 continue
+        if xfail.libc is not None:
+            if args.libc is None:
+                raise ValueError(f"--libc must be specified for project {args.project}")
+            if args.libc != xfail.libc:
+                continue
         if xfail.conditional is not None:
             if not xfail.conditional():
                 continue
-        testnames = [lit_qualified_test_name(xfail, test) for test in xfail.testnames]
         if xfail.result == NewResult.XFAILED:
-            tests_to_xfail.extend(testnames)
+            tests_to_xfail.extend(xfail.testnames)
         elif xfail.result == NewResult.PASSED:
-            tests_to_upass.extend(testnames)
+            tests_to_upass.extend(xfail.testnames)
         elif xfail.result == NewResult.EXCLUDE:
-            tests_to_exclude.extend(testnames)
+            tests_to_exclude.extend(xfail.testnames)
 
     tests_to_xfail.sort()
     tests_to_upass.sort()
