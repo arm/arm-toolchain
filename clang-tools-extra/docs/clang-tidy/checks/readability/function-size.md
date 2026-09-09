@@ -1,55 +1,70 @@
-.. title:: clang-tidy - readability-function-size
+```{title} clang-tidy - readability-function-size
+```
 
-readability-function-size
-=========================
+# readability-function-size
 
 `google-readability-function-size` redirects here as an alias for this check.
 
 Checks for large functions based on various metrics.
 
-Options
--------
+## Options
 
-.. option:: LineThreshold
+(readability-function-size-line-threshold)=
 
-   Flag functions exceeding this number of lines. The default is `none` (ignore
-   the number of lines).
+```{option} LineThreshold
+Flag functions exceeding this number of lines. Default is `none` (ignore the
+number of lines).
+```
 
-.. option:: StatementThreshold
+(readability-function-size-statement-threshold)=
 
-   Flag functions exceeding this number of statements. This may differ
-   significantly from the number of lines for macro-heavy code. The default is
-   `800`.
+```{option} StatementThreshold
+Flag functions exceeding this number of statements. This may differ
+significantly from the number of lines for macro-heavy code. Default is
+`800`.
+```
 
-.. option:: BranchThreshold
+(readability-function-size-branch-threshold)=
 
-   Flag functions exceeding this number of control statements. The default is
-   `none` (ignore the number of branches).
+```{option} BranchThreshold
+Flag functions exceeding this number of control statements. Default is
+`none` (ignore the number of branches).
+```
 
-.. option:: ParameterThreshold
+(readability-function-size-parameter-threshold)=
 
-   Flag functions that exceed a specified number of parameters. The default
-   is `none` (ignore the number of parameters).
+```{option} ParameterThreshold
+Flag functions that exceed a specified number of parameters. Default
+is `none` (ignore the number of parameters).
+```
 
-.. option:: NestingThreshold
+(readability-function-size-nesting-threshold)=
 
-    Flag compound statements which create next nesting level after
-    `NestingThreshold`. This may differ significantly from the expected value
-    for macro-heavy code. The default is `none` (ignore the nesting level).
+```{option} NestingThreshold
+Flag compound statements which create next nesting level after
+[`NestingThreshold`](#readability-function-size-nesting-threshold). This may differ significantly from the expected
+value for macro-heavy code. Default is `none` (ignore the nesting level).
+```
 
-.. option:: VariableThreshold
+(readability-function-size-variable-threshold)=
 
-   Flag functions exceeding this number of variables declared in the body.
-   The default is `none` (ignore the number of variables).
-   Please note that function parameters and variables declared in lambdas,
-   GNU Statement Expressions, and nested class inline functions are not counted.
+```{option} VariableThreshold
+Flag functions exceeding this number of variables declared in the body.
+Please note that function parameters and variables declared in lambdas,
+GNU Statement Expressions, and nested class inline functions are not counted.
+Default is `none` (ignore the number of variables).
+```
 
-.. option:: CountMemberInitAsStmt
+(readability-function-size-count-member-init-as-stmt)=
 
-   When `true`, count class member initializers in constructors as statements.
-   Default is `true`.
+```{option} CountMemberInitAsStmt
+When `true`, count class member initializers in constructors as statements.
+Default is `true`.
+```
 
-.. option:: IgnoreMacros
+(readability-function-size-ignore-macros)=
 
-   If set to `true`, the check will not count statements, branches, nesting
-   levels, or variable declarations inside macros. Default is `false`.
+```{option} IgnoreMacros
+When `true`, the check will not count statements, branches, nesting
+levels, or variable declarations inside macros. Default is `false`.
+```
