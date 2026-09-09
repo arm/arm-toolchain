@@ -459,6 +459,8 @@ product_build() {
     bootstrap_compiler_default_config
 
     local libs="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
+    cp "${BUILD_DIR}"/bootstrap_compiler/lib/clang/*/lib/"${ATFL_TARGET_TRIPLE}"/libclang_rt.builtins.a .
+    local rtlibs="${libs} ${BUILD_DIR}/stage/product_build/libclang_rt.builtins.a"
     local cmake_caches="${BUILD_DIR}/stage/product_build/cmake_caches"
 
     mkdir -p "${cmake_caches}"
@@ -474,7 +476,7 @@ product_build() {
       print_forced_cached_flag "CMAKE_MODULE_LINKER_FLAGS:STRING" "\"${libs} ${RELOCS_LINKER_FLAGS}\""
       print_forced_cached_flag "CMAKE_SHARED_LINKER_FLAGS:STRING" "\"${libs} ${RELOCS_LINKER_FLAGS}\""
       print_forced_cached_flag "LLVM_ENABLE_RUNTIMES:STRING" "\"compiler-rt;flang-rt;libunwind;openmp\""
-      print_forced_cached_flag "RUNTIMES_CMAKE_ARGS:STRING" "\"-DCMAKE_C_COMPILER=${ATFL_DIR}/bin/clang;-DCMAKE_CXX_COMPILER=${ATFL_DIR}/bin/clang++;-DCMAKE_Fortran_COMPILER=${ATFL_DIR}/bin/flang;-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${libs};-DCMAKE_MODULE_LINKER_FLAGS=${libs};-DCMAKE_SHARED_LINKER_FLAGS=${libs}\""
+      print_forced_cached_flag "RUNTIMES_CMAKE_ARGS:STRING" "\"-DCMAKE_C_COMPILER=${ATFL_DIR}/bin/clang;-DCMAKE_CXX_COMPILER=${ATFL_DIR}/bin/clang++;-DCMAKE_Fortran_COMPILER=${ATFL_DIR}/bin/flang;-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${rtlibs};-DCMAKE_MODULE_LINKER_FLAGS=${rtlibs};-DCMAKE_SHARED_LINKER_FLAGS=${rtlibs}\""
     } >> ${cmake_caches}/BOLT.cmake
 
     if [[ "${RELEASE_FLAGS}" == "true" ]]; then
@@ -511,7 +513,7 @@ product_build() {
         -DLLVM_SPHINX_THREADS=1 \
         -DLLVM_ENABLE_PROJECTS="llvm;clang;flang;bolt;lld" \
         -DLLVM_ENABLE_RUNTIMES="compiler-rt;flang-rt;libunwind;openmp" \
-        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${libs};-DCMAKE_MODULE_LINKER_FLAGS=${libs};-DCMAKE_SHARED_LINKER_FLAGS=${libs}" \
+        -DRUNTIMES_CMAKE_ARGS="-DCMAKE_CXX_FLAGS=-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT;-DCMAKE_EXE_LINKER_FLAGS=${rtlibs};-DCMAKE_MODULE_LINKER_FLAGS=${rtlibs};-DCMAKE_SHARED_LINKER_FLAGS=${rtlibs}" \
         "${extra_flags[@]}" 2>&1 | tee "${LOGS_DIR}/product.txt"
     run_command cmake --build . "${CMAKE_BUILD_ARGS[@]}" 2>&1 | tee -a "${LOGS_DIR}/product.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/product.txt"
