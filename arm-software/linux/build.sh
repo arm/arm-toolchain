@@ -89,6 +89,12 @@ declare -A COMMON_CMAKE_FLAGS=(
     ["ZLIB_LIBRARY_RELEASE:FILEPATH"]="\"${ZLIB_STATIC_PATH}\""
 )
 
+if [[ "${OS_NAME}" == "rhel-8" ]]; then
+    COMMON_CMAKE_FLAGS+=(
+        ["LIBCXX_TEST_CONFIG:FILEPATH"]="\"${SOURCES_DIR}/arm-software/linux/rhel-8-libc++-shared.cfg.in\""
+    )
+fi
+
 declare -A USE_BOOTSTRAP_CMAKE_FLAGS=(
     ["CMAKE_C_COMPILER:FILEPATH"]="\"${BOOTSTRAP_COMPILER_DIR}/bin/clang\""
     ["CMAKE_CXX_COMPILER:FILEPATH"]="\"${BOOTSTRAP_COMPILER_DIR}/bin/clang++\""
@@ -367,16 +373,10 @@ print_forced_cmake_flags_cache() {
     done
 }
 
-bootstrap_compiler_default_config() {
-    echo "-fuse-ld=lld" >"${BOOTSTRAP_COMPILER_DIR}/bin/clang.cfg"
-    echo "-fuse-ld=lld" >"${BOOTSTRAP_COMPILER_DIR}/bin/clang++.cfg"
-}
-
 bootstrap_compiler_build() {
     if [[ -e "${BOOTSTRAP_COMPILER_DIR}/bin/clang++" ]]; then
       echo "Using the existing bootstrap compiler."
       export PATH="${BOOTSTRAP_COMPILER_DIR}/bin:${PATH}"
-      bootstrap_compiler_default_config
       {
           echo '<?xml version="1.0" encoding="UTF-8"?>'
           echo '<testsuite name="bootstrap_check_all" tests="1" skipped="1" failures="0" errors="0">'
@@ -430,14 +430,12 @@ bootstrap_compiler_build() {
     run_command cmake --build . "${CMAKE_BUILD_ARGS[@]}" 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BOOTSTRAP_COMPILER_DIR}/bin:${PATH}"
-    bootstrap_compiler_default_config
     run_test_command "${LOGS_DIR}/bootstrap_check_all.xml" "${LOGS_DIR}/bootstrap_compiler.txt" check-all
 }
 
 libcpp_build() {
     mkdir -p "${BUILD_DIR}/stage/libcpp_build"
     cd "${BUILD_DIR}/stage/libcpp_build"
-    bootstrap_compiler_default_config
 
     { print_forced_cmake_flags_cache "COMMON_CMAKE_FLAGS"
       print_forced_cmake_flags_cache "USE_BOOTSTRAP_CMAKE_FLAGS"
@@ -482,7 +480,6 @@ product_build() {
 
     mkdir -p "${BUILD_DIR}/stage/product_build"
     cd "${BUILD_DIR}/stage/product_build"
-    bootstrap_compiler_default_config
 
     local libs="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
     local cmake_caches="${BUILD_DIR}/stage/product_build/cmake_caches"
@@ -562,14 +559,11 @@ product_build() {
       cp "${ATFL_DIR}/bin/${clang_name}" "${ATFL_DIR}/bin/${clang_name}.not_bolted"
       cp "${ATFL_DIR}/bin/${flang_name}" "${ATFL_DIR}/bin/${flang_name}.not_bolted"
     fi
-
-    bootstrap_compiler_default_config
 }
 
 static_libomp_build() {
     mkdir -p "${BUILD_DIR}/stage/static_libomp_build"
     cd "${BUILD_DIR}/stage/static_libomp_build"
-    bootstrap_compiler_default_config
 
     { print_forced_cmake_flags_cache "COMMON_CMAKE_FLAGS"
       print_forced_cmake_flags_cache "USE_BOOTSTRAP_CMAKE_FLAGS"
