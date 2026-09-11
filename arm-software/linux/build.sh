@@ -356,8 +356,8 @@ print_forced_cmake_flags_cache() {
 }
 
 bootstrap_compiler_default_config() {
-    rm -f "${BUILD_DIR}"/bootstrap_compiler/bin/clang.cfg
-    rm -f "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
+    echo "-fuse-ld=lld" >"${BUILD_DIR}"/bootstrap_compiler/bin/clang.cfg
+    echo "-fuse-ld=lld" >"${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
 }
 
 bootstrap_compiler_build() {
