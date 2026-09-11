@@ -446,12 +446,22 @@ endif()
 
 # Extract common header files which spans across multilib variant directories.
 if(ENABLE_MULTILIB_HEADER_OPTIMISATION)
-    add_custom_target(generate-multilib-common-headers ALL
+    set(multilib_common_headers_stamp
+        "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised/.common-headers.stamp"
+    )
+
+    add_custom_command(
+        OUTPUT "${multilib_common_headers_stamp}"
         COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/common-headers-generate.py"
                 "${CMAKE_CURRENT_BINARY_DIR}/multilib"
                 "${CMAKE_CURRENT_BINARY_DIR}/multilib-optimised"
+        COMMAND ${CMAKE_COMMAND} -E touch "${multilib_common_headers_stamp}"
         COMMENT "Generating common headers"
         DEPENDS ${all_runtime_targets} multilib-yaml
+    )
+
+    add_custom_target(generate-multilib-common-headers ALL
+        DEPENDS "${multilib_common_headers_stamp}"
     )
 
     install(
