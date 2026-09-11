@@ -33,15 +33,18 @@ import hashlib
 import os
 import shutil
 
+import yaml
+
 # Define the multilib target dirs which want to process
 MULTILIB_TARGET_DIRS = ["arm-none-eabi", "aarch64-none-elf"]
 PRIMARY_VARIANT_GROUP = "stdlibs"
+HASH_CHUNK_SIZE = 1024 * 1024
 
 
 def file_content_hash(path):
     content_hash = hashlib.sha256()
     with open(path, "rb") as file:
-        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+        for chunk in iter(lambda: file.read(HASH_CHUNK_SIZE), b""):
             content_hash.update(chunk)
     return content_hash.hexdigest()
 
@@ -98,45 +101,32 @@ def group_headers_by_name_and_content_hash(variant_includes):
     return headers
 
 
-def parse_yaml_scalar(value):
-    return value.strip().strip("\"'")
-
-
 def collect_variant_groups(multilib_yaml):
     # Navigate multilib.yaml, only paying attention to the Variants: section
     # and skipping other sections. Inside Variants:, remember each Dir until
     # its matching Group is found, then record "target/variant" -> "group_name".
-    variant_groups = {}
-    current_dir = None
-    in_variants = False
-
+    # Expected YAML shape:
+    # Variants:
+    # - Dir: arm-none-eabi/thumb/v7-a
+    #   Group: stdlibs
+    # - Error: ...
     with open(multilib_yaml, encoding="utf-8") as file:
-        for line in file:
-            stripped = line.strip()
-            if not stripped or stripped.startswith("#"):
-                continue
+        multilib_config = yaml.safe_load(file) or {}
 
-            if line[0] not in (" ", "-") and stripped.endswith(":"):
-                in_variants = stripped == "Variants:"
-                current_dir = None
-                continue
+    variants = multilib_config.get("Variants", [])
+    if not isinstance(variants, list):
+        raise ValueError(f"Expected 'Variants' in {multilib_yaml} to contain a list of "
+                          "multilib variants with 'Dir' and 'Group' entries.")
 
-            if not in_variants:
-                continue
+    variant_groups = {}
+    for variant in variants:
+        if not isinstance(variant, dict):
+            continue
 
-            if stripped.startswith("- Dir:"):
-                current_dir = parse_yaml_scalar(stripped.split(":", 1)[1])
-                continue
-
-            if stripped.startswith("- Error:"):
-                current_dir = None
-                continue
-
-            if current_dir and stripped.startswith("Group:"):
-                variant_groups[current_dir] = parse_yaml_scalar(
-                    stripped.split(":", 1)[1]
-                )
-                current_dir = None
+        variant_dir = variant.get("Dir")
+        group = variant.get("Group")
+        if variant_dir and group:
+            variant_groups[variant_dir] = group
 
     return variant_groups
 
@@ -218,7 +208,10 @@ def generate_common_headers(
         common_content_hash = None
 
         if common_group:
+            # Record the hash of the common header content so it can be skipped below.
             common_content_hash, common_entries = common_group
+            # Use the header path from the first entry in the common group and
+            # copy it into the shared include directory.
             copy_header(common_entries[0][1], output_include_dir, header_name)
 
         for content_hash, entries in content_hash_groups.items():
@@ -233,17 +226,23 @@ def generate_common_headers(
                 )
                 copy_header(variant_header_path, variant_include_dir, header_name)
 
+    # Group minor-variant headers by name and content so identical copies can
+    # be handled together.
     minor_headers = group_headers_by_name_and_content_hash(minor_includes)
     for header_name in sorted(minor_headers):
+        # Check whether this header already has a shared copy and, if so,
+        # calculate its content hash for comparison with the minor variants.
         common_header = os.path.join(output_include_dir, header_name)
         common_content_hash = (
             file_content_hash(common_header) if os.path.exists(common_header) else None
         )
 
         for content_hash, entries in minor_headers[header_name].items():
+            # Minor variants can use the shared header when their content matches it.
             if content_hash == common_content_hash:
                 continue
 
+            # Keep differing headers local to the minor variants that use them.
             for variant, variant_header_path in entries:
                 variant_include_dir = os.path.join(
                     output_target_dir, variant, "include"
