@@ -84,11 +84,15 @@ declare -A COMMON_CMAKE_FLAGS=(
     ["LLVM_TARGETS_TO_BUILD:STRING"]="\"AArch64\""
     ["LLVM_DEFAULT_TARGET_TRIPLE:STRING"]="\"${ATFL_TARGET_TRIPLE}\""
     ["ZLIB_LIBRARY_RELEASE:FILEPATH"]="\"${ZLIB_STATIC_PATH}\""
+    ["LIBCXX_TEST_CONFIG:FILEPATH"]="\"${SOURCES_DIR}/arm-software/linux/atfl-libc++-shared.cfg.in\""
+    ["LIBCXXABI_TEST_CONFIG:FILEPATH"]="\"${SOURCES_DIR}/arm-software/linux/atfl-libc++abi-shared.cfg.in\""
+    ["LIBUNWIND_TEST_CONFIG:FILEPATH"]="\"${SOURCES_DIR}/arm-software/linux/atfl-libunwind-shared.cfg.in\""
 )
 
 declare -A USE_BOOTSTRAP_CMAKE_FLAGS=(
     ["CMAKE_C_COMPILER:FILEPATH"]="\"${BUILD_DIR}/bootstrap_compiler/bin/clang\""
     ["CMAKE_CXX_COMPILER:FILEPATH"]="\"${BUILD_DIR}/bootstrap_compiler/bin/clang++\""
+    ["CMAKE_LINKER_TYPE:STRING"]="LLD"
     ["CMAKE_INSTALL_PREFIX:PATH"]="\"${ATFL_DIR}\""
     ["LLVM_ENABLE_LLD:BOOL"]=ON
 )
@@ -355,11 +359,6 @@ print_forced_cmake_flags_cache() {
     done
 }
 
-bootstrap_compiler_default_config() {
-    rm -f "${BUILD_DIR}"/bootstrap_compiler/bin/clang.cfg
-    rm -f "${BUILD_DIR}"/bootstrap_compiler/bin/clang++.cfg
-}
-
 bootstrap_compiler_build() {
     mkdir -p "${BUILD_DIR}/stage/bootstrap_compiler"
     cd "${BUILD_DIR}/stage/bootstrap_compiler"
@@ -404,14 +403,12 @@ bootstrap_compiler_build() {
     run_command cmake --build . "${CMAKE_BUILD_ARGS[@]}" 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     run_command cmake --install . 2>&1 | tee -a "${LOGS_DIR}/bootstrap_compiler.txt"
     export PATH="${BUILD_DIR}/bootstrap_compiler/bin:${PATH}"
-    bootstrap_compiler_default_config
     run_test_command "${LOGS_DIR}/bootstrap_check_all.xml" "${LOGS_DIR}/bootstrap_compiler.txt" check-all
 }
 
 libcpp_build() {
     mkdir -p "${BUILD_DIR}/stage/libcpp_build"
     cd "${BUILD_DIR}/stage/libcpp_build"
-    bootstrap_compiler_default_config
 
     { print_forced_cmake_flags_cache "COMMON_CMAKE_FLAGS"
       print_forced_cmake_flags_cache "USE_BOOTSTRAP_CMAKE_FLAGS"
@@ -456,7 +453,6 @@ product_build() {
 
     mkdir -p "${BUILD_DIR}/stage/product_build"
     cd "${BUILD_DIR}/stage/product_build"
-    bootstrap_compiler_default_config
 
     local libs="-L${ATFL_DIR}/lib -rtlib=compiler-rt -unwindlib=libunwind -Wl,--as-needed -stdlib=libc++ ${COMMON_LINKER_FLAGS}"
     local cmake_caches="${BUILD_DIR}/stage/product_build/cmake_caches"
@@ -536,14 +532,11 @@ product_build() {
       cp "${ATFL_DIR}/bin/${clang_name}" "${ATFL_DIR}/bin/${clang_name}.not_bolted"
       cp "${ATFL_DIR}/bin/${flang_name}" "${ATFL_DIR}/bin/${flang_name}.not_bolted"
     fi
-
-    bootstrap_compiler_default_config
 }
 
 static_libomp_build() {
     mkdir -p "${BUILD_DIR}/stage/static_libomp_build"
     cd "${BUILD_DIR}/stage/static_libomp_build"
-    bootstrap_compiler_default_config
 
     { print_forced_cmake_flags_cache "COMMON_CMAKE_FLAGS"
       print_forced_cmake_flags_cache "USE_BOOTSTRAP_CMAKE_FLAGS"
