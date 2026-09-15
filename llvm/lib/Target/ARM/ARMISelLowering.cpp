@@ -10064,7 +10064,7 @@ SDValue ARMTargetLowering::LowerSTORE(SDValue Op, SelectionDAG &DAG,
     Args.push_back(EntryA);
 
     TargetLowering::ArgListEntry EntryB(nullptr, Val, Type::getInt8Ty(*DAG.getContext()));
-    Args.push_back(Entry);
+    Args.push_back(EntryB);
 
     TargetLowering::CallLoweringInfo CLI(DAG);
     CLI.setDebugLoc(dl).setChain(Chain)
