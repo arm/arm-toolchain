@@ -103,7 +103,7 @@ def group_headers_by_name_and_content_hash(variant_includes):
 
 def collect_variant_groups(multilib_yaml):
     # Navigate multilib.yaml, only paying attention to the Variants: section
-    # and skipping other sections. Inside Variants:, remember each Dir until
+    # and skipping other sections. Inside Variants remember each Dir until
     # its matching Group is found, then record "target/variant" -> "group_name".
     # Expected YAML shape:
     # Variants:
