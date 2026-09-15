@@ -368,7 +368,14 @@ bootstrap_compiler_build() {
       echo "Using the existing bootstrap compiler."
       export PATH="${BOOTSTRAP_COMPILER_DIR}/bin:${PATH}"
       bootstrap_compiler_default_config
-      touch "${LOGS_DIR}/bootstrap_check_all.xml"
+      {
+          echo '<?xml version="1.0" encoding="UTF-8"?>'
+          echo '<testsuite name="bootstrap_check_all" tests="1" skipped="1" failures="0" errors="0">'
+          echo '  <testcase name="bootstrap_check_all">'
+          echo '    <skipped message="Using a pre-built bootstrap compiler"/>'
+          echo '  </testcase>'
+          echo '</testsuite>'
+      } > "${LOGS_DIR}/bootstrap_check_all.xml"
       return
     fi
     mkdir -p "${BOOTSTRAP_COMPILER_DIR}"
