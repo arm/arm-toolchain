@@ -115,8 +115,10 @@ def collect_variant_groups(multilib_yaml):
 
     variants = multilib_config.get("Variants", [])
     if not isinstance(variants, list):
-        raise ValueError(f"Expected 'Variants' in {multilib_yaml} to contain a list of "
-                          "multilib variants with 'Dir' and 'Group' entries.")
+        raise ValueError(
+            f"Expected 'Variants' in {multilib_yaml} to contain a list of "
+            "multilib variants with 'Dir' and 'Group' entries."
+        )
 
     variant_groups = {}
     for variant in variants:
