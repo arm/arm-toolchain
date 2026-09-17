@@ -15,12 +15,16 @@ from xml.etree import ElementTree
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("directory", type=Path, help="Directory containing test reports")
+    parser.add_argument(
+        "directory", type=Path, help="Directory containing test reports"
+    )
     args = parser.parse_args()
 
     result_files = sorted(args.directory.rglob("lit_results.junit.xml"))
     if not result_files:
-        print(f"error: no lit JUnit results found below {args.directory}", file=sys.stderr)
+        print(
+            f"error: no lit JUnit results found below {args.directory}", file=sys.stderr
+        )
         return 1
 
     failed_files = []
