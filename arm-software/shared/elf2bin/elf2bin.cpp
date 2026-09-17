@@ -1,6 +1,6 @@
 // Main program for elf2bin
 //
-// Copyright (c) 2022-2025, Arm Limited and affiliates.
+// Copyright (c) 2022-2026, Arm Limited and affiliates.
 //
 // Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -34,7 +34,6 @@
 #include "llvm/Option/Option.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/InitLLVM.h"
-#include "llvm/Support/LLVMDriver.h"
 
 using namespace llvm;
 using llvm::object::ELFObjectFileBase;
