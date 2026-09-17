@@ -64,8 +64,6 @@ else:
     # Preserve the original behavior for package tests configured without an
     # explicitly selected C library.
     libc_linker_script = libc_linker_scripts["picolibc"]
-llvm_config.config.substitutions.append(
-    ("%libc_linker_script", libc_linker_script)
-)
+llvm_config.config.substitutions.append(("%libc_linker_script", libc_linker_script))
 
 config.environment["CLANG_NO_DEFAULT_CONFIG"] = "1"
