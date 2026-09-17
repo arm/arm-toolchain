@@ -73,7 +73,27 @@ jobs:
         run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
 
       - name: Build
-        run: ./arm-software/embedded/scripts/build_post_merge.sh
+        run: |
+          set -o pipefail
+          ./arm-software/embedded/scripts/build_post_merge.sh 2>&1 | tee build.log
 
       - name: Test
-        run: ./arm-software/embedded/scripts/test_post_merge.sh
+        run: |
+          set -o pipefail
+          ./arm-software/embedded/scripts/test_post_merge.sh 2>&1 | tee test.log
+
+      - name: Upload logs as artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: logs-post-merge
+          path: |
+            build.log
+            test.log
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results-post-merge
+          path: build/**/lit_results.junit.xml
