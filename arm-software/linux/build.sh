@@ -29,6 +29,7 @@ BOOTSTRAP_COMPILER_DIR=${BOOTSTRAP_COMPILER_DIR:-"${BUILD_DIR}/bootstrap_compile
 #########################
 
 INTERACTIVE=false
+TESTS_MAY_FAIL=${TESTS_MAY_FAIL:-"true"}
 
 ##########################
 ## Configuration: Build ##
@@ -246,7 +247,14 @@ run_test_command() {
 
     if ! LIT_OPTS="${LIT_OPTS} --xunit-xml-output=${xml_output}" \
         run_command ninja "${NINJA_ARGS[@]}" "$@" 2>&1 | tee -a "${log_file}"; then
-        echo "WARNING: Test command failed, continuing: $*" | tee -a "${log_file}"
+        if [ "$TESTS_MAY_FAIL" == "true" ]; then
+            echo "WARNING: Test command failed, continuing: $*" | tee -a "${log_file}"
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 0
     fi
 }
 
@@ -824,7 +832,11 @@ make_and_clean_directory "${LOGS_DIR:?}"
 # The lit test suites do not generate xml results by default.
 # This can be enabled with the --xunit-xml-output option.
 # Each check target appends its own --xunit-xml-output path under LOGS_DIR.
-export LIT_OPTS="${LIT_OPTS:+${LIT_OPTS} }--ignore-fail"
+if [ "$TESTS_MAY_FAIL" == "true" ]; then
+    export LIT_OPTS="${LIT_OPTS:+${LIT_OPTS} }--ignore-fail"
+else
+    export LIT_OPTS="${LIT_OPTS:+${LIT_OPTS} }"
+fi
 
 main
 trap : 0
