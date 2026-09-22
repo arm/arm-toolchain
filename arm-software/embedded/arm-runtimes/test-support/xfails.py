@@ -1189,6 +1189,32 @@ def main():
             ],
             description="TestPrimitiveTypes fails on big aarch64a endian.",
         ),
+        XFail(
+            name="missing __aeabi_memcmp",
+            testnames=[
+                "arm/aeabi_mem_test.c",
+            ],
+            result=NewResult.XFAILED,
+            project="compiler-rt",
+            libc="picolibc",
+            description="__aeabi_memcmp is excluded from compiler-rt, but then not provided by picolibc",
+        ),
+        XFail(
+            name="cmpflags_interwork hard fault",
+            testnames=[
+                "arm/aeabi_cmpflags_interwork_test.c",
+            ],
+            result=NewResult.XFAILED,
+            project="compiler-rt",
+            libc="picolibc",
+            variants=[
+                "armv8.1m.main_soft_nofp_nomve_pacret_bti_exn_rtti_size",
+                "armv8.1m.main_soft_nofp_nomve_pacret_bti_exn_rtti_unaligned_size",
+                "armv8.1m.main_soft_nofp_nomve_pacret_bti_size",
+                "armv8.1m.main_soft_nofp_nomve_pacret_bti_unaligned_size",
+            ],
+            description="The test fails with a hard fault on only these variants",
+        ),
     ]
 
     tests_to_xfail = []
