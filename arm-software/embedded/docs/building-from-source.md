@@ -12,6 +12,12 @@ Please refer to the _Host Platforms_ section in the [README](https://github.com/
 
 The build requires the following software to be installed:
 * [Software required by LLVM](https://llvm.org/docs/GettingStarted.html#software)
+
+  > **Note:** Building LLVM libc with parallel library configuration enabled
+  > (`ENABLE_PARALLEL_LIB_CONFIG=ON`, the default) requires CMake 4.3.0 or later.
+  > Earlier CMake versions may run out of memory during configuration, so require 
+  > disabling parallel configuration with `-DENABLE_PARALLEL_LIB_CONFIG=OFF`.
+
 * [Meson](https://mesonbuild.com/Getting-meson.html)
 * [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 * [Ninja](https://ninja-build.org/)
