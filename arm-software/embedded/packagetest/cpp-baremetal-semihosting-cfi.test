@@ -1,7 +1,7 @@
 # RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-cfi clean
 # RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-cfi run BIN_PATH=%unpack_directory/bin %sample_libc 2>&1 | FileCheck %s
 # RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-cfi clean
-# RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-cfi build-no-cfi
+# RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-cfi build-no-cfi BIN_PATH=%unpack_directory/bin %sample_libc
 # RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-cfi run BIN_PATH=%unpack_directory/bin %sample_libc 2>&1 | FileCheck %s --check-prefix=NOCFI
 # RUN: make -C %samples_dir/src/cpp-baremetal-semihosting-cfi clean
 # CHECK-NOT: Bad

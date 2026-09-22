@@ -54,4 +54,16 @@ if config.packagetest_libc:
 else:
     llvm_config.config.substitutions.append(("%sample_libc", ""))
 
+libc_linker_scripts = {
+    "picolibc": "picolibcpp.ld",
+    "llvmlibc": "llvmlibc.ld",
+}
+if config.packagetest_libc:
+    libc_linker_script = libc_linker_scripts[config.packagetest_libc]
+else:
+    # Preserve the original behavior for package tests configured without an
+    # explicitly selected C library.
+    libc_linker_script = libc_linker_scripts["picolibc"]
+llvm_config.config.substitutions.append(("%libc_linker_script", libc_linker_script))
+
 config.environment["CLANG_NO_DEFAULT_CONFIG"] = "1"
