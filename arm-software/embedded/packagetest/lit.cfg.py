@@ -54,6 +54,15 @@ if config.packagetest_libc:
 else:
     llvm_config.config.substitutions.append(("%sample_libc", ""))
 
+libc_config = ""
+if config.packagetest_libc:
+    libc_config_file = os.path.join(
+        config.unpack_directory, "bin", "%s.cfg" % config.packagetest_libc
+    )
+    if os.path.isfile(libc_config_file):
+        libc_config = "--config=%s.cfg" % config.packagetest_libc
+llvm_config.config.substitutions.append(("%libc_config", libc_config))
+
 libc_linker_scripts = {
     "picolibc": "picolibcpp.ld",
     "llvmlibc": "llvmlibc.ld",
