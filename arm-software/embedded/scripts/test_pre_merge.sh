@@ -23,7 +23,8 @@ REPO_ROOT=$( git -C "${SCRIPT_DIR}" rev-parse --show-toplevel )
 # This can be enabled with the --xunit-xml-output option. The file
 # written will be relative to the individual suite's build directly,
 # so the same name can be used for all files for consistency.
-export LIT_OPTS="--ignore-fail --xunit-xml-output=lit_results.junit.xml"
+LIT_RESULTS_FILE="lit_results.junit.xml"
+export LIT_OPTS="--ignore-fail --xunit-xml-output=${LIT_RESULTS_FILE}"
 
 # Run all relevant test targets using Ninja.
 cd "${REPO_ROOT}"/build
@@ -39,4 +40,5 @@ ninja -k 0 check-all \
     check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned \
     check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size
 
-python3 "${SCRIPT_DIR}"/fail_on_test_failures.py "${REPO_ROOT}"/build
+python3 "${SCRIPT_DIR}"/fail_on_test_failures.py \
+    "${REPO_ROOT}"/build "${LIT_RESULTS_FILE}"

@@ -18,12 +18,17 @@ def main() -> int:
     parser.add_argument(
         "directory", type=Path, help="Directory containing test reports"
     )
+    parser.add_argument(
+        "results_file_name",
+        help="Name of the lit JUnit result files",
+    )
     args = parser.parse_args()
 
-    result_files = sorted(args.directory.rglob("lit_results.junit.xml"))
+    result_files = sorted(args.directory.rglob(args.results_file_name))
     if not result_files:
         print(
-            f"error: no lit JUnit results found below {args.directory}", file=sys.stderr
+            f"error: no {args.results_file_name} files found below {args.directory}",
+            file=sys.stderr,
         )
         return 1
 
