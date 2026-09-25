@@ -111,4 +111,4 @@ jobs:
         if: always()
         with:
           name: test-results-pre-merge
-          path: build/**/lit_results.junit.xml
+          path: build/test-results/*_lit_results.junit.xml

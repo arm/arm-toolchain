@@ -96,4 +96,4 @@ jobs:
         if: always()
         with:
           name: test-results-post-merge
-          path: build/**/lit_results.junit.xml
+          path: build/test-results/*_lit_results.junit.xml
