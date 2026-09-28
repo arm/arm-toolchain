@@ -1,4 +1,4 @@
-From 5d19128bc5e3d076cc0a54bcdae654c58f25b5fb Mon Sep 17 00:00:00 2001A
+From 5d19128bc5e3d076cc0a54bcdae654c58f25b5fb Mon Sep 17 00:00:00 2001
 From: Hussam Alhassan <hussam.alhassan@arm.com>
 Date: Fri, 25 Sep 2026 09:35:54 +0100
 Subject: [PATCH] Enable libcxx builds
