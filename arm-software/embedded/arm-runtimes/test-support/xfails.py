@@ -1017,6 +1017,7 @@ def main():
         XFail(
             name="llvmlibc embedded executor stdin/runtime failures",
             testnames=[
+                "libcxx/input.output/iostream.objects/cin-read-stdio-sync.sh.cpp",
                 "std/containers/unord/unord.multiset/local_iterators.pass.cpp",
                 "std/input.output/iostream.objects/narrow.stream.objects/cin.readmany.sh.cpp",
                 "std/input.output/iostream.objects/narrow.stream.objects/cin.sh.cpp",
