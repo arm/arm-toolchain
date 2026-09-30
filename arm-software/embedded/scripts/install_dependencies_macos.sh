@@ -51,6 +51,10 @@ export PATH="${VENV_DIR}/bin:${PATH}"
 if [[ -n "${GITHUB_PATH:-}" ]]; then
     echo "${VENV_DIR}/bin" >> "${GITHUB_PATH}"
 fi
+if [[ -n "${GITHUB_ENV:-}" ]]; then
+    # Make CMake prefer this environment over Apple framework Python in later steps.
+    echo "VIRTUAL_ENV=${VENV_DIR}" >> "${GITHUB_ENV}"
+fi
 
 # Upgrade pip and install Python tooling inside the virtual environment
 python -m pip install --upgrade pip
