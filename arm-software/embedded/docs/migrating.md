@@ -118,7 +118,8 @@ section and can place it after `.tbss`. The default linker script layout places
 `.tdata` and `.tbss` between `.data` and `.bss`, and startup initialization can
 therefore overwrite a GOT placed there.
 
-Always place the GOT explicitly in a custom AArch64 linker script, for example:
+Always place the GOT explicitly in a custom AArch64 linker script and,
+if `.tdata` is present, arrange the GOT before it, for example:
 
 ```text
 .got : { *(.got.plt) *(.got) }
@@ -126,10 +127,7 @@ Always place the GOT explicitly in a custom AArch64 linker script, for example:
 
 #### RELRO
 
-LLD classifies `.got` as relocation read-only (RELRO). When RELRO is enabled,
-all RELRO sections must be contiguous because they are described by a single
-`PT_GNU_RELRO` program header; otherwise, LLD reports a non-contiguous RELRO
-error.
+LLD classifies `.got` as relocation read-only (RELRO).
 
 * For a bare-metal application with no program loader that supports RELRO,
   disable RELRO with `-z norelro` (`-Wl,-z,norelro` when invoking the linker
@@ -139,8 +137,19 @@ error.
   omitting a `PT_GNU_RELRO` header also disables RELRO. Use this approach when
   the script already controls its program headers explicitly.
 * If the application is loaded by an operating environment that supports RELRO,
-  keep RELRO enabled and place `.got` adjacent to the other RELRO sections. With
-  the default linker script layout, place `.got` before `.tdata`.
+  keep RELRO enabled and keep the RELRO sections contiguous.
+  
+  Typical examples of RELRO sections include `.got`, writable TLS sections
+  such as `.tdata` and `.tbss`, initialization and finalization arrays,
+  `.dynamic`, and `.data.rel.ro`.
+  See LLD’s `isRelroSection` implementation for the complete classification.
+  
+  With the linker script layout described above, place `.got` before `.tdata`.
+  
+  > **Note:** LLD can emit multiple `PT_GNU_RELRO` program headers for
+  > discontiguous regions, but some loaders process only the first one, thus
+  > contiguous layout is recommended.
+  
 
 ## Startup code
 
