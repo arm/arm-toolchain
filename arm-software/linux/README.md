@@ -290,13 +290,40 @@ $ chrpath -l ./example
 
 ## Nightly build binary distribution
 
-[ATfL Nightly Build and Test](https://github.com/arm/arm-toolchain/actions/workflows/atfl_nightly_build_and_test.yml) hosts nightly builds, and provides binary artifacts in form of tarball.
+The [ATfL Nightly Build and Test](https://github.com/arm/arm-toolchain/actions/workflows/atfl_nightly_build_and_test.yml) workflow provides nightly binary tarballs as downloadable zipped artifacts. Use the latest successful nightly build for the most up-to-date pre-release ATfL version.
 
-Verify sha256 checksum of tarball, before further usage.
+### Using the non-root installer script with nightly builds
 
-ATfL binaries must be used on trusted inputs (such as the customer's own source code). If it is run on untrusted code, then the customer must sandbox the compiler.
+The [non-root installer script](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/linux/scripts/user_install.sh) supports a `--nightly` option to download and install the latest successful build from the `arm-software` branch for your Linux distribution.
+Currently supported for AArch64 systems running Ubuntu 24.04 or RHEL 10. This option also downloads and installs the latest matching ArmPL package into the same user-writable installation root.
 
-It is recommended to use latest binaries from nightly builds.
+The non-root installer `--nightly` option requires the GitHub CLI `gh` command is available and authenticated before it runs. Follow the [GitHub CLI installation instructions for Linux](https://github.com/cli/cli/blob/trunk/docs/install_linux.md), then sign in to `github.com` and check your authentication:
+
+```bash
+gh auth login --hostname github.com
+gh auth status --hostname github.com
+```
+The authenticated account or token must have access to the workflow runs and permission to download GitHub Actions artifacts from `arm/arm-toolchain`.
+Authentication is required even though the repository is public.
+
+Download the script from GitHub and run it with `--nightly` and your chosen installation root, for example:
+
+```bash
+curl -fsSL -o user_install.sh \
+  https://raw.githubusercontent.com/arm/arm-toolchain/arm-software/arm-software/linux/scripts/user_install.sh
+bash user_install.sh --nightly "$HOME/tools/atfl"
+```
+
+The installer detects your distribution, verifies the downloaded artifact's SHA-256 digest, and extracts the toolchain without requiring root privileges.
+
+It prints the selected workflow run, source commit, and artifact expiry, followed by commands to activate the installed toolchain using Environment Modules or its `env.bash` script. Add `--yes` to run non-interactively and perform a post-install compiler self-test.
+
+Use `bash user_install.sh --help` for the full list of options.
+Without `--nightly`, the script installs the latest release from the public package repositories at https://developer.arm.com/packages/arm-toolchains.
+
+You can also download a zipped nightly tarball manually from the workflow's artifacts. Verify the zipped file SHA-256 checksum before use.
+
+ATfL binaries must be used on trusted inputs (such as your own source code). When compiling untrusted code, sandbox the compiler.
 
 ## Providing feedback and reporting issues
 
