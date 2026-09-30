@@ -1176,6 +1176,21 @@ def main():
             description="Clang ARM AAPCS mislowers variadic vector type arguments (LLVMAENG-6240)",
         ),
         XFail(
+            name="llvmlibc mathvec cosf big-endian failure",
+            testnames=[
+                "src/mathvec/libc.test.src.mathvec.cosf_test.__build__",
+            ],
+            result=NewResult.XFAILED,
+            project="llvmlibc",
+            variants=[
+                "aarch64a_be",
+                "aarch64a_be_exn_rtti",
+                "aarch64r_be",
+                "aarch64r_be_exn_rtti",
+            ],
+            description="The mathvec cosf SIMD results exceed the test's ULP tolerance on big-endian AArch64 variants",
+        ),
+        XFail(
             name="variadic primitive type arguments",
             testnames=[
                 "src/__support/libc.test.src.__support.arg_list_test.__build__",
