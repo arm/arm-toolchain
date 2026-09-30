@@ -69,7 +69,9 @@ following command line options, in addition to `--target`, `-march` or
   you can include the linker script in your custom linker script,
   similar to [how `picolibc.ld` is used](https://github.com/picolibc/picolibc/blob/main/doc/linking.md#using-picolibcld),
   or write your own linker script defining `__stack`, and
-  `__llvm_libc_heap_limit` if you are using the heap
+  `__llvm_libc_heap_limit` if you are using the heap. When
+  writing a custom script, follow the
+  [Custom linker scripts](migrating.md#custom-linker-scripts) guidance.
 
 > [!IMPORTANT]
 > The default `llvmlibc.ld` is provided for testing and is derived from the

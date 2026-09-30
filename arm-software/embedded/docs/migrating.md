@@ -106,6 +106,51 @@ LLD includes not only the printf/scanf implementation variant from picolibc spec
 also the default PICOLIBC_DOUBLE_PRINTF_SCANF variant. To avoid linking the default variant into the application, you
 must include the `--gc-sections` linker flag.
 
+### Custom linker scripts
+
+#### GOT placement on AArch64
+
+On AArch64, weak references to data use the Global Offset Table (GOT), so even a
+statically linked application can contain a `.got` section.
+
+If a custom linker script does not place `.got`, LLD treats it as an orphan
+section and can place it after `.tbss`. The default linker script layout places
+`.tdata` and `.tbss` between `.data` and `.bss`, and startup initialization can
+therefore overwrite a GOT placed there.
+
+Always place the GOT explicitly in a custom AArch64 linker script and,
+if `.tdata` is present, arrange the GOT before it, for example:
+
+```text
+.got : { *(.got.plt) *(.got) }
+```
+
+#### RELRO
+
+LLD classifies `.got` as relocation read-only (RELRO).
+
+* For a bare-metal application with no program loader that supports RELRO,
+  disable RELRO with `-z norelro` (`-Wl,-z,norelro` when invoking the linker
+  through Clang). This is the recommended solution because RELRO provides no
+  benefit without a loader that applies the requested memory protection.
+* If the linker script uses the `PHDRS` command to define all program headers,
+  omitting a `PT_GNU_RELRO` header also disables RELRO. Use this approach when
+  the script already controls its program headers explicitly.
+* If the application is loaded by an operating environment that supports RELRO,
+  keep RELRO enabled and keep the RELRO sections contiguous.
+  
+  Typical examples of RELRO sections include `.got`, writable TLS sections
+  such as `.tdata` and `.tbss`, initialization and finalization arrays,
+  `.dynamic`, and `.data.rel.ro`.
+  See LLD’s `isRelroSection` implementation for the complete classification.
+  
+  With the linker script layout described above, place `.got` before `.tdata`.
+  
+  > **Note:** LLD can emit multiple `PT_GNU_RELRO` program headers for
+  > discontiguous regions, but some loaders process only the first one, thus
+  > contiguous layout is recommended.
+  
+
 ## Startup code
 
 Refer to [Using Picolibc in Embedded Systems](https://github.com/picolibc/picolibc/blob/main/doc/using.md)
