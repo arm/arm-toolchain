@@ -20,7 +20,8 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
 
 # Upgrade pip and install dependencies
 python3 -m pip install --upgrade pip
-python3 -m pip install --user -r requirements.txt 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+python3 -m pip install --user -r "$SCRIPT_DIR/requirements.txt"
 python3 -m pip install --user cmake ruff
 
 export PATH="${HOME}/.local/bin:${PATH}"

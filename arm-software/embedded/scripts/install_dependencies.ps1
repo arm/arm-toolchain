@@ -15,7 +15,7 @@ if ($LASTEXITCODE) { exit $LASTEXITCODE }
 # Upgrade pip and install the Python build dependencies in the environment.
 & $venvPython -m pip install --upgrade pip
 if ($LASTEXITCODE) { exit $LASTEXITCODE }
-& $venvPython -m pip install -r requirements.txt
+& $venvPython -m pip install -r "$PSScriptRoot\requirements.txt"
 if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
 $env:VIRTUAL_ENV = $venvDir

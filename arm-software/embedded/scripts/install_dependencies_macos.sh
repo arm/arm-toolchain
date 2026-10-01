@@ -58,7 +58,8 @@ fi
 
 # Upgrade pip and install Python tooling inside the virtual environment
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+python -m pip install -r "$SCRIPT_DIR/requirements.txt"
 python -m pip install cmake ruff
 
 cmake --version
