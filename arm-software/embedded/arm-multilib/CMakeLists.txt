@@ -389,7 +389,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
             foreach(flag ${multilib_flags_list})
                 string(APPEND multilib_yaml_content "  - ${flag}\n")
             endforeach()
-            string(APPEND multilib_yaml_content "  Group: base_libs\n")
+            string(APPEND multilib_yaml_content "  Group: ${variant_group}\n")
         endif()
     endif()
 

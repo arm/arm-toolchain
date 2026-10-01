@@ -38,8 +38,6 @@ Groups:
   Type: Exclusive
 - Name: string_libs
   Type: Exclusive
-- Name: startup_libs
-  Type: Exclusive
 
 # The list of library variants is substituted in by CMakeLists.txt, so
 # that it can respect the LLVM_TOOLCHAIN_LIBRARY_VARIANTS setting and

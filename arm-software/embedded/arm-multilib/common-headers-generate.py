@@ -37,7 +37,7 @@ import yaml
 
 # Define the multilib target dirs which want to process
 MULTILIB_TARGET_DIRS = ["arm-none-eabi", "aarch64-none-elf"]
-PRIMARY_VARIANT_GROUP = "stdlibs"
+PRIMARY_VARIANT_GROUP = "base_libs"
 HASH_CHUNK_SIZE = 1024 * 1024
 
 
