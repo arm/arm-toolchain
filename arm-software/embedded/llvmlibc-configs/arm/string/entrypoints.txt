@@ -1,0 +1,4 @@
+include("${LIBC_SOURCE_DIR}/config/baremetal/arm/entrypoints.txt")
+
+list(FILTER TARGET_LLVMLIBC_ENTRYPOINTS
+     INCLUDE REGEX "^libc\\.src\\.strings?\\.")
