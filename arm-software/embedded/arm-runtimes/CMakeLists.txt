@@ -24,8 +24,10 @@ get_filename_component(llvmproject_src_dir_abs "${llvmproject_src_dir}" ABSOLUTE
 set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
 set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
-set(ENABLE_LLVMLIBC_MINOR_VARIANT_def OFF)
-set(LLVMLIBC_SUBARCHIVE_NAME_def "")
+set(LLVM_LIBC_ENABLE_MINOR_VARIANT_def OFF)
+set(LLVM_LIBC_SUBARCHIVE_NAME_def "")
+set(LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS_def "")
+set(LLVM_LIBC_ENTRYPOINT_CONFIG_PATH_def "")
 set(ENABLE_LLVMLIBC_CORE_LIBS_def ON)
 set(ENABLE_LLVMLIBC_SUPPORT_LIBS_def ON)
 set(ENABLE_COMPILER_RT_LIBS_def ON)
@@ -107,9 +109,10 @@ set(ENABLE_COMPILER_RT_LIBS ${ENABLE_COMPILER_RT_LIBS_def} CACHE BOOL "Build and
 set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
-set(LIBC_CONFIG_PATH "${LIBC_CONFIG_PATH_def}" CACHE PATH "Path to an LLVM libc config directory.")
-set(ENABLE_LLVMLIBC_MINOR_VARIANT ${ENABLE_LLVMLIBC_MINOR_VARIANT_def} CACHE BOOL "Install only the llvm-libc minor variant payload for this variant.")
-set(LLVMLIBC_SUBARCHIVE_NAME ${LLVMLIBC_SUBARCHIVE_NAME_def} CACHE STRING "llvm-libc subarchive to install when ENABLE_LLVMLIBC_MINOR_VARIANT is enabled.")
+set(LLVM_LIBC_ENABLE_MINOR_VARIANT ${LLVM_LIBC_ENABLE_MINOR_VARIANT_def} CACHE BOOL "Install only the llvm-libc minor variant payload for this variant.")
+set(LLVM_LIBC_SUBARCHIVE_NAME ${LLVM_LIBC_SUBARCHIVE_NAME_def} CACHE STRING "llvm-libc subarchive to install when LLVM_LIBC_ENABLE_MINOR_VARIANT is enabled.")
+set(LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS ${LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS_def} CACHE STRING "Semicolon-separated routine names for the llvm-libc minor variant, or '*' for all configured routines.")
+set(LLVM_LIBC_ENTRYPOINT_CONFIG_PATH ${LLVM_LIBC_ENTRYPOINT_CONFIG_PATH_def} CACHE PATH "Downstream LLVM-libc entrypoint configuration used to resolve minor-variant routine names.")
 set(ENABLE_LLVMLIBC_CORE_LIBS ${ENABLE_LLVMLIBC_CORE_LIBS_def} CACHE BOOL "Build and install the library archives from the llvm-libc build.")
 set(ENABLE_LLVMLIBC_SUPPORT_LIBS ${ENABLE_LLVMLIBC_SUPPORT_LIBS_def} CACHE BOOL "Build and install llvmlibc support libraries such as crt0 and semihost.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
@@ -169,13 +172,21 @@ endif()
 # Some llvm-libc variants are packaged as minor layers. The subprojects
 # are still built as normal, but the installed payload is restricted to
 # the files that differ from the base layer.
-if(ENABLE_LLVMLIBC_MINOR_VARIANT)
+if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
     if(NOT C_LIBRARY STREQUAL llvmlibc)
-        message(FATAL_ERROR "ENABLE_LLVMLIBC_MINOR_VARIANT is only supported with C_LIBRARY=llvmlibc.")
+        message(FATAL_ERROR "LLVM_LIBC_ENABLE_MINOR_VARIANT is only supported with C_LIBRARY=llvmlibc.")
     endif()
-    if(NOT LLVMLIBC_SUBARCHIVE_NAME)
+    if(NOT LLVM_LIBC_SUBARCHIVE_NAME)
         message(FATAL_ERROR
-            "ENABLE_LLVMLIBC_MINOR_VARIANT requires LLVMLIBC_SUBARCHIVE_NAME to be set")
+            "LLVM_LIBC_ENABLE_MINOR_VARIANT requires LLVM_LIBC_SUBARCHIVE_NAME to be set")
+    endif()
+    if(NOT LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS)
+        message(FATAL_ERROR
+            "LLVM_LIBC_ENABLE_MINOR_VARIANT requires LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS to be set")
+    endif()
+    if(NOT LLVM_LIBC_ENTRYPOINT_CONFIG_PATH)
+        message(FATAL_ERROR
+            "LLVM_LIBC_ENABLE_MINOR_VARIANT requires LLVM_LIBC_ENTRYPOINT_CONFIG_PATH to be set")
     endif()
 endif()
 if(NOT ENABLE_COMPILER_RT_LIBS)
@@ -832,7 +843,113 @@ endif()
 # llvmlibc
 ###############################################################################
 
+# Load the configured LLVM-libc entrypoints and resolve the routines requested
+# by LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS to their fully qualified target names.
+# The resulting list is returned to the caller through output_variable.
+function(get_llvmlibc_subarchive_entrypoints output_variable)
+    set(entrypoint_config_path
+        "${TOOLCHAIN_SOURCE_DIR}/${LLVM_LIBC_ENTRYPOINT_CONFIG_PATH}")
+    if(NOT EXISTS "${entrypoint_config_path}/entrypoints.txt")
+        message(FATAL_ERROR
+            "LLVM-libc entrypoint configuration not found: "
+            "${entrypoint_config_path}/entrypoints.txt")
+    endif()
+
+    set(TARGET_LLVMLIBC_ENTRYPOINTS "")
+    set(TARGET_LIBC_ENTRYPOINTS "")
+    set(TARGET_LIBM_ENTRYPOINTS "")
+    set(TARGET_LIBMVEC_ENTRYPOINTS "")
+    set(LIBC_SOURCE_DIR "${llvmproject_src_dir}/libc")
+    include("${entrypoint_config_path}/entrypoints.txt")
+
+    set(resolved_entrypoints "")
+    # Treat "*" as a request to include every entrypoint from the configuration.
+    if("*" IN_LIST LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS)
+        set(resolved_entrypoints ${TARGET_LLVMLIBC_ENTRYPOINTS})
+    else()
+        # Match each requested routine name against the final component of the
+        # fully qualified entrypoints provided by the configuration.
+        foreach(routine IN LISTS LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS)
+            set(routine_matches "")
+            foreach(entrypoint IN LISTS TARGET_LLVMLIBC_ENTRYPOINTS)
+                string(REGEX REPLACE "^.*\\." "" entrypoint_routine
+                    "${entrypoint}")
+                if(entrypoint_routine STREQUAL routine)
+                    list(APPEND routine_matches "${entrypoint}")
+                endif()
+            endforeach()
+            # Reject unknown routines instead of silently creating an
+            # incomplete subarchive.
+            if(NOT routine_matches)
+                message(FATAL_ERROR
+                    "LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS routine '${routine}' "
+                    "is not present in ${entrypoint_config_path}/entrypoints.txt")
+            endif()
+            list(APPEND resolved_entrypoints ${routine_matches})
+        endforeach()
+    endif()
+    list(REMOVE_DUPLICATES resolved_entrypoints)
+
+    set(${output_variable} ${resolved_entrypoints} PARENT_SCOPE)
+endfunction()
+
+# Build the command used to run only the hermetic tests belonging to a minor
+# LLVM-libc variant. Test targets and lit directories are derived from the
+# resolved llvmlibc_subarchive_entrypoints list, and the command is returned
+# to the caller through output_variable.
+function(make_llvmlibc_minor_variant_lit_command output_variable)
+    separate_arguments(lit_args_list NATIVE_COMMAND "${llvmlibc_lit_args}")
+
+    set(lit_test_dirs "")
+    set(lit_build_targets "")
+    # Convert each fully qualified entrypoint into its corresponding source
+    # directory, test name, and hermetic test build target.
+    foreach(entrypoint IN LISTS llvmlibc_subarchive_entrypoints)
+        if(entrypoint MATCHES "^libc\\.src\\.(.+)\\.[^.]+$")
+            set(test_dir "${CMAKE_MATCH_1}")
+            set(test_dir_for_target "${test_dir}")
+            string(REPLACE "." "/" test_dir "${test_dir}")
+            string(REGEX REPLACE "^.*\\.([^.]+)$" "\\1" test_name
+                "${entrypoint}")
+            set(test_cmake_path
+                "${llvmproject_src_dir}/libc/test/src/${test_dir}/CMakeLists.txt")
+            # Some entrypoints do not have a standalone test, so include only
+            # tests that have both a source file and a CMake definition.
+            if(EXISTS "${llvmproject_src_dir}/libc/test/src/${test_dir}/${test_name}_test.cpp"
+                    AND EXISTS "${test_cmake_path}")
+                set(test_target_name "${test_name}_test")
+                list(APPEND lit_test_dirs
+                    <BINARY_DIR>/libc/test/src/${test_dir})
+                list(APPEND lit_build_targets
+                    "libc.test.src.${test_dir_for_target}.${test_target_name}.__build__")
+            endif()
+        endif()
+    endforeach()
+    list(REMOVE_DUPLICATES lit_test_dirs)
+    list(REMOVE_DUPLICATES lit_build_targets)
+
+    if(NOT lit_build_targets)
+        message(FATAL_ERROR
+            "No LLVM-libc hermetic test targets could be derived from "
+            "LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS")
+    endif()
+
+    set(${output_variable}
+        "${CMAKE_COMMAND}" --build <BINARY_DIR> --target ${lit_build_targets}
+        COMMAND ${Python3_EXECUTABLE} ${external_lit_path}
+            ${lit_args_list} ${lit_test_dirs}
+        PARENT_SCOPE
+    )
+endfunction()
+
 if(C_LIBRARY STREQUAL llvmlibc)
+    set(llvmlibc_subarchive_entrypoints "")
+    if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
+        get_llvmlibc_subarchive_entrypoints(
+            llvmlibc_subarchive_entrypoints
+        )
+    endif()
+
     set(test_cmd "${lit_test_executor} @BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
     set(enable_dummypackeys OFF)
@@ -895,28 +1012,6 @@ if(C_LIBRARY STREQUAL llvmlibc)
         set(llvmlibc_lit_args "@${llvmlibc_lit_xfails_path} ${llvmlibc_lit_args}")
     endif()
 
-    set(llvmlibc_config_cmake_args "")
-    if(LIBC_CONFIG_PATH)
-        set(llvmlibc_config_path "${TOOLCHAIN_SOURCE_DIR}/${LIBC_CONFIG_PATH}")
-
-        if(EXISTS "${llvmlibc_config_path}")
-            list(APPEND llvmlibc_config_cmake_args "-DLIBC_CONFIG_PATH=${llvmlibc_config_path}")
-        elseif(LLVMLIBC_SUBARCHIVE_NAME)
-            message(FATAL_ERROR
-                "LLVMLIBC_SUBARCHIVE_NAME requires LIBC_CONFIG_PATH to "
-                "exist, but '${llvmlibc_config_path}' was not found.")
-        endif()
-    elseif(LLVMLIBC_SUBARCHIVE_NAME)
-        message(FATAL_ERROR
-            "LLVMLIBC_SUBARCHIVE_NAME requires LIBC_CONFIG_PATH to be set.")
-    endif()
-
-    if(ENABLE_LLVMLIBC_MINOR_VARIANT)
-        set(llvmlibc_include_startup OFF)
-    else()
-        set(llvmlibc_include_startup ON)
-    endif()
-
     set(common_llvmlibc_cmake_args
         -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
         -DCMAKE_ASM_COMPILER=${LLVM_BINARY_DIR}/bin/clang${CMAKE_EXECUTABLE_SUFFIX}
@@ -936,13 +1031,19 @@ if(C_LIBRARY STREQUAL llvmlibc)
         # Let CMake know we're cross-compiling
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-        ${llvmlibc_config_cmake_args}
-        -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVMLIBC_SUBARCHIVE_NAME}
-        -DLLVM_LIBC_INCLUDE_STARTUP=${llvmlibc_include_startup}
+        -DLLVM_LIBC_ENABLE_MINOR_VARIANT=${LLVM_LIBC_ENABLE_MINOR_VARIANT}
+        -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVM_LIBC_SUBARCHIVE_NAME}
     )
+    # ExternalProject uses ',' as its list separator below. Encode the CMake
+    # list here so it reaches the LLVM libc configure as one -D argument and
+    # is restored to a semicolon-separated list there.
+    list(JOIN llvmlibc_subarchive_entrypoints ","
+        llvmlibc_subarchive_entrypoints_arg)
+    list(APPEND common_llvmlibc_cmake_args
+        -DLLVM_LIBC_SUBARCHIVE_ENTRYPOINTS=${llvmlibc_subarchive_entrypoints_arg})
 
     set(llvmlibc_build_install_args)
-    if(ENABLE_LLVMLIBC_CORE_LIBS OR ENABLE_LLVMLIBC_MINOR_VARIANT)
+    if(ENABLE_LLVMLIBC_CORE_LIBS OR LLVM_LIBC_ENABLE_MINOR_VARIANT)
         # Run full llvmlibc install, then copy lib + include.
         list(APPEND llvmlibc_build_install_args
             INSTALL_COMMAND ${CMAKE_COMMAND} --install .
@@ -1046,6 +1147,15 @@ if(C_LIBRARY STREQUAL llvmlibc)
         add_custom_target(check-llvmlibc-lit)
         add_dependencies(check-all check-llvmlibc)
 
+        set(llvmlibc_check_lit_command
+            "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc
+        )
+        if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
+            make_llvmlibc_minor_variant_lit_command(
+                llvmlibc_check_lit_command
+            )
+        endif()
+
         ExternalProject_Add_Step(
             llvmlibc
             check
@@ -1059,7 +1169,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ExternalProject_Add_Step(
             llvmlibc
             check-lit
-            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc
+            COMMAND ${llvmlibc_check_lit_command}
             COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
             --dir <BINARY_DIR>/libc/test
