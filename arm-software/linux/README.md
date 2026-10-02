@@ -299,19 +299,20 @@ Currently supported for AArch64 systems running Ubuntu 24.04 or RHEL 10. This op
 
 The non-root installer `--nightly` option requires the GitHub CLI `gh` command is available and authenticated before it runs. Follow the [GitHub CLI installation instructions for Linux](https://github.com/cli/cli/blob/trunk/docs/install_linux.md), then sign in to `github.com` and check your authentication:
 
-```bash
-gh auth login --hostname github.com
-gh auth status --hostname github.com
+```
+$ gh auth login --hostname github.com
+
+$ gh auth status --hostname github.com
 ```
 The authenticated account or token must have access to the workflow runs and permission to download GitHub Actions artifacts from `arm/arm-toolchain`.
 Authentication is required even though the repository is public.
 
 Download the script from GitHub and run it with `--nightly` and your chosen installation root, for example:
 
-```bash
-curl -fsSL -o user_install.sh \
-  https://raw.githubusercontent.com/arm/arm-toolchain/arm-software/arm-software/linux/scripts/user_install.sh
-bash user_install.sh --nightly "$HOME/tools/atfl"
+```
+$ curl -fsSL -o user_install.sh https://raw.githubusercontent.com/arm/arm-toolchain/arm-software/arm-software/linux/scripts/user_install.sh
+
+$ bash user_install.sh --nightly "$HOME/tools/atfl"
 ```
 
 The installer detects your distribution, verifies the downloaded artifact's SHA-256 digest, and extracts the toolchain without requiring root privileges.
