@@ -5,6 +5,24 @@
 #
 # This script installs the essential build dependencies for ATfE.
 
-# Upgrade pip and install meson
-python -m pip install --upgrade pip
-python -m pip install meson==1.2.3 psutil==7.2.2 pyyaml==6.0.3
+# Use a virtual environment so CMake and pip use the same Python installation.
+$venvDir = Join-Path $env:USERPROFILE ".atfe-venv"
+$venvScripts = Join-Path $venvDir "Scripts"
+$venvPython = Join-Path $venvScripts "python.exe"
+python -m venv $venvDir
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+# Upgrade pip and install the Python build dependencies in the environment.
+& $venvPython -m pip install --upgrade pip
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+& $venvPython -m pip install meson==1.2.3 psutil==7.2.2 pyyaml==6.0.3
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+$env:VIRTUAL_ENV = $venvDir
+$env:PATH = "$venvScripts;$env:PATH"
+if ($env:GITHUB_PATH) {
+    Add-Content -Path $env:GITHUB_PATH -Value $venvScripts -Encoding utf8
+}
+if ($env:GITHUB_ENV) {
+    Add-Content -Path $env:GITHUB_ENV -Value "VIRTUAL_ENV=$venvDir" -Encoding utf8
+}
