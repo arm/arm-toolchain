@@ -20,7 +20,9 @@ sudo apt-get update && sudo apt-get install -y --no-install-recommends \
 
 # Upgrade pip and install dependencies
 python3 -m pip install --upgrade pip
-python3 -m pip install --user cmake==4.3.0 meson==1.2.3 psutil==7.2.2 pyyaml==6.0.3 ruff==0.8.6
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+python3 -m pip install --user -r "$SCRIPT_DIR/requirements.txt"
+python3 -m pip install --user cmake ruff
 
 export PATH="${HOME}/.local/bin:${PATH}"
 cmake --version

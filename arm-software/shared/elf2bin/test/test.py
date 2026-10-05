@@ -207,7 +207,7 @@ class ihex(Base):
             )
             self.assertEqual(
                 err,
-                "elf2bin: input.elf: data address does not " "fit in 32 bits",
+                "elf2bin: input.elf: data address does not fit in 32 bits",
             )
 
     def testEntryPointRange(self):
@@ -235,7 +235,7 @@ class ihex(Base):
             )
             self.assertEqual(
                 err,
-                "elf2bin: input.elf: entry point does not " "fit in 32 bits",
+                "elf2bin: input.elf: entry point does not fit in 32 bits",
             )
 
 
@@ -291,7 +291,7 @@ S70500001238B0
             )
             self.assertEqual(
                 err,
-                "elf2bin: input.elf: data address does not " "fit in 32 bits",
+                "elf2bin: input.elf: data address does not fit in 32 bits",
             )
 
     def testEntryPointRange(self):
@@ -319,7 +319,7 @@ S70500001238B0
             )
             self.assertEqual(
                 err,
-                "elf2bin: input.elf: entry point does not " "fit in 32 bits",
+                "elf2bin: input.elf: entry point does not fit in 32 bits",
             )
 
 
