@@ -601,13 +601,12 @@ resolve_nightly_run() {
   local run_id="" artifact="" run_list="" metadata="" candidate candidate_id
 
   run_list="$(
-    gh api --hostname github.com --method GET \
+    # GitHub's run search filters can return stale results. Fetch the workflow
+    # history without search filters and select eligible runs locally.
+    gh api --hostname github.com --method GET --paginate \
       "repos/$GITHUB_REPOSITORY/actions/workflows/$GITHUB_WORKFLOW/runs" \
-      -f branch="$GITHUB_BRANCH" \
-      -f status=success \
-      -f event=schedule \
-      -f per_page=20 \
-      --jq '.workflow_runs[] | [.id, .run_attempt, .head_sha, .head_branch, .event, .status, .conclusion, .repository.full_name, .head_repository.full_name, .path, .html_url, .created_at] | @tsv'
+      -f per_page=100 \
+      --jq ".workflow_runs[] | select(.head_branch == \"$GITHUB_BRANCH\" and .event == \"schedule\" and .status == \"completed\" and .conclusion == \"success\") | [.id, .run_attempt, .head_sha, .head_branch, .event, .status, .conclusion, .repository.full_name, .head_repository.full_name, .path, .html_url, .created_at] | @tsv"
   )" || return 1
 
   while IFS= read -r candidate; do
