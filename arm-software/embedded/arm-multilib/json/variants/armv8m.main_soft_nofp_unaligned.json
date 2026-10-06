@@ -2,7 +2,7 @@
     "args": {
         "common": {
             "TARGET_ARCH": "armv8m.main",
-            "VARIANT": "armv8m.main_soft_nofp_unaligned_size",
+            "VARIANT": "armv8m.main_soft_nofp_unaligned",
             "COMPILE_FLAGS": "-mfloat-abi=soft -march=armv8m.main -mfpu=none",
             "ENABLE_EXCEPTIONS": "OFF",
             "ENABLE_RTTI": "OFF",
@@ -31,10 +31,17 @@
             "ENABLE_LIBCXX_TESTS": "OFF"
         },
         "llvmlibc": {
-            "ENABLE_CXX_LIBS": "ON",
+            "LLVM_LIBC_ENABLE_MINOR_VARIANT": "ON",
+            "ENABLE_CXX_LIBS": "OFF",
+            "ENABLE_LLVMLIBC_CORE_LIBS": "OFF",
+            "ENABLE_LLVMLIBC_SUPPORT_LIBS": "ON",
+            "ENABLE_COMPILER_RT_LIBS": "OFF",
             "ENABLE_LIBC_TESTS": "ON",
             "ENABLE_COMPILER_RT_TESTS": "OFF",
-            "ENABLE_LIBCXX_TESTS": "OFF"
+            "ENABLE_LIBCXX_TESTS": "OFF",
+            "LLVM_LIBC_SUBARCHIVE_NAME": "string",
+            "LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS": "*",
+            "LLVM_LIBC_ENTRYPOINT_CONFIG_PATH": "llvmlibc-configs/aarch64/string"
         }
     }
 }

@@ -2,8 +2,8 @@
     "args": {
         "common": {
             "TARGET_ARCH": "armv8.1m.main",
-            "VARIANT": "armv8.1m.main_hard_fp_nomve_unaligned_size",
-            "COMPILE_FLAGS": "-mfloat-abi=hard -march=armv8.1m.main+nomve -mfpu=fp-armv8-fullfp16-sp-d16",
+            "VARIANT": "armv8.1m.main_soft_nofp_nomve_size",
+            "COMPILE_FLAGS": "-mfloat-abi=soft -march=armv8.1m.main+nomve -mfpu=none -mno-unaligned-access",
             "ENABLE_EXCEPTIONS": "OFF",
             "ENABLE_RTTI": "OFF",
             "TEST_EXECUTOR": "qemu",
