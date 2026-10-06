@@ -531,12 +531,15 @@ if(C_LIBRARY STREQUAL picolibc)
             -Dtest-long-double=${enable_picolibc_long_double_test}
             -Dtest-machine=${TEST_EXECUTOR}
             -Dtests=false
-            --prefix <INSTALL_DIR>
+            # The prefix uses target paths; stage into the build host's
+            # install directory with --destdir, including on Windows.
+            --prefix /
             --cross-file ${CMAKE_CURRENT_BINARY_DIR}/meson-cross-build.txt
             --buildtype=${LIBRARY_MESON_BUILD_TYPE}
             <SOURCE_DIR>
         BUILD_COMMAND ${MESON_EXECUTABLE} compile
-        INSTALL_COMMAND ${MESON_EXECUTABLE} install ${MESON_INSTALL_QUIET}
+        INSTALL_COMMAND ${MESON_EXECUTABLE} install
+            --destdir <INSTALL_DIR> ${MESON_INSTALL_QUIET}
         USES_TERMINAL_CONFIGURE TRUE
         USES_TERMINAL_BUILD TRUE
         USES_TERMINAL_INSTALL TRUE
