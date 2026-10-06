@@ -2,8 +2,8 @@
     "args": {
         "common": {
             "TARGET_ARCH": "armv8.1m.main",
-            "VARIANT": "armv8.1m.main_hard_fpdp_nomve_exn_rtti_unaligned",
-            "COMPILE_FLAGS": "-mfloat-abi=hard -march=armv8.1m.main+nomve -mfpu=fp-armv8-fullfp16-d16",
+            "VARIANT": "armv8.1m.main_hard_fpdp_nomve_exn_rtti_size",
+            "COMPILE_FLAGS": "-mfloat-abi=hard -march=armv8.1m.main+nomve -mfpu=fp-armv8-fullfp16-d16 -mno-unaligned-access",
             "ENABLE_EXCEPTIONS": "ON",
             "ENABLE_RTTI": "ON",
             "TEST_EXECUTOR": "qemu",
@@ -16,7 +16,7 @@
             "RAM_ADDRESS": "0x61000000",
             "RAM_SIZE": "0x1000000",
             "STACK_SIZE": "4K",
-            "LIBRARY_BUILD_TYPE": "release"
+            "LIBRARY_BUILD_TYPE": "minsizerelease"
         },
         "picolibc": {
             "ENABLE_CXX_LIBS": "ON",
@@ -31,17 +31,10 @@
             "ENABLE_LIBCXX_TESTS": "OFF"
         },
         "llvmlibc": {
-            "LLVM_LIBC_ENABLE_MINOR_VARIANT": "ON",
-            "ENABLE_CXX_LIBS": "OFF",
-            "ENABLE_LLVMLIBC_CORE_LIBS": "OFF",
-            "ENABLE_LLVMLIBC_SUPPORT_LIBS": "ON",
-            "ENABLE_COMPILER_RT_LIBS": "OFF",
+            "ENABLE_CXX_LIBS": "ON",
             "ENABLE_LIBC_TESTS": "ON",
             "ENABLE_COMPILER_RT_TESTS": "OFF",
-            "ENABLE_LIBCXX_TESTS": "OFF",
-            "LLVM_LIBC_SUBARCHIVE_NAME": "string",
-            "LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS": "*",
-            "LLVM_LIBC_ENTRYPOINT_CONFIG_PATH": "llvmlibc-configs/aarch64/string"
+            "ENABLE_LIBCXX_TESTS": "OFF"
         }
     }
 }
