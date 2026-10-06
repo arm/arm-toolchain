@@ -304,6 +304,19 @@ $ gh auth login --hostname github.com
 
 $ gh auth status --hostname github.com
 ```
+
+Make sure that the `auth` status is reporting the following token scopes:
+
+```
+Token scopes: gist, read:org, repo, workflow
+```
+
+If not, the scopes need to be extended with the following command:
+
+```
+$ gh auth refresh --hostname github.com --scopes repo
+```
+
 The authenticated account or token must have access to the workflow runs and permission to download GitHub Actions artifacts from `arm/arm-toolchain`.
 Authentication is required even though the repository is public.
 
