@@ -165,6 +165,43 @@ elseif(TARGET_ARCH MATCHES "^(arm|armeb)v6" AND NOT TARGET_ARCH MATCHES "^(arm|a
     set(target_supports_lock_free_atomics OFF)
 endif()
 
+# Prepare LLVM libc test link options before configuring compiler-rt, which
+# also uses them to link its tests. Libc tests provide their own start code,
+# while compiler-rt and libc++ tests need the semihosting startup object.
+if(C_LIBRARY STREQUAL llvmlibc)
+    set(enable_dummypackeys OFF)
+    set(llvmlibc_test_link_options
+        -nostartfiles
+        -lsemihost
+        -T
+        llvmlibc.ld
+    )
+    set(llvmlibc_test_compile_options "")
+    if(LLVM_LIBC_TEST_SYSROOT)
+        set(llvmlibc_test_sysroot "--sysroot=${LLVM_LIBC_TEST_SYSROOT}")
+        list(APPEND llvmlibc_test_compile_options ${llvmlibc_test_sysroot})
+        list(APPEND llvmlibc_test_link_options ${llvmlibc_test_sysroot})
+    endif()
+    if(VARIANT_MULTILIB_FLAGS)
+        separate_arguments(llvmlibc_test_multilib_flags NATIVE_COMMAND ${VARIANT_MULTILIB_FLAGS})
+        list(APPEND llvmlibc_test_compile_options ${llvmlibc_test_multilib_flags})
+        list(APPEND llvmlibc_test_link_options ${llvmlibc_test_multilib_flags})
+    endif()
+    list(JOIN llvmlibc_test_compile_options "," llvmlibc_test_compile_options_default)
+    if(NOT target_supports_lock_free_atomics)
+        list(APPEND llvmlibc_test_link_options -latomic-fallback)
+    endif()
+    if(VARIANT MATCHES "(^|_)pacret_bti(_|$)")
+        set(enable_dummypackeys ON)
+        list(APPEND llvmlibc_test_link_options -ldummypackeys)
+    endif()
+    list(JOIN llvmlibc_test_link_options "," llvmlibc_test_link_options_default)
+
+    set(llvmlibc_cxx_test_link_options ${llvmlibc_test_link_options})
+    list(INSERT llvmlibc_cxx_test_link_options 1 -lcrt0-semihost)
+    list(JOIN llvmlibc_cxx_test_link_options " " runtime_test_link_flags)
+endif()
+
 # Create a single target for all testing. If no testing is enabled, this
 # will simply do nothing.
 add_custom_target(check-all)
@@ -190,7 +227,7 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
         list(APPEND runtime_test_link_options -T picolibcpp.ld)
         list(JOIN runtime_test_link_options " " runtime_test_link_flags)
     elseif(C_LIBRARY STREQUAL llvmlibc)
-        # QEMU logic handled later
+        # LLVM libc flags were prepared above because compiler-rt needs them.
     else()
         message(FATAL_ERROR "Tests can only be enabled using picolibc or llvmlibc.")
     endif()
@@ -795,38 +832,6 @@ endif()
 if(C_LIBRARY STREQUAL llvmlibc)
     set(test_cmd "${lit_test_executor} @BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
-    set(enable_dummypackeys OFF)
-    set(llvmlibc_test_link_options
-        -nostartfiles
-        -lsemihost
-        -T
-        llvmlibc.ld
-    )
-    set(llvmlibc_test_compile_options "")
-    if(LLVM_LIBC_TEST_SYSROOT)
-        set(llvmlibc_test_sysroot "--sysroot=${LLVM_LIBC_TEST_SYSROOT}")
-        list(APPEND llvmlibc_test_compile_options ${llvmlibc_test_sysroot})
-        list(APPEND llvmlibc_test_link_options ${llvmlibc_test_sysroot})
-    endif()
-    if(VARIANT_MULTILIB_FLAGS)
-        separate_arguments(llvmlibc_test_multilib_flags NATIVE_COMMAND ${VARIANT_MULTILIB_FLAGS})
-        list(APPEND llvmlibc_test_compile_options ${llvmlibc_test_multilib_flags})
-        list(APPEND llvmlibc_test_link_options ${llvmlibc_test_multilib_flags})
-    endif()
-    list(JOIN llvmlibc_test_compile_options "," llvmlibc_test_compile_options_default)
-    if(NOT target_supports_lock_free_atomics)
-        list(APPEND llvmlibc_test_link_options -latomic-fallback)
-    endif()
-    if(VARIANT MATCHES "(^|_)pacret_bti(_|$)")
-        set(enable_dummypackeys ON)
-        list(APPEND llvmlibc_test_link_options -ldummypackeys)
-    endif()
-    list(JOIN llvmlibc_test_link_options "," llvmlibc_test_link_options_default)
-
-    # libc tests use upstream start.cpp as the bootcode, libcxx tests need crt0
-    set(llvmlibc_cxx_test_link_options ${llvmlibc_test_link_options})
-    list(INSERT llvmlibc_cxx_test_link_options 1 -lcrt0-semihost)
-    list(JOIN llvmlibc_cxx_test_link_options " " runtime_test_link_flags)
 
     # We want to set LIBC_MATH_ASSUME_ROUND_NEAREST_ONLY in the
     # LIBC_CONF_MATH_OPTIMIZATIONS setting, in addition to all the bit

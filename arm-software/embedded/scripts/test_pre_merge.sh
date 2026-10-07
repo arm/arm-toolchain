@@ -23,16 +23,13 @@ rm -f "${RESULTS_DIR}"/*_lit_results.junit.xml
 
 declare -a check_targets=(
     "check-all"
-    "check-compiler-rt-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
-    "check-compiler-rt-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size"
-    "check-cxx-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
-    "check-cxx-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size"
-    "check-cxxabi-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
-    "check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size"
-    "check-picolibc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
-    "check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size"
-    "check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
-    "check-unwind-armv7m_hard_fpv5_d16_exn_rtti_unaligned_size"
+    "check-llvmlibc-armv6m_soft_nofp_exn_rtti_size"
+    "check-llvmlibc-armv7r_hard_vfpv3_d16"
+    "check-llvmlibc-aarch64a_exn_rtti"
+    "check-cxx-aarch64a_exn_rtti"
+    "check-cxxabi-aarch64a_exn_rtti"
+    "check-unwind-aarch64a_exn_rtti"
+    "check-package-llvm-toolchain"
 )
 
 # Finish all targets and check all reports before returning a failure.
