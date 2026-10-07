@@ -19,7 +19,11 @@ mkdir $buildDir
 cd $buildDir
 
 cmake ..\arm-software\embedded -GNinja -DFETCHCONTENT_QUIET=OFF -DCPACK_PACKAGE_DIRECTORY=atfe_packages -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON -DENABLE_QEMU_TESTING=OFF -DENABLE_FVP_TESTING=OFF -DLLVM_PARALLEL_LINK_JOBS=2 -DSHORT_BUILD_PATHS=ON
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
 ninja -j 48 package-llvm-toolchain
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
 # Remove CPack working directory.
-Remove-Item -Recurse -Force atfe_packages/_CPack_Packages
+if (Test-Path atfe_packages/_CPack_Packages) {
+    Remove-Item -Recurse -Force atfe_packages/_CPack_Packages
+}
