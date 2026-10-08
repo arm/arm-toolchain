@@ -1183,6 +1183,7 @@ def main():
             result=NewResult.XFAILED,
             project="llvmlibc",
             variants=[
+                "armebv6m_soft_nofp_size",
                 "armebv7m_soft_nofp_exn_rtti_size",
                 "armebv7m_soft_nofp_size",
                 "armv7a_hard_vfpv3_d16",
