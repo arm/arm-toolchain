@@ -34,7 +34,9 @@
 #include "llvm/MC/MCInstPrinter.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSymbol.h"
+// Begin downstream change #1087
 #include "llvm/MC/TargetRegistry.h"
+// End downstream change #1087
 #include "llvm/Object/ObjectFile.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Debug.h"
@@ -1597,12 +1599,14 @@ bool BinaryFunction::scanExternalRefs() {
   assert(FunctionData.size() == getMaxSize() &&
          "function size does not match raw data size");
 
+  // Begin downstream change #1087
   // Ignoring a referenced function can recursively scan its external
   // references. Give each scan its own disassembler so a nested scan cannot
   // replace or clear the symbolizer that the outer scan still needs.
   std::unique_ptr<MCDisassembler> DisAsm(
       BC.TheTarget->createMCDisassembler(*BC.STI, *BC.Ctx));
   DisAsm->setSymbolizer(
+  // End downstream change #1087
       BC.MIB->createTargetSymbolizer(*this, /*CreateSymbols*/ false));
 
   // A list of patches for this function.
@@ -1623,8 +1627,10 @@ bool BinaryFunction::scanExternalRefs() {
 
     const uint64_t AbsoluteInstrAddr = getAddress() + Offset;
     PrevInstruction = Instruction;
+    // Begin downstream change #1087
     if (!DisAsm->getInstruction(Instruction, Size, FunctionData.slice(Offset),
                                 AbsoluteInstrAddr, nulls())) {
+    // End downstream change #1087
       if (opts::Verbosity >= 1 && !isZeroPaddingAt(Offset)) {
         BC.errs()
             << "BOLT-WARNING: unable to disassemble instruction at offset 0x"
@@ -1669,7 +1675,9 @@ bool BinaryFunction::scanExternalRefs() {
     // Handle calls and branches separately as symbolization doesn't work for
     // them yet.
     MCSymbol *BranchTargetSymbol = nullptr;
+    // Begin downstream change #1087
     SmallVector<const MCSymbol *, 1> RefSymbols;
+    // End downstream change #1087
     if (BC.MIB->isCall(Instruction) || BC.MIB->isBranch(Instruction)) {
       uint64_t TargetAddress = 0;
       BC.MIB->evaluateBranch(Instruction, AbsoluteInstrAddr, Size,
@@ -1702,6 +1710,7 @@ bool BinaryFunction::scanExternalRefs() {
                                   Emitter.LocalCtx.get());
     } else {
       analyzeInstructionForFuncReference(Instruction);
+      // Begin downstream change #1087
       // Symbols referenced by this instruction that belong to functions we are
       // going to move. Note that AArch64 instructions have at most one such
       // operand, but the code below does not rely on it.
@@ -1713,6 +1722,7 @@ bool BinaryFunction::scanExternalRefs() {
           RefSymbols.push_back(Symbol);
       }
       if (RefSymbols.empty())
+      // End downstream change #1087
         continue;
     }
 
@@ -1805,6 +1815,7 @@ bool BinaryFunction::scanExternalRefs() {
     // relocations.
     if (BC.isAArch64()) {
       if (!BranchTargetSymbol) {
+        // Begin downstream change #1087
         // A bare PC-relative reference, such as ADR or LDR (literal), reaches
         // only +/-1MB, while the target is likely to end up much further away
         // once it is moved. Such an instruction cannot be patched in place, and
@@ -1827,6 +1838,7 @@ bool BinaryFunction::scanExternalRefs() {
           continue;
         }
 
+        // End downstream change #1087
         LLVM_DEBUG(BC.printInstruction(dbgs(), Instruction, AbsoluteInstrAddr));
         InstructionPatches.push_back({AbsoluteInstrAddr, Instruction});
         continue;
@@ -1884,6 +1896,9 @@ bool BinaryFunction::scanExternalRefs() {
     if (!Success)
       break;
   }
+
+  // Begin downstream change #1087
+  // End downstream change #1087
 
   // Add relocations unless disassembly failed for this function.
   if (!DisassemblyFailed)

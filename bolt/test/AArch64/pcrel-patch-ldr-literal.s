@@ -1,3 +1,4 @@
+# Begin downstream change #1087
 ## Same failure class as pcrel-patch-skipped-func.s, but through LDR (literal)
 ## instead of ADR. LDR (literal) has the same +/-1MB reach and the same
 ## assembler-resolution behaviour for a local symbol in the same section, so it
@@ -61,3 +62,4 @@ victim:
   ldr x8, target_fn
   ret
   .size victim, .-victim
+# End downstream change #1087

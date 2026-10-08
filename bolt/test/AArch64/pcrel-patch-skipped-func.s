@@ -1,3 +1,4 @@
+# Begin downstream change #1087
 ## Check that BOLT does not create an unencodable instruction patch for a
 ## short-range PC-relative reference in a function it was asked to skip. Here
 ## the reference is an ADR; see pcrel-patch-ldr-literal.s for the LDR (literal)
@@ -68,3 +69,4 @@ hot_func:
   add w0, w0, #1
   ret
   .size hot_func, .-hot_func
+# End downstream change #1087

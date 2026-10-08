@@ -1,3 +1,4 @@
+# Begin downstream change #1087
 ## Scanning first recursively scans third, which references first again.
 ## Each scan must retain its own symbolizer for the references that follow.
 
@@ -44,3 +45,4 @@ _start:
   .size _start, .-_start
 
   .quad _start
+# End downstream change #1087

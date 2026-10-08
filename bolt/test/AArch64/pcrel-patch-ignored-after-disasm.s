@@ -1,3 +1,4 @@
+# Begin downstream change #1087
 ## Same failure as pcrel-patch-skipped-func.s, but the function is ignored by
 ## BOLT's own decision *after* it was disassembled, so the scan happens in
 ## BinaryFunction::setIgnored() rather than in
@@ -57,3 +58,4 @@ victim:
   .p2align 3
 badptr:
   .quad victim+2
+# End downstream change #1087

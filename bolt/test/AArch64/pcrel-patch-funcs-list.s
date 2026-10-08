@@ -1,3 +1,4 @@
+# Begin downstream change #1087
 ## Same failure as pcrel-patch-skipped-func.s, reached through an inclusion list
 ## instead of an exclusion list: with --funcs, everything not named is ignored
 ## without going through mustSkip().
@@ -44,3 +45,4 @@ victim:
   blr x8
   ret
   .size victim, .-victim
+# End downstream change #1087

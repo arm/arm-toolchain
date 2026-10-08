@@ -1,3 +1,4 @@
+# Begin downstream change #1087
 ## Ignoring an already-disassembled target recursively scans its references.
 ## The outer scan must still symbolize subsequent ADR and literal LDR operands.
 ## Cover both assembler-resolved references and a relocation-backed first
@@ -72,3 +73,4 @@ _start:
 
 ## Keep a text relocation even when both references are assembler-resolved.
   .quad _start
+# End downstream change #1087

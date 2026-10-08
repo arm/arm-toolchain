@@ -1,3 +1,4 @@
+# Begin downstream change #1087
 ## Same failure as pcrel-patch-skipped-func.s, but reached through the default
 ## AArch64 configuration: lite mode. Functions without profile data are ignored
 ## (RewriteInstance.cpp, shouldProcess()), so a non-profiled function holding an
@@ -53,3 +54,4 @@ victim:
   blr x8
   ret
   .size victim, .-victim
+# End downstream change #1087

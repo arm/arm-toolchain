@@ -1,3 +1,4 @@
+# Begin downstream change #1087
 ## Invalid external branch targets also cause recursive scans. A later ADR in
 ## the skipped function must still keep its target at the original address.
 
@@ -33,3 +34,4 @@ _start:
   .size _start, .-_start
 
   .quad _start
+# End downstream change #1087
