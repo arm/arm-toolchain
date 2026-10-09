@@ -197,6 +197,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
     if(variant IN_LIST ENABLE_VARIANTS OR ENABLE_VARIANTS STREQUAL "all")
         list(APPEND enabled_variants ${variant})
         string(JSON variant_multilib_flags GET ${lib_def} "flags")
+        set(variant_group "base_libs")
         # Placeholder libraries won't have a json, so store the error in
         # a variable so a fatal error isn't generated.
         string(JSON variant_json ERROR_VARIABLE json_error GET ${lib_def} "json")
@@ -220,7 +221,28 @@ foreach(lib_idx RANGE ${lib_count_dec})
             # Read info from the variant specific json.
             file(READ ${variant_json_file} variant_json_str)
             string(JSON test_executor GET ${variant_json_str} "args" "common" "TEST_EXECUTOR")
+            if(C_LIBRARY MATCHES "^newlib")
+                # Treat newlib variants as newlib for library compatibility.
+                # The JSON config does not contain a separate "newlib-nano" section.
+                set(json_c_library newlib)
+            else()
+                set(json_c_library ${C_LIBRARY})
+            endif()
 
+            # LLVM libc minor variants contain a subarchive rather than a base
+            # C library, so place them in a group named after that subarchive.
+            string(JSON llvm_libc_minor_variant ERROR_VARIABLE json_error
+                GET ${variant_json_str} "args" ${json_c_library} "LLVM_LIBC_ENABLE_MINOR_VARIANT")
+            if(llvm_libc_minor_variant STREQUAL "ON")
+                string(JSON llvm_libc_subarchive_name
+                    GET ${variant_json_str} "args" ${json_c_library} "LLVM_LIBC_SUBARCHIVE_NAME")
+                set(variant_group "${llvm_libc_subarchive_name}_libs")
+            endif()
+
+            set(enable_vars
+                ENABLE_CXX_LIBS
+                ENABLE_COMPILER_RT_LIBS
+            )
             # The multilib project can be configured to disable QEMU and/or FVP
             # testing, which will need to override the settings from the json.
             if((test_executor STREQUAL "qemu" AND NOT ${ENABLE_QEMU_TESTING}) OR (test_executor STREQUAL "fvp" AND NOT ${ENABLE_FVP_TESTING}))
@@ -229,20 +251,47 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 set(read_ENABLE_COMPILER_RT_TESTS "OFF")
                 set(read_ENABLE_LIBCXX_TESTS "OFF")
             else()
-                # From the json, check which tests are enabled.
-                foreach(test_enable_var
+                list(APPEND enable_vars
                     ENABLE_LIBC_TESTS
                     ENABLE_COMPILER_RT_TESTS
                     ENABLE_LIBCXX_TESTS
                 )
-                    string(JSON read_${test_enable_var} ERROR_VARIABLE json_error GET ${variant_json_str} "args" ${C_LIBRARY} ${test_enable_var})
-                    if(read_${test_enable_var} STREQUAL "json-NOTFOUND")
-                        string(JSON read_${test_enable_var} ERROR_VARIABLE json_error GET ${variant_json_str} "args" "common" ${test_enable_var})
-                        if(read_${test_enable_var} STREQUAL "json-NOTFOUND")
-                            set(read_${test_enable_var} "OFF")
-                        endif()
+            endif()
+
+            # From the json, check which library builds and tests are enabled.
+            foreach(enable_var IN LISTS enable_vars)
+                string(JSON read_${enable_var} ERROR_VARIABLE json_error GET ${variant_json_str} "args" ${json_c_library} ${enable_var})
+                if(read_${enable_var} STREQUAL "json-NOTFOUND")
+                    string(JSON read_${enable_var} ERROR_VARIABLE json_error GET ${variant_json_str} "args" "common" ${enable_var})
+                    if(read_${enable_var} STREQUAL "json-NOTFOUND")
+                        set(read_${enable_var} "OFF")
                     endif()
-                endforeach()
+                endif()
+            endforeach()
+
+            # Only schedule subtargets that the variant build actually creates.
+            set(variant_subtargets)
+            if(read_ENABLE_COMPILER_RT_LIBS)
+                list(APPEND variant_subtargets
+                    compiler_rt-configure
+                    compiler_rt-build
+                )
+            endif()
+            list(APPEND variant_subtargets
+                clib-configure
+                clib-build
+            )
+            if(read_ENABLE_COMPILER_RT_LIBS)
+                list(APPEND variant_subtargets
+                    compiler_rt_profile-configure
+                    compiler_rt_profile-build
+                )
+            endif()
+            if(read_ENABLE_CXX_LIBS)
+                list(APPEND variant_subtargets
+                    cxxlibs-configure
+                    cxxlibs-build
+                )
             endif()
 
             if(NUMERICAL_BUILD_NAMES)
@@ -286,12 +335,13 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 # configuration steps can be run in parallel.
                 # Each step should depend on the previous, with the first depending on the pre-defined
                 # 'configure' step, and the pre-defined 'build' step depending on the last.
-                set(subtarget_deps configure ${subtargets} build)
-                list(SUBLIST subtarget_deps 0 ${subtarget_count} subtarget_dependees)
-                list(SUBLIST subtarget_deps 2 ${subtarget_count} subtarget_dependers)
+                list(LENGTH variant_subtargets variant_subtarget_count)
+                set(subtarget_deps configure ${variant_subtargets} build)
+                list(SUBLIST subtarget_deps 0 ${variant_subtarget_count} subtarget_dependees)
+                list(SUBLIST subtarget_deps 2 ${variant_subtarget_count} subtarget_dependers)
 
                 # First loop to add the steps and targets.
-                foreach(subtarget subtarget_dependee IN ZIP_LISTS subtargets subtarget_dependees)
+                foreach(subtarget subtarget_dependee IN ZIP_LISTS variant_subtargets subtarget_dependees)
                     # Enabling USES_TERMINAL puts the step in Ninja's "console" job pool, which
                     # prevents the steps from being run in parallel since each must be given
                     # exclusive access to the terminal. When disabled, the console won't be updated
@@ -317,7 +367,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 endforeach()
 
                 # Second loop to set the steps that will depend on the new targets.
-                foreach(subtarget subtarget_depender IN ZIP_LISTS subtargets subtarget_dependers)
+                foreach(subtarget subtarget_depender IN ZIP_LISTS variant_subtargets subtarget_dependers)
                     ExternalProject_Add_StepDependencies(
                         runtimes-${variant}
                         ${subtarget_depender}

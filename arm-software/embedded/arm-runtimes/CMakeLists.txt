@@ -24,6 +24,14 @@ get_filename_component(llvmproject_src_dir_abs "${llvmproject_src_dir}" ABSOLUTE
 set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
 set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
+set(LLVM_LIBC_ENABLE_MINOR_VARIANT_def OFF)
+set(LLVM_LIBC_SUBARCHIVE_NAME_def "")
+set(LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS_def "")
+set(LLVM_LIBC_ENTRYPOINT_CONFIG_PATH_def "")
+set(ENABLE_LLVMLIBC_CORE_LIBS_def ON)
+set(ENABLE_LLVMLIBC_SUPPORT_LIBS_def ON)
+set(ENABLE_COMPILER_RT_LIBS_def ON)
+
 set(VARIANT_JSON "" CACHE STRING "JSON file to load args from.")
 if(VARIANT_JSON)
     file(READ ${VARIANT_JSON} variant_json_read)
@@ -97,9 +105,16 @@ set(LIBRARY_BUILD_TYPE ${LIBRARY_BUILD_TYPE_def} CACHE STRING "Build type to use
 set_property(CACHE LIBRARY_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_LIBRARY_BUILD_TYPES})
 
 set(ENABLE_CXX_LIBS ${ENABLE_CXX_LIBS_def} CACHE BOOL "Build CXX libs")
+set(ENABLE_COMPILER_RT_LIBS ${ENABLE_COMPILER_RT_LIBS_def} CACHE BOOL "Build and install the compiler-rt libraries.")
 set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
+set(LLVM_LIBC_ENABLE_MINOR_VARIANT ${LLVM_LIBC_ENABLE_MINOR_VARIANT_def} CACHE BOOL "Install only the llvm-libc minor variant payload for this variant.")
+set(LLVM_LIBC_SUBARCHIVE_NAME ${LLVM_LIBC_SUBARCHIVE_NAME_def} CACHE STRING "llvm-libc subarchive to install when LLVM_LIBC_ENABLE_MINOR_VARIANT is enabled.")
+set(LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS ${LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS_def} CACHE STRING "Semicolon-separated routine names for the llvm-libc minor variant, or '*' for all configured routines.")
+set(LLVM_LIBC_ENTRYPOINT_CONFIG_PATH ${LLVM_LIBC_ENTRYPOINT_CONFIG_PATH_def} CACHE PATH "Downstream LLVM-libc entrypoint configuration used to resolve minor-variant routine names.")
+set(ENABLE_LLVMLIBC_CORE_LIBS ${ENABLE_LLVMLIBC_CORE_LIBS_def} CACHE BOOL "Build and install the library archives from the llvm-libc build.")
+set(ENABLE_LLVMLIBC_SUPPORT_LIBS ${ENABLE_LLVMLIBC_SUPPORT_LIBS_def} CACHE BOOL "Build and install llvmlibc support libraries such as crt0 and semihost.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
 set(LLVM_LIBC_TEST_SYSROOT "" CACHE PATH "Build-tree package-style sysroot for LLVM libc tests.")
 option(LLVM_USE_RELATIVE_PATHS_IN_MACROS "Use relative paths in macro expansions" ON)
@@ -154,6 +169,36 @@ else()
     set(cpu_family arm)
 endif()
 
+# Some llvm-libc variants are packaged as minor layers. The subprojects
+# are still built as normal, but the installed payload is restricted to
+# the files that differ from the base layer.
+if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
+    if(NOT C_LIBRARY STREQUAL llvmlibc)
+        message(FATAL_ERROR "LLVM_LIBC_ENABLE_MINOR_VARIANT is only supported with C_LIBRARY=llvmlibc.")
+    endif()
+    if(NOT LLVM_LIBC_SUBARCHIVE_NAME)
+        message(FATAL_ERROR
+            "LLVM_LIBC_ENABLE_MINOR_VARIANT requires LLVM_LIBC_SUBARCHIVE_NAME to be set")
+    endif()
+    if(NOT LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS)
+        message(FATAL_ERROR
+            "LLVM_LIBC_ENABLE_MINOR_VARIANT requires LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS to be set")
+    endif()
+    if(NOT LLVM_LIBC_ENTRYPOINT_CONFIG_PATH)
+        message(FATAL_ERROR
+            "LLVM_LIBC_ENABLE_MINOR_VARIANT requires LLVM_LIBC_ENTRYPOINT_CONFIG_PATH to be set")
+    endif()
+endif()
+if(NOT ENABLE_COMPILER_RT_LIBS)
+    if(ENABLE_COMPILER_RT_TESTS)
+        message(FATAL_ERROR
+            "ENABLE_COMPILER_RT_TESTS requires ENABLE_COMPILER_RT_LIBS=ON.")
+    endif()
+    if(ENABLE_CXX_LIBS)
+        message(FATAL_ERROR
+            "ENABLE_CXX_LIBS requires ENABLE_COMPILER_RT_LIBS=ON.")
+    endif()
+endif()
 # compiler-rt's upstream atomic builtins require lock-free pointer-size
 # compare/exchange. Armv6K and Armv6ZK have load/store exclusive support, but
 # earlier Arm architectures and Armv6-M use the weak libatomic-fallback from
@@ -378,93 +423,99 @@ set(
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON
 )
 
-ExternalProject_Add(
-    compiler_rt
-    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
-    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
-    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
-    TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
-    SOURCE_DIR ${llvmproject_src_dir}/runtimes
-    INSTALL_DIR compiler-rt/install
-    CMAKE_ARGS
-    ${compiler_rt_common_flags}
-    ${compiler_launcher_cmake_args}
-    ${compiler_rt_cmake_args}
-    ${compiler_rt_test_cmake_args}
-    -DCOMPILER_RT_BUILD_BUILTINS=ON
-    -DCOMPILER_RT_BUILD_PROFILE=OFF
-    STEP_TARGETS configure build install
-    USES_TERMINAL_CONFIGURE TRUE
-    USES_TERMINAL_BUILD TRUE
-    USES_TERMINAL_INSTALL TRUE
-    LIST_SEPARATOR ,
-    CONFIGURE_HANDLED_BY_BUILD TRUE
-    INSTALL_COMMAND ${CMAKE_COMMAND} --install .
-    # Copy compiler-rt lib directory, moving libraries out of their
-    # target-specific subdirectory.
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E copy_directory
-        <INSTALL_DIR>/lib/${normalized_target_triple}
-        "${TEMP_LIB_DIR}/lib"
-)
-
 add_custom_target(check-compiler-rt)
 add_dependencies(check-all check-compiler-rt)
-if(ENABLE_COMPILER_RT_TESTS)
-    ExternalProject_Add_Step(
+set(compiler_rt_install_dependency)
+if(ENABLE_COMPILER_RT_LIBS)
+    ExternalProject_Add(
         compiler_rt
-        check-compiler-rt
-        COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-compiler-rt
-        COMMAND ${Python3_EXECUTABLE}
-        ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
-        --dir <BINARY_DIR>/compiler-rt/test
-        --testsuite compiler-rt-${variant_xml_name}
-        USES_TERMINAL TRUE
-        EXCLUDE_FROM_MAIN TRUE
-        ALWAYS TRUE
+        STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/tmp
+        SOURCE_DIR ${llvmproject_src_dir}/runtimes
+        INSTALL_DIR compiler-rt/install
+        CMAKE_ARGS
+        ${compiler_rt_common_flags}
+        ${compiler_launcher_cmake_args}
+        ${compiler_rt_cmake_args}
+        ${compiler_rt_test_cmake_args}
+        -DCOMPILER_RT_BUILD_BUILTINS=ON
+        -DCOMPILER_RT_BUILD_PROFILE=OFF
+        STEP_TARGETS configure build install
+        USES_TERMINAL_CONFIGURE TRUE
+        USES_TERMINAL_BUILD TRUE
+        USES_TERMINAL_INSTALL TRUE
+        LIST_SEPARATOR ,
+        CONFIGURE_HANDLED_BY_BUILD TRUE
+        INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+        # Copy compiler-rt lib directory, moving libraries out of their
+        # target-specific subdirectory.
+        COMMAND
+            ${CMAKE_COMMAND}
+            -E copy_directory
+            <INSTALL_DIR>/lib/${normalized_target_triple}
+            "${TEMP_LIB_DIR}/lib"
     )
-    ExternalProject_Add_StepTargets(compiler_rt check-compiler-rt)
-    ExternalProject_Add_StepDependencies(
-        compiler_rt
-        check-compiler-rt
-        compiler_rt-build
-        clib-install
-        compiler-rt-xfail-lit-args
-    )
-    add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
+
+    if(ENABLE_COMPILER_RT_TESTS)
+        ExternalProject_Add_Step(
+            compiler_rt
+            check-compiler-rt
+            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-compiler-rt
+            COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
+            --dir <BINARY_DIR>/compiler-rt/test
+            --testsuite compiler-rt-${variant_xml_name}
+            USES_TERMINAL TRUE
+            EXCLUDE_FROM_MAIN TRUE
+            ALWAYS TRUE
+        )
+        ExternalProject_Add_StepTargets(compiler_rt check-compiler-rt)
+        ExternalProject_Add_StepDependencies(
+            compiler_rt
+            check-compiler-rt
+            compiler_rt-build
+            clib-install
+            compiler-rt-xfail-lit-args
+        )
+        add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
+    endif()
+    set(compiler_rt_install_dependency compiler_rt-install)
 endif()
 
 # Build compiler-rt profile library after the C library is available.
-ExternalProject_Add(
-    compiler_rt_profile
-    STAMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/stamp
-    BINARY_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/build
-    DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/dl
-    TMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/tmp
-    SOURCE_DIR ${llvmproject_src_dir}/runtimes
-    INSTALL_DIR compiler-rt-profile/install
-    DEPENDS compiler_rt-install clib-install
-    CMAKE_ARGS
-    ${compiler_rt_common_flags}
-    ${compiler_launcher_cmake_args}
-    ${compiler_rt_cmake_args}
-    -DCOMPILER_RT_BUILD_BUILTINS=OFF
-    -DCOMPILER_RT_BUILD_PROFILE=ON
-    -DCOMPILER_RT_PROFILE_BAREMETAL=ON
-    STEP_TARGETS configure build install
-    USES_TERMINAL_CONFIGURE TRUE
-    USES_TERMINAL_BUILD TRUE
-    USES_TERMINAL_INSTALL TRUE
-    LIST_SEPARATOR ,
-    CONFIGURE_HANDLED_BY_BUILD TRUE
-    INSTALL_COMMAND ${CMAKE_COMMAND} --install .
-    COMMAND
-        ${CMAKE_COMMAND}
-        -E copy_directory
-        <INSTALL_DIR>/lib/${normalized_target_triple}
-        "${TEMP_LIB_DIR}/lib"
-)
+if(ENABLE_COMPILER_RT_LIBS)
+    ExternalProject_Add(
+        compiler_rt_profile
+        STAMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/tmp
+        SOURCE_DIR ${llvmproject_src_dir}/runtimes
+        INSTALL_DIR compiler-rt-profile/install
+        DEPENDS ${compiler_rt_install_dependency} clib-install
+        CMAKE_ARGS
+        ${compiler_rt_common_flags}
+        ${compiler_launcher_cmake_args}
+        ${compiler_rt_cmake_args}
+        -DCOMPILER_RT_BUILD_BUILTINS=OFF
+        -DCOMPILER_RT_BUILD_PROFILE=ON
+        -DCOMPILER_RT_PROFILE_BAREMETAL=ON
+        STEP_TARGETS configure build install
+        USES_TERMINAL_CONFIGURE TRUE
+        USES_TERMINAL_BUILD TRUE
+        USES_TERMINAL_INSTALL TRUE
+        LIST_SEPARATOR ,
+        CONFIGURE_HANDLED_BY_BUILD TRUE
+        INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+        COMMAND
+            ${CMAKE_COMMAND}
+            -E copy_directory
+            <INSTALL_DIR>/lib/${normalized_target_triple}
+            "${TEMP_LIB_DIR}/lib"
+    )
+endif()
 
 ###############################################################################
 # picolibc
@@ -518,7 +569,7 @@ if(C_LIBRARY STREQUAL picolibc)
         TMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${picolibc_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
-        DEPENDS compiler_rt-install
+        DEPENDS ${compiler_rt_install_dependency}
         CONFIGURE_COMMAND
             ${MESON_EXECUTABLE}
             setup
@@ -567,7 +618,7 @@ if(C_LIBRARY STREQUAL picolibc)
             picolibc
             compile-tests
             picolibc-build
-            compiler_rt-install
+            ${compiler_rt_install_dependency}
         )
 
         # Timeout multipliers. The actual timeout value used in testing is:
@@ -795,7 +846,113 @@ endif()
 # llvmlibc
 ###############################################################################
 
+# Load the configured LLVM-libc entrypoints and resolve the routines requested
+# by LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS to their fully qualified target names.
+# The resulting list is returned to the caller through output_variable.
+function(get_llvmlibc_subarchive_entrypoints output_variable)
+    set(entrypoint_config_path
+        "${TOOLCHAIN_SOURCE_DIR}/${LLVM_LIBC_ENTRYPOINT_CONFIG_PATH}")
+    if(NOT EXISTS "${entrypoint_config_path}/entrypoints.txt")
+        message(FATAL_ERROR
+            "LLVM-libc entrypoint configuration not found: "
+            "${entrypoint_config_path}/entrypoints.txt")
+    endif()
+
+    set(TARGET_LLVMLIBC_ENTRYPOINTS "")
+    set(TARGET_LIBC_ENTRYPOINTS "")
+    set(TARGET_LIBM_ENTRYPOINTS "")
+    set(TARGET_LIBMVEC_ENTRYPOINTS "")
+    set(LIBC_SOURCE_DIR "${llvmproject_src_dir}/libc")
+    include("${entrypoint_config_path}/entrypoints.txt")
+
+    set(resolved_entrypoints "")
+    # Treat "*" as a request to include every entrypoint from the configuration.
+    if("*" IN_LIST LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS)
+        set(resolved_entrypoints ${TARGET_LLVMLIBC_ENTRYPOINTS})
+    else()
+        # Match each requested routine name against the final component of the
+        # fully qualified entrypoints provided by the configuration.
+        foreach(routine IN LISTS LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS)
+            set(routine_matches "")
+            foreach(entrypoint IN LISTS TARGET_LLVMLIBC_ENTRYPOINTS)
+                string(REGEX REPLACE "^.*\\." "" entrypoint_routine
+                    "${entrypoint}")
+                if(entrypoint_routine STREQUAL routine)
+                    list(APPEND routine_matches "${entrypoint}")
+                endif()
+            endforeach()
+            # Reject unknown routines instead of silently creating an
+            # incomplete subarchive.
+            if(NOT routine_matches)
+                message(FATAL_ERROR
+                    "LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS routine '${routine}' "
+                    "is not present in ${entrypoint_config_path}/entrypoints.txt")
+            endif()
+            list(APPEND resolved_entrypoints ${routine_matches})
+        endforeach()
+    endif()
+    list(REMOVE_DUPLICATES resolved_entrypoints)
+
+    set(${output_variable} ${resolved_entrypoints} PARENT_SCOPE)
+endfunction()
+
+# Build the command used to run only the hermetic tests belonging to a minor
+# LLVM-libc variant. Test targets and lit directories are derived from the
+# resolved llvmlibc_subarchive_entrypoints list, and the command is returned
+# to the caller through output_variable.
+function(make_llvmlibc_minor_variant_lit_command output_variable)
+    separate_arguments(lit_args_list NATIVE_COMMAND "${llvmlibc_lit_args}")
+
+    set(lit_test_dirs "")
+    set(lit_build_targets "")
+    # Convert each fully qualified entrypoint into its corresponding source
+    # directory, test name, and hermetic test build target.
+    foreach(entrypoint IN LISTS llvmlibc_subarchive_entrypoints)
+        if(entrypoint MATCHES "^libc\\.src\\.(.+)\\.[^.]+$")
+            set(test_dir "${CMAKE_MATCH_1}")
+            set(test_dir_for_target "${test_dir}")
+            string(REPLACE "." "/" test_dir "${test_dir}")
+            string(REGEX REPLACE "^.*\\.([^.]+)$" "\\1" test_name
+                "${entrypoint}")
+            set(test_cmake_path
+                "${llvmproject_src_dir}/libc/test/src/${test_dir}/CMakeLists.txt")
+            # Some entrypoints do not have a standalone test, so include only
+            # tests that have both a source file and a CMake definition.
+            if(EXISTS "${llvmproject_src_dir}/libc/test/src/${test_dir}/${test_name}_test.cpp"
+                    AND EXISTS "${test_cmake_path}")
+                set(test_target_name "${test_name}_test")
+                list(APPEND lit_test_dirs
+                    <BINARY_DIR>/libc/test/src/${test_dir})
+                list(APPEND lit_build_targets
+                    "libc.test.src.${test_dir_for_target}.${test_target_name}.__build__")
+            endif()
+        endif()
+    endforeach()
+    list(REMOVE_DUPLICATES lit_test_dirs)
+    list(REMOVE_DUPLICATES lit_build_targets)
+
+    if(NOT lit_build_targets)
+        message(FATAL_ERROR
+            "No LLVM-libc hermetic test targets could be derived from "
+            "LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS")
+    endif()
+
+    set(${output_variable}
+        "${CMAKE_COMMAND}" --build <BINARY_DIR> --target ${lit_build_targets}
+        COMMAND ${Python3_EXECUTABLE} ${external_lit_path}
+            ${lit_args_list} ${lit_test_dirs}
+        PARENT_SCOPE
+    )
+endfunction()
+
 if(C_LIBRARY STREQUAL llvmlibc)
+    set(llvmlibc_subarchive_entrypoints "")
+    if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
+        get_llvmlibc_subarchive_entrypoints(
+            llvmlibc_subarchive_entrypoints
+        )
+    endif()
+
     set(test_cmd "${lit_test_executor} @BINARY@")
     set(lib_compile_flags "${lib_compile_flags} -Wno-error=atomic-alignment")
     set(enable_dummypackeys OFF)
@@ -877,7 +1034,47 @@ if(C_LIBRARY STREQUAL llvmlibc)
         # Let CMake know we're cross-compiling
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
+        -DLLVM_LIBC_ENABLE_MINOR_VARIANT=${LLVM_LIBC_ENABLE_MINOR_VARIANT}
+        -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVM_LIBC_SUBARCHIVE_NAME}
     )
+    # ExternalProject uses ',' as its list separator below. Encode the CMake
+    # list here so it reaches the LLVM libc configure as one -D argument and
+    # is restored to a semicolon-separated list there.
+    list(JOIN llvmlibc_subarchive_entrypoints ","
+        llvmlibc_subarchive_entrypoints_arg)
+    list(APPEND common_llvmlibc_cmake_args
+        -DLLVM_LIBC_SUBARCHIVE_ENTRYPOINTS=${llvmlibc_subarchive_entrypoints_arg})
+
+    set(llvmlibc_build_install_args)
+    if(ENABLE_LLVMLIBC_CORE_LIBS OR LLVM_LIBC_ENABLE_MINOR_VARIANT)
+        # Run full llvmlibc install, then copy lib + include.
+        list(APPEND llvmlibc_build_install_args
+            INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+            COMMAND
+                ${CMAKE_COMMAND}
+                -E copy_directory
+                <INSTALL_DIR>/lib/${target_triple}
+                "${TEMP_LIB_DIR}/lib"
+            COMMAND
+                ${CMAKE_COMMAND}
+                -E copy_directory
+                <INSTALL_DIR>/include/${target_triple}
+                "${TEMP_LIB_DIR}/include"
+        )
+    else()
+        # Build only install-libc-headers, then copy include.
+        list(APPEND llvmlibc_build_install_args
+            BUILD_COMMAND
+                ${CMAKE_COMMAND}
+                --build <BINARY_DIR>
+                --target install-libc-headers
+            INSTALL_COMMAND
+                ${CMAKE_COMMAND}
+                -E copy_directory
+                <INSTALL_DIR>/include/${target_triple}
+                "${TEMP_LIB_DIR}/include"
+        )
+    endif()
 
     ExternalProject_Add(
         llvmlibc
@@ -913,56 +1110,54 @@ if(C_LIBRARY STREQUAL llvmlibc)
         USES_TERMINAL_INSTALL TRUE
         LIST_SEPARATOR ,
         CONFIGURE_HANDLED_BY_BUILD TRUE
-        INSTALL_COMMAND ${CMAKE_COMMAND} --install .
-        # Copy llvm-libc lib directory, moving libraries out of their
-        # target-specific subdirectory.
-        COMMAND
-            ${CMAKE_COMMAND}
-            -E copy_directory
-            <INSTALL_DIR>/lib/${target_triple}
-            "${TEMP_LIB_DIR}/lib"
-        # Also copy the includes from their target-specific subdirectory.
-        COMMAND
-            ${CMAKE_COMMAND}
-            -E copy_directory
-            <INSTALL_DIR>/include/${target_triple}
-            "${TEMP_LIB_DIR}/include"
+        ${llvmlibc_build_install_args}
     )
 
-    ExternalProject_Add(
-        llvmlibc-support
-        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
-        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
-        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
-        TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
-        SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
-        INSTALL_DIR ${TEMP_LIB_DIR}
-        DEPENDS ${lib_tool_dependencies} llvmlibc-install
-        CMAKE_ARGS
-        ${compiler_launcher_cmake_args}
-        ${common_llvmlibc_cmake_args}
-        -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
-        -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
-        -DFLASH_ADDRESS=${FLASH_ADDRESS}
-        -DFLASH_SIZE=${FLASH_SIZE}
-        -DRAM_ADDRESS=${RAM_ADDRESS}
-        -DRAM_SIZE=${RAM_SIZE}
-        -DSTACK_SIZE=${STACK_SIZE}
-        -DLLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS=${enable_dummypackeys}
-        -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
-        STEP_TARGETS build install
-        USES_TERMINAL_CONFIGURE TRUE
-        USES_TERMINAL_BUILD TRUE
-        USES_TERMINAL_INSTALL TRUE
-        USES_TERMINAL_TEST TRUE
-        LIST_SEPARATOR ,
-        CONFIGURE_HANDLED_BY_BUILD TRUE
-    )
+    if(ENABLE_LLVMLIBC_SUPPORT_LIBS)
+        ExternalProject_Add(
+            llvmlibc-support
+            STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
+            BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
+            DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
+            TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
+            SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
+            INSTALL_DIR ${TEMP_LIB_DIR}
+            DEPENDS ${lib_tool_dependencies} llvmlibc-install
+            CMAKE_ARGS
+            ${compiler_launcher_cmake_args}
+            ${common_llvmlibc_cmake_args}
+            -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
+            -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
+            -DFLASH_ADDRESS=${FLASH_ADDRESS}
+            -DFLASH_SIZE=${FLASH_SIZE}
+            -DRAM_ADDRESS=${RAM_ADDRESS}
+            -DRAM_SIZE=${RAM_SIZE}
+            -DSTACK_SIZE=${STACK_SIZE}
+            -DLLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS=${enable_dummypackeys}
+            -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
+            STEP_TARGETS build install
+            USES_TERMINAL_CONFIGURE TRUE
+            USES_TERMINAL_BUILD TRUE
+            USES_TERMINAL_INSTALL TRUE
+            USES_TERMINAL_TEST TRUE
+            LIST_SEPARATOR ,
+            CONFIGURE_HANDLED_BY_BUILD TRUE
+        )
+    endif()
 
     if(ENABLE_LIBC_TESTS)
         add_custom_target(check-llvmlibc)
         add_custom_target(check-llvmlibc-lit)
         add_dependencies(check-all check-llvmlibc)
+
+        set(llvmlibc_check_lit_command
+            "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc
+        )
+        if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
+            make_llvmlibc_minor_variant_lit_command(
+                llvmlibc_check_lit_command
+            )
+        endif()
 
         ExternalProject_Add_Step(
             llvmlibc
@@ -977,7 +1172,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ExternalProject_Add_Step(
             llvmlibc
             check-lit
-            COMMAND "${CMAKE_COMMAND}" --build <BINARY_DIR> --target check-libc
+            COMMAND ${llvmlibc_check_lit_command}
             COMMAND ${Python3_EXECUTABLE}
             ${CMAKE_CURRENT_SOURCE_DIR}/test-support/update-xml-suitename.py
             --dir <BINARY_DIR>/libc/test
@@ -990,21 +1185,24 @@ if(C_LIBRARY STREQUAL llvmlibc)
 
         ExternalProject_Add_StepTargets(llvmlibc check)
         ExternalProject_Add_StepTargets(llvmlibc check-lit)
+        set(llvmlibc_test_dependencies
+            llvmlibc-build
+            ${compiler_rt_install_dependency}
+            cxxlibs-install
+        )
+        if(ENABLE_LLVMLIBC_SUPPORT_LIBS)
+            list(APPEND llvmlibc_test_dependencies llvmlibc-support-build)
+        endif()
+
         ExternalProject_Add_StepDependencies(
             llvmlibc
             check
-            llvmlibc-build
-            llvmlibc-support-build
-            compiler_rt-install
-            cxxlibs-install
+            ${llvmlibc_test_dependencies}
         )
         ExternalProject_Add_StepDependencies(
             llvmlibc
             check-lit
-            llvmlibc-build
-            llvmlibc-support-build
-            compiler_rt-install
-            cxxlibs-install
+            ${llvmlibc_test_dependencies}
             llvmlibc-xfail-lit-args
         )
         
@@ -1114,7 +1312,7 @@ if(ENABLE_CXX_LIBS)
         TMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR ${TEMP_LIB_DIR}
-        DEPENDS compiler_rt-install clib-install
+        DEPENDS ${compiler_rt_install_dependency} clib-install
         CMAKE_ARGS
         ${compiler_launcher_cmake_args}
         -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
