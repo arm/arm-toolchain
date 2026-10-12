@@ -233,7 +233,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
             # C library, so place them in a group named after that subarchive.
             string(JSON llvm_libc_minor_variant ERROR_VARIABLE json_error
                 GET ${variant_json_str} "args" ${json_c_library} "LLVM_LIBC_ENABLE_MINOR_VARIANT")
-            if(llvm_libc_minor_variant STREQUAL "ON")
+            if(llvm_libc_minor_variant)
                 string(JSON llvm_libc_subarchive_name
                     GET ${variant_json_str} "args" ${json_c_library} "LLVM_LIBC_SUBARCHIVE_NAME")
                 set(variant_group "${llvm_libc_subarchive_name}_libs")

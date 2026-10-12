@@ -28,8 +28,6 @@ set(LLVM_LIBC_ENABLE_MINOR_VARIANT_def OFF)
 set(LLVM_LIBC_SUBARCHIVE_NAME_def "")
 set(LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS_def "")
 set(LLVM_LIBC_ENTRYPOINT_CONFIG_PATH_def "")
-set(ENABLE_LLVMLIBC_CORE_LIBS_def ON)
-set(ENABLE_LLVMLIBC_SUPPORT_LIBS_def ON)
 set(ENABLE_COMPILER_RT_LIBS_def ON)
 
 set(VARIANT_JSON "" CACHE STRING "JSON file to load args from.")
@@ -113,8 +111,6 @@ set(LLVM_LIBC_ENABLE_MINOR_VARIANT ${LLVM_LIBC_ENABLE_MINOR_VARIANT_def} CACHE B
 set(LLVM_LIBC_SUBARCHIVE_NAME ${LLVM_LIBC_SUBARCHIVE_NAME_def} CACHE STRING "llvm-libc subarchive to install when LLVM_LIBC_ENABLE_MINOR_VARIANT is enabled.")
 set(LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS ${LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS_def} CACHE STRING "Semicolon-separated routine names for the llvm-libc minor variant, or '*' for all configured routines.")
 set(LLVM_LIBC_ENTRYPOINT_CONFIG_PATH ${LLVM_LIBC_ENTRYPOINT_CONFIG_PATH_def} CACHE PATH "Downstream LLVM-libc entrypoint configuration used to resolve minor-variant routine names.")
-set(ENABLE_LLVMLIBC_CORE_LIBS ${ENABLE_LLVMLIBC_CORE_LIBS_def} CACHE BOOL "Build and install the library archives from the llvm-libc build.")
-set(ENABLE_LLVMLIBC_SUPPORT_LIBS ${ENABLE_LLVMLIBC_SUPPORT_LIBS_def} CACHE BOOL "Build and install llvmlibc support libraries such as crt0 and semihost.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
 set(LLVM_LIBC_TEST_SYSROOT "" CACHE PATH "Build-tree package-style sysroot for LLVM libc tests.")
 option(LLVM_USE_RELATIVE_PATHS_IN_MACROS "Use relative paths in macro expansions" ON)
@@ -190,6 +186,10 @@ if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
     endif()
 endif()
 if(NOT ENABLE_COMPILER_RT_LIBS)
+    if(NOT C_LIBRARY STREQUAL "llvmlibc" OR NOT LLVM_LIBC_ENABLE_MINOR_VARIANT)
+        message(FATAL_ERROR
+            "ENABLE_COMPILER_RT_LIBS may only be disabled for an llvm-libc minor variant.")
+    endif()
     if(ENABLE_COMPILER_RT_TESTS)
         message(FATAL_ERROR
             "ENABLE_COMPILER_RT_TESTS requires ENABLE_COMPILER_RT_LIBS=ON.")
@@ -1035,45 +1035,17 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DCMAKE_SYSTEM_NAME=Generic
         -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
         -DLLVM_LIBC_ENABLE_MINOR_VARIANT=${LLVM_LIBC_ENABLE_MINOR_VARIANT}
-        -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVM_LIBC_SUBARCHIVE_NAME}
     )
-    # ExternalProject uses ',' as its list separator below. Encode the CMake
-    # list here so it reaches the LLVM libc configure as one -D argument and
-    # is restored to a semicolon-separated list there.
-    list(JOIN llvmlibc_subarchive_entrypoints ","
-        llvmlibc_subarchive_entrypoints_arg)
-    list(APPEND common_llvmlibc_cmake_args
-        -DLLVM_LIBC_SUBARCHIVE_ENTRYPOINTS=${llvmlibc_subarchive_entrypoints_arg})
-
-    set(llvmlibc_build_install_args)
-    if(ENABLE_LLVMLIBC_CORE_LIBS OR LLVM_LIBC_ENABLE_MINOR_VARIANT)
-        # Run full llvmlibc install, then copy lib + include.
-        list(APPEND llvmlibc_build_install_args
-            INSTALL_COMMAND ${CMAKE_COMMAND} --install .
-            COMMAND
-                ${CMAKE_COMMAND}
-                -E copy_directory
-                <INSTALL_DIR>/lib/${target_triple}
-                "${TEMP_LIB_DIR}/lib"
-            COMMAND
-                ${CMAKE_COMMAND}
-                -E copy_directory
-                <INSTALL_DIR>/include/${target_triple}
-                "${TEMP_LIB_DIR}/include"
-        )
-    else()
-        # Build only install-libc-headers, then copy include.
-        list(APPEND llvmlibc_build_install_args
-            BUILD_COMMAND
-                ${CMAKE_COMMAND}
-                --build <BINARY_DIR>
-                --target install-libc-headers
-            INSTALL_COMMAND
-                ${CMAKE_COMMAND}
-                -E copy_directory
-                <INSTALL_DIR>/include/${target_triple}
-                "${TEMP_LIB_DIR}/include"
-        )
+    if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
+        list(APPEND common_llvmlibc_cmake_args
+            -DLLVM_LIBC_SUBARCHIVE_NAME=${LLVM_LIBC_SUBARCHIVE_NAME})
+        # ExternalProject uses ',' as its list separator below. Encode the CMake
+        # list here so it reaches the LLVM libc configure as one -D argument and
+        # is restored to a semicolon-separated list there.
+        list(JOIN llvmlibc_subarchive_entrypoints ","
+            llvmlibc_subarchive_entrypoints_arg)
+        list(APPEND common_llvmlibc_cmake_args
+            -DLLVM_LIBC_SUBARCHIVE_ENTRYPOINTS=${llvmlibc_subarchive_entrypoints_arg})
     endif()
 
     ExternalProject_Add(
@@ -1110,40 +1082,51 @@ if(C_LIBRARY STREQUAL llvmlibc)
         USES_TERMINAL_INSTALL TRUE
         LIST_SEPARATOR ,
         CONFIGURE_HANDLED_BY_BUILD TRUE
-        ${llvmlibc_build_install_args}
+        INSTALL_COMMAND ${CMAKE_COMMAND} --install .
+        # Copy llvm-libc lib directory, moving libraries out of their
+        # target-specific subdirectory.
+        COMMAND
+            ${CMAKE_COMMAND}
+            -E copy_directory
+            <INSTALL_DIR>/lib/${target_triple}
+            "${TEMP_LIB_DIR}/lib"
+        # Also copy the includes from their target-specific subdirectory.
+        COMMAND
+            ${CMAKE_COMMAND}
+            -E copy_directory
+            <INSTALL_DIR>/include/${target_triple}
+            "${TEMP_LIB_DIR}/include"
     )
 
-    if(ENABLE_LLVMLIBC_SUPPORT_LIBS)
-        ExternalProject_Add(
-            llvmlibc-support
-            STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
-            BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
-            DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
-            TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
-            SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
-            INSTALL_DIR ${TEMP_LIB_DIR}
-            DEPENDS ${lib_tool_dependencies} llvmlibc-install
-            CMAKE_ARGS
-            ${compiler_launcher_cmake_args}
-            ${common_llvmlibc_cmake_args}
-            -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
-            -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
-            -DFLASH_ADDRESS=${FLASH_ADDRESS}
-            -DFLASH_SIZE=${FLASH_SIZE}
-            -DRAM_ADDRESS=${RAM_ADDRESS}
-            -DRAM_SIZE=${RAM_SIZE}
-            -DSTACK_SIZE=${STACK_SIZE}
-            -DLLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS=${enable_dummypackeys}
-            -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
-            STEP_TARGETS build install
-            USES_TERMINAL_CONFIGURE TRUE
-            USES_TERMINAL_BUILD TRUE
-            USES_TERMINAL_INSTALL TRUE
-            USES_TERMINAL_TEST TRUE
-            LIST_SEPARATOR ,
-            CONFIGURE_HANDLED_BY_BUILD TRUE
-        )
-    endif()
+    ExternalProject_Add(
+        llvmlibc-support
+        STAMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/stamp
+        BINARY_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/build
+        DOWNLOAD_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/dl
+        TMP_DIR ${PROJECT_PREFIX}/llvmlibc-support/${VARIANT_BUILD_ID}/tmp
+        SOURCE_DIR ${TOOLCHAIN_SOURCE_DIR}/llvmlibc-support
+        INSTALL_DIR ${TEMP_LIB_DIR}
+        DEPENDS ${lib_tool_dependencies} llvmlibc-install
+        CMAKE_ARGS
+        ${compiler_launcher_cmake_args}
+        ${common_llvmlibc_cmake_args}
+        -DBOOT_FLASH_ADDRESS=${BOOT_FLASH_ADDRESS}
+        -DBOOT_FLASH_SIZE=${BOOT_FLASH_SIZE}
+        -DFLASH_ADDRESS=${FLASH_ADDRESS}
+        -DFLASH_SIZE=${FLASH_SIZE}
+        -DRAM_ADDRESS=${RAM_ADDRESS}
+        -DRAM_SIZE=${RAM_SIZE}
+        -DSTACK_SIZE=${STACK_SIZE}
+        -DLLVMLIBC_SUPPORT_ENABLE_DUMMYPACKEYS=${enable_dummypackeys}
+        -DLLVM_USE_RELATIVE_PATHS_IN_MACROS=${LLVM_USE_RELATIVE_PATHS_IN_MACROS}
+        STEP_TARGETS build install
+        USES_TERMINAL_CONFIGURE TRUE
+        USES_TERMINAL_BUILD TRUE
+        USES_TERMINAL_INSTALL TRUE
+        USES_TERMINAL_TEST TRUE
+        LIST_SEPARATOR ,
+        CONFIGURE_HANDLED_BY_BUILD TRUE
+    )
 
     if(ENABLE_LIBC_TESTS)
         add_custom_target(check-llvmlibc)
@@ -1187,12 +1170,10 @@ if(C_LIBRARY STREQUAL llvmlibc)
         ExternalProject_Add_StepTargets(llvmlibc check-lit)
         set(llvmlibc_test_dependencies
             llvmlibc-build
+            llvmlibc-support-build
             ${compiler_rt_install_dependency}
             cxxlibs-install
         )
-        if(ENABLE_LLVMLIBC_SUPPORT_LIBS)
-            list(APPEND llvmlibc_test_dependencies llvmlibc-support-build)
-        endif()
 
         ExternalProject_Add_StepDependencies(
             llvmlibc
