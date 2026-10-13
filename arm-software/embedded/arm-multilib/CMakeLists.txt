@@ -237,6 +237,14 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 string(JSON llvm_libc_subarchive_name
                     GET ${variant_json_str} "args" ${json_c_library} "LLVM_LIBC_SUBARCHIVE_NAME")
                 set(variant_group "${llvm_libc_subarchive_name}_libs")
+                string(JSON llvm_libc_base_variant ERROR_VARIABLE json_error
+                    GET ${variant_json_str} "args" ${json_c_library} "LLVM_LIBC_BASE_VARIANT")
+                if(llvm_libc_base_variant STREQUAL "LLVM_LIBC_BASE_VARIANT-NOTFOUND")
+                    message(FATAL_ERROR
+                        "LLVM libc minor variant ${variant} does not specify LLVM_LIBC_BASE_VARIANT")
+                endif()
+                list(APPEND llvm_libc_minor_variants ${variant})
+                list(APPEND llvm_libc_base_variants ${llvm_libc_base_variant})
             endif()
 
             set(enable_vars
@@ -442,6 +450,17 @@ foreach(lib_idx RANGE ${lib_count_dec})
         endif()
     endif()
 
+endforeach()
+
+# Tests for a minor LLVM libc variant use artifacts from its base variant.
+# Build each required base before creating the test sysroot.
+foreach(minor_variant base_variant IN ZIP_LISTS llvm_libc_minor_variants llvm_libc_base_variants)
+    if(NOT base_variant IN_LIST enabled_variants)
+        message(FATAL_ERROR
+            "LLVM libc minor variant ${minor_variant} requires base variant "
+            "${base_variant}, but ${base_variant} is not enabled")
+    endif()
+    add_dependencies(llvmlibc-test-sysroot runtimes-${base_variant}-build)
 endforeach()
 
 # Check that all variants that were configured to be enabled
