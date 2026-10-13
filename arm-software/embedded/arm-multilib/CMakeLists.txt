@@ -241,7 +241,6 @@ foreach(lib_idx RANGE ${lib_count_dec})
 
             set(enable_vars
                 ENABLE_CXX_LIBS
-                ENABLE_COMPILER_RT_LIBS
             )
             # The multilib project can be configured to disable QEMU and/or FVP
             # testing, which will need to override the settings from the json.
@@ -271,7 +270,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
 
             # Only schedule subtargets that the variant build actually creates.
             set(variant_subtargets)
-            if(read_ENABLE_COMPILER_RT_LIBS)
+            if(NOT llvm_libc_minor_variant)
                 list(APPEND variant_subtargets
                     compiler_rt-configure
                     compiler_rt-build
@@ -281,7 +280,7 @@ foreach(lib_idx RANGE ${lib_count_dec})
                 clib-configure
                 clib-build
             )
-            if(read_ENABLE_COMPILER_RT_LIBS)
+            if(NOT llvm_libc_minor_variant)
                 list(APPEND variant_subtargets
                     compiler_rt_profile-configure
                     compiler_rt_profile-build

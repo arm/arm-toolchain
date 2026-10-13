@@ -28,7 +28,6 @@ set(LLVM_LIBC_ENABLE_MINOR_VARIANT_def OFF)
 set(LLVM_LIBC_SUBARCHIVE_NAME_def "")
 set(LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS_def "")
 set(LLVM_LIBC_ENTRYPOINT_CONFIG_PATH_def "")
-set(ENABLE_COMPILER_RT_LIBS_def ON)
 
 set(VARIANT_JSON "" CACHE STRING "JSON file to load args from.")
 if(VARIANT_JSON)
@@ -103,7 +102,6 @@ set(LIBRARY_BUILD_TYPE ${LIBRARY_BUILD_TYPE_def} CACHE STRING "Build type to use
 set_property(CACHE LIBRARY_BUILD_TYPE PROPERTY STRINGS ${SUPPORTED_LIBRARY_BUILD_TYPES})
 
 set(ENABLE_CXX_LIBS ${ENABLE_CXX_LIBS_def} CACHE BOOL "Build CXX libs")
-set(ENABLE_COMPILER_RT_LIBS ${ENABLE_COMPILER_RT_LIBS_def} CACHE BOOL "Build and install the compiler-rt libraries.")
 set(ENABLE_LIBC_TESTS ${ENABLE_LIBC_TESTS_def} CACHE BOOL "Enable libc tests (picolibc, newlib, newlib-nano or llvm-libc).")
 set(ENABLE_COMPILER_RT_TESTS ${ENABLE_COMPILER_RT_TESTS_def} CACHE BOOL "Enable compiler-rt tests.")
 set(ENABLE_LIBCXX_TESTS ${ENABLE_LIBCXX_TESTS_def} CACHE BOOL "Enable libcxx tests.")
@@ -185,18 +183,14 @@ if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
             "LLVM_LIBC_ENABLE_MINOR_VARIANT requires LLVM_LIBC_ENTRYPOINT_CONFIG_PATH to be set")
     endif()
 endif()
-if(NOT ENABLE_COMPILER_RT_LIBS)
-    if(NOT C_LIBRARY STREQUAL "llvmlibc" OR NOT LLVM_LIBC_ENABLE_MINOR_VARIANT)
-        message(FATAL_ERROR
-            "ENABLE_COMPILER_RT_LIBS may only be disabled for an llvm-libc minor variant.")
-    endif()
+if(LLVM_LIBC_ENABLE_MINOR_VARIANT)
     if(ENABLE_COMPILER_RT_TESTS)
         message(FATAL_ERROR
-            "ENABLE_COMPILER_RT_TESTS requires ENABLE_COMPILER_RT_LIBS=ON.")
+            "ENABLE_COMPILER_RT_TESTS is not supported for an llvm-libc minor variant.")
     endif()
     if(ENABLE_CXX_LIBS)
         message(FATAL_ERROR
-            "ENABLE_CXX_LIBS requires ENABLE_COMPILER_RT_LIBS=ON.")
+            "ENABLE_CXX_LIBS is not supported for an llvm-libc minor variant.")
     endif()
 endif()
 # compiler-rt's upstream atomic builtins require lock-free pointer-size
@@ -425,8 +419,7 @@ set(
 
 add_custom_target(check-compiler-rt)
 add_dependencies(check-all check-compiler-rt)
-set(compiler_rt_install_dependency)
-if(ENABLE_COMPILER_RT_LIBS)
+if(NOT LLVM_LIBC_ENABLE_MINOR_VARIANT)
     ExternalProject_Add(
         compiler_rt
         STAMP_DIR ${PROJECT_PREFIX}/compiler_rt/${VARIANT_BUILD_ID}/stamp
@@ -481,11 +474,10 @@ if(ENABLE_COMPILER_RT_LIBS)
         )
         add_dependencies(check-compiler-rt compiler_rt-check-compiler-rt)
     endif()
-    set(compiler_rt_install_dependency compiler_rt-install)
 endif()
 
 # Build compiler-rt profile library after the C library is available.
-if(ENABLE_COMPILER_RT_LIBS)
+if(NOT LLVM_LIBC_ENABLE_MINOR_VARIANT)
     ExternalProject_Add(
         compiler_rt_profile
         STAMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/stamp
@@ -494,7 +486,7 @@ if(ENABLE_COMPILER_RT_LIBS)
         TMP_DIR ${PROJECT_PREFIX}/compiler_rt_profile/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR compiler-rt-profile/install
-        DEPENDS ${compiler_rt_install_dependency} clib-install
+        DEPENDS compiler_rt-install clib-install
         CMAKE_ARGS
         ${compiler_rt_common_flags}
         ${compiler_launcher_cmake_args}
@@ -569,7 +561,7 @@ if(C_LIBRARY STREQUAL picolibc)
         TMP_DIR ${PROJECT_PREFIX}/picolibc/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${picolibc_SOURCE_DIR}
         INSTALL_DIR ${TEMP_LIB_DIR}
-        DEPENDS ${compiler_rt_install_dependency}
+        DEPENDS compiler_rt-install
         CONFIGURE_COMMAND
             ${MESON_EXECUTABLE}
             setup
@@ -618,7 +610,7 @@ if(C_LIBRARY STREQUAL picolibc)
             picolibc
             compile-tests
             picolibc-build
-            ${compiler_rt_install_dependency}
+            compiler_rt-install
         )
 
         # Timeout multipliers. The actual timeout value used in testing is:
@@ -1171,9 +1163,11 @@ if(C_LIBRARY STREQUAL llvmlibc)
         set(llvmlibc_test_dependencies
             llvmlibc-build
             llvmlibc-support-build
-            ${compiler_rt_install_dependency}
             cxxlibs-install
         )
+        if(NOT LLVM_LIBC_ENABLE_MINOR_VARIANT)
+            list(APPEND llvmlibc_test_dependencies compiler_rt-install)
+        endif()
 
         ExternalProject_Add_StepDependencies(
             llvmlibc
@@ -1293,7 +1287,7 @@ if(ENABLE_CXX_LIBS)
         TMP_DIR ${PROJECT_PREFIX}/cxxlibs/${VARIANT_BUILD_ID}/tmp
         SOURCE_DIR ${llvmproject_src_dir}/runtimes
         INSTALL_DIR ${TEMP_LIB_DIR}
-        DEPENDS ${compiler_rt_install_dependency} clib-install
+        DEPENDS compiler_rt-install clib-install
         CMAKE_ARGS
         ${compiler_launcher_cmake_args}
         -DCMAKE_AR=${LLVM_BINARY_DIR}/bin/llvm-ar${CMAKE_EXECUTABLE_SUFFIX}
