@@ -283,6 +283,18 @@ static void instructionCountersPass(ModulePassManager &MPM,
   }
 }
 
+// Add passes to run at the start of the pipeline. This includes things like
+// statistics passes.
+static void addPipelineStartPasses(ModulePassManager &MPM) {
+  instructionCountersPass(MPM, /*IsPreOptimization=*/true);
+}
+
+// Add passes to run at the end of the pipeline. This includes things like
+// statistics passes.
+static void addPipelineEndPasses(ModulePassManager &MPM) {
+  instructionCountersPass(MPM, /*IsPreOptimization=*/false);
+}
+
 // Helper to add AnnotationRemarksPass.
 static void addAnnotationRemarksPass(ModulePassManager &MPM) {
   MPM.addPass(createModuleToFunctionPassAdaptor(AnnotationRemarksPass()));
@@ -1625,7 +1637,7 @@ PassBuilder::buildPerModuleDefaultPipeline(OptimizationLevel Level,
     return buildO0DefaultPipeline(Level, Phase);
 
   ModulePassManager MPM;
-  instructionCountersPass(MPM, /* IsPreOptimization */ true);
+  addPipelineStartPasses(MPM);
   // Currently this pipeline is only invoked in an LTO pre link pass or when we
   // are not running LTO. If that changes the below checks may need updating.
   assert(isLTOPreLink(Phase) || Phase == ThinOrFullLTOPhase::None);
@@ -1667,7 +1679,7 @@ PassBuilder::buildPerModuleDefaultPipeline(OptimizationLevel Level,
   if (isLTOPreLink(Phase))
     addRequiredLTOPreLinkPasses(MPM);
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ false);
+  addPipelineEndPasses(MPM);
   return MPM;
 }
 
@@ -1676,7 +1688,7 @@ PassBuilder::buildFatLTODefaultPipeline(OptimizationLevel Level, bool ThinLTO,
                                         bool EmitSummary, bool Verify) {
   ModulePassManager MPM;
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ true);
+  addPipelineStartPasses(MPM);
 
   if (ThinLTO)
     MPM.addPass(buildThinLTOPreLinkDefaultPipeline(Level));
@@ -1727,7 +1739,7 @@ PassBuilder::buildFatLTODefaultPipeline(OptimizationLevel Level, bool ThinLTO,
     addAnnotationRemarksPass(MPM);
   }
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ false);
+  addPipelineEndPasses(MPM);
 
   return MPM;
 }
@@ -1739,7 +1751,7 @@ PassBuilder::buildThinLTOPreLinkDefaultPipeline(OptimizationLevel Level) {
 
   ModulePassManager MPM;
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ true);
+  addPipelineStartPasses(MPM);
 
   // Convert @llvm.global.annotations to !annotation metadata.
   MPM.addPass(Annotation2MetadataPass());
@@ -1796,7 +1808,7 @@ PassBuilder::buildThinLTOPreLinkDefaultPipeline(OptimizationLevel Level) {
 
   addRequiredLTOPreLinkPasses(MPM);
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ false);
+  addPipelineEndPasses(MPM);
 
   return MPM;
 }
@@ -1805,7 +1817,7 @@ ModulePassManager PassBuilder::buildThinLTODefaultPipeline(
     OptimizationLevel Level, const ModuleSummaryIndex *ImportSummary) {
   ModulePassManager MPM;
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ true);
+  addPipelineStartPasses(MPM);
 
   invokeThinLinkTimeOptimizationEarlyEPCallbacks(MPM, Level);
 
@@ -1878,7 +1890,7 @@ ModulePassManager PassBuilder::buildThinLTODefaultPipeline(
   // Emit annotation remarks.
   addAnnotationRemarksPass(MPM);
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ false);
+  addPipelineEndPasses(MPM);
 
   return MPM;
 }
@@ -1895,7 +1907,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
                                      ModuleSummaryIndex *ExportSummary) {
   ModulePassManager MPM;
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ true);
+  addPipelineStartPasses(MPM);
 
   invokeFullLinkTimeOptimizationEarlyEPCallbacks(MPM, Level);
 
@@ -2026,7 +2038,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
     // Emit annotation remarks.
     addAnnotationRemarksPass(MPM);
 
-    instructionCountersPass(MPM, /* IsPreOptimization */ false);
+    addPipelineEndPasses(MPM);
 
     return MPM;
   }
@@ -2281,7 +2293,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
   // Emit annotation remarks.
   addAnnotationRemarksPass(MPM);
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ false);
+  addPipelineEndPasses(MPM);
 
   return MPM;
 }
@@ -2294,7 +2306,7 @@ PassBuilder::buildO0DefaultPipeline(OptimizationLevel Level,
 
   ModulePassManager MPM;
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ true);
+  addPipelineStartPasses(MPM);
 
   // Perform pseudo probe instrumentation in O0 mode. This is for the
   // consistency between different build modes. For example, a LTO build can be
@@ -2415,7 +2427,7 @@ PassBuilder::buildO0DefaultPipeline(OptimizationLevel Level,
   // Emit annotation remarks.
   addAnnotationRemarksPass(MPM);
 
-  instructionCountersPass(MPM, /* IsPreOptimization */ false);
+  addPipelineEndPasses(MPM);
 
   return MPM;
 }
