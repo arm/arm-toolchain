@@ -32,6 +32,7 @@
         },
         "llvmlibc": {
             "LLVM_LIBC_ENABLE_MINOR_VARIANT": "ON",
+            "LLVM_LIBC_BASE_VARIANT": "armv7m_hard_fpv5_d16_exn_rtti_size",
             "ENABLE_CXX_LIBS": "OFF",
             "ENABLE_LLVMLIBC_CORE_LIBS": "OFF",
             "ENABLE_LLVMLIBC_SUPPORT_LIBS": "ON",

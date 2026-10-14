@@ -33,6 +33,7 @@
         },
         "llvmlibc": {
             "LLVM_LIBC_ENABLE_MINOR_VARIANT": "ON",
+            "LLVM_LIBC_BASE_VARIANT": "armv7r_hard_vfpv3xd",
             "ENABLE_CXX_LIBS": "OFF",
             "ENABLE_LLVMLIBC_CORE_LIBS": "OFF",
             "ENABLE_LLVMLIBC_SUPPORT_LIBS": "ON",
