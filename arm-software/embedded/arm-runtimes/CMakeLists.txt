@@ -1064,6 +1064,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_LIBC_FULL_BUILD=ON
         -DLIBC_TEST_COMPILE_OPTIONS_DEFAULT=${llvmlibc_test_compile_options_default}
         -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
+        -DLIBC_TEST_BUILTINS_LIBRARY=${TEMP_LIB_DIR}/lib/libclang_rt.builtins.a
         -DLIBC_TEST_CMD=${test_cmd}
         -DLIBC_TEST_HERMETIC_ONLY=ON
         -DLLVM_EXTERNAL_LIT=${external_lit_path}
