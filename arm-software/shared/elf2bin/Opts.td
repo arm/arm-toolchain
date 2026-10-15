@@ -60,5 +60,7 @@ defm zi: NoValue<"zi", "", "Include the zero-initialized padding at the end of e
 defm physical: NoValue<"physical", "", "Use the physical addresses (p_paddr) of ELF segments", grp_opts>;
 defm virtual: NoValue<"virtual", "", "Use the virtual addresses (p_vaddr) of ELF segments", grp_opts>;
 
+defm range: Value<"range", "", "ADDRESS-ADDRESS", "Select only the ELF segments of the input which fit entirely within the specified address range", grp_opts>;
+
 defm help: NoValue<"help", "", "Display this help", grp_opts>;
 defm version: NoValue<"version", "", "Display the version", grp_opts>;

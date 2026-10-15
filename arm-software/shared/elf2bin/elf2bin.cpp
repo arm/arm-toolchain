@@ -245,6 +245,15 @@ int main(int argc, char **argv) {
     segments_wanted = bases;
   }
 
+  uint64_t start_addr = 0, end_addr = std::numeric_limits<uint64_t>::max();
+  if (Arg *A = Args.getLastArg(OPT_range_EQ)) {
+    SmallVector<StringRef, 2> fields;
+    SplitString(A->getValue(), fields, "-");
+    if (fields.size() != 2 || fields[0].getAsInteger(0, start_addr) ||
+        fields[1].getAsInteger(0, end_addr))
+      fatal(Twine("cannot parse address range '") + A->getValue() + "'");
+  }
+
   uint64_t bankwidth = 1, nbanks = 1;
   if (Arg *A = Args.getLastArg(OPT_banks_EQ)) {
     StringRef str = A->getValue();
@@ -410,8 +419,8 @@ int main(int argc, char **argv) {
 
     case Format::BinCombined:
       bincombined_write(*conv.inobj, conv.outfile, segments(*conv.inobj),
-                        include_zi, baseaddr, bankmod, conv.bank * bankwidth,
-                        bankwidth);
+                        start_addr, end_addr, include_zi, baseaddr, bankmod,
+                        conv.bank * bankwidth, bankwidth);
       break;
 
     case Format::VhxMultifile:
