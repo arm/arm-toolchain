@@ -105,9 +105,10 @@ extern "C" [[gnu::weak]] void _platform_setup_memory() {
 #if __ARM_ARCH_PROFILE == 'R'
 #ifdef __ARM_ARCH_ISA_A64
   setup_mpu();
-#endif
+#else
   // Enable the branch predictor
   SCTLR.Z = 1;
+#endif
 #endif
 
 #ifdef __ARM_FEATURE_MEMORY_TAGGING

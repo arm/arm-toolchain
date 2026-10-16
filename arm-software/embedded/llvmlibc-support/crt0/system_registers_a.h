@@ -265,7 +265,7 @@ public:
   Bit<2> C;
   Bit<3> SA;
   Bit<6> nAA;
-#if __ARM_ARCH_PROFILE == 'R'
+#if __ARM_ARCH_PROFILE == 'R' && !defined(__ARM_ARCH_ISA_A64)
   Bit<11> Z;
 #else
   Bit<11> EOS;
