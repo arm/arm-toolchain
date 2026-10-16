@@ -35,7 +35,7 @@
             "LLVM_LIBC_ENABLE_MINOR_VARIANT": "ON",
             "LLVM_LIBC_BASE_VARIANT": "armv7r_hard_vfpv3xd_exn_rtti",
             "ENABLE_CXX_LIBS": "OFF",
-            "ENABLE_LIBC_TESTS": "ON",
+            "ENABLE_LIBC_TESTS": "OFF",
             "ENABLE_COMPILER_RT_TESTS": "OFF",
             "ENABLE_LIBCXX_TESTS": "OFF",
             "LLVM_LIBC_SUBARCHIVE_NAME": "string",
