@@ -950,6 +950,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
     set(enable_dummypackeys OFF)
     set(llvmlibc_test_link_options
         -nostartfiles
+	-lcrt0-semihost
         -lsemihost
         -T
         llvmlibc.ld
@@ -1062,6 +1063,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_ENABLE_RUNTIMES=libc
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
+	-DLLVM_LIBC_HERMETIC_TEST_USE_INTERNAL_STARTUP=OFF
         -DLIBC_TEST_COMPILE_OPTIONS_DEFAULT=${llvmlibc_test_compile_options_default}
         -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
         -DLIBC_TEST_BUILTINS_LIBRARY=${TEMP_LIB_DIR}/lib/libclang_rt.builtins.a
