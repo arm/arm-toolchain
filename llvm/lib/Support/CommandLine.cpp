@@ -2965,9 +2965,9 @@ void LibraryOptionsContext::assign(const LibraryOptionsContext &Other) {
 Error LibraryOptionsContext::parse(LibraryOptions &L,
                                    ArrayRef<const char *> Args,
                                    unsigned &Consumed) {
-  auto [It, Inserted] = Values.try_emplace(L.global());
+  auto [It, Inserted] = Values.try_emplace(L.getDefault());
   if (Inserted)
-    It->second = L.copyGlobal(Alloc);
+    It->second = L.copyDefault(Alloc);
   return parseLibraryOption(L, It->second, Args, Consumed, Alloc, &SavedArgs);
 }
 
