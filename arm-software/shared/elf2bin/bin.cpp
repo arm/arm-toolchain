@@ -305,8 +305,8 @@ void bin_write(const InputObject &inobj, const std::string &outfile,
 }
 
 void bincombined_write(const InputObject &inobj, const std::string &outfile,
-                       const std::vector<Segment> &segments,
-                       bool include_zi, std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
+                       const std::vector<Segment> &segments, bool include_zi,
+                       std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
                        uint64_t bank_firstres, uint64_t bank_nres) {
   auto streamp = combined_prepare(inobj, segments, include_zi, baseaddr);
   streamp =

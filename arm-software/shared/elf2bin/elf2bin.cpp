@@ -243,7 +243,8 @@ int main(int argc, char **argv) {
       if (field.contains('-')) {
         uint64_t start_addr, end_addr;
         auto [start_text, end_text] = field.split('-');
-        if (start_text.getAsInteger(0, start_addr) || end_text.getAsInteger(0, end_addr) || start_addr > end_addr)
+        if (start_text.getAsInteger(0, start_addr) ||
+            end_text.getAsInteger(0, end_addr) || start_addr > end_addr)
           fatal(Twine("cannot parse segment address range '") + field + "'");
         ranges.insert({start_addr, end_addr});
         continue;
@@ -327,20 +328,20 @@ int main(int argc, char **argv) {
     inobj.elf = std::move(elf);
   }
 
-  // Helper function to check if a segment falls within any of the supplied ranges
+  // Helper function to check if a segment falls within any of the supplied
+  // ranges
   auto fits_range = [&](const Segment &seg) {
     if (!ranges_wanted)
       return false;
-    // If --zi is set, we check that a segment's memsize (rather than filesize) fits within any supplied range
+    // If --zi is set, we check that a segment's memsize (rather than filesize)
+    // fits within any supplied range
     const uint64_t seg_size = include_zi ? seg.memsize : seg.filesize;
-    return std::any_of(
-        ranges_wanted->begin(), ranges_wanted->end(),
-        [&](const auto &range) {
-          const auto &[start, end] = range;
-          return seg.baseaddr >= start &&
-                seg.baseaddr <= end &&
-                seg_size <= end - seg.baseaddr;
-        });
+    return std::any_of(ranges_wanted->begin(), ranges_wanted->end(),
+                       [&](const auto &range) {
+                         const auto &[start, end] = range;
+                         return seg.baseaddr >= start && seg.baseaddr <= end &&
+                                seg_size <= end - seg.baseaddr;
+                       });
   };
 
   // Helper function for listing the segments of a file, paying
@@ -440,8 +441,8 @@ int main(int argc, char **argv) {
 
     case Format::BinCombined:
       bincombined_write(*conv.inobj, conv.outfile, segments(*conv.inobj),
-                        include_zi, baseaddr, bankmod,
-                        conv.bank * bankwidth, bankwidth);
+                        include_zi, baseaddr, bankmod, conv.bank * bankwidth,
+                        bankwidth);
       break;
 
     case Format::VhxMultifile:
