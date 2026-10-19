@@ -1095,11 +1095,6 @@ def main():
             result=NewResult.XFAILED,
             project="libunwind",
             libc="llvmlibc",
-            variants=[
-                "aarch64a_exn_rtti",
-                "armv7m_hard_fpv4_sp_d16_exn_rtti_size",
-                "armv7m_soft_nofp_exn_rtti_size",
-            ],
             description="These libunwind tests include POSIX headers not provided by LLVM libc bare-metal, such as signal.h, sys/types.h, and alloca.h.",
         ),
         XFail(
