@@ -285,23 +285,6 @@ combined_prepare(const InputObject &inobj,
 }
 
 static std::unique_ptr<BinaryDataStream>
-range_prepare(const InputObject &inobj,
-                 const std::vector<Segment> &segments_orig, uint64_t start_addr,
-                 uint64_t end_addr, bool include_zi, std::optional<uint64_t> baseaddr)
-                 {
-
-  // Filter out the segments that don't fit within the range
-  std::vector<Segment> filtered;
-  std::copy_if(segments_orig.begin(), segments_orig.end(),
-               std::back_inserter(filtered),
-               [start_addr, end_addr](const Segment &seg) {
-                 return seg.baseaddr >= start_addr && (seg.baseaddr + seg.memsize) <= end_addr;
-               });
-
-  return combined_prepare(inobj, filtered, include_zi, baseaddr);
-}
-
-static std::unique_ptr<BinaryDataStream>
 bank_prepare(std::unique_ptr<BinaryDataStream> stream, uint64_t bank_modulus,
              uint64_t bank_firstres, uint64_t bank_nres) {
   if (bank_modulus == 1)
@@ -322,24 +305,14 @@ void bin_write(const InputObject &inobj, const std::string &outfile,
 }
 
 void bincombined_write(const InputObject &inobj, const std::string &outfile,
-                       const std::vector<Segment> &segments, uint64_t start_addr, uint64_t end_addr,
+                       const std::vector<Segment> &segments,
                        bool include_zi, std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
                        uint64_t bank_firstres, uint64_t bank_nres) {
-  auto streamp = range_prepare(inobj, segments, start_addr, end_addr, include_zi, baseaddr);
+  auto streamp = combined_prepare(inobj, segments, include_zi, baseaddr);
   streamp =
       bank_prepare(std::move(streamp), bank_modulus, bank_firstres, bank_nres);
   bin_write(*streamp, outfile);
 }
-
-// void binrange_write(const InputObject &inobj, const std::string &outfile,
-//                        const std::vector<Segment> &segments, uint64_t start_addr, uint64_t end_addr,
-//                        bool include_zi, std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
-//                        uint64_t bank_firstres, uint64_t bank_nres) {
-//   auto streamp = range_prepare(inobj, segments, start_addr, end_addr, include_zi, baseaddr);
-//   streamp =
-//       bank_prepare(std::move(streamp), bank_modulus, bank_firstres, bank_nres);
-//   bin_write(*streamp, outfile);
-// }
 
 void vhx_write(const InputObject &inobj, const std::string &outfile,
                uint64_t fileoffset, uint64_t size, uint64_t zi_size,

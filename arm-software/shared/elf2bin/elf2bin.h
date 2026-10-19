@@ -117,7 +117,7 @@ void vhx_write(const InputObject &inobj, const std::string &outfile,
 //
 // These functions too will exit with an error in case of failure.
 void bincombined_write(const InputObject &inobj, const std::string &outfile,
-                       const std::vector<Segment> &segments, uint64_t start_addr, uint64_t end_addr, bool include_zi,
+                       const std::vector<Segment> &segments, bool include_zi,
                        std::optional<uint64_t> baseaddr, uint64_t bank_modulus,
                        uint64_t bank_firstres, uint64_t bank_nres);
 void vhxcombined_write(const InputObject &inobj, const std::string &outfile,
