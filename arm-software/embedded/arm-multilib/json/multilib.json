@@ -603,7 +603,7 @@
         {
             "variant": "armv8.1m.main_hard_fp_nomve_pacret_bti_size",
             "json": "armv8.1m.main_hard_fp_nomve_pacret_bti_size.json",
-            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -munaligned-access -fno-exceptions -fno-rtti"
+            "flags": "--target=thumbv8.1m.main-unknown-none-eabihf -march=thumbv8.1m.main+fp16 -mfpu=fp-armv8-fullfp16-sp-d16 -mbranch-protection=pac-ret+bti -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv8.1m.main_hard_fpdp_nomve_pacret_bti_exn_rtti_unaligned",
