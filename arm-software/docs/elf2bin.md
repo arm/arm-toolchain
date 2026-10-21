@@ -231,11 +231,14 @@ different for the two formats.
 You can use `--segments` to restrict `elf2bin` to writing only a
 subset of the loadable segments in the ELF file.
 
-The argument is a comma-separated list of base addresses.
+The argument is a comma-separated list of base addresses and/or address ranges.
 
 For example, if you had an input file containing segments at addresses
 0x8000, 0x20000 and 0x10000000, then `--segments 0x8000,0x10000000`
-would skip the middle one. This option applies to all output modes.
+would skip the middle one. Address ranges are used to capture segments that fall
+entirely within the specified range. For example, `--segments 0x8000,0x15000-0x25000`
+would skip the last, assuming the size of the second section is < 0x5000. This option
+applies to all output modes.
 
 #### `--physical` and `--virtual`: choose which segment address field to use
 

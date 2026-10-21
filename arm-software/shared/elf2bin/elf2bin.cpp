@@ -232,17 +232,31 @@ int main(int argc, char **argv) {
   }
 
   std::optional<std::set<uint64_t>> segments_wanted;
+  std::optional<std::set<std::pair<uint64_t, uint64_t>>> ranges_wanted;
   if (Arg *A = Args.getLastArg(OPT_segments_EQ)) {
     std::set<uint64_t> bases;
+    std::set<std::pair<uint64_t, uint64_t>> ranges;
     SmallVector<StringRef, 4> fields;
     SplitString(A->getValue(), fields, ",");
     for (auto field : fields) {
+      // First check if it's a range
+      if (field.contains('-')) {
+        uint64_t start_addr, end_addr;
+        auto [start_text, end_text] = field.split('-');
+        if (start_text.getAsInteger(0, start_addr) ||
+            end_text.getAsInteger(0, end_addr) || start_addr > end_addr)
+          fatal(Twine("cannot parse segment address range '") + field + "'");
+        ranges.insert({start_addr, end_addr});
+        continue;
+      }
+      // Otherwise check if it's a valid base
       uint64_t base;
       if (field.getAsInteger(0, base))
         fatal(Twine("cannot parse segment base address '") + field + "'");
       bases.insert(base);
     }
     segments_wanted = bases;
+    ranges_wanted = ranges;
   }
 
   uint64_t bankwidth = 1, nbanks = 1;
@@ -314,18 +328,35 @@ int main(int argc, char **argv) {
     inobj.elf = std::move(elf);
   }
 
+  // Helper function to check if a segment falls within any of the supplied
+  // ranges
+  auto fits_range = [&](const Segment &seg) {
+    if (!ranges_wanted)
+      return false;
+    // If --zi is set, we check that a segment's memsize (rather than filesize)
+    // fits within any supplied range
+    const uint64_t seg_size = include_zi ? seg.memsize : seg.filesize;
+    return std::any_of(ranges_wanted->begin(), ranges_wanted->end(),
+                       [&](const auto &range) {
+                         const auto &[start, end] = range;
+                         return seg.baseaddr >= start && seg.baseaddr <= end &&
+                                seg_size <= end - seg.baseaddr;
+                       });
+  };
+
   // Helper function for listing the segments of a file, paying
   // attention to the --segments option to restrict to a subset.
   auto segments = [&](InputObject &inobj) {
     std::vector<Segment> allsegs = inobj.segments(physical);
-    if (!segments_wanted)
+    if (!segments_wanted && !ranges_wanted)
       return allsegs;
 
     std::vector<Segment> segs;
-    auto &keep = segments_wanted.value();
+    auto &keep_base = segments_wanted.value();
     for (auto seg : allsegs)
-      if (keep.find(seg.baseaddr) != keep.end())
+      if (keep_base.find(seg.baseaddr) != keep_base.end() || fits_range(seg))
         segs.push_back(seg);
+
     return segs;
   };
 

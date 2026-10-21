@@ -1043,6 +1043,82 @@ class segselect(Base):
                 bindata = fh.read()
                 self.assertEqual(bindata, segment_contents2)
 
+    def testBinCombinedRange(self):
+        "Test --segments address ranges without --zi."
+        segment_contents1 = bytes(range(0x10))
+        segment_contents2 = bytes(range(0x10, 0x20))
+        segment_contents3 = bytes(range(0x20, 0x30))
+
+        with self.tempsubdir():
+            makeelf(
+                "input.elf",
+                False,
+                True,
+                [
+                    SegmentDesc(1, 0x1000, segment_contents1, 0x10),
+                    SegmentDesc(1, 0x1020, segment_contents2, 0x10),
+                    SegmentDesc(1, 0x1040, segment_contents3, 0x20),
+                ],
+            )
+
+            # All three segments' file data fits within the range.
+            self.elf2bin(
+                "--bincombined",
+                "--segments",
+                "0x1000-0x1050",
+                "-o",
+                "output.bin",
+                "input.elf",
+            )
+            with open("output.bin", "rb") as fh:
+                bindata = fh.read()
+            self.assertEqual(
+                bindata,
+                segment_contents1
+                + b"\0" * 0x10
+                + segment_contents2
+                + b"\0" * 0x10
+                + segment_contents3,
+            )
+
+    def testBinCombinedRangeZI(self):
+        "Test --segments address ranges with --zi."
+        segment_contents1 = bytes(range(0x10))
+        segment_contents2 = bytes(range(0x10, 0x20))
+        segment_contents3 = bytes(range(0x20, 0x30))
+
+        with self.tempsubdir():
+            makeelf(
+                "input.elf",
+                False,
+                True,
+                [
+                    SegmentDesc(1, 0x1000, segment_contents1, 0x10),
+                    SegmentDesc(1, 0x1020, segment_contents2, 0x10),
+                    SegmentDesc(1, 0x1040, segment_contents3, 0x20),
+                ],
+            )
+
+            # The third segment's zero-initialized padding exceeds the range.
+            self.elf2bin(
+                "--bincombined",
+                "--segments",
+                "0x1000-0x1050",
+                "--zi",
+                "-o",
+                "output.bin",
+                "input.elf",
+            )
+            with open("output.bin", "rb") as fh:
+                bindata = fh.read()
+            self.assertEqual(
+                bindata,
+                segment_contents1
+                + b"\0" * 0x10
+                + segment_contents2
+                + b"\0" * 0x10,
+            )
+
     def testVhxCombined(self):
         "Test --segments with single-file VHX output."
         segment_contents1 = bytes(range(0x10))
