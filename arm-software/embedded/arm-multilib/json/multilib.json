@@ -123,42 +123,42 @@
         {
             "variant": "armv4t_exn_rtti_size",
             "json": "armv4t_exn_rtti_size.json",
-            "flags": "--target=armv4t-unknown-none-eabi -mfpu=none -mno-unaligned-access"
+            "flags": "--target=armv4t-unknown-none-eabi -mfpu=none"
         },
         {
             "variant": "armv4t_size",
             "json": "armv4t_size.json",
-            "flags": "--target=armv4t-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=armv4t-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv5te_exn_rtti_size",
             "json": "armv5te_exn_rtti_size.json",
-            "flags": "--target=armv5e-unknown-none-eabi -mfpu=none -mno-unaligned-access"
+            "flags": "--target=armv5e-unknown-none-eabi -mfpu=none"
         },
         {
             "variant": "armv5te_size",
             "json": "armv5te_size.json",
-            "flags": "--target=armv5e-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=armv5e-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv6m_soft_nofp_exn_rtti_size",
             "json": "armv6m_soft_nofp_exn_rtti_size.json",
-            "flags": "--target=thumbv6m-unknown-none-eabi -mfpu=none -mno-unaligned-access"
+            "flags": "--target=thumbv6m-unknown-none-eabi -mfpu=none"
         },
         {
             "variant": "armv6m_soft_nofp_size",
             "json": "armv6m_soft_nofp_size.json",
-            "flags": "--target=thumbv6m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=thumbv6m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armebv6m_soft_nofp_exn_rtti_size",
             "json": "armebv6m_soft_nofp_exn_rtti_size.json",
-            "flags": "--target=thumbebv6m-unknown-none-eabi -mfpu=none -mno-unaligned-access"
+            "flags": "--target=thumbebv6m-unknown-none-eabi -mfpu=none"
         },
         {
             "variant": "armebv6m_soft_nofp_size",
             "json": "armebv6m_soft_nofp_size.json",
-            "flags": "--target=thumbebv6m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=thumbebv6m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv7a_soft_nofp_exn_rtti_unaligned",
@@ -183,12 +183,12 @@
         {
             "variant": "armebv7a_soft_nofp_exn_rtti",
             "json": "armebv7a_soft_nofp_exn_rtti.json",
-            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none -mno-unaligned-access"
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none"
         },
         {
             "variant": "armebv7a_soft_nofp",
             "json": "armebv7a_soft_nofp.json",
-            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=armebv7-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv7a_hard_vfpv3_d16_exn_rtti_unaligned",
@@ -433,12 +433,12 @@
         {
             "variant": "armebv7m_soft_nofp_exn_rtti_size",
             "json": "armebv7m_soft_nofp_exn_rtti_size.json",
-            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=none -mno-unaligned-access"
+            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=none"
         },
         {
             "variant": "armebv7m_soft_nofp_size",
             "json": "armebv7m_soft_nofp_size.json",
-            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti -mno-unaligned-access"
+            "flags": "--target=thumbebv7m-unknown-none-eabi -mfpu=none -fno-exceptions -fno-rtti"
         },
         {
             "variant": "armv8m.main_soft_nofp_exn_rtti_unaligned",
