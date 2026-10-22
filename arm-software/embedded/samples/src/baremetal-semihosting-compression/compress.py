@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #
-# Copyright (c) 2023-2026, Arm Limited and affiliates. 
+# Copyright (c) 2023-2026, Arm Limited and affiliates.
 # Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
 # See https://llvm.org/LICENSE.txt for license information.
 # SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
@@ -28,9 +28,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("infile", help="File to compress.")
-    parser.add_argument(
-        "-o", "--output", required=True, help="Output file name."
-    )
+    parser.add_argument("-o", "--output", required=True, help="Output file name.")
     args = parser.parse_args()
 
     # Read the input file.
