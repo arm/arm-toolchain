@@ -1113,10 +1113,7 @@ class segselect(Base):
                 bindata = fh.read()
             self.assertEqual(
                 bindata,
-                segment_contents1
-                + b"\0" * 0x10
-                + segment_contents2
-                + b"\0" * 0x10,
+                segment_contents1 + b"\0" * 0x10 + segment_contents2 + b"\0" * 0x10,
             )
 
     def testVhxCombined(self):
