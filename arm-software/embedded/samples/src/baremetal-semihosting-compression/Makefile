@@ -14,8 +14,8 @@ build: compression-demo.elf
 exec.elf: demo.c inner.ld
 	$(BIN_PATH)/clang $(MICROBIT_TARGET) $(CRT_SEMIHOST) -T inner.ld -o $@ $<
 
-# Now extract the binary data of each PT_LOAD segment. Because we manually
-# specified a fixed set of those segments, we know what address ranges to extract.
+# Now extract the binary RO and RW data separately. Because we manually
+# specified the memory layout, we know what address ranges to extract.
 #
 # Note also that we use --zi, so that the RW data blob will physically contain
 # zero bytes on the end covering the ZI data. Including these as the input to
@@ -33,7 +33,6 @@ exec-rw.bin: exec.elf
 rw-compressed.bin: exec-rw.bin
 	python3 compress.py $^ -o $@
 
-, 
 # Build the same decompression code into a standalone tool using the system compiler.
 deflate-fixed.out: deflate-fixed.c
 	cc -DSTANDALONE -o $@ $<
