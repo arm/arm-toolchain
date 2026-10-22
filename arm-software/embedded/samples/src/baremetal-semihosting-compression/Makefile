@@ -33,14 +33,15 @@ exec-rw.bin: exec.elf
 rw-compressed.bin: exec-rw.bin
 	python3 compress.py $^ -o $@
 
-# (Optional) Check that it decompresses correctly, by building the same
-# decompression code into a standalone tool using the system compiler.
+, 
+# Build the same decompression code into a standalone tool using the system compiler.
 deflate-fixed.out: deflate-fixed.c
 	cc -DSTANDALONE -o $@ $<
 
 rw-decompressed.bin: deflate-fixed.out rw-compressed.bin
 	./$^ $@
 
+# (Optional) Check that it decompresses correctly using the standalone decompressor
 check-compression: rw-decompressed.bin exec-rw.bin
 	cmp $^
 
