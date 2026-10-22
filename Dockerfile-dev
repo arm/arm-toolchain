@@ -57,6 +57,15 @@ RUN dnf install -y epel-release && \
     alternatives --set python3 /usr/bin/python3.12 && \
     rm -rf /var/cache/dnf
 
+# FIXME this is a temporary upgrade and pin to address certificate security incidents
+# This should be replaced with a normal `pip --upgrade pip>=26.2.2` after the OS level ca-certs
+# have been updated. See https://discuss.python.org/t/information-for-python-users-regarding-emudhra-emsign-ca-certificate-security-incident/109576
+# for additional information.
+RUN python3 -m pip install "pip @ \
+    https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+RUN python3 -m pip install --no-cache-dir --upgrade \
+        certifi>=2026.10.19
+
 # Note: the Rocky Linux meson is too out-of-date to build picolibc, install the
 # latest using pip instead
 RUN pip3 install --no-cache-dir --upgrade meson
