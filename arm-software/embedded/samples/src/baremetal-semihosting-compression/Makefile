@@ -12,8 +12,6 @@ build: compression-demo.elf
 # First, link the image with a simple ld script that does no memory setup and
 # places every segment at its execution-time address.
 exec.elf: demo.c inner.ld
-	$(BIN_PATH)/clang $(MICROBIT_TARGET) -print-target-triple
-	$(BIN_PATH)/clang -E -P -x c -DLIBC_LD_FILE=$(LIBC_LD_FILE) ../../ldscripts/microbit.ld.in -o microbit.ld
 	$(BIN_PATH)/clang $(MICROBIT_TARGET) $(CRT_SEMIHOST) -T inner.ld -o $@ $<
 
 # Now extract the binary data of each PT_LOAD segment. Because we manually
