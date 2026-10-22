@@ -6,7 +6,7 @@
 
 /* ld script for the outermost (load-time) link of compression demo */
 
-INCLUDE layout.ld
+INCLUDE memory_map.ld
 
 SECTIONS
 {

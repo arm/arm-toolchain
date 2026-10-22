@@ -2,9 +2,9 @@
 
 This sample demonstrates compressing the RW data and using a decompressor routine at startup to build a smaller boot image.
 
-The inner.ld script represents the execution-time configuration. The Make process and outer.ld then extract and compress the RW data, include it as RO data, and supply the decompressor code.
+memory_map.ld specifies the relevant memory layout variables for the target machine, and is included by both inner.ld and outer.ld. The inner.ld script represents the execution-time configuration. The Make process then extracts and compresses the RW data, and outer.ld includes it as RO data, and bundles the decompressor code.
 
-The use of these two linker scripts in this manner allows the program to use RW variables transparently without extra modification, as the compressed rodata is decompressed into the expected address space before other code runs.
+The use of these two linker scripts in this manner allows the program to use RW variables transparently without extra modification, as the compressed RO data is decompressed into the expected address space before other code runs.
 
 The picolibc/microbit.ld script supplied with the toolchain and used by other samples cannot be used as-is, due to it including the .data section in RO FLASH and copying it to RAM at runtime. The script can be modified to work with this compression setup and be used instead of inner.ld, but we leave this as an exercise to the user.
 

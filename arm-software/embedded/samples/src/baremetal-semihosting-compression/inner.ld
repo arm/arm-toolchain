@@ -11,7 +11,7 @@
  * expecting that the outer link will set everything up.
  *
  * However, one difference is that we must force the program header
- * table to contain precisely two PT_LOAD segments, so that llvm-elf2bin
+ * table to contain precisely two PT_LOAD segments, so that elf2bin
  * will extract the data for use in the outer link in exactly the two
  * binary chunks we expect. If we don't do that, lld will potentially
  * split up one or the other segment into two pieces. It does this if
@@ -20,7 +20,7 @@
  * intervening bytes.
  */
 
-INCLUDE layout.ld
+INCLUDE memory_map.ld
 
 PHDRS
 {

@@ -12,8 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// extern void _bp(void);
-
 /*
  * This source file can be compiled two ways.
  *

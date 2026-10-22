@@ -9,8 +9,8 @@ include ../../Makefile.conf
 
 build: compression-demo.elf
 
-# First, link the image with a simple ld script that does no memory setup and
-# places every segment at its execution-time address.
+# First, link the image with a simple ld script that places every segment at its
+# execution-time address and specifies that data should not be copied from flash to ram at runtime.
 exec.elf: demo.c inner.ld
 	$(BIN_PATH)/clang $(MICROBIT_TARGET) $(CRT_SEMIHOST) -T inner.ld -o $@ $<
 
