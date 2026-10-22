@@ -18,6 +18,8 @@
  * intervening bytes.
  */
 
+INCLUDE machine.ld
+
 PHDRS
 {
     ro PT_LOAD;
@@ -30,10 +32,10 @@ PHDRS
 
 SECTIONS
 {
-  .text 0x00003000 : { *(.text .text.*) } :ro
+  .text __flash : { *(.text .text.*) } :ro
   PROVIDE(__data_start = ADDR(.data));
 	PROVIDE(__data_source = LOADADDR(.data));
-  .data 0x20002000 : { *(.data .data.*) } :rw
+  .data __ram : { *(.data .data.*) } :rw
   .tdata : { *(.tdata .tdata.* .gnu.linkonce.td.*) } :rw :tls
   PROVIDE( __data_end = . );
   .tbss : { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) } :rw :tls
@@ -48,8 +50,8 @@ SECTIONS
 
 PROVIDE(__tls_base = ADDR(.tdata));
 
-/* RAM ends at 0x20004000. Reserve its top 1 KiB for the stack. */
-PROVIDE(__stack = 0x20004000);
+/*  Reserve the top 1 KiB of RAM for the stack. */
+PROVIDE(__stack = __ram + __ram_size);
 PROVIDE(__stack_size = 0x400);
 
 /* The heap occupies free RAM between BSS and the stack reservation. */
@@ -57,5 +59,5 @@ PROVIDE(__heap_start = ALIGN(__bss_end, 8));
 PROVIDE(__heap_end = __stack - __stack_size);
 PROVIDE(__heap_size = __heap_end - __heap_start);
 
-/* The decompressor will initialise .data. */
-/* PROVIDE(__data_size = 0); */
+/* The decompressor will initialise .data so tell picolibc to not copy anything into .data's runtime address */
+PROVIDE(__data_size = 0);

@@ -3,6 +3,8 @@
  * Copyright 2023 Arm Limited. All rights reserved.
  */
 
+ INCLUDE machine.ld
+
 SECTIONS
 {
   /*
@@ -15,7 +17,7 @@ SECTIONS
    * the entry point, the decompressor, and the compressed RW data.
    */
   .text : {
-    . = 0x03000;
+    . = __flash;
     KEEP(ro.o(.text))
     *(.text)
     rw-compressed.o(.rodata)
@@ -33,7 +35,7 @@ SECTIONS
 }
 
 /* Address that we want to decompress the RW data to. */
-PROVIDE(decompressed_rw_start = 0x20002000);
+PROVIDE(decompressed_rw_start = __ram);
 
 /* Starting value for the stack pointer. */
-PROVIDE(__stack = 0x20004000);
+PROVIDE(__stack = __ram + __ram_size);
