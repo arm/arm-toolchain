@@ -1,9 +1,11 @@
-/* inner.ld - ld script for the inner (execution-time) link of compression demo
- *
- * Copyright 2026 Arm Limited. All rights reserved.
- */
+/* Copyright (c) 2023-2026, Arm Limited and affiliates. 
+ * 
+ * Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+ * See https://llvm.org/LICENSE.txt for license information.
+ * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception */
 
-/*
+/* ld script for the inner (execution-time) link of compression demo
+ *
  * This ld script puts code and RO data at 0x3000 and RW data at 0x20000000,
  * and sets __data_size to 0 to prevent crt0 startup code from populating RAM,
  * expecting that the outer link will set everything up.

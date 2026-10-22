@@ -1,9 +1,12 @@
-/* final.ld - ld script for the outermost (load-time) link of compression demo
- *
- * Copyright 2023 Arm Limited. All rights reserved.
- */
+/* Copyright (c) 2023-2026, Arm Limited and affiliates. 
+ * 
+ * Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+ * See https://llvm.org/LICENSE.txt for license information.
+ * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception */
 
- INCLUDE layout.ld
+/* ld script for the outermost (load-time) link of compression demo */
+
+INCLUDE layout.ld
 
 SECTIONS
 {

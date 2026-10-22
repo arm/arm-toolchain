@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+#
+# Copyright (c) 2023-2026, Arm Limited and affiliates. 
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+
 """Compress a file to Deflate format (RFC 1951), ensuring that the
 output data does not contain any block using dynamic Huffman trees.
 
