@@ -3,7 +3,7 @@
  * Copyright 2023 Arm Limited. All rights reserved.
  */
 
- INCLUDE machine.ld
+ INCLUDE layout.ld
 
 SECTIONS
 {

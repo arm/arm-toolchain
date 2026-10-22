@@ -4,9 +4,9 @@
  */
 
 /*
- * This ld script puts code and RO data at 0x3000 and RW data at 0x20002000,
- * and selects the no-op memory setup function, expecting that the outer
- * link will have set everything up already.
+ * This ld script puts code and RO data at 0x3000 and RW data at 0x20000000,
+ * and sets __data_size to 0 to prevent crt0 startup code from populating RAM,
+ * expecting that the outer link will set everything up.
  *
  * However, one difference is that we must force the program header
  * table to contain precisely two PT_LOAD segments, so that llvm-elf2bin
@@ -18,7 +18,7 @@
  * intervening bytes.
  */
 
-INCLUDE machine.ld
+INCLUDE layout.ld
 
 PHDRS
 {
