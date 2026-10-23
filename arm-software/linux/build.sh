@@ -71,6 +71,7 @@ COMMON_LINKER_FLAGS="-Wl,--build-id"
 
 # Safe to use by all stages
 declare -A COMMON_CMAKE_FLAGS=(
+    ["CLANG_ENABLE_CIR:BOOL"]=OFF
     ["CLANG_ENABLE_LIBXML2:BOOL"]=OFF
     ["LLVM_ENABLE_LIBXML2:BOOL"]=OFF
     ["LLVM_ENABLE_ZLIB:BOOL"]=ON
