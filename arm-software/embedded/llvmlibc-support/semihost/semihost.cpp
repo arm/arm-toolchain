@@ -1,30 +1,192 @@
 //
-// Copyright (c) 2022-2025, Arm Limited and affiliates.
+// Copyright (c) 2022-2026, Arm Limited and affiliates.
 //
-// Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions. 
-// See https://llvm.org/LICENSE.txt for license information.
+// Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM
+// Exceptions. See https://llvm.org/LICENSE.txt for license information.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 
 #include "semihost.h"
 #include "platform.h"
 
+#include <errno.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 namespace {
+// File cookies
+constexpr size_t DEFAULT_FILE_COOKIE_COUNT = 4;
+__llvm_libc_semihost_file_cookie
+    default_file_cookies[DEFAULT_FILE_COOKIE_COUNT];
+} // namespace
 
-bool stdio_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
-  const char std_stream_name[] = ":tt";
-  size_t args[] = {
-      reinterpret_cast<size_t>(std_stream_name),
-      mode,
-      sizeof(std_stream_name) - 1UL,
-  };
-  cookie->handle = semihosting_call(SYS_OPEN, args);
-  return cookie->handle >= 0;
+extern "C" {
+// Override this weak definition with a pool backed by an application-owned
+// array to change the maximum number of simultaneously open files.
+__attribute__((weak)) __llvm_libc_semihost_file_cookie_pool
+    __llvm_libc_semihost_file_cookie_storage = {default_file_cookies,
+                                                DEFAULT_FILE_COOKIE_COUNT};
+struct __llvm_libc_stdio_cookie __llvm_libc_stdin_cookie;
+struct __llvm_libc_stdio_cookie __llvm_libc_stdout_cookie;
+struct __llvm_libc_stdio_cookie __llvm_libc_stderr_cookie;
 }
+
+namespace {
+// File cookie helpers
+bool is_std_stream(void *cookie) {
+  return cookie == &__llvm_libc_stdin_cookie ||
+         cookie == &__llvm_libc_stdout_cookie ||
+         cookie == &__llvm_libc_stderr_cookie;
+}
+
+size_t get_handle(void *cookie) {
+  return static_cast<__llvm_libc_stdio_cookie *>(cookie)->handle;
+}
+
+__llvm_libc_semihost_file_cookie *allocate_file() {
+  for (size_t i = 0; i < __llvm_libc_semihost_file_cookie_storage.size; ++i) {
+    auto *cookie = &__llvm_libc_semihost_file_cookie_storage.cookies[i];
+    if (!cookie->in_use) {
+      cookie->in_use = true;
+      cookie->position = 0;
+      return cookie;
+    }
+  }
+  return nullptr;
+}
+
+void release_file(void *cookie) {
+  static_cast<__llvm_libc_semihost_file_cookie *>(cookie)->in_use = false;
+}
+
+off_t get_file_position(void *cookie) {
+  return static_cast<__llvm_libc_semihost_file_cookie *>(cookie)->position;
+}
+
+void set_file_position(void *cookie, off_t position) {
+  static_cast<__llvm_libc_semihost_file_cookie *>(cookie)->position = position;
+}
+
+void advance_file_position(void *cookie, off_t amount) {
+  set_file_position(cookie, get_file_position(cookie) + amount);
+}
+} // namespace
+
+namespace {
+// Helper functions implemented here to avoid dependency on libc which is not
+// available in LLVM libc hermetic testing.
+int _isspace(char ch) {
+  return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' || ch == '\v' ||
+         ch == '\f';
+}
+
+__attribute__((no_builtin("strlen"))) size_t _strlen(const char *str) {
+  const char *end = str;
+  while (*end)
+    ++end;
+  return static_cast<size_t>(end - str);
+}
+
+// Semihosting helpers
+int semihost_errno_negative() {
+  int error = semihosting_call(SYS_ERRNO, nullptr);
+  return error > 0 ? -error : -EIO;
+}
+
+off_t semihost_file_length(size_t handle) {
+  size_t args[] = {handle};
+  off_t length = semihosting_call(SYS_FLEN, args);
+  return length < 0 ? semihost_errno_negative() : length;
+}
+
+ssize_t semihost_read(size_t handle, char *buf, size_t size) {
+  size_t args[] = {
+      handle,
+      reinterpret_cast<size_t>(buf),
+      size,
+  };
+  ssize_t not_read = semihosting_call(SYS_READ, args);
+  return not_read < 0 ? semihost_errno_negative()
+                      : static_cast<ssize_t>(size) - not_read;
+}
+
+ssize_t semihost_read_console(char *buf, size_t size) {
+  for (size_t i = 0; i < size; ++i) {
+    long ch = semihosting_call(SYS_READC, nullptr);
+    buf[i] = static_cast<char>(ch);
+    if (buf[i] == '\r')
+      buf[i] = '\n';
+  }
+  return static_cast<ssize_t>(size);
+}
+
+ssize_t semihost_write(size_t handle, const char *buf, size_t size) {
+  size_t args[] = {
+      handle,
+      reinterpret_cast<size_t>(buf),
+      size,
+  };
+  ssize_t not_written = semihosting_call(SYS_WRITE, args);
+  return not_written < 0 ? semihost_errno_negative()
+                         : static_cast<ssize_t>(size) - not_written;
+}
+
+int semihost_seek(size_t handle, off_t position) {
+  size_t args[] = {
+      handle,
+      static_cast<size_t>(position),
+  };
+  return semihosting_call(SYS_SEEK, args) == 0 ? 0 : semihost_errno_negative();
+}
+
+long semihost_open(const char *path, size_t length, size_t mode) {
+  size_t args[] = {
+      reinterpret_cast<size_t>(path),
+      mode,
+      length,
+  };
+  long handle = semihosting_call(SYS_OPEN, args);
+  return handle < 0 ? semihost_errno_negative() : handle;
+}
+
+int semihost_remove(const char *path, size_t length) {
+  size_t args[] = {
+      reinterpret_cast<size_t>(path),
+      length,
+  };
+  return semihosting_call(SYS_REMOVE, args) == 0 ? 0
+                                                  : semihost_errno_negative();
+}
+
+int semihost_rename(const char *old_path, size_t old_length,
+                    const char *new_path, size_t new_length) {
+  size_t args[] = {
+      reinterpret_cast<size_t>(old_path),
+      old_length,
+      reinterpret_cast<size_t>(new_path),
+      new_length,
+  };
+  return semihosting_call(SYS_RENAME, args) == 0 ? 0
+                                                 : semihost_errno_negative();
+}
+
+int semihost_close(size_t handle) {
+  size_t args[] = {handle};
+  return semihosting_call(SYS_CLOSE, args);
+}
+
+bool stdio_cookie_open(struct __llvm_libc_stdio_cookie *cookie, size_t mode) {
+  const char std_stream_name[] = ":tt";
+  long handle =
+      semihost_open(std_stream_name, sizeof(std_stream_name) - 1, mode);
+  if (handle < 0)
+    return false;
+  cookie->handle = static_cast<size_t>(handle);
+  return true;
+}
+
 } // namespace
 
 extern "C" {
@@ -56,41 +218,114 @@ void __llvm_libc_exit(int status) {
   semihosting_call_exit(status);
 }
 
-struct __llvm_libc_stdio_cookie __llvm_libc_stdin_cookie;
-struct __llvm_libc_stdio_cookie __llvm_libc_stdout_cookie;
-struct __llvm_libc_stdio_cookie __llvm_libc_stderr_cookie;
+ssize_t __llvm_libc_stdio_read(void *cookie, char *buf, size_t size) {
+  if (cookie == &__llvm_libc_stdin_cookie)
+    return semihost_read_console(buf, size);
+  if (is_std_stream(cookie))
+    return -EBADF;
 
-// Currently only supports reading from stdin.
-// We use SYS_READC for reading from stdin as QEMUs SYS_READ does not block.
-// For other files SYS_READ should be used as SYS_READC is intended for console
-// input and may block indefinitely in QEMU.
-// TODO: Extend to handle regular files when implemented in LLVM libc.
-
-ssize_t __llvm_libc_stdio_read(struct __llvm_libc_stdio_cookie *cookie,
-                               char *buf, size_t size) {
-  if (cookie != &__llvm_libc_stdin_cookie)
-    return -1;
-  
-  for (size_t i = 0; i < size; ++i) {
-    long ch = semihosting_call(SYS_READC, nullptr);
-    buf[i] = static_cast<char>(ch & 0xff);
-    if (buf[i] == '\r')
-      buf[i] = '\n';
-  }
-  return size;
+  ssize_t result = semihost_read(get_handle(cookie), buf, size);
+  if (result < 0)
+    return result;
+  advance_file_position(cookie, result);
+  return result;
 }
 
-ssize_t __llvm_libc_stdio_write(struct __llvm_libc_stdio_cookie *cookie,
-                                const char *buf, size_t size) {
-  size_t args[] = {
-      static_cast<size_t>(cookie->handle),
-      reinterpret_cast<size_t>(buf),
-      size,
-  };
-  ssize_t retval = semihosting_call(SYS_WRITE, args);
-  if (retval >= 0)
-    retval = size - retval;
-  return retval;
+ssize_t __llvm_libc_stdio_write(void *cookie, const char *buf, size_t size) {
+  ssize_t result = semihost_write(get_handle(cookie), buf, size);
+  if (result < 0)
+    return result;
+  if (!is_std_stream(cookie))
+    advance_file_position(cookie, result);
+  return result;
+}
+
+int __llvm_libc_stdio_open(const char *path, const char *mode, void **cookie) {
+  auto *file_cookie = allocate_file();
+  if (!file_cookie)
+    return -EMFILE;
+
+  size_t open_mode = OPENMODE_R;
+  if (mode[0] == 'w')
+    open_mode = OPENMODE_W;
+  else if (mode[0] == 'a')
+    open_mode = OPENMODE_A;
+  for (const char *option = mode + 1; *option != '\0'; ++option) {
+    if (*option == '+')
+      open_mode |= OPENMODE_PLUS;
+    else if (*option == 'b')
+      open_mode |= OPENMODE_B;
+  }
+
+  long handle = semihost_open(path, _strlen(path), open_mode);
+  if (handle < 0) {
+    release_file(file_cookie);
+    return static_cast<int>(handle);
+  }
+  file_cookie->stdio_cookie.handle = static_cast<size_t>(handle);
+  if (open_mode & OPENMODE_A) {
+    off_t length = semihost_file_length(get_handle(file_cookie));
+    if (length < 0) {
+      semihost_close(get_handle(file_cookie));
+      release_file(file_cookie);
+      return static_cast<int>(length);
+    }
+    set_file_position(file_cookie, length);
+  }
+  *cookie = file_cookie;
+  return 0;
+}
+
+int __llvm_libc_stdio_remove(const char *path) {
+  return semihost_remove(path, _strlen(path));
+}
+
+int __llvm_libc_stdio_rename(const char *old_path, const char *new_path) {
+  return semihost_rename(old_path, _strlen(old_path), new_path,
+                         _strlen(new_path));
+}
+
+off_t __llvm_libc_stdio_seek(void *cookie, off_t offset, int whence) {
+  if (is_std_stream(cookie))
+    return -ESPIPE;
+
+  off_t base;
+  if (whence == SEEK_SET)
+    base = 0;
+  else if (whence == SEEK_CUR)
+    base = get_file_position(cookie);
+  else if (whence == SEEK_END) {
+    base = semihost_file_length(get_handle(cookie));
+    if (base < 0)
+      return base;
+  } else
+    return -EINVAL;
+
+  off_t position;
+  if (__builtin_add_overflow(base, offset, &position) || position < 0)
+    return -EINVAL;
+  int error = semihost_seek(get_handle(cookie), position);
+  if (error)
+    return error;
+  set_file_position(cookie, position);
+  return position;
+}
+
+int __llvm_libc_stdio_set_buffer(void *, char *, size_t, int) {
+  // Semihost streams are unbuffered.
+  return 0;
+}
+
+int __llvm_libc_stdio_flush(void *) {
+  // Semihost streams are unbuffered.
+  return 0;
+}
+
+int __llvm_libc_stdio_close(void *cookie) {
+  int result = semihost_close(get_handle(cookie));
+  if (!is_std_stream(cookie))
+    release_file(cookie);
+  return result;
 }
 
 bool __llvm_libc_timespec_get_active(struct timespec *ts) {
@@ -115,14 +350,14 @@ bool __llvm_libc_timespec_get_utc(struct timespec *ts) {
 
 // Entry point
 void _platform_init(void) {
-  stdio_open(&__llvm_libc_stdin_cookie, OPENMODE_R);
-  stdio_open(&__llvm_libc_stdout_cookie, OPENMODE_W);
+  stdio_cookie_open(&__llvm_libc_stdin_cookie, OPENMODE_R);
+  stdio_cookie_open(&__llvm_libc_stdout_cookie, OPENMODE_W);
   // The convention of opening ":tt" in append mode to specify stderr is not
   // supported by all semihosting implementations. If this open fails, retry in
   // write mode, because having stderr squashed into stdout is better than not
   // having it at all.
-  if (!stdio_open(&__llvm_libc_stderr_cookie, OPENMODE_A))
-    stdio_open(&__llvm_libc_stderr_cookie, OPENMODE_W);
+  if (!stdio_cookie_open(&__llvm_libc_stderr_cookie, OPENMODE_A))
+    stdio_cookie_open(&__llvm_libc_stderr_cookie, OPENMODE_W);
 }
 
 // Debug output
@@ -140,21 +375,6 @@ void _platform_debug_putc(int c) {
 //   Not closed quote will run till the end of the provided line.
 // - Escape sequences: \ copies next char as-is unless inside ' quotes
 //   or at the end of the string.
-
-// Helper functions implemented here to avoid dependency on libc which is not
-// available in LLVM libc hermetic testing.
-static int _isspace(char ch) {
-  return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' || ch == '\v' ||
-         ch == '\f';
-}
-
-__attribute__((no_builtin("strlen"))) static size_t _strlen(const char *str) {
-  const char *pend = str;
-  while (*pend) {
-    pend++;
-  }
-  return (size_t)(pend - str);
-}
 
 static inline void skip_spaces(const char *&p) {
   while (_isspace(*p))
