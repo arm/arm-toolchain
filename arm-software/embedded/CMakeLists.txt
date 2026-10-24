@@ -1068,9 +1068,9 @@ endforeach()
 
 # Install samples
 if(WIN32 OR LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
-    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|h|ld|md|in|bat)")
+    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|h|ld|md|in|bat|py|s|S)")
 else()
-    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|h|ld|md|in)")
+    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|h|ld|md|in|py|s|S)")
 endif()
 install(
     DIRECTORY samples
