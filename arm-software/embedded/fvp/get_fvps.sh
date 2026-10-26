@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2024, 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
 # This script downloads the FVP models which we use for testing the toolchain.
 # These are available at no cost, but come with EULAs which must be agreed to
@@ -49,12 +49,12 @@ done
 MACHINE_HARDWARE=$(uname -m)
 
 if [ "$MACHINE_HARDWARE" == 'x86_64' ]; then
-    URL_CORSTONE_310='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64.tgz'
+    URL_CORSTONE_320='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-320/FVP_Corstone_SSE-320_11.32.cs320_3_Linux_x86.tar.gz'
     URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.31/FVP_Base_RevC_AEMvA_11.31_28_Linux_x86.tar.gz'
     URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.31/FVP_Base_AEMv8R_11.31_28_Linux_x86.tar.gz'
     URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.31/FastModels_crypto_11.31_28_Linux_x86.tar.gz'
 elif [ "$MACHINE_HARDWARE" == 'aarch64' ]; then
-    URL_CORSTONE_310='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-310/FVP_Corstone_SSE-310_11.27_42_Linux64_armv8l.tgz'
+    URL_CORSTONE_320='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Corstone-IoT/Corstone-320/FVP_Corstone_SSE-320_11.32.cs320_3_Linux_armv8.tar.gz'
     URL_BASE_AEM_A='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.31/FVP_Base_RevC_AEMvA_11.31_28_Linux_armv8.tar.gz'
     URL_BASE_AEM_R='https://developer.arm.com/-/cdn-downloads/permalink/FVPs-Architecture/FM-11.31/FVP_Base_AEMv8R_11.31_28_Linux_armv8.tar.gz'
     URL_CRYPTO='https://developer.arm.com/-/cdn-downloads/permalink/Fast-Models-Crypto-Plug-in/FM-11.31/FastModels_crypto_11.31_28_Linux_armv8.tar.gz'
@@ -63,7 +63,7 @@ else
     exit 1
 fi
 
-FILENAME_CORSTONE_310=$(basename "$URL_CORSTONE_310")
+FILENAME_CORSTONE_320=$(basename "$URL_CORSTONE_320")
 FILENAME_BASE_AEM_A=$(basename "$URL_BASE_AEM_A")
 FILENAME_BASE_AEM_R=$(basename "$URL_BASE_AEM_R")
 FILENAME_CRYPTO=$(basename "$URL_CRYPTO")
@@ -80,7 +80,7 @@ fi
 mkdir -p download
 pushd download
 DOWNLOAD_DIR="$(pwd)"
-download_to "${URL_CORSTONE_310}" "${FILENAME_CORSTONE_310}"
+download_to "${URL_CORSTONE_320}" "${FILENAME_CORSTONE_320}"
 download_to "${URL_BASE_AEM_A}" "${FILENAME_BASE_AEM_A}"
 download_to "${URL_BASE_AEM_R}" "${FILENAME_BASE_AEM_R}"
 download_to "${URL_CRYPTO}" "${FILENAME_CRYPTO}"
@@ -89,9 +89,9 @@ popd
 mkdir -p install
 pushd install
 
-if [ ! -d "Corstone-310" ]; then
-tar -xf ${DOWNLOAD_DIR}/${FILENAME_CORSTONE_310}
-./FVP_Corstone_SSE-310.sh --destination ./Corstone-310 "${INSTALLER_FLAGS_CORSTONE[@]}"
+if [ ! -d "Corstone-320_11.32.cs320_3" ]; then
+tar -xf ${DOWNLOAD_DIR}/${FILENAME_CORSTONE_320}
+./"${FILENAME_CORSTONE_320%.tar.gz}.sh" --destination ./Corstone-320_11.32.cs320_3 "${INSTALLER_FLAGS_CORSTONE[@]}"
 fi
 
 if [ ! -d "FVP_Base_RevC_AEMvA_11.31_28" ]; then
