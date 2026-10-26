@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- A new sample program demonstrating transparent RW data compression
+- A new sample `baremetal-semihosting-compression` demonstrating transparent RW data compression.
 
 ### Changed
 
