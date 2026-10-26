@@ -743,6 +743,7 @@ def main():
             result=NewResult.EXCLUDE,
             project="picolibc",
             variants=[
+                "aarch64a",
                 "aarch64a_exn_rtti_unaligned",
                 "aarch64a_soft_nofp",
                 "aarch64a_soft_nofp_exn_rtti",
@@ -983,6 +984,19 @@ def main():
             description="This exhaustive exception matching test does not complete within the embedded executor timeout.",
         ),
         XFail(
+            name="picolibc signal unwind on AArch64 QEMU",
+            testnames=[
+                "signal_unwind.pass.cpp",
+            ],
+            result=NewResult.XFAILED,
+            project="libunwind",
+            libc="picolibc",
+            variants=[
+                "aarch64a",
+            ],
+            description="Backtracing from the signal handler fails to reach main on AArch64 QEMU, so the test exits with status 255.",
+        ),
+        XFail(
             name="llvmlibc libunwind missing POSIX headers",
             testnames=[
                 "aarch64_za_unwind.pass.cpp",
@@ -1019,9 +1033,22 @@ def main():
             description="Clang ARM AAPCS mislowers variadic vector type arguments (LLVMAENG-6240)",
         ),
         XFail(
-            name="llvmlibc mathvec cosf big-endian failure",
+            name="llvmlibc powf double-evaluation underflow",
+            testnames=[
+                "src/math/smoke/libc.test.src.math.smoke.powf_test.__build__",
+                "src/math/smoke/libc.test.src.math.smoke.powf_test.__NO_ROUND_OPT.__build__",
+            ],
+            result=NewResult.XFAILED,
+            project="llvmlibc",
+            description="The bare-metal configuration skips the accurate pass, so DoubleEval.RangeUnderflow returns zero instead of the smallest positive subnormal at the rounding boundary.",
+        ),
+        XFail(
+            name="llvmlibc mathvec cosf and logf big-endian failures",
             testnames=[
                 "src/mathvec/libc.test.src.mathvec.cosf_test.__build__",
+                "src/mathvec/libc.test.src.mathvec.cosf_test.__NO_ROUND_OPT.__build__",
+                "src/mathvec/libc.test.src.mathvec.logf_test.__build__",
+                "src/mathvec/libc.test.src.mathvec.logf_test.__NO_ROUND_OPT.__build__",
             ],
             result=NewResult.XFAILED,
             project="llvmlibc",
@@ -1031,7 +1058,7 @@ def main():
                 "aarch64r_be",
                 "aarch64r_be_exn_rtti",
             ],
-            description="The mathvec cosf SIMD results exceed the test's ULP tolerance on big-endian AArch64 variants",
+            description="The mathvec cosf and logf SIMD results exceed the test's ULP tolerance, and logf special-value checks fail on big-endian AArch64 variants",
         ),
         XFail(
             name="variadic primitive type arguments",
