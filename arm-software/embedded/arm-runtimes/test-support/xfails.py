@@ -1019,6 +1019,16 @@ def main():
             description="Clang ARM AAPCS mislowers variadic vector type arguments (LLVMAENG-6240)",
         ),
         XFail(
+            name="llvmlibc powf double-evaluation underflow",
+            testnames=[
+                "src/math/smoke/libc.test.src.math.smoke.powf_test.__build__",
+                "src/math/smoke/libc.test.src.math.smoke.powf_test.__NO_ROUND_OPT.__build__",
+            ],
+            result=NewResult.XFAILED,
+            project="llvmlibc",
+            description="The bare-metal configuration skips the accurate pass, so DoubleEval.RangeUnderflow returns zero instead of the smallest positive subnormal at the rounding boundary.",
+        ),
+        XFail(
             name="llvmlibc mathvec cosf big-endian failure",
             testnames=[
                 "src/mathvec/libc.test.src.mathvec.cosf_test.__build__",
