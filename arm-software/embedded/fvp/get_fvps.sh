@@ -69,7 +69,7 @@ FILENAME_BASE_AEM_R=$(basename "$URL_BASE_AEM_R")
 FILENAME_CRYPTO=$(basename "$URL_CRYPTO")
 
 if which curl >&/dev/null; then
-    download_to() { curl --retry 5 --no-clobber "$1" -o "$2"; }
+    download_to() { curl --retry 5 "$1" -o "$2"; }
 elif which wget >&/dev/null; then
     download_to() { wget --no-clobber "$1" -O "$2"; }
 else
