@@ -17,7 +17,7 @@ SECTIONS
 {
   /*
    * Our .text section begins with the read-only PT_LOAD segment from
-   * the inner link (which in turn contains both code and RO data), at
+   * the runtime link (which in turn contains both code and RO data), at
    * exactly the same start address. Therefore, it needs no copying or
    * modification at load time.
    *
