@@ -4,20 +4,17 @@
  * See https://llvm.org/LICENSE.txt for license information.
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception */
 
-/* ld script for the inner (execution-time) link of compression demo
+/* ld script for the inner (execution-time) link of the compression demo
  *
- * This ld script puts code and RO data at 0x3000 and RW data at 0x20000000,
- * and sets __data_size to 0 to prevent crt0 startup code from populating RAM,
- * expecting that the outer link will set everything up.
+ * This is a minimal ld script that works with both picolibc and llvmlibc. It puts code and RO data at
+ * 0x3000 and RW data at 0x20000000.
  *
- * However, one difference is that we must force the program header
- * table to contain precisely two PT_LOAD segments, so that elf2bin
- * will extract the data for use in the outer link in exactly the two
- * binary chunks we expect. If we don't do that, lld will potentially
- * split up one or the other segment into two pieces. It does this if
- * it has to insert alignment padding (e.g. between code and RO data),
- * apparently preferring not to specify arbitrary values for the
- * intervening bytes.
+ * Crucially, it does not specify that data should be copied from flash to ram at runtime.
+ * i.e., doesn't use something like ">ram AT>flash" for the rw data section, which would otherwise place it
+ * in the wrong address space in the inital image.
+ *
+ * We will then be using elf2bin to extract the ro and rw sections as two separate binary chunks,
+ * based on the address ranges above.
  */
 
 INCLUDE memory_map.ld
@@ -42,7 +39,7 @@ SECTIONS
   } :boot
 
   /* We'll be extracting the binary contents from this point forward */
-  
+
   . =  __flash;
   .text : { *(.text .text.*) } :ro
   .rodata : { *(.rodata .rodata.* ) } : ro
@@ -94,7 +91,7 @@ PROVIDE(__heap_start = ALIGN(__bss_end, 8));
 PROVIDE(__heap_end = __stack - __stack_size);
 PROVIDE(__heap_size = __heap_end - __heap_start);
 
-/* Symbols expected by llvmlibc */
+/* Symbols required by llvmlibc */
 PROVIDE(__llvm_libc_heap_limit = __heap_end);
 PROVIDE(_end = __heap_start);
 
