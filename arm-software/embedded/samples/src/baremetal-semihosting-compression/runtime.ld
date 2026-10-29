@@ -24,6 +24,7 @@ INCLUDE memory_map.ld
 
 PHDRS
 {
+    boot PT_LOAD;
     ro PT_LOAD;
     rw PT_LOAD;
     tls PT_TLS;
@@ -34,29 +35,59 @@ PHDRS
 
 SECTIONS
 {
-  .text __flash : { *(.text .text.*) } :ro
+  /* This is required to run the uncompressed version but won't be included in
+   * the compressed image */
+  .boot_flash : {
+    KEEP (*(.text.init.enter))
+  } :boot
+
+  /* We'll be extracting the binary contents from this point forward */
+  
+  . =  __flash;
+  .text : { *(.text .text.*) } :ro
+  .rodata : { *(.rodata .rodata.* ) } : ro
+
+  . =  __ram;
   PROVIDE(__data_start = ADDR(.data));
 	PROVIDE(__data_source = LOADADDR(.data));
-  .data __ram : { *(.data .data.*) } :rw
+  .data : { *(.data .data.*) } :rw
   .tdata : { *(.tdata .tdata.* .gnu.linkonce.td.*) } :rw :tls
   PROVIDE( __data_end = . );
-  .tbss : { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) } :rw :tls
-  PROVIDE( __tls_align = MAX(ALIGNOF(.tdata), ALIGNOF(.tbss)) );
   PROVIDE( __data_size = __data_end - __data_start );
-  .bss : { *(.bss .bss.*) } :rw
-  /* Align the heap */
-  /* . = ALIGN(8); */
-  __bss_end = .;
+  .tbss : { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) } :rw :tls
+  PROVIDE( __tls_end = . );
+  PROVIDE( __tbss_end = . );
+
+  .bss : {
+    . = ALIGN(__tls_align);
+    PROVIDE( __tls_tail_extra_start = . );
+		KEEP (*(.tls_tail_extra .tls_tail_extra.*))
+		PROVIDE( __tls_tail_extra_end = . );
+
+    PROVIDE( __non_tls_bss_start = . );
+    *(.bss .bss.*)
+
+    /* Align the heap */
+    . = ALIGN(8);
+    __bss_end = .;
+  } :rw
   PROVIDE( __bss_start = ADDR(.tbss) );
   PROVIDE( __arm32_tls_tcb_offset = MAX(8, __tls_align) );
   PROVIDE( __bss_size = __bss_end - __bss_start );
+
+  /DISCARD/ : {
+    *(.note .note.*)
+    *(.eh_frame .eh_frame.*)
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    *(.ARM.exidx*)
+  }
 }
 
-PROVIDE(__tls_base = ADDR(.tdata));
-
-/*  Reserve the top 1 KiB of RAM for the stack. */
-PROVIDE(__stack = __ram + __ram_size);
-PROVIDE(__stack_size = 0x400);
+PROVIDE( __tls_first = SIZEOF(.tdata) ? ADDR(.tdata) : ADDR(.tbss) );
+PROVIDE( __tls_base = ADDR(.tdata));
+PROVIDE( __tls_align = MAX(ALIGNOF(.tdata), ALIGNOF(.tbss)) );
+PROVIDE( __tls_size = (__tls_tail_extra_size ? ALIGN(__tls_end, __tls_align) + __tls_tail_extra_size : __tls_end) - __tls_base );
+PROVIDE( __tls_tail_extra_size = __tls_tail_extra_end - __tls_tail_extra_start );
 
 /* The heap occupies free RAM between BSS and the stack reservation. */
 PROVIDE(__heap_start = ALIGN(__bss_end, 8));
@@ -65,7 +96,8 @@ PROVIDE(__heap_size = __heap_end - __heap_start);
 
 /* Symbols expected by llvmlibc */
 PROVIDE(__llvm_libc_heap_limit = __heap_end);
-PROVIDE(_end = __heap_start); 
+PROVIDE(_end = __heap_start);
 
-/* The decompressor will initialise .data so tell picolibc to not copy anything into .data's runtime address */
-/* PROVIDE(__data_size = 0); */
+/*  Reserve the top 1 KiB of RAM for the stack. */
+PROVIDE(__stack = __ram + __ram_size);
+PROVIDE(__stack_size = 0x400);
