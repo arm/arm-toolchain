@@ -12,7 +12,7 @@ build: compression-demo.elf
 # First, link the image with a minimal ld script that places every segment at its
 # execution-time address.
 exec.elf: demo.c runtime.ld
-	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_TARGET) $(CRT_SEMIHOST) -Wl,--Map=exec-runtime-diag.map -T runtime.ld -o $@ $<
+	$(BIN_PATH)/clang $(CFG_FILE) $(MICROBIT_TARGET) $(CRT_SEMIHOST) -T runtime.ld -o $@ $<
 
 # Now extract the binary RO and RW chunks separately. Because we manually
 # specified the memory layout, we know what address ranges to extract.
