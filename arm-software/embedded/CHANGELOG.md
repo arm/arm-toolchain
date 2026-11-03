@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+
+- A new sample `baremetal-semihosting-compression` demonstrating transparent RW data compression.
+
 ### Changed
 
 - macOS package provides Apple Silicon binaries only.
