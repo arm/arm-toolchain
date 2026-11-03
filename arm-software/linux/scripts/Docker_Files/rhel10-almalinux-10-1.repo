@@ -1,0 +1,336 @@
+# Repo_name = almalinux-saphana.repo
+
+[saphana]
+name=AlmaLinux 10 - SAPHANA
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/saphana
+# baseurl=https://repo.almalinux.org/almalinux/9/SAPHANA/$basearch/os/
+enabled=0
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[saphana-debug]
+name=AlmaLinux 10 - SAPHANA - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/saphana-debug
+# baseurl=https://repo.almalinux.org/vault/9/SAPHANA/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[saphana-source]
+name=AlmaLinux 10 - SAPHANA - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/saphana-source
+# baseurl=https://repo.almalinux.org/vault/9/SAPHANA/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+# Repo_name = almalinux-sap.repo
+
+[sap]
+name=AlmaLinux 10 - SAP
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/sap
+# baseurl=https://repo.almalinux.org/almalinux/9/SAP/$basearch/os/
+enabled=0
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[sap-debug]
+name=AlmaLinux 10 - SAP - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/sap-debug
+# baseurl=https://repo.almalinux.org/vault/9/SAP/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[sap-source]
+name=AlmaLinux 10 - SAP - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/sap-source
+# baseurl=https://repo.almalinux.org/vault/9/SAP/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+# Repo_name = almalinux-resilientstorage.repo
+
+[resilientstorage]
+name=AlmaLinux 10 - ResilientStorage
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/resilientstorage
+# baseurl=https://repo.almalinux.org/almalinux/9/ResilientStorage/$basearch/os/
+enabled=0
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[resilientstorage-debug]
+name=AlmaLinux 10 - ResilientStorage - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/resilientstorage-debug
+# baseurl=https://repo.almalinux.org/vault/9/ResilientStorage/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[resilientstorage-source]
+name=AlmaLinux 10 - ResilientStorage - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/resilientstorage-source
+# baseurl=https://repo.almalinux.org/vault/9/ResilientStorage/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+# Repo_name = almalinux-plus.repo
+
+[plus]
+name=AlmaLinux 10 - Plus
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/plus
+# baseurl=https://repo.almalinux.org/almalinux/9/plus/$basearch/os/
+enabled=0
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[plus-debug]
+name=AlmaLinux 10 - Plus - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/plus-debug
+# baseurl=https://repo.almalinux.org/vault/9/plus/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[plus-source]
+name=AlmaLinux 10 - Plus - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/plus-source
+# baseurl=https://repo.almalinux.org/vault/9/plus/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+# Repo_name = almalinux-highavailability.repo
+
+[highavailability]
+name=AlmaLinux 10 - HighAvailability
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/highavailability
+# baseurl=https://repo.almalinux.org/almalinux/9/HighAvailability/$basearch/os/
+enabled=0
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[highavailability-debug]
+name=AlmaLinux 10 - HighAvailability - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/highavailability-debug
+# baseurl=https://repo.almalinux.org/vault/9/HighAvailability/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[highavailability-source]
+name=AlmaLinux 10 - HighAvailability - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/highavailability-source
+# baseurl=https://repo.almalinux.org/vault/9/HighAvailability/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+# Repo_name = almalinux-extras.repo
+
+[extras]
+name=AlmaLinux 10 - Extras
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/extras
+# baseurl=https://repo.almalinux.org/almalinux/9/extras/$basearch/os/
+enabled=1
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[extras-debug]
+name=AlmaLinux 10 - Extras - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/extras-debug
+# baseurl=https://repo.almalinux.org/vault/9/extras/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[extras-source]
+name=AlmaLinux 10 - Extras - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/extras-source
+# baseurl=https://repo.almalinux.org/vault/9/extras/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+# Repo_name = almalinux-crb.repo
+
+[crb]
+name=AlmaLinux 10 - CRB
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/crb
+# baseurl=https://repo.almalinux.org/almalinux/9/CRB/$basearch/os/
+enabled=0
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[crb-debug]
+name=AlmaLinux 10 - CRB - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/crb-debug
+# baseurl=https://repo.almalinux.org/vault/9/CRB/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[crb-source]
+name=AlmaLinux 10 - CRB - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/crb-source
+# baseurl=https://repo.almalinux.org/vault/9/CRB/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+# Repo_name = almalinux-baseos.repo
+
+[baseos]
+name=AlmaLinux 10 - BaseOS
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/baseos
+# baseurl=https://repo.almalinux.org/almalinux/9/BaseOS/$basearch/os/
+enabled=1
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=1
+priority=10
+
+[devel]
+name=AlmaLinux 10 - Devel
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/devel
+# baseurl=https://repo.almalinux.org/almalinux/9/devel/$basearch/os/
+enabled=1
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=1
+priority=10
+
+[baseos-debug]
+name=AlmaLinux 10 - BaseOS - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/baseos-debug
+# baseurl=https://repo.almalinux.org/vault/9/BaseOS/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[baseos-source]
+name=AlmaLinux 10 - BaseOS - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/baseos-source
+# baseurl=https://repo.almalinux.org/vault/9/BaseOS/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+# Repo_name = almalinux-appstream.repo
+
+[appstream]
+name=AlmaLinux 10 - AppStream
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/appstream
+# baseurl=https://repo.almalinux.org/almalinux/9/AppStream/$basearch/os/
+enabled=1
+gpgcheck=1
+countme=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=1
+priority=10
+
+[appstream-debug]
+name=AlmaLinux 10 - AppStream - Debug
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/appstream-debug
+# baseurl=https://repo.almalinux.org/vault/9/AppStream/debug/$basearch/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+
+[appstream-source]
+name=AlmaLinux 10 - AppStream - Source
+mirrorlist=https://mirrors.almalinux.org/mirrorlist/10/appstream-source
+# baseurl=https://repo.almalinux.org/vault/9/AppStream/Source/
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+metadata_expire=86400
+enabled_metadata=0
+priority=10
+

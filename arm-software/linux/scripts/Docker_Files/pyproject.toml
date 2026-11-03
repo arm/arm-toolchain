@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "ATfL"
+version = "1.0.0a0"
+description = "Arm Toolchain for Linux"
+authors = ["Arm Ltd <arm.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.9"
+furo = ">=2024.1.29"
+myst-parser = ">=0.16.1"
+pyyaml = "^6.0.2"
+pygments = "^2.19.1"
+psutil = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

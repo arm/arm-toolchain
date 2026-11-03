@@ -1,0 +1,82 @@
+# Copyright (c) 2026, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow tags a commit as a Release Candidate.
+
+name: "(ATfE) Tag Release Candidate"
+on:
+  workflow_dispatch:
+    inputs:
+      target-commit:
+        description: Commit hash to be tagged
+        required: true
+        type: string
+      rc-number:
+        description: Release Candidate Number
+        required: true
+        type: string
+      atfe-version:
+        description: ATfE Version (x.x.x)
+        required: true
+        type: string
+jobs:
+  atfe-tag-release-candidate:
+    runs-on: ubuntu-24.04-arm
+    if: github.repository == 'arm/arm-toolchain'
+    steps:
+      - name: Validate Inputs
+        env:
+          RC_NUM: ${{github.event.inputs.rc-number}}
+          ATFE_VERS: ${{github.event.inputs.atfe-version}}
+        run: |
+          if ! echo "$RC_NUM" | grep -qx "[0-9]\+"; then
+            echo "Error: Release Candidate Number must be numeric"
+            exit 1
+          fi
+          if ! echo "$ATFE_VERS" | grep -qx "[0-9]\+\.[0-9]\+\.[0-9]\+"; then
+            echo "Error: ATfE Version should use x.x.x format"
+            exit 1
+          fi
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v3
+        id: generate-token
+        with:
+          client-id: ${{ secrets.SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          fetch-depth: 0
+      - name: Configure Git Identity
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Check if tag exists
+        env:
+          TAG_NAME: RC${{ inputs.rc-number }}-${{ inputs.atfe-version }}-ATfE
+        run: |
+          if git tag | grep -qF "$TAG_NAME"; then
+            echo "Error: Tag $TAG_NAME already exists"
+            exit 1
+          fi
+      - name: Check commit is on release branch
+        env:
+          ATFE_VERS: ${{github.event.inputs.atfe-version}}
+        run: |
+          majorv=$(echo "$ATFE_VERS" | grep -o "^[0-9]\+")
+          releaseb="release/arm-software/$majorv.x"
+          git fetch origin "$releaseb:$releaseb"
+          if ! git branch --contains ${{ inputs.target-commit }} | grep -qF "$releaseb"; then
+            echo "Error: Commit ${{ inputs.target-commit }} not found on branch $releaseb"
+            exit 1
+          fi
+      - name: Create Tag
+        env:
+          TAG_NAME: RC${{ inputs.rc-number }}-${{ inputs.atfe-version }}-ATfE
+          TAG_MSG: release-${{ inputs.atfe-version }}-ATfE Release Candidate ${{ inputs.rc-number }}
+        run: |
+          git tag -a "$TAG_NAME" ${{ inputs.target-commit }} -m "$TAG_MSG"
+          git push origin "$TAG_NAME"

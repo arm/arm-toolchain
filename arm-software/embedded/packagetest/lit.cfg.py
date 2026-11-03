@@ -1,0 +1,78 @@
+# -*- Python -*-
+
+import os
+import sys
+
+import lit.formats
+
+from lit.llvm import llvm_config
+from lit.llvm.subst import FindTool, ToolSubst
+
+# Configuration file for the 'lit' test runner.
+
+config.name = "package"
+config.test_format = lit.formats.ShTest()
+config.suffixes = [".c", ".cpp", ".test"]
+config.excludes = ["CMakeLists.txt", "README.md"]
+config.test_source_root = os.path.dirname(__file__)
+
+
+# Copy-pasted from use_default_substitutions in
+# llvm-project/llvm/utils/lit/lit/llvm/config.py
+# FileCheck is not packaged so we need to get it from a different directory.
+tool_patterns = [
+    ToolSubst("FileCheck", unresolved="fatal"),
+    # Handle these specially as they are strings searched for during
+    # testing.
+    ToolSubst(
+        r"\| \bcount\b",
+        command=FindTool("count"),
+        verbatim=True,
+        unresolved="fatal",
+    ),
+    ToolSubst(
+        r"\| \bnot\b",
+        command=FindTool("not"),
+        verbatim=True,
+        unresolved="fatal",
+    ),
+]
+llvm_config.config.substitutions.append(("%python", '"%s"' % (sys.executable)))
+llvm_config.add_tool_substitutions(
+    tool_patterns, [os.path.join(config.llvm_obj_root, "bin")]
+)
+llvm_config.add_err_msg_substitutions()
+llvm_config.use_clang()
+llvm_config.config.substitutions.append(("%samples_dir", '"%s"' % config.samples_dir))
+llvm_config.config.substitutions.append(
+    ("%unpack_directory", '"%s"' % config.unpack_directory)
+)
+if config.packagetest_libc:
+    llvm_config.config.substitutions.append(
+        ("%sample_libc", "LIBC=%s" % config.packagetest_libc)
+    )
+else:
+    llvm_config.config.substitutions.append(("%sample_libc", ""))
+
+libc_config = ""
+if config.packagetest_libc:
+    libc_config_file = os.path.join(
+        config.unpack_directory, "bin", "%s.cfg" % config.packagetest_libc
+    )
+    if os.path.isfile(libc_config_file):
+        libc_config = "--config=%s.cfg" % config.packagetest_libc
+llvm_config.config.substitutions.append(("%libc_config", libc_config))
+
+libc_linker_scripts = {
+    "picolibc": "picolibcpp.ld",
+    "llvmlibc": "llvmlibc.ld",
+}
+if config.packagetest_libc:
+    libc_linker_script = libc_linker_scripts[config.packagetest_libc]
+else:
+    # Preserve the original behavior for package tests configured without an
+    # explicitly selected C library.
+    libc_linker_script = libc_linker_scripts["picolibc"]
+llvm_config.config.substitutions.append(("%libc_linker_script", libc_linker_script))
+
+config.environment["CLANG_NO_DEFAULT_CONFIG"] = "1"

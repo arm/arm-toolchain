@@ -1,0 +1,56 @@
+# Copyright (c) 2026, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow creates a downstream arm-toolchain release branch.
+# The branch should be created at the commit where the upstream branch
+# point was merged on to the arm-software branch.
+
+name: "(arm-toolchain) Create arm-toolchain Release Branch"
+on:
+  workflow_dispatch:
+    inputs:
+      release-version:
+        description: Release Major Version
+        required: true
+        type: string
+jobs:
+  create-arm-release-branch:
+    runs-on: ubuntu-24.04-arm
+    if: github.repository == 'arm/arm-toolchain'
+    steps:
+      - name: Configure Access Token
+        uses: actions/create-github-app-token@v3
+        id: generate-token
+        with:
+          client-id: ${{ secrets.SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          fetch-depth: 0
+      - name: Configure Git Identity
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Fetch Remotes
+        run: |
+          git remote add llvm https://github.com/llvm/llvm-project.git
+          git fetch llvm main
+          git fetch llvm release/${{ inputs.release-version }}.x
+      - name: Create Branch
+        run: |
+          llvmbranchpoint=$(git merge-base remotes/llvm/main remotes/llvm/release/${{ inputs.release-version }}.x)
+          echo "release/${{ inputs.release-version }}.x branched at $llvmbranchpoint"
+          armbranchpoint=$(git rev-list --reverse --ancestry-path --min-parents=2 "$llvmbranchpoint"..arm-software | head -n 1)
+          if echo "$armbranchpoint" | grep "[0-9a-z]\{40\}"; then
+            echo "Branching release/arm-software/${{ inputs.release-version }}.x at $armbranchpoint"
+          else
+            echo "Unexpected git rev-list result: $armbranchpoint"
+            exit 1
+          fi
+          git switch -c release/arm-software/${{ inputs.release-version }}.x $armbranchpoint
+          git push origin release/arm-software/${{ inputs.release-version }}.x
+

@@ -1,0 +1,105 @@
+FROM registry.access.redhat.com/ubi10/ubi:latest
+
+# Enable the running user to own the build
+ARG USER_ID=1001
+ARG GROUP_ID=1002
+ARG USER=cicd
+ARG WORKSPACE=/workspace
+
+RUN groupadd -g ${GROUP_ID} ${USER} || true && \
+    useradd -u ${USER_ID} -g ${GROUP_ID} -m ${USER} && \
+    mkdir -p ${WORKSPACE}/build \
+             ${WORKSPACE}/lib \
+             ${WORKSPACE}/logs \
+             ${WORKSPACE}/output \
+             ${WORKSPACE}/patches \
+             ${WORKSPACE}/python \
+             ${WORKSPACE}/src && \
+    chown -R ${USER}:${GROUP_ID} ${WORKSPACE}
+
+# Install dependencies
+ADD --checksum=sha256:de57c3c0a2dcde88ff5b894e74335f55a0ec074815f36d472270d937c16f077b \
+    https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux-10 \
+    /etc/pki/rpm-gpg/RPM-GPG-KEY-AlmaLinux-10
+ADD *.repo /etc/yum.repos.d/
+
+RUN sed -i '/^\[.*\]/a priority=1' /etc/yum.repos.d/ubi.repo
+
+RUN dnf install -y dnf-plugins-core && \
+    dnf config-manager --set-enabled crb && \
+    dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm && \
+    dnf install -y --allowerasing --nobest \
+    binutils-devel \
+    diffutils \
+    gnupg2 \
+    glibc-common \
+    libzstd-devel \
+    libzstd-static \
+    gcc \
+    gcc-c++ \
+    git \
+    patch \
+    perl \
+    perl-File-Copy \
+    perl-FindBin \
+    python3.12 \
+    python3.12-devel \
+    python3.12-pip \
+    unzip \
+    wget \
+    zlib-devel \
+    zlib-static \
+    && dnf clean all
+
+# Install cmake from precompiled-binaries
+RUN version=4.3.4 \
+    && mkdir /tmp/temp \
+    && cd /tmp/temp \
+    && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-linux-aarch64.tar.gz \
+    && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-SHA-256.txt \
+    && sha256sum -c --ignore-missing cmake-$version-SHA-256.txt \
+    && wget https://github.com/Kitware/CMake/releases/download/v$version/cmake-$version-SHA-256.txt.asc \
+    && gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys C6C265324BBEBDC350B513D02D2CEF1034921684 \
+    && gpg --verify cmake-$version-SHA-256.txt.asc cmake-$version-SHA-256.txt \
+    && tar -xzvf cmake-$version-linux-aarch64.tar.gz -C /opt \
+    && cd ~ && rm -rfv /tmp/temp \
+    && alternatives \
+        --install /usr/local/bin/cmake cmake /opt/cmake-$version-linux-aarch64/bin/cmake 10 \
+        --slave /usr/local/bin/ctest ctest /opt/cmake-$version-linux-aarch64/bin/ctest \
+        --slave /usr/local/bin/cpack cpack /opt/cmake-$version-linux-aarch64/bin/cpack \
+        --slave /usr/local/bin/ccmake ccmake /opt/cmake-$version-linux-aarch64/bin/ccmake \
+        --family cmake \
+    && cmake --version \
+    && ctest --version \
+    && cpack --version \
+    && ccmake --version
+
+RUN ninja_version=1.12.1 \
+    && wget https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux-aarch64.zip \
+    && unzip ninja-linux-aarch64.zip \
+    && mv ninja /usr/bin \
+    && rm ninja-linux-aarch64.zip
+
+RUN ln -fs /usr/bin/python3.12 /usr/bin/python && \
+    ln -fs /usr/bin/python3.12 /usr/bin/python3
+
+ADD pyproject.toml poetry.lock ${WORKSPACE}/python/
+WORKDIR ${WORKSPACE}/python
+
+RUN python3.12 -m pip install --no-cache-dir poetry \
+    && poetry config virtualenvs.in-project true \
+    && poetry install --no-root --no-interaction --no-ansi
+
+ENV PATH="${WORKSPACE}/python/.venv/bin:$PATH"
+
+# Copy the entrypoint into the container and make it executable
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+WORKDIR ${WORKSPACE}
+
+# Set the user to run the build
+USER ${USER}
+
+# Run the entrypoint
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]

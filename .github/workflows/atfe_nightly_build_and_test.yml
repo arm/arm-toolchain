@@ -1,0 +1,141 @@
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+
+# This workflow runs all build scripts in parallel for multiple operating
+# systems and architectures.
+# It is intended to be triggered as part of a **nightly build** to
+# validate all build configurations and test them automatically.
+#
+# Each build script is paired with a corresponding test script using
+# a matrix strategy. Each build+test pair runs as a separate job,
+# allowing for concurrency and clear traceability of failures.
+
+name: (ATfE) Nightly Build and Test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'  # Every day at 06:00 UTC
+
+jobs:
+  build-and-test-toolchain:
+    name: Build ${{ matrix.build_script }} for ${{ matrix.target_os }} on ${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    # Ensure the workflow only runs on the arm-toolchain repository and not on forks
+    if: github.repository == 'arm/arm-toolchain'
+
+    strategy:
+      fail-fast: false  # Prevents one job failure from cancelling all
+      matrix:
+        include:
+          # Complete Toolchain Build & Test
+          - build_script: build.sh
+            test_script: test.sh
+            install_script: install_dependencies.sh
+            target_os: Ubuntu-22.04-x86_64
+            runner: ToolchainGroup_LargeRunner_Linux-x64
+
+          - build_script: build.sh
+            test_script: test.sh
+            install_script: install_dependencies.sh
+            target_os: Ubuntu-22.04-arm64
+            runner: ah-ubuntu_22_04-c7g_8x-100
+
+          - build_script: build.ps1
+            test_script: ''
+            install_script: install_dependencies.ps1
+            target_os: Windows-2022-x86_64
+            runner: ToolchainGroup_LargeRunner_Windows-x64
+
+          - build_script: build.sh
+            test_script: test_package_only.sh
+            install_script: install_dependencies_macos.sh
+            target_os: macOS-arm64
+            runner: mini-github-m4-01
+
+          # Newlib nano Overlay Package Build
+          - build_script: build_newlib_nano_overlay.sh
+            test_script: ''
+            install_script: install_dependencies.sh
+            target_os: Ubuntu-22.04-arm64
+            runner: ah-ubuntu_22_04-c7g_8x-100
+
+          # Newlib Overlay Package Build
+          - build_script: build_newlib_overlay.sh
+            test_script: ''
+            install_script: install_dependencies.sh
+            target_os: Ubuntu-22.04-arm64
+            runner: ah-ubuntu_22_04-c7g_8x-100
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Dependencies
+        run: ./arm-software/embedded/scripts/${{ matrix.install_script }}
+
+      - name: Add ~/.local/bin to PATH
+        if: runner.os != 'Windows'
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Apply llvm-project patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project
+
+      - name: Apply llvm-project-perf patches
+        run: python3 arm-software/embedded/cmake/patch_repo.py --method apply arm-software/embedded/patches/llvm-project-perf
+
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          set -o pipefail # ensure failure is propagated even when piping to tee
+          ./arm-software/embedded/scripts/${{ matrix.build_script }} 2>&1 | tee build.log
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\arm-software\embedded\scripts\${{ matrix.build_script }} *>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE } # Propagate failure
+
+      - name: Test (Unix)
+        if: runner.os != 'Windows' && matrix.test_script != ''
+        run: |
+          set -o pipefail # ensure failure is propagated even when piping to tee
+          ./arm-software/embedded/scripts/${{ matrix.test_script }} 2>&1 | tee test.log
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows' && matrix.test_script != ''
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          .\arm-software\embedded\scripts\${{ matrix.test_script }} *>&1 | Tee-Object -FilePath test.log
+          if ($LASTEXITCODE) { exit $LASTEXITCODE } # Propagate failure
+
+      - name: Upload logs as artifact
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: logs-${{ matrix.build_script }}-${{ matrix.target_os }}
+          path: |
+            build.log
+            test.log
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results-${{ matrix.build_script }}-${{ matrix.target_os }}
+          path: build/**/lit_results.junit.xml
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@v7
+        if: success()
+        with:
+          name: ATfE-packages-${{ matrix.build_script }}-${{ matrix.target_os }}
+          path: |
+            build*/atfe_packages/ATfE-*.tar.xz
+            build*/atfe_packages/ATfE-*.zip
+            build*/atfe_packages/ATfE-*.dmg

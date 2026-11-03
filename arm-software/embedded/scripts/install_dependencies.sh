@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Copyright (c) 2025, Arm Limited and affiliates.
+# Part of the Arm Toolchain project, under the Apache License v2.0 with LLVM Exceptions.
+# See https://llvm.org/LICENSE.txt for license information.
+# SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+#
+# This script installs the essential build dependencies for ATfE.
+
+set -e
+
+sudo apt-get update && sudo apt-get install -y --no-install-recommends \
+    clang \
+    ccache \
+    ninja-build \
+    python3-pip \
+    python3-setuptools \
+    qemu-system-arm \
+    ipxe-qemu
+
+# Upgrade pip and install dependencies
+python3 -m pip install --upgrade pip
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+python3 -m pip install --user -r "$SCRIPT_DIR/requirements.txt"
+python3 -m pip install --user cmake ruff
+
+export PATH="${HOME}/.local/bin:${PATH}"
+cmake --version
