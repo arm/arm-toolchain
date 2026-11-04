@@ -327,6 +327,7 @@ set(LLVM_DISTRIBUTION_COMPONENTS
     llvm-cxxfilt
     llvm-dwarfdump
     llvm-mc
+    llvm-mca
     llvm-nm
     llvm-objcopy
     llvm-objdump
