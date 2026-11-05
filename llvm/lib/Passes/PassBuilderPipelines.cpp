@@ -2138,7 +2138,7 @@ PassBuilder::buildLTODefaultPipeline(OptimizationLevel Level,
     LoopPassManager OmaxLPM;
     OmaxLPM.addPass(LoopFullUnrollPass(static_cast<int>(Level),
                                        /*OnlyWhenForced=*/!PTO.LoopUnrolling,
-                                       PTO.ForgetAllSCEVInLoopUnroll));
+                                       *PTO.ForgetAllSCEVInLoopUnroll));
     FPM.addPass(
         createFunctionToLoopPassAdaptor(std::move(OmaxLPM),
                                         /*UseMemorySSA=*/false));
