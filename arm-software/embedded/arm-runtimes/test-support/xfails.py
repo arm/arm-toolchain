@@ -1076,6 +1076,18 @@ def main():
             ],
             description="TestPrimitiveTypes fails on big aarch64a endian.",
         ),
+        XFail(
+            name="Unsupported rounding mode in shared math tests",
+            testnames=[
+                "shared/libc.test.shared.shared_math_test.__NO_MISC_MATH_BASIC_OPS_OPT.__NO_ROUND_OPT.__build__",
+                "shared/libc.test.shared.shared_math_test.__NO_MISC_MATH_BASIC_OPS_OPT.__build__",
+                "shared/libc.test.shared.shared_math_test.__NO_ROUND_OPT.__build__",
+                "shared/libc.test.shared.shared_math_test.__build__",
+            ],
+            result=NewResult.XFAILED,
+            project="llvmlibc",
+            description="The shared math tests fail on the StaticRounding subtest for expf and exp2f when attempting to use non-nearest rounding, as this is not supported",
+        ),
     ]
 
     tests_to_xfail = []
