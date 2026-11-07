@@ -243,6 +243,9 @@ foreach(lib_idx RANGE ${lib_count_dec})
                     message(FATAL_ERROR
                         "LLVM libc minor variant ${variant} does not specify LLVM_LIBC_BASE_VARIANT")
                 endif()
+                list(APPEND additional_cmake_args
+                    "-DLIBC_TEST_BUILTINS_LIBRARY=${LLVM_LIBC_TEST_SYSROOT}/${parent_dir_name}/${llvm_libc_base_variant}/lib/libclang_rt.builtins.a"
+                )
                 list(APPEND llvm_libc_minor_variants ${variant})
                 list(APPEND llvm_libc_base_variants ${llvm_libc_base_variant})
             endif()
