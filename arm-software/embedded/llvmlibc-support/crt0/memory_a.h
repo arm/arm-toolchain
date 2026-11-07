@@ -101,8 +101,15 @@ extern "C" [[gnu::weak]] void _platform_setup_memory() {
 #endif
 
 #if __ARM_ARCH_PROFILE == 'R'
+#ifdef __ARM_ARCH_ISA_A64
+  // Use the platform's default memory map while the MPU is disabled. Without
+  // the background region, data accesses use Device memory attributes and
+  // unaligned accesses fault even when SCTLR.A is clear.
+  SCTLR.BR = 1;
+#else
   // Enable the branch predictor
   SCTLR.Z = 1;
+#endif
 #endif
 
 #ifdef __ARM_FEATURE_MEMORY_TAGGING
