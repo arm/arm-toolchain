@@ -18,6 +18,8 @@
 #else
 #include "memory_7a.h"
 #endif
+#elif __ARM_ARCH_PROFILE == 'R' && defined(__ARM_ARCH_ISA_A64)
+#include "memory_8r.h"
 #endif
 #include "system_registers_a.h"
 
@@ -31,7 +33,7 @@ void invalidate_cache() {
   // This does not need to be done from a cold reset
   SCTLR.I = 0; // Disable instruction cache
   SCTLR.C = 0; // Disable data cache
-  SCTLR.M = 0; // Disable MMU
+  SCTLR.M = 0; // Disable MMU/MPU
   __isb(0xf);
   __dmb(0xf);
 
@@ -101,8 +103,12 @@ extern "C" [[gnu::weak]] void _platform_setup_memory() {
 #endif
 
 #if __ARM_ARCH_PROFILE == 'R'
+#ifdef __ARM_ARCH_ISA_A64
+  setup_mpu();
+#else
   // Enable the branch predictor
   SCTLR.Z = 1;
+#endif
 #endif
 
 #ifdef __ARM_FEATURE_MEMORY_TAGGING
