@@ -643,27 +643,6 @@ def main():
             description="std::regex exponential match/search tests abort at runtime (exit status 134).",
         ),
         XFail(
-            name="sqrt precision on softnofp",
-            testnames=[
-                "std/numerics/c.math/cmath.pass.cpp",
-            ],
-            result=NewResult.XFAILED,
-            project="libcxx",
-            variants=[
-                "aarch64a_soft_nofp",
-                "aarch64a_soft_nofp_exn_rtti",
-                "aarch64a_be_soft_nofp",
-                "aarch64a_be_soft_nofp_exn_rtti",
-                "aarch64r_soft_nofp",
-                "aarch64r_soft_nofp_unaligned",
-                "aarch64r_soft_nofp_exn_rtti",
-                "aarch64r_soft_nofp_exn_rtti_unaligned",
-                "aarch64r_be_soft_nofp",
-                "aarch64r_be_soft_nofp_exn_rtti",
-            ],
-            description="std::sqrt with long double gives incorrect results in soft nofp builds.",
-        ),
-        XFail(
             name="Sync Fault On AArch64 FVP",
             testnames=[
                 "unwind_leaffunction.pass.cpp",
