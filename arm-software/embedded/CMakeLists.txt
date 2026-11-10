@@ -327,6 +327,7 @@ set(LLVM_DISTRIBUTION_COMPONENTS
     llvm-cxxfilt
     llvm-dwarfdump
     llvm-mc
+    llvm-mca
     llvm-nm
     llvm-objcopy
     llvm-objdump
@@ -358,6 +359,7 @@ set(LLVM_ENABLE_TERMINFO OFF CACHE BOOL "")
 set(LLVM_ENABLE_ZSTD OFF CACHE BOOL "")
 set(LLVM_ENABLE_LIBXML2 OFF CACHE BOOL "")
 set(CLANG_DEFAULT_LINKER lld CACHE STRING "")
+set(CLANG_ENABLE_CIR OFF CACHE BOOL "")
 
 # Default to a release build
 # (CMAKE_BUILD_TYPE is a special CMake variable so if you want to set
@@ -1067,9 +1069,9 @@ endforeach()
 
 # Install samples
 if(WIN32 OR LLVM_TOOLCHAIN_CROSS_BUILD_MINGW)
-    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|h|ld|md|in|bat)")
+    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|h|ld|md|in|bat|py|s|S)")
 else()
-    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|h|ld|md|in)")
+    set(sample_files_regex "Makefile|.*\\.(c|conf|cpp|h|ld|md|in|py|s|S)")
 endif()
 install(
     DIRECTORY samples

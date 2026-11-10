@@ -272,6 +272,9 @@ public:
 #endif
   Bit<12> I;
   Bit<13> EnDB;
+#if __ARM_ARCH_PROFILE == 'R' && defined(__ARM_ARCH_ISA_A64)
+  Bit<17> BR;
+#endif
   Bit<19> WXN;
   Bit<21> IESB;
   Bit<22> EIS;

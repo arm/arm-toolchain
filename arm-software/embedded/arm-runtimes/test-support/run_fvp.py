@@ -1,11 +1,9 @@
-# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2024, 2026 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
 import os
-import re
 import subprocess
 import sys
 import tempfile
-from os import environ
 from os import path
 from dataclasses import dataclass
 from platform import uname
@@ -23,18 +21,18 @@ class FVP:
 
 
 MODELS = {
-    "corstone-310": {
+    "corstone-320": {
         "x86": FVP(
-            "Corstone-310/models/Linux64_GCC-9.3/FVP_Corstone_SSE-310",
-            "Corstone-310/plugins/Linux64_GCC-9.3/TarmacTrace.so",
-            "FastModels_11.31_28/plugins/Linux64_GCC-9.3/Crypto.so",
-            "cpu0.semihosting-cmd_line",
+            "Corstone-320_11.32.cs320_3/bin/FVP_Corstone_SSE-320",
+            "Corstone-320_11.32.cs320_3/plugins/TarmacTrace.so",
+            "Corstone-320_11.32.cs320_3/plugins/Crypto.so",
+            "mps4_board.subsystem.cpu0.semihosting-cmd_line",
         ),
         "aarch64": FVP(
-            "Corstone-310/models/Linux64_armv8l_GCC-9.3/FVP_Corstone_SSE-310",
-            "Corstone-310/plugins/Linux64_armv8l_GCC-9.3/TarmacTrace.so",
-            "FastModels_11.31_28/plugins/Linux64_armv8l_GCC-9.3/Crypto.so",
-            "cpu0.semihosting-cmd_line",
+            "Corstone-320_11.32.cs320_3/bin/FVP_Corstone_SSE-320",
+            "Corstone-320_11.32.cs320_3/plugins/TarmacTrace.so",
+            "Corstone-320_11.32.cs320_3/plugins/Crypto.so",
+            "mps4_board.subsystem.cpu0.semihosting-cmd_line",
         ),
     },
     "aem-a": {
@@ -99,32 +97,13 @@ def run_fvp(
         raise Exception(f"{uname_machine} is not a recognised uname machine")
     model = MODELS[fvp_model][fvp_platform]
 
-    env = environ.copy()
-    if fvp_model == "corstone-310":
-        # Corstone-310 v11.27 requires PYTHONHOME to be set to the version of
-        # python included in the install, and fmtplib and python/lib to be found
-        # in LD_LIBRARY_PATH. If the installed version include these, then add
-        # them to the environment.
-        fmtplib_dir = path.join(fvp_install_dir, "Corstone-310", "fmtplib")
-        python_dir = path.join(fvp_install_dir, "Corstone-310", "python")
-        ld_library_paths = []
-        if path.exists(fmtplib_dir):
-            ld_library_paths.append(fmtplib_dir)
-        if path.exists(python_dir):
-            ld_library_paths.append(path.join(python_dir, "lib"))
-            env["PYTHONHOME"] = python_dir
-        if len(ld_library_paths) > 0:
-            if "LD_LIBRARY_PATH" in env:
-                ld_library_paths.append(env["LD_LIBRARY_PATH"])
-            env["LD_LIBRARY_PATH"] = ":".join(ld_library_paths)
-
     command = [path.join(fvp_install_dir, model.model_exe)]
     command.extend(["--quiet"])
     for config in fvp_configs:
         command.extend(["--config-file", path.join(fvp_config_dir, config + ".cfg")])
 
-    if fvp_model == "corstone-310":
-        command.extend(["--application", f"cpu0={image}"])
+    if fvp_model == "corstone-320":
+        command.extend(["--application", f"mps4_board.subsystem.cpu0={image}"])
     elif fvp_model == "aem-a" or fvp_model == "aem-r":
         # In case we ever need to run multiprocessor images, the instance name below
         # can be renamed to "cluster0.cpu*" (wildcard).
@@ -181,43 +160,7 @@ def run_fvp(
         timeout=timeout,
         cwd=working_directory,
         check=False,
-        env=env,
     )
 
-    # Corstone-310 prints out boilerplate text on stdout alongside the actual
-    # output of the image. Some tests, for instance in libcxx, check the
-    # contents of stdout, and may treat the unexpected text as a condition for
-    # failure. To work around this, we cut out the model's boilerplate output.
-    if fvp_model == "corstone-310":
-        decoded_stdout = result.stdout.decode()
-        boilerplate_pattern = r"""
-    Ethos-U rev [0-9a-z]+ --- \w{3} {1,2}\d{1,2} \d{4} \d{2}:\d{2}:\d{2}
-    \(C\) COPYRIGHT (?:\d{4}|\d{4}-\d{4})(?:,\s?(?:\d{4}|\d{4}-\d{4}))* Arm Limited
-    ALL RIGHTS RESERVED
-
-"""
-        # Not all Corstone-310 versions print the "Info" message.
-        stop_info_pattern = "\nInfo: /OSCI/SystemC: Simulation stopped by user.\n"
-        stop_warning_pattern = r"""\[warning \]\[main@0\]\[\d+ ns\] Simulation stopped by user
-"""
-        expected_stdout_format = (
-            f"{boilerplate_pattern}(.*?)(?:{stop_info_pattern})?{stop_warning_pattern}"
-        )
-        regex_result = re.fullmatch(
-            expected_stdout_format, decoded_stdout, flags=re.DOTALL
-        )
-        if not regex_result:
-            error_msg = (
-                f"Corstone's output format is different than expected\n"
-                f"Expected (regex): {expected_stdout_format}\n"
-                f"Got: {decoded_stdout}"
-            )
-            raise RuntimeError(error_msg)
-
-        relevant_stdout = regex_result[1]
-        result_stdout = relevant_stdout.encode()
-    else:
-        result_stdout = result.stdout
-
-    sys.stdout.buffer.write(result_stdout)
+    sys.stdout.buffer.write(result.stdout)
     return result.returncode

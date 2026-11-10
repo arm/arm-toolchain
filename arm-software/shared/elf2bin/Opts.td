@@ -55,7 +55,7 @@ defm vhxcombined: NoValue<"vhxcombined", "", "Output a single Verilog Hex file, 
 defm base: Value<"base", "", "ADDRESS", "Base address of the whole output file, for --bincombined or --vhxcombined", grp_opts>;
 defm banks: Value<"banks", "", "WIDTHxNUM", "Partition the output into subfiles by writing WIDTH bytes in turn to each of NUM files in cyclic order, for binary or Verilog Hex output", grp_opts>;
 defm datareclen: Value<"datareclen", "", "LENGTH", "Number of data bytes to put into each record, for Intel Hex or Motorola Hex output", grp_opts>;
-defm segments: Value<"segments", "", "ADDRESS,ADDRESS,...", "Select only the ELF segments of the input which start at the specified addresses (--physical or --virtual controls which address field is used)", grp_opts>;
+defm segments: Value<"segments", "", "ADDRESS,ADDRESS-ADDRESS,...", "Select only the ELF segments of the input which start at the specified addresses or which fit entirely within a supplied address range (--physical or --virtual controls which address field is used)", grp_opts>;
 defm zi: NoValue<"zi", "", "Include the zero-initialized padding at the end of each ELF segment", grp_opts>;
 defm physical: NoValue<"physical", "", "Use the physical addresses (p_paddr) of ELF segments", grp_opts>;
 defm virtual: NoValue<"virtual", "", "Use the virtual addresses (p_vaddr) of ELF segments", grp_opts>;

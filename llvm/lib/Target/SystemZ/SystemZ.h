@@ -15,6 +15,10 @@
 #define LLVM_LIB_TARGET_SYSTEMZ_SYSTEMZ_H
 
 #include "MCTargetDesc/SystemZMCTargetDesc.h"
+#include "llvm/CodeGen/MachineFunctionAnalysisManager.h"
+#include "llvm/CodeGen/SelectionDAGISel.h"
+#include "llvm/IR/Analysis.h"
+#include "llvm/IR/PassManager.h"
 #include "llvm/Support/CodeGen.h"
 
 namespace llvm {
@@ -190,27 +194,73 @@ static inline bool isImmHF(uint64_t Val) {
 }
 } // end namespace SystemZ
 
-FunctionPass *createSystemZISelDag(SystemZTargetMachine &TM,
-                                   CodeGenOptLevel OptLevel);
+class SystemZISelDAGToDAGPass : public SelectionDAGISelPass {
+public:
+  SystemZISelDAGToDAGPass(SystemZTargetMachine &TM, CodeGenOptLevel OptLevel);
+};
+
+FunctionPass *createSystemZISelDagLegacyPass(SystemZTargetMachine &TM,
+                                             CodeGenOptLevel OptLevel);
 FunctionPass *createSystemZElimComparePass(SystemZTargetMachine &TM);
 FunctionPass *createSystemZShortenInstPass(SystemZTargetMachine &TM);
 FunctionPass *createSystemZLongBranchPass(SystemZTargetMachine &TM);
-FunctionPass *createSystemZLDCleanupPass(SystemZTargetMachine &TM);
-FunctionPass *createSystemZCopyPhysRegsPass(SystemZTargetMachine &TM);
-FunctionPass *createSystemZPostRewritePass(SystemZTargetMachine &TM);
-FunctionPass *createSystemZTDCPass();
-ModulePass *createSystemZAlignGlobalsPass();
+
+class SystemZLDCleanupPass
+    : public OptionalPassInfoMixin<SystemZLDCleanupPass> {
+public:
+  PreservedAnalyses run(MachineFunction &MF,
+                        MachineFunctionAnalysisManager &MFAM);
+};
+
+FunctionPass *createSystemZLDCleanupLegacyPass(SystemZTargetMachine &TM);
+
+class SystemZCopyPhysRegsPass
+    : public RequiredPassInfoMixin<SystemZCopyPhysRegsPass> {
+public:
+  PreservedAnalyses run(MachineFunction &MF,
+                        MachineFunctionAnalysisManager &MFAM);
+};
+
+FunctionPass *createSystemZCopyPhysRegsLegacyPass(SystemZTargetMachine &TM);
+
+class SystemZPostRewritePass
+    : public RequiredPassInfoMixin<SystemZPostRewritePass> {
+public:
+  PreservedAnalyses run(MachineFunction &MF,
+                        MachineFunctionAnalysisManager &MFAM);
+};
+
+FunctionPass *createSystemZPostRewriteLegacyPass(SystemZTargetMachine &TM);
+
+class SystemZTDCPass : public RequiredPassInfoMixin<SystemZTDCPass> {
+  SystemZTargetMachine &TM;
+
+public:
+  SystemZTDCPass(SystemZTargetMachine &TM) : TM(TM) {}
+  PreservedAnalyses run(Function &F, FunctionAnalysisManager &FAM);
+};
+
+FunctionPass *createSystemZTDCLegacyPass();
+
+class SystemZAlignGlobalsPass
+    : public RequiredPassInfoMixin<SystemZAlignGlobalsPass> {
+public:
+  PreservedAnalyses run(Module &M, ModuleAnalysisManager &MAM);
+};
+
+ModulePass *createSystemZAlignGlobalsLegacyPass();
 
 void initializeSystemZAsmPrinterPass(PassRegistry &);
-void initializeSystemZCopyPhysRegsPass(PassRegistry &);
+
+void initializeSystemZCopyPhysRegsLegacyPass(PassRegistry &);
 void initializeSystemZDAGToDAGISelLegacyPass(PassRegistry &);
 void initializeSystemZElimComparePass(PassRegistry &);
-void initializeSystemZLDCleanupPass(PassRegistry &);
+void initializeSystemZLDCleanupLegacyPass(PassRegistry &);
 void initializeSystemZLongBranchPass(PassRegistry &);
-void initializeSystemZPostRewritePass(PassRegistry &);
+void initializeSystemZPostRewriteLegacyPass(PassRegistry &);
 void initializeSystemZShortenInstPass(PassRegistry &);
-void initializeSystemZTDCPassPass(PassRegistry &);
-void initializeSystemZAlignGlobalsPass(PassRegistry &);
+void initializeSystemZTDCLegacyPass(PassRegistry &);
+void initializeSystemZAlignGlobalsLegacyPass(PassRegistry &);
 
 namespace SYSTEMZAS {
 enum : unsigned { PTR32 = 1 };

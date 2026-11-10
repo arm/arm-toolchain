@@ -34,7 +34,7 @@ endif
 # For A-profile example, see https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/aarch64a_be.json
 # For R-profile example, see https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/arm-multilib/json/variants/aarch64r_be.json
 CORSTONE_FVP_MEMORY_MAP=\
-	-Wl,--defsym=__boot_flash=0x01000000 \
+	-Wl,--defsym=__boot_flash=0x11000000 \
 	-Wl,--defsym=__boot_flash_size=2M \
 	-Wl,--defsym=__flash=0x60000000 \
 	-Wl,--defsym=__flash_size=0x1000000 \
@@ -53,7 +53,7 @@ run: hello.elf
 	python3 $(LIT_EXEC_FVP) --verbose \
 		--fvp-install-dir=$(FVP_INSTALL_DIR) \
 		--fvp-config-dir=$(FVP_CONFIG_DIR) \
-		--fvp-model=corstone-310 \
+		--fvp-model=corstone-320 \
 		--fvp-config=cortex-m85 \
 		hello.elf
 
