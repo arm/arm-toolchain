@@ -20,7 +20,8 @@
 __arm_sme_state:
   .cfi_startproc
   // HINT encodings allow assembly for baseline Armv8-A.
-#ifdef __ARM_FEATURE_BTI_DEFAULT
+#if defined(__ARM_FEATURE_BTI_DEFAULT) && \
+    (!(__ARM_FEATURE_PAC_DEFAULT & 4) || (__ARM_FEATURE_PAC_DEFAULT & 8))
   hint #34 // BTI c
 #endif
 // PAC_DEFAULT: key A=1, key B=2, leaf=4, PC diversification=8.
