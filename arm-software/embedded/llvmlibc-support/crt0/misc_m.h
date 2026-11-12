@@ -33,14 +33,20 @@ using namespace sysreg;
 extern "C" MISC_M_PLATFORM_SETUP_ARCH_EXTENSIONS_BINDING
     __attribute__((target("pacbti"))) void
     _platform_setup_arch_extensions() {
-#ifdef __ARM_FP
-  // CPACR enable access to vfp and simd
-  CPACR.CP10 = 0x3;
-  CPACR.CP11 = 0x3;
-  // NSACR enable access to vfp in nonsecure
-  NSACR.CP10 = 1;
-  NSACR.CP11 = 1;
-  // Ensure LSPACT bit is clear in FPCCR
+#if defined(__ARM_FP) || defined(__ARM_FEATURE_MVE)
+  constexpr unsigned long CPACR_CP10_FULL_ACCESS = 3UL << (10 * 2);
+  constexpr unsigned long CPACR_CP11_FULL_ACCESS = 3UL << (11 * 2);
+  constexpr unsigned long NSACR_CP10_ACCESS = 1UL << 10;
+  constexpr unsigned long NSACR_CP11_ACCESS = 1UL << 11;
+
+  // CP10 and CP11 must have matching values; set each pair in one write.
+  // Enable access to floating-point and MVE instructions when present.
+  CPACR.write(CPACR.read() | CPACR_CP10_FULL_ACCESS | CPACR_CP11_FULL_ACCESS);
+  // Permit non-secure access too.
+  NSACR.write(NSACR.read() | NSACR_CP10_ACCESS | NSACR_CP11_ACCESS);
+  __dsb(0xf);
+  __isb(0xf);
+  // FPCCR also exists with integer MVE and controls its lazy context saving.
   FPCCR.LSPACT = 0;
 #endif
 
