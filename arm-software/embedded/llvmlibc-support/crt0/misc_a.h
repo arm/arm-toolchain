@@ -38,6 +38,9 @@ using namespace sysreg;
   } else if (CurrentEL.is(ExceptionLevel::EL2)) {
     SMCR_EL2.LEN = 0xf;
     __isb(0xf);
+  } else {
+    SMCR_EL1.LEN = 0xf;
+    __isb(0xf);
   }
 }
 #endif
@@ -68,18 +71,22 @@ extern "C" [[gnu::weak]] void _platform_setup_arch_extensions() {
 #endif
 
 #ifdef __ARM_FP
-  // CPACR enable access to vfp and simd
-  CPACR.CP10 = 0x3;
-  CPACR.CP11 = 0x3;
 #if defined(__ARM_ARCH_ISA_A64)
-  // Don't trap FP instructions
-  CPTR.TFP = 0;
-  // Don't trap SVE or SME instructions, for targets which do not have the
-  // relevant feature these bits are ignored, so safe to set unconditionally.
-  CPTR.EZ = 1;
-  CPTR.ESM = 1;
+  // Enable FP, SVE and SME at EL1. Unsupported fields are RES0.
+  CPACR.FPEN = 0x3;
+  CPACR.ZEN = 0x3;
+  CPACR.SMEN = 0x3;
+  if (!CurrentEL.is(ExceptionLevel::EL1)) {
+    // EL2 and EL3 also control access through CPTR.
+    CPTR.TFP = 0;
+    CPTR.EZ = 1;
+    CPTR.ESM = 1;
+  }
   init_sme_state();
 #else
+  // CPACR enables access to VFP and SIMD in AArch32.
+  CPACR.CP10 = 0x3;
+  CPACR.CP11 = 0x3;
   // Enable VFP and SIMD
   __arm_wsr("fpexc", 1 << 30);
 #endif

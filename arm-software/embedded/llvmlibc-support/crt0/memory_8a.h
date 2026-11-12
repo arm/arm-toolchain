@@ -56,8 +56,7 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
   }
   TTBR0 = reinterpret_cast<unsigned long>(pagetable);
 
-  // No need to program TTBR1_EL2, as we will set TCR_EL3.EPD1=1 to prevent
-  // table walks using this table.
+  // No need to program TTBR1: TCR.EPD1 disables table walks using it.
 
   // Set up memory attributes
   // -------------------------
@@ -68,7 +67,7 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
   // 3 = b11110000 = Normal, Inner/Outer WB/WA/RA, Tagged
   MAIR = 0x00000000F000FF44;
 
-  // Set up TCR_EL2
+  // Set up TCR at the current exception level.
   // ---------------
   // EPD0=0b0      Table walks using TTBR0 enabled
   // EPD1=0b1      Table walks using TTBR1 disabled
@@ -81,15 +80,14 @@ void setup_mmu(volatile unsigned long *pagetable, unsigned long stackheap_start,
   // AS=0          8-bit ASID
   unsigned long tcr_val = 0x0000000080813519;
 #ifdef __ARM_FEATURE_MEMORY_TAGGING
+  const bool at_el1 = CurrentEL.is(ExceptionLevel::EL1);
   // If ID_AA64PFR1_EL1 bits [55:52] are non-zero then MTE4 is present.
   if (ID_AA64PFR1 & (0xfUL << 52)) {
-    // When MTE4 is present enable canonical tag checking by setting TCR.MTX
-    // to 1.
-    tcr_val |= 1UL << 33;
+    // Enable canonical tag checking using TCR_EL1.MTX0 or TCR_EL2/3.MTX.
+    tcr_val |= 1UL << (at_el1 ? 60 : 33);
   } else {
-    // MTE before MTE4 requires the "top byte ignore" feature to be enabled,
-    // which is done by setting TCR_ELx.TBI (bit 20) to 1.
-    tcr_val |= 1UL << 20;
+    // Earlier MTE needs top-byte ignore: TCR_EL1.TBI0 or TCR_EL2/3.TBI.
+    tcr_val |= 1UL << (at_el1 ? 37 : 20);
   }
 #endif
   TCR = tcr_val;
