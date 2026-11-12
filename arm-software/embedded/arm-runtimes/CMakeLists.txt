@@ -1322,6 +1322,10 @@ if(ENABLE_CXX_LIBS)
         -DLIBCXX_ENABLE_FILESYSTEM=OFF
         -DLIBCXX_ENABLE_SHARED=OFF
         -DLIBCXX_ENABLE_STATIC=ON
+        # Avoid using __libcpp_verbose_abort from libcxx/include/__verbose_abort
+        # to save code size.
+        # $<COMMA> keeps the comma from being replaced by LIST_SEPARATOR below.
+        "-DLIBCXX_EXTRA_SITE_DEFINES=_LIBCPP_VERBOSE_ABORT(...)=(decltype((void)(__VA_ARGS__))()$<COMMA>__builtin_abort())"
         -DLIBCXX_INCLUDE_BENCHMARKS=OFF
         -DLIBCXX_SHARED_OUTPUT_NAME="c++-shared"
         -DLIBUNWIND_ENABLE_ASSERTIONS=OFF
