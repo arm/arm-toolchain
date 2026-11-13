@@ -720,6 +720,16 @@ def main():
             description="The test expects serial port activity to end the test and times out without it.",
         ),
         XFail(
+            name="libcxx verbose abort customization",
+            testnames=[
+                "libcxx/assertions/customize_verbose_abort.compile-time.pass.cpp",
+                "libcxx-03/assertions/customize_verbose_abort.compile-time.pass.cpp",
+            ],
+            result=NewResult.EXCLUDE,
+            project="libcxx",
+            description="The __config_site definition of _LIBCPP_VERBOSE_ABORT provided through CMake does not allow customization.",
+        ),
+        XFail(
             name="llvmlibc missing signal.h",
             testnames=[
                 "extensions/libcxx/depr/depr.c.headers/extern_c.pass.cpp",
