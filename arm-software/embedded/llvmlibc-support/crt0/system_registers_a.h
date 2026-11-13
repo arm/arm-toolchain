@@ -87,6 +87,26 @@ public:
 extern TPIDR2_Class TPIDR2;
 extern SVCR_Class SVCR;
 
+class SMCR_EL1_Class : public SysRegBase<SMCR_EL1_Class> {
+public:
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS unsigned long read() {
+    return __arm_rsr64("s3_0_c1_c2_6");
+  }
+
+  [[clang::always_inline]] static PLATFORM_SETUP_PCS void
+  write(unsigned long val) {
+    __arm_wsr64("s3_0_c1_c2_6", val);
+  }
+
+  [[clang::always_inline]] PLATFORM_SETUP_PCS SMCR_EL1_Class &
+  operator=(unsigned long val) {
+    write(val);
+    return *this;
+  }
+
+  Field<0, 3> LEN;
+};
+
 class SMCR_EL2_Class : public SysRegBase<SMCR_EL2_Class> {
 public:
   [[clang::always_inline]] static PLATFORM_SETUP_PCS unsigned long read() {
@@ -127,6 +147,7 @@ public:
   Field<0, 3> LEN;
 };
 
+extern SMCR_EL1_Class SMCR_EL1;
 extern SMCR_EL2_Class SMCR_EL2;
 extern SMCR_EL3_Class SMCR_EL3;
 #endif
@@ -156,22 +177,23 @@ extern SMCR_EL3_Class SMCR_EL3;
   REGNAME(APGAKeyHi, "NO_REGISTER")                                            \
   REGNAME(ID_AA64MMFR2, "p15:3:c0:c7:2")
 
-// Registers that (in AArch64) have both an EL2 and an EL3 version. When these
-// are accessed we choose the appropriate version based on CurrentEL.
-#define EL23_REGNAMES                                                          \
+// Registers with EL1, EL2 and EL3 versions in AArch64.
+#define EL123_REGNAMES                                                         \
   REGNAME(SCTLR, "p15:0:c1:c0:0")                                              \
   REGNAME(VBAR, "p15:0:c12:c0:0")                                              \
   REGNAME(ESR, "NO_REGISTER")                                                  \
   REGNAME(ELR, "NO_REGISTER")                                                  \
   REGNAME(FAR, "NO_REGISTER")                                                  \
-  REGNAME(CPTR, "p15:4:c1:c1:2")                                               \
   REGNAME(TTBR0, "p15:0:c2:c0:0")                                              \
   REGNAME(MAIR, "p15:0:c10:c2:0")                                              \
   REGNAME(TCR, "p15:0:c2:c0:2")
 
+// CPTR has no EL1 version; use CPACR_EL1 at EL1 instead.
+#define EL23_REGNAMES REGNAME(CPTR, "p15:4:c1:c1:2")
+
 enum class SysRegName {
 #define REGNAME(X, Y) X,
-  EL0_REGNAMES EL1_REGNAMES EL23_REGNAMES
+  EL0_REGNAMES EL1_REGNAMES EL123_REGNAMES EL23_REGNAMES
 #undef REGNAME
 };
 
@@ -224,8 +246,30 @@ EL1_REGNAMES
   SysReg<SysRegName::X>::read() {                                              \
     if (CurrentEL.is(ExceptionLevel::EL3))                                     \
       return __arm_rsr64(#X "_EL3");                                           \
-    else                                                                       \
+    if (CurrentEL.is(ExceptionLevel::EL2))                                     \
       return __arm_rsr64(#X "_EL2");                                           \
+    return __arm_rsr64(#X "_EL1");                                             \
+  }                                                                            \
+  template <>                                                                  \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS void                      \
+  SysReg<SysRegName::X>::write(unsigned long val) {                            \
+    if (CurrentEL.is(ExceptionLevel::EL3))                                     \
+      __arm_wsr64(#X "_EL3", val);                                             \
+    else if (CurrentEL.is(ExceptionLevel::EL2))                                \
+      __arm_wsr64(#X "_EL2", val);                                             \
+    else                                                                       \
+      __arm_wsr64(#X "_EL1", val);                                             \
+  }
+EL123_REGNAMES
+#undef REGNAME
+
+#define REGNAME(X, Y)                                                          \
+  template <>                                                                  \
+  [[clang::always_inline]] inline PLATFORM_SETUP_PCS unsigned long             \
+  SysReg<SysRegName::X>::read() {                                              \
+    if (CurrentEL.is(ExceptionLevel::EL3))                                     \
+      return __arm_rsr64(#X "_EL3");                                           \
+    return __arm_rsr64(#X "_EL2");                                             \
   }                                                                            \
   template <>                                                                  \
   [[clang::always_inline]] inline PLATFORM_SETUP_PCS void                      \
@@ -253,6 +297,7 @@ EL23_REGNAMES
   }
 EL0_REGNAMES
 EL1_REGNAMES
+EL123_REGNAMES
 EL23_REGNAMES
 #undef REGNAME
 
@@ -361,10 +406,16 @@ public:
 
 class CPACR_Class : public SysReg<SysRegName::CPACR> {
 public:
+#ifdef __ARM_ARCH_ISA_A64
+  Field<16, 17> ZEN;
+  Field<20, 21> FPEN;
+  Field<24, 25> SMEN;
+#else
   Field<20, 21> CP10;
   Field<22, 23> CP11;
   Bit<28> TRCDIS;
   Bit<31> ASEDIS;
+#endif
 };
 
 class PMCCFILTR_Class : public SysReg<SysRegName::PMCCFILTR> {
