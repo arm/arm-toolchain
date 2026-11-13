@@ -11,9 +11,6 @@ if(NOT VERSIONS_JSON)
     include(${CMAKE_CURRENT_LIST_DIR}/read_versions.cmake)
 endif()
 read_repo_version(picolibc picolibc)
-if(PICOLIBC_GIT_TAG)
-    set(picolibc_TAG "${PICOLIBC_GIT_TAG}")
-endif()
 get_patch_command(${CMAKE_CURRENT_LIST_DIR}/.. picolibc picolibc_patch_command)
 
 FetchContent_Declare(picolibc
