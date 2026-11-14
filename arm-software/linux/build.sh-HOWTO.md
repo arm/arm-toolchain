@@ -167,6 +167,8 @@ The `build.sh` script reads the following environment variables:
   (default: false), set this to `true` when doing a proper release (not nightly) build
 - `PARALLEL_JOBS` - The number of parallel jobs to run during the build
   (default: number of the available CPU cores)
+- `ATFL_BUILD_TYPE` - Specify build type
+  (default: RelWithDebInfo)
 - `ATFL_ASSERTIONS` - Enable assertions in the build ON/OFF
   (default: ON), set this to `OFF` when doing a proper release (not nightly) build
 - `ATFL_BOLTED` - Specify whether the clang and flang compilers should be bolted
