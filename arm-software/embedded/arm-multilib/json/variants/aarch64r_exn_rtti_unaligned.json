@@ -31,6 +31,8 @@
             "ENABLE_LIBCXX_TESTS": "OFF"
         },
         "llvmlibc": {
+            "ENABLE_CXX_LIBS": "ON",
+            "ENABLE_LIBC_TESTS": "ON",
             "LLVM_LIBC_ENABLE_MINOR_VARIANT": "ON",
             "LLVM_LIBC_BASE_VARIANT": "aarch64r_exn_rtti",
             "ENABLE_CXX_LIBS": "OFF",
