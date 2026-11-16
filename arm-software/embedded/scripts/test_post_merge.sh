@@ -29,15 +29,21 @@ declare -a check_targets=(
     "check-unwind-armv7m_hard_fpv4_sp_d16_exn_rtti_size"
     "check-llvmlibc-armv7r_hard_vfpv3_d16"
     "check-llvmlibc-armv7a_hard_vfpv3_d16_exn_rtti"
-    "check-llvmlibc-armebv6m_soft_nofp_size"
-    "check-llvmlibc-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_size"
-    "check-llvmlibc-aarch64a_exn_rtti"
-    "check-cxx-aarch64a_exn_rtti"
-    "check-cxxabi-aarch64a_exn_rtti"
-    "check-unwind-aarch64a_exn_rtti"
-    "check-llvmlibc-aarch64a_be"
     "check-package-llvm-toolchain"
 )
+
+# FVP test targets are only generated when FVP testing is enabled at build time.
+if [[ -n "${FVP_INSTALL_DIR}" ]]; then
+    check_targets+=(
+        "check-llvmlibc-armebv6m_soft_nofp_size"
+        "check-llvmlibc-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_size"
+        "check-llvmlibc-aarch64a_exn_rtti"
+        "check-cxx-aarch64a_exn_rtti"
+        "check-cxxabi-aarch64a_exn_rtti"
+        "check-unwind-aarch64a_exn_rtti"
+        "check-llvmlibc-aarch64a_be"
+    )
+fi
 
 # Finish all targets and check all reports before returning a failure.
 status=0

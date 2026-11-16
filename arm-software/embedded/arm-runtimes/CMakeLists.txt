@@ -211,12 +211,13 @@ elseif(TARGET_ARCH MATCHES "^(arm|armeb)v6" AND NOT TARGET_ARCH MATCHES "^(arm|a
 endif()
 
 # Prepare LLVM libc test link options before configuring compiler-rt, which
-# also uses them to link its tests. Libc tests provide their own start code,
-# while compiler-rt and libc++ tests need the semihosting startup object.
+# also uses them to link its tests. All runtime tests use the semihosting
+# startup object, including libc tests configured with internal startup disabled.
 if(C_LIBRARY STREQUAL llvmlibc)
     set(enable_dummypackeys OFF)
     set(llvmlibc_test_link_options
         -nostartfiles
+        -lcrt0-semihost
         -lsemihost
         -T
         llvmlibc.ld
@@ -242,9 +243,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
     endif()
     list(JOIN llvmlibc_test_link_options "," llvmlibc_test_link_options_default)
 
-    set(llvmlibc_cxx_test_link_options ${llvmlibc_test_link_options})
-    list(INSERT llvmlibc_cxx_test_link_options 1 -lcrt0-semihost)
-    list(JOIN llvmlibc_cxx_test_link_options " " runtime_test_link_flags)
+    list(JOIN llvmlibc_test_link_options " " runtime_test_link_flags)
 endif()
 
 # Create a single target for all testing. If no testing is enabled, this
