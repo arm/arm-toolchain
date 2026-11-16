@@ -1,0 +1,29 @@
+# This testing configuration is for running the test suite against ATfL's libc++
+# shared library under RHEL-8.
+# This is based on libcxx/test/configs/llvm-libc++-shared.cfg.in
+# and the only difference is the addition of -ldl to link_flags.
+# See https://github.com/llvm/llvm-project/pull/222797 for details.
+# Can be removed when ATfL RHEL-8 support is removed.
+
+config.substitutions.append(('%{flags}',
+    '-pthread' + (' -isysroot {}'.format('@CMAKE_OSX_SYSROOT@') if '@CMAKE_OSX_SYSROOT@' else '')
+))
+config.substitutions.append(('%{compile_flags}',
+    '-nostdinc++ -I %{target-include-dir} -I %{include-dir} -I %{libcxx-dir}/test/support'
+))
+config.substitutions.append(('%{link_flags}',
+    '-ldl -nostdlib++ -L %{lib-dir} -Wl,-rpath,%{lib-dir} -lc++'
+))
+config.substitutions.append(('%{exec}',
+    '%{executor} --execdir %{temp} -- '
+))
+
+import os, site
+site.addsitedir(os.path.join('@LIBCXX_SOURCE_DIR@', 'utils'))
+import libcxx.test.params, libcxx.test.config
+libcxx.test.config.configure(
+    libcxx.test.params.DEFAULT_PARAMETERS,
+    libcxx.test.features.DEFAULT_FEATURES,
+    config,
+    lit_config
+)

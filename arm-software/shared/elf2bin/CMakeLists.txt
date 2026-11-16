@@ -34,7 +34,7 @@ endif()
 
 # Process Opts.td into a list of command-line options.
 set(LLVM_TARGET_DEFINITIONS Opts.td)
-tablegen(LLVM Opts.inc -gen-opt-parser-defs)
+llvm_tablegen(Opts.inc -gen-opt-parser-defs)
 add_public_tablegen_target(Elf2BinOptsTableGen)
 
 # Append elf2bin to LLVM_TOOLCHAIN_TOOLS, which will cause

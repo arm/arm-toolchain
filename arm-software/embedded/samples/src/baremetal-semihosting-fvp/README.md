@@ -3,7 +3,7 @@
 This sample shows how to use semihosting with a
 [Corstone IoT FVP (Fixed Virtual Platform)](https://developer.arm.com/Tools%20and%20Software/Fixed%20Virtual%20Platforms/IoT%20FVPs).
 
-This sample is supported on Linux only. It relies on Corstone-310 FVP to be
+This sample is supported on Linux only. It relies on Corstone-320 FVP to be
 installed, you can use the
 [`get_fvps.sh`](https://github.com/arm/arm-toolchain/blob/arm-software/arm-software/embedded/fvp/get_fvps.sh)
 script from the ATfE repository to install this and other FVPs.

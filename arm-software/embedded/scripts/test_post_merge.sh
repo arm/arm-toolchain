@@ -36,7 +36,7 @@ declare -a check_targets=(
 if [[ -n "${FVP_INSTALL_DIR}" ]]; then
     check_targets+=(
         "check-llvmlibc-armebv6m_soft_nofp_size"
-        "check-llvmlibc-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_unaligned_size"
+        "check-llvmlibc-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_size"
         "check-llvmlibc-aarch64a_exn_rtti"
         "check-cxx-aarch64a_exn_rtti"
         "check-cxxabi-aarch64a_exn_rtti"

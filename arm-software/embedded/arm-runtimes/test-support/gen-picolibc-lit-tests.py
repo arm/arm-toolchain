@@ -16,6 +16,7 @@ infrastructure as the other LLVM projects."""
 
 import argparse
 import os
+import re
 import subprocess
 
 
@@ -84,12 +85,21 @@ def main():
     ]
 
     for line in p.stdout.splitlines():
-        # Meson lists tests in the format of
+        if line.startswith("NOTICE:"):
+            # Filter out low severity NOTICE lines.
+            print(f"meson notice: {line}")
+            continue
+        # Meson < 1.9.2 lists tests in the format of
         # [SUBPROJECT]:[PATH] / [TESTNAME]
         # e.g. picolibc:semihost / semihost-argv
+        # Meson >= 1.9.2 lists tests in the format of
+        # [PATH] - [SUBPROJECT]:[TESTNAME]
+        # e.g. semihost - picolibc:semihost-argv
         # The testnames should be unique, so only the name is needed.
-        subproj, full_testname = line.split(":", maxsplit=1)
-        testname = full_testname.split(" / ")[-1]
+        m = re.match(r"(?:(?:.*:.* / )|(?:.* - .*:))(.*)", line)
+        if m is None:
+            raise ValueError(f"Unexpected meson test --list output: {line}")
+        testname = m.group(1)
         with open(
             os.path.join(args.output, "tests", testname + ".test"),
             "w",

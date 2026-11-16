@@ -17,6 +17,7 @@ namespace sysreg {
 CurrentEL_Class CurrentEL;
 TPIDR2_Class TPIDR2;
 SVCR_Class SVCR;
+SMCR_EL1_Class SMCR_EL1;
 SMCR_EL2_Class SMCR_EL2;
 SMCR_EL3_Class SMCR_EL3;
 #endif
