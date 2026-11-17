@@ -52,6 +52,7 @@ then
 fi
 OS_NAME=${OS_NAME:-"linux"}
 TAR_NAME=${TAR_NAME:-"atfl-${ATFL_VERSION}-${OS_NAME}-$(uname -m).tar.gz"}
+ATFL_BUILD_TYPE=${ATFL_BUILD_TYPE:-"RelWithDebInfo"}
 ATFL_ASSERTIONS=${ATFL_ASSERTIONS:-"ON"}
 ATFL_BOLTED=${ATFL_BOLTED:-"OFF"}
 ATFL_TARGET_TRIPLE=${ATFL_TARGET_TRIPLE:-"$(uname -m)-unknown-linux-gnu"}
@@ -303,6 +304,8 @@ Environment Variables:
                             (default: ${RELEASE_FLAGS})
     PARALLEL_JOBS           The number of parallel jobs to run during the build
                             (default: ${PARALLEL_JOBS})
+    ATFL_BUILD_TYPE         Specify build type
+                            (default: ${ATFL_BUILD_TYPE})
     ATFL_ASSERTIONS         Enable assertions in the build ON/OFF
                             (default: ${ATFL_ASSERTIONS})
     ATFL_BOLTED             Specify whether the clang and flang compilers should be bolted
@@ -524,7 +527,7 @@ product_build() {
         -C "${SOURCES_DIR}/flang/cmake/caches/BOLT-PGO.cmake" \
         -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
-        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_BUILD_TYPE="${ATFL_BUILD_TYPE}" \
         -DCMAKE_EXE_LINKER_FLAGS="${libs}" \
         -DCMAKE_MODULE_LINKER_FLAGS="${libs}" \
         -DCMAKE_SHARED_LINKER_FLAGS="${libs}" \
@@ -576,7 +579,7 @@ static_libomp_build() {
         -C flags.cmake \
         -DBUILD_SHARED_LIBS=False \
         -DLLVM_ENABLE_RUNTIMES="openmp" \
-        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_BUILD_TYPE="${ATFL_BUILD_TYPE}" \
         -DCMAKE_Fortran_COMPILER="${ATFL_DIR}/bin/flang" \
         -DCMAKE_LINKER="${ATFL_DIR}/bin/ld.lld" \
         -DCMAKE_CXX_FLAGS="-stdlib++-isystem${ATFL_DIR}/include/c++/v1 -D_LIBCPP_VERBOSE_ABORT_NOT_NOEXCEPT" \
