@@ -18,8 +18,9 @@
 #
 # Output file generated: either one or all of these:
 # ATfE-SBOM.spdx.json
-# ATfE-SBOM-llvmlibc-overlay.spdx.json
-# ATfE-SBOM-newlib-overlay.spdx.json
+# ATfE-SBOM-llvmlibc.spdx.json
+# ATfE-SBOM-newlib.spdx.json
+# ATfE-SBOM-picolibc.spdx.json
 #
 import argparse
 import sys
@@ -77,51 +78,66 @@ STRING_SPDX_PACKAGE = "SPDXRef-Package-"
 
 # Name of SBOM file for main, llvmlibc and newlib
 SBOM_JSON_FILENAME_ATFE = "ATfE-SBOM.spdx.json"
-SBOM_JSON_FILENAME_LLVM_LIBC_OVERLAY = "ATfE-SBOM-llvmlibc-overlay.spdx.json"
-SBOM_JSON_FILENAME_NEWLIB_OVERLAY = "ATfE-SBOM-newlib-overlay.spdx.json"
+SBOM_JSON_FILENAME_LLVM_LIBC = "ATfE-SBOM-llvmlibc.spdx.json"
+SBOM_JSON_FILENAME_NEWLIB = "ATfE-SBOM-newlib.spdx.json"
+SBOM_JSON_FILENAME_PICOLIBC = "ATfE-SBOM-picolibc.spdx.json"
 
 # Define the string names for SBOM title
-STRING_ATFE = "Arm Toolchain for Embedded"
-STRING_LLVM_LIBC_OVERLAY = "Arm Toolchain for Embedded LLVM libc overlay"
-STRING_NEWLIB_OVERLAY = "Arm Toolchain for Embedded newlib overlay"
+NAME_STRING_ATFE = "Arm Toolchain for Embedded"
+NAME_STRING_LLVM_LIBC = "Arm Toolchain for Embedded LLVM libc"
+NAME_STRING_NEWLIB = "Arm Toolchain for Embedded newlib"
+NAME_STRING_PICOLIBC = "Arm Toolchain for Embedded picolibc"
 
 STRING_LLVM_FOUNDATION = "LLVM Foundation"
 STRING_ARM_LIMITED = "Arm Limited"
 APACHE20_WITH_LLVM_EXCEPTION = "Apache-2.0 WITH LLVM-exception"
 
 # List to indicate choices for the arguments to the script
-ARGUMENT_CHOICES = ["all", "main", "llvmlibc", "newlib"]
+ARGUMENT_CHOICES = ["all", "main", "llvmlibc", "newlib", "picolibc"]
 
 # Dict with details to define the contents of package
 # Update the name, SBOM file name and contents of SBOM as appropriate.
 dict_details_SBOM = {
-    STRING_ATFE: {
+    NAME_STRING_ATFE: {
         "sbom_filename": SBOM_JSON_FILENAME_ATFE,
         "sources": [
-            STRING_ATFE,
+            NAME_STRING_ATFE,
             "llvm-project",
             "clang",
             "lld",
+        ],
+    },
+    NAME_STRING_LLVM_LIBC: {
+        "sbom_filename": SBOM_JSON_FILENAME_LLVM_LIBC,
+        "sources": [
+            NAME_STRING_ATFE,
             "compiler-rt",
+            "libc",
             "libcxx",
             "libcxxabi",
             "libunwind",
-            "picolibc",
         ],
     },
-    STRING_LLVM_LIBC_OVERLAY: {
-        "sbom_filename": SBOM_JSON_FILENAME_LLVM_LIBC_OVERLAY,
-        "sources": [STRING_ATFE, "compiler-rt", "libc"],
-    },
-    STRING_NEWLIB_OVERLAY: {
-        "sbom_filename": SBOM_JSON_FILENAME_NEWLIB_OVERLAY,
+    NAME_STRING_NEWLIB: {
+        "sbom_filename": SBOM_JSON_FILENAME_NEWLIB,
         "sources": [
-            STRING_ATFE,
+            NAME_STRING_ATFE,
             "compiler-rt",
             "libcxx",
             "libcxxabi",
             "libunwind",
             "newlib",
+        ],
+    },
+    NAME_STRING_PICOLIBC: {
+        "sbom_filename": SBOM_JSON_FILENAME_PICOLIBC,
+        "sources": [
+            NAME_STRING_ATFE,
+            "compiler-rt",
+            "libcxx",
+            "libcxxabi",
+            "libunwind",
+            "picolibc",
         ],
     },
 }
@@ -130,7 +146,7 @@ dict_details_SBOM = {
 # Store the details in "value" field as list.
 # Syntax is name of source : list of details
 dict_source_details = {
-    STRING_ATFE: [
+    NAME_STRING_ATFE: [
         URL_ATFE,
         ActorType.ORGANIZATION,
         STRING_ARM_LIMITED,
@@ -370,19 +386,25 @@ def main():
     # ATfE
     if args.source == "main" or args.source == "all":
         print("Generating SBOM for main branch of ATfE.")
-        generateSBOMFromDetails(STRING_ATFE)
+        generateSBOMFromDetails(NAME_STRING_ATFE)
 
-    # llvm libc overlay
+    # llvm libc
     if args.source == "llvmlibc" or args.source == "all":
         print("Generating SBOM for llvmlibc.")
 
-        generateSBOMFromDetails(STRING_LLVM_LIBC_OVERLAY)
+        generateSBOMFromDetails(NAME_STRING_LLVM_LIBC)
 
-    # newlib overlay
+    # newlib
     if args.source == "newlib" or args.source == "all":
         print("Generating SBOM for newlib.")
 
-        generateSBOMFromDetails(STRING_NEWLIB_OVERLAY)
+        generateSBOMFromDetails(NAME_STRING_NEWLIB)
+
+    # picolibc
+    if args.source == "picolibc" or args.source == "all":
+        print("Generating SBOM for picolibc.")
+
+        generateSBOMFromDetails(NAME_STRING_PICOLIBC)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,13 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-11T14:57:55Z",
+        "created": "2026-11-12T17:28:11Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
     },
     "dataLicense": "CC0-1.0",
-    "name": "Arm Toolchain for Embedded LLVM libc overlay",
+    "name": "Arm Toolchain for Embedded LLVM libc",
     "spdxVersion": "SPDX-2.3",
     "documentNamespace": "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
     "packages": [
@@ -43,6 +43,39 @@
             "name": "libc",
             "originator": "Organization: LLVM Foundation (info@llvm.org)",
             "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-55633fe2-115b-594e-a5ec-84ece9a16f80",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/libcxx",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libcxx",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-90f44391-c061-5db7-ad32-4c0951366e9e",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/libcxxabi",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libcxxabi",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
+        },
+        {
+            "SPDXID": "SPDXRef-Package-95411904-8af0-5830-8fbc-4185e16949de",
+            "downloadLocation": "https://github.com/llvm/llvm-project/tree/main/libunwind",
+            "filesAnalyzed": false,
+            "licenseComments": "",
+            "licenseConcluded": "Apache-2.0 WITH LLVM-exception",
+            "licenseDeclared": "Apache-2.0 WITH LLVM-exception",
+            "name": "libunwind",
+            "originator": "Organization: LLVM Foundation (info@llvm.org)",
+            "supplier": "Organization: LLVM Foundation (info@llvm.org)"
         }
     ],
     "relationships": [
@@ -59,6 +92,21 @@
         {
             "spdxElementId": "SPDXRef-DOCUMENT",
             "relatedSpdxElement": "SPDXRef-Package-09ef5819-9c48-5d94-b42b-4a918b20f6e4",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-55633fe2-115b-594e-a5ec-84ece9a16f80",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-90f44391-c061-5db7-ad32-4c0951366e9e",
+            "relationshipType": "DESCRIBES"
+        },
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relatedSpdxElement": "SPDXRef-Package-95411904-8af0-5830-8fbc-4185e16949de",
             "relationshipType": "DESCRIBES"
         }
     ]
