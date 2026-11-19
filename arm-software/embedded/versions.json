@@ -8,8 +8,8 @@
   "repos": {
     "picolibc": {
       "url": "https://github.com/picolibc/picolibc.git",
-      "tagType": "tag",
-      "tag": "1.8.12"
+      "tagType": "commithash",
+      "tag": "b333b3787ad3cdbdd6a7e32ca623985d4614c05f"
     },
     "newlib": {
       "url": "https://github.com/RTEMS/sourceware-mirror-newlib-cygwin.git",
