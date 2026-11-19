@@ -235,7 +235,7 @@ if(ENABLE_LIBC_TESTS OR ENABLE_COMPILER_RT_TESTS OR ENABLE_LIBCXX_TESTS)
         list(APPEND runtime_test_link_options -T picolibcpp.ld)
         list(JOIN runtime_test_link_options " " runtime_test_link_flags)
     elseif(C_LIBRARY STREQUAL llvmlibc)
-        # QEMU logic handled later
+        # LLVM libc test link flags are prepared below.
     else()
         message(FATAL_ERROR "Tests can only be enabled using picolibc or llvmlibc.")
     endif()
@@ -956,6 +956,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
     set(enable_dummypackeys OFF)
     set(llvmlibc_test_link_options
         -nostartfiles
+        -lcrt0-semihost
         -lsemihost
         -T
         llvmlibc.ld
@@ -981,10 +982,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
     endif()
     list(JOIN llvmlibc_test_link_options "," llvmlibc_test_link_options_default)
 
-    # libc tests use upstream start.cpp as the bootcode, libcxx tests need crt0
-    set(llvmlibc_cxx_test_link_options ${llvmlibc_test_link_options})
-    list(INSERT llvmlibc_cxx_test_link_options 1 -lcrt0-semihost)
-    list(JOIN llvmlibc_cxx_test_link_options " " runtime_test_link_flags)
+    list(JOIN llvmlibc_test_link_options " " runtime_test_link_flags)
 
     # We want to set LIBC_MATH_ASSUME_ROUND_NEAREST_ONLY in the
     # LIBC_CONF_MATH_OPTIMIZATIONS setting, in addition to all the bit
@@ -1068,6 +1066,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_ENABLE_RUNTIMES=libc
         -DLLVM_LIBC_ALL_HEADERS=ON
         -DLLVM_LIBC_FULL_BUILD=ON
+        -DLLVM_LIBC_HERMETIC_TEST_USE_INTERNAL_STARTUP=OFF
         -DLIBC_TEST_COMPILE_OPTIONS_DEFAULT=${llvmlibc_test_compile_options_default}
         -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
         -DLIBC_TEST_BUILTINS_LIBRARY=${LIBC_TEST_BUILTINS_LIBRARY}
