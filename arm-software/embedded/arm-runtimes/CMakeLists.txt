@@ -111,6 +111,15 @@ set(LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS ${LLVM_LIBC_SUBARCHIVE_ENTRYPOINTS_def} CAC
 set(LLVM_LIBC_ENTRYPOINT_CONFIG_PATH ${LLVM_LIBC_ENTRYPOINT_CONFIG_PATH_def} CACHE PATH "Downstream LLVM-libc entrypoint configuration used to resolve minor-variant routine names.")
 set(LLVM_BINARY_DIR "" CACHE PATH "Path to LLVM toolchain root to build libraries with")
 set(LLVM_LIBC_TEST_SYSROOT "" CACHE PATH "Build-tree package-style sysroot for LLVM libc tests.")
+
+# Temporary location to collect the libraries as they are built.
+set(TEMP_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/tmp_install")
+
+set(
+    LIBC_TEST_BUILTINS_LIBRARY
+    "${TEMP_LIB_DIR}/lib/libclang_rt.builtins.a"
+    CACHE FILEPATH "Compiler runtime builtins library used by LLVM libc tests."
+)
 option(LLVM_USE_RELATIVE_PATHS_IN_MACROS "Use relative paths in macro expansions" ON)
 
 set(PROJECT_PREFIX "subproj" CACHE STRING "Directory to build subprojects in.")
@@ -119,9 +128,6 @@ set(VARIANT_BUILD_ID "${VARIANT}" CACHE STRING "Name to use to identify build di
 # A '.' character is used in junit xml to split classes/groups.
 # Variants such as armv8m.main need to be renamed.
 string(REPLACE "." "_" variant_xml_name ${VARIANT})
-
-# Temporary location to collect the libraries as they are built.
-set(TEMP_LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/tmp_install")
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
@@ -1064,7 +1070,7 @@ if(C_LIBRARY STREQUAL llvmlibc)
         -DLLVM_LIBC_FULL_BUILD=ON
         -DLIBC_TEST_COMPILE_OPTIONS_DEFAULT=${llvmlibc_test_compile_options_default}
         -DLIBC_TEST_LINK_OPTIONS_DEFAULT=${llvmlibc_test_link_options_default}
-        -DLIBC_TEST_BUILTINS_LIBRARY=${TEMP_LIB_DIR}/lib/libclang_rt.builtins.a
+        -DLIBC_TEST_BUILTINS_LIBRARY=${LIBC_TEST_BUILTINS_LIBRARY}
         -DLIBC_TEST_CMD=${test_cmd}
         -DLIBC_TEST_HERMETIC_ONLY=ON
         -DLLVM_EXTERNAL_LIT=${external_lit_path}
