@@ -22,7 +22,7 @@ set(llvmproject_src_dir ${TOOLCHAIN_SOURCE_DIR}/../..)
 # Cache variables to be set by user
 set(MULTILIB_JSON "" CACHE STRING "JSON file to load library definitions from.")
 set(ENABLE_VARIANTS "all" CACHE STRING "Semicolon separated list of variants to build, or \"all\". Must match entries in the json.")
-set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
+set(C_LIBRARY "llvmlibc" CACHE STRING "Which C library to use.")
 set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 set(PROJECT_PREFIX "${CMAKE_BINARY_DIR}/lib-builds" CACHE STRING "Directory to build subprojects in.")
 set(LLVM_LIBC_TEST_SYSROOT "${PROJECT_PREFIX}/test-sysroot" CACHE PATH "Build-tree package-style sysroot for LLVM libc tests.")

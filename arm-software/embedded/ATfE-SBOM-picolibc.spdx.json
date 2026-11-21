@@ -1,13 +1,13 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-18T15:54:51Z",
+        "created": "2026-11-12T17:28:11Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
     },
     "dataLicense": "CC0-1.0",
-    "name": "Arm Toolchain for Embedded newlib overlay",
+    "name": "Arm Toolchain for Embedded picolibc",
     "spdxVersion": "SPDX-2.3",
     "documentNamespace": "https://github.com/arm/arm-toolchain/tree/arm-software/arm-software/embedded",
     "packages": [
@@ -67,13 +67,13 @@
             "supplier": "Organization: LLVM Foundation (info@llvm.org)"
         },
         {
-            "SPDXID": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
-            "downloadLocation": "https://sourceware.org/newlib/",
+            "SPDXID": "SPDXRef-Package-8f339123-88e4-5ff4-9a69-bc4b0c8d65d0",
+            "downloadLocation": "https://github.com/picolibc/picolibc",
             "filesAnalyzed": false,
-            "licenseComments": "Detailed list of licenses is at: https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.NEWLIB;hb=HEAD and https://sourceware.org/git/?p=newlib-cygwin.git;a=blob;f=COPYING.LIBGLOSS;hb=HEAD",
-            "name": "newlib",
-            "originator": "Organization: https://sourceware.org/newlib/ (newlib@sourceware.org)",
-            "supplier": "Organization: https://sourceware.org/newlib/ (newlib@sourceware.org)"
+            "licenseComments": "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.picolibc",
+            "name": "picolibc",
+            "originator": "Person: Keith Packard (https://github.com/keith-packard)",
+            "supplier": "Person: Keith Packard (https://github.com/keith-packard)"
         }
     ],
     "relationships": [
@@ -104,7 +104,7 @@
         },
         {
             "spdxElementId": "SPDXRef-DOCUMENT",
-            "relatedSpdxElement": "SPDXRef-Package-43e25662-200b-584e-b946-57bddf7cb24a",
+            "relatedSpdxElement": "SPDXRef-Package-8f339123-88e4-5ff4-9a69-bc4b0c8d65d0",
             "relationshipType": "DESCRIBES"
         }
     ]
