@@ -2861,6 +2861,8 @@ bool Driver::HandleImmediateArgs(Compilation &C) {
                           Action::OFK_Host);
     RegisterEffectiveTriple TripleRAII(TC, Triple);
     switch (RLT) {
+    case ToolChain::RLT_None:
+      break;
     case ToolChain::RLT_CompilerRT:
       llvm::outs() << TC.getCompilerRT(C.getArgs(), "builtins") << "\n";
       break;
