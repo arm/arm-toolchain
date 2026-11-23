@@ -196,8 +196,8 @@ option(LLVM_TOOLCHAIN_ENABLE_NEWLIB "Enable building newlib runtime" OFF)
 option(LLVM_TOOLCHAIN_ENABLE_NEWLIB_NANO "Enable building newlib-nano runtime" OFF)
 option(LLVM_TOOLCHAIN_ENABLE_PICOLIBC "Enable building picolibc runtime" ON)
 set(LLVM_TOOLCHAIN_CLANG_RUNTIMES_LIBC
-    "picolibc" CACHE STRING
-    "When building multible libc options, select which libc to install to 
+    "" CACHE STRING
+    "When building multible libc options, select which libc to install to
     clang-runtimes. Any additional enabled libraries will go into
     subdirectories. When building a single libc, that will always be
     selected by default."
@@ -730,23 +730,22 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         # Use a per-libc prefix to avoid subproject build dir conflicts.
         set(multilib_prefix ${CMAKE_BINARY_DIR}/${multilib_project}-builds/)
         set(libc_install_dir ${CMAKE_CURRENT_BINARY_DIR}/llvm/${TARGET_LIBRARIES_DIR})
-        # Overlays and non-default libcs require a cfg file for sysroot selection.
+        set(libc_cfg_dir "<CFGDIR>/../lib/clang-runtimes")
+        # Only one libc can go in the clang-runtimes root, any others built
+        # should be installed to subdirectories.
         if(LLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL OR NOT libc_name STREQUAL LLVM_TOOLCHAIN_CLANG_RUNTIMES_LIBC)
             string(APPEND libc_install_dir "/${libc_name}")
-            set(LLVM_TOOLCHAIN_CFG_LIBC_NAME ${libc_name})
-            set(LLVM_TOOLCHAIN_CFG_LIBC_SUBDIR ${libc_name})
-            set(libc_cfg_path ${CMAKE_CURRENT_BINARY_DIR}/${libc_name}.cfg)
-            configure_file(
-                ${CMAKE_CURRENT_SOURCE_DIR}/cmake/libc-config.cfg.in
-                ${libc_cfg_path}
-                @ONLY
-            )    
-            install(
-                FILES ${libc_cfg_path}
-                DESTINATION bin
-                COMPONENT llvm-toolchain-libs
-            )
+            string(APPEND libc_cfg_dir "/${libc_name}")
         endif()
+        # Generate a cfg file for the libc
+        set(libc_cfg_path ${CMAKE_CURRENT_BINARY_DIR}/${libc_name}.cfg)
+        set(libc_cfg_text "# ${libc_name} config for ATfE\n--sysroot ${libc_cfg_dir}\n")
+        file(WRITE ${libc_cfg_path} ${libc_cfg_text})
+        install(
+            FILES ${libc_cfg_path}
+            DESTINATION bin
+            COMPONENT llvm-toolchain-libs
+        )
 
         ExternalProject_Add(
             ${multilib_project}
@@ -817,7 +816,7 @@ if(NOT PREBUILT_TARGET_LIBRARIES)
         foreach(lib_idx RANGE ${lib_count_dec})
             string(JSON lib_def GET ${multilib_defs} ${lib_idx})
             string(JSON variant GET ${lib_def} "variant")
-            foreach(check_target IN LISTS libc_check_targets)
+            foreach(check_target IN LISTS multilib_check_targets)
                 set(variant_target ${check_target}-${variant})
                 ExternalProject_Add_Step(
                     ${multilib_project}
@@ -886,7 +885,7 @@ set(llvm_toolchain_license_text
    "additional or alternate licenses:\n")
 
 # Table of license files to be copied and renamed
-#   Name        Source location                                  Destination                     Destination name 
+#   Name        Source location                                  Destination                     Destination name
 set(third_party_license_files
     LLVM        ${llvmproject_src_dir}/llvm/LICENSE.TXT          third-party-licenses            LLVM-LICENSE.txt
     Clang       ${llvmproject_src_dir}/clang/LICENSE.TXT         third-party-licenses            CLANG-LICENSE.txt
