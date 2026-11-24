@@ -414,7 +414,8 @@ foreach(lib_idx RANGE ${lib_count_dec})
                     ${check_target}
                     runtimes-${variant}-build
                 )
-                if(C_LIBRARY STREQUAL llvmlibc AND check_target STREQUAL check-llvmlibc)
+                if(C_LIBRARY STREQUAL llvmlibc AND
+                   (check_target STREQUAL check-llvmlibc OR check_target STREQUAL check-compiler-rt))
                     ExternalProject_Add_StepDependencies(
                         runtimes-${variant}
                         ${check_target}
