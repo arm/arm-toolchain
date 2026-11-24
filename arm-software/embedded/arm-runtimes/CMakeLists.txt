@@ -937,7 +937,10 @@ function(make_llvmlibc_minor_variant_lit_command output_variable)
 
     set(${output_variable}
         "${CMAKE_COMMAND}" --build <BINARY_DIR> --target ${lit_build_targets}
-        COMMAND ${Python3_EXECUTABLE} ${external_lit_path}
+        # Match check-libc's working directory so relative lit output paths
+        # also match the directory used by update-xml-suitename.py.
+        COMMAND "${CMAKE_COMMAND}" -E chdir <BINARY_DIR>/libc/test
+            ${Python3_EXECUTABLE} ${external_lit_path}
             ${lit_args_list} ${lit_test_dirs}
         PARENT_SCOPE
     )
