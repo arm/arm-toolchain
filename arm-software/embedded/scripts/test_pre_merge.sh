@@ -25,6 +25,7 @@ declare -a check_targets=(
     "check-all"
     "check-llvmlibc-armv6m_soft_nofp_exn_rtti_size"
     "check-llvmlibc-armv7r_hard_vfpv3_d16"
+    "check-llvmlibc-armv7r_hard_vfpv3_d16_unaligned"
     "check-package-llvm-toolchain"
 )
 
@@ -36,6 +37,8 @@ if [[ -n "${FVP_INSTALL_DIR}" ]]; then
         "check-cxxabi-aarch64a_exn_rtti"
         "check-unwind-aarch64a_exn_rtti"
     )
+else
+    echo "FVP tests skipped"
 fi
 
 # Finish all targets and check all reports before returning a failure.

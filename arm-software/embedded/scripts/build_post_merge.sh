@@ -31,8 +31,10 @@ POST_MERGE_VARIANTS="armv6m_soft_nofp_size;\
 armv6m_soft_nofp_exn_rtti_size;\
 armebv6m_soft_nofp_size;\
 armv7m_hard_fpv4_sp_d16_exn_rtti_size;\
-armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_unaligned_size;\
+armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_size;\
+armv8.1m.main_hard_nofp_mve_pacret_bti_exn_rtti_unaligned;\
 armv7r_hard_vfpv3_d16;\
+armv7r_hard_vfpv3_d16_unaligned;\
 armv7a_hard_vfpv3_d16_exn_rtti;\
 aarch64a_exn_rtti;\
 aarch64a_be"

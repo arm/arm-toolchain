@@ -30,6 +30,7 @@ fi
 PRE_MERGE_VARIANTS="armv6m_soft_nofp_size;\
 armv6m_soft_nofp_exn_rtti_size;\
 armv7r_hard_vfpv3_d16;\
+armv7r_hard_vfpv3_d16_unaligned;\
 aarch64a_exn_rtti"
 
 mkdir -p "${REPO_ROOT}"/build
