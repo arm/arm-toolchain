@@ -1,7 +1,7 @@
 {
     "SPDXID": "SPDXRef-DOCUMENT",
     "creationInfo": {
-        "created": "2025-03-11T14:57:51Z",
+        "created": "2026-11-12T17:28:11Z",
         "creators": [
             "Organization: Arm Limited (open-source-office@arm.com)"
         ]
@@ -98,15 +98,6 @@
             "name": "libunwind",
             "originator": "Organization: LLVM Foundation (info@llvm.org)",
             "supplier": "Organization: LLVM Foundation (info@llvm.org)"
-        },
-        {
-            "SPDXID": "SPDXRef-Package-8f339123-88e4-5ff4-9a69-bc4b0c8d65d0",
-            "downloadLocation": "https://github.com/picolibc/picolibc",
-            "filesAnalyzed": false,
-            "licenseComments": "Detailed list of licenses is at: https://github.com/picolibc/picolibc/blob/main/COPYING.picolibc",
-            "name": "picolibc",
-            "originator": "Person: Keith Packard (https://github.com/keith-packard)",
-            "supplier": "Person: Keith Packard (https://github.com/keith-packard)"
         }
     ],
     "relationships": [
@@ -148,11 +139,6 @@
         {
             "spdxElementId": "SPDXRef-DOCUMENT",
             "relatedSpdxElement": "SPDXRef-Package-95411904-8af0-5830-8fbc-4185e16949de",
-            "relationshipType": "DESCRIBES"
-        },
-        {
-            "spdxElementId": "SPDXRef-DOCUMENT",
-            "relatedSpdxElement": "SPDXRef-Package-8f339123-88e4-5ff4-9a69-bc4b0c8d65d0",
             "relationshipType": "DESCRIBES"
         }
     ]
