@@ -712,6 +712,7 @@ def main():
             project="picolibc",
             variants=[
                 "aarch64a",
+                "aarch64a_exn_rtti",
                 "aarch64a_exn_rtti_unaligned",
                 "aarch64a_soft_nofp",
                 "aarch64a_soft_nofp_exn_rtti",
@@ -967,6 +968,7 @@ def main():
             libc="picolibc",
             variants=[
                 "aarch64a",
+                "aarch64a_exn_rtti",
             ],
             description="Backtracing from the signal handler fails to reach main on AArch64 QEMU, so the test exits with status 255.",
         ),
