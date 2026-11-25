@@ -29,8 +29,8 @@ declare -a check_targets=(
     "check-cxx-armv7m_hard_fpv5_d16_exn_rtti_size"
     "check-cxxabi-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
     "check-cxxabi-armv7m_hard_fpv5_d16_exn_rtti_size"
-    "check-picolibc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
-    "check-picolibc-armv7m_hard_fpv5_d16_exn_rtti_size"
+    "check-libc-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
+    "check-libc-armv7m_hard_fpv5_d16_exn_rtti_size"
     "check-unwind-armv7a_hard_vfpv3_d16_exn_rtti_unaligned"
     "check-unwind-armv7m_hard_fpv5_d16_exn_rtti_size"
 )

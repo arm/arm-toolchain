@@ -90,14 +90,14 @@ Multiple libraries can be enabled simultaneously. For example, to build both
 picolibc and LLVM libc:
 
 ```
-cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON
+cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON -GNinja -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON
 ```
 
-When multiple libraries are enabled, picolibc is always the **primary** library
-(its runtimes are installed directly under `lib/clang-runtimes/`). Non-primary
-libraries are installed under `lib/clang-runtimes/<libc>/` and **require** the
-corresponding `--config=<libc>.cfg` flag on the command line to be used, for
-example:
+When multiple libraries are enabled, only one library can be installed
+directly under `lib/clang-runtimes/`, which can selected using the
+`LLVM_TOOLCHAIN_CLANG_RUNTIMES_LIBC` CMake option. Other libraries are
+installed under `lib/clang-runtimes/<libc>/` and **require** the corresponding
+`--config=<libc>.cfg` flag on the command line to be used, for example:
 
 ```
 clang --config=newlib.cfg --target=arm-none-eabi -march=armv7m ...
@@ -110,13 +110,8 @@ To build with only a non-default library, disable picolibc explicitly:
 cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=OFF -DLLVM_TOOLCHAIN_ENABLE_NEWLIB=ON
 ```
 
-When only a single library is enabled, it becomes the primary regardless of
-which library it is, so its runtimes are installed directly under
+When only a single library is enabled, its runtimes are installed directly under
 `lib/clang-runtimes/` and no `--config` flag is needed.
-
-> **Note:** The older `LLVM_TOOLCHAIN_C_LIBRARY` option is deprecated. It is
-> still accepted for backward compatibility but will emit a warning. Use the
-> per-library options above instead.
 
 ### Library variants
 
