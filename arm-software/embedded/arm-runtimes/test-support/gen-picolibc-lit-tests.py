@@ -82,6 +82,7 @@ def main():
         "test-memchr",
         "test-memmem",
         "test-memset",
+        "test-fread-fwrite",
     ]
 
     for line in p.stdout.splitlines():
