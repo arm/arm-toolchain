@@ -26,7 +26,7 @@ cmake ../arm-software/embedded \
     -GNinja \
     -DFETCHCONTENT_QUIET=OFF \
     -DCPACK_PACKAGE_DIRECTORY=atfe_packages \
-    -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=OFF \
+    -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=OFF \
     -DLLVM_TOOLCHAIN_ENABLE_NEWLIB=ON \
     -DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=on
 ninja package-llvm-toolchain

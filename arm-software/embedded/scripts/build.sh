@@ -36,7 +36,7 @@ cmake ../arm-software/embedded \
     -DCPACK_PACKAGE_DIRECTORY=atfe_packages \
     -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON \
     -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON \
-    -DLLVM_TOOLCHAIN_CLANG_RUNTIMES_LIBC=picolibc \
+    -DLLVM_TOOLCHAIN_CLANG_RUNTIMES_LIBC=llvmlibc \
     ${EXTRA_CMAKE_ARGS}
 ninja package-llvm-toolchain
 
