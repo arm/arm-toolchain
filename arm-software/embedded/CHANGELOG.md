@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- LLVM libc is now the default C library. To keep using `picolibc`
+  in your project add `--config=picolibc.cfg` to the command line.
 - macOS package provides Apple Silicon binaries only.
   It is possible to build the universal package from sources by setting the
   `CMAKE_OSX_ARCHITECTURES` CMake option.

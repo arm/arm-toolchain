@@ -9,7 +9,7 @@ bare-metal LLVM based toolchain targeting Arm® architecture based on:
 * libc++abi
 * libc++
 * compiler-rt
-* picolibc, or optionally newlib(-nano) or LLVM's libc
+* LLVM libc, or optionally picolibc or newlib(-nano)
 
 ## Goal
 
@@ -118,9 +118,8 @@ To use the toolchain, on the command line you need to provide the following opti
 * The semihosting library, if using `crt0-semihost`.
 * A [linker script](
   https://sourceware.org/binutils/docs/ld/Scripts.html) specified with `-T`.
-  Default `picolibcpp.ld` and `picolibc.ld` scripts are provided and can be used
-  directly or included from a [custom linker script](
-  https://github.com/picolibc/picolibc/blob/main/doc/linking.md#using-picolibcld).
+  A default `llvmlibc.ld` script is provided and can be used directly or
+  included from a custom linker script.
 
 For example:
 ```
@@ -133,7 +132,7 @@ $ clang \
 -nostartfiles \
 -lcrt0-semihost \
 -lsemihost \
--T picolibc.ld \
+-T llvmlibc.ld \
 -o example example.c
 ```
 

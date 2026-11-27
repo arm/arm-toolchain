@@ -21,7 +21,7 @@ get_filename_component(llvmproject_src_dir_abs "${llvmproject_src_dir}" ABSOLUTE
 
 # CMake arguments are loaded from the JSON file depending on which C
 # library is used, so this must be set before the JSON is processed.
-set(C_LIBRARY "picolibc" CACHE STRING "Which C library to use.")
+set(C_LIBRARY "llvmlibc" CACHE STRING "Which C library to use.")
 set_property(CACHE C_LIBRARY PROPERTY STRINGS picolibc newlib newlib-nano llvmlibc)
 
 set(LLVM_LIBC_ENABLE_MINOR_VARIANT_def OFF)
