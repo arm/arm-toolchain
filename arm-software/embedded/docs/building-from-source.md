@@ -71,26 +71,26 @@ them.
 
 ### Selecting C libraries
 
-By default, ATfE builds with [picolibc](https://github.com/picolibc/picolibc).
+By default, ATfE builds with LLVM libc.
 You can enable additional C libraries or switch to a different one using
 independent per-library CMake options:
 
 | Option | Default | Library |
 |--------|---------|---------|
-| `LLVM_TOOLCHAIN_ENABLE_PICOLIBC` | **ON** | picolibc |
+| `LLVM_TOOLCHAIN_ENABLE_LLVMLIBC` | **ON** | LLVM libc |
+| `LLVM_TOOLCHAIN_ENABLE_PICOLIBC` | OFF | picolibc |
 | `LLVM_TOOLCHAIN_ENABLE_NEWLIB` | OFF | newlib |
 | `LLVM_TOOLCHAIN_ENABLE_NEWLIB_NANO` | OFF | newlib-nano |
-| `LLVM_TOOLCHAIN_ENABLE_LLVMLIBC` | OFF | LLVM libc |
 
 > **Note:** The default C library may change in a future ATfE version.
 > If your build requires a specific C library, for example picolibc,
 > please enable it explicitly with `-DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON`.
 
 Multiple libraries can be enabled simultaneously. For example, to build both
-picolibc and LLVM libc:
+LLVM libc and picolibc:
 
 ```
-cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON -GNinja -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON
+cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON
 ```
 
 When multiple libraries are enabled, only one library can be installed
@@ -104,10 +104,10 @@ clang --config=newlib.cfg --target=arm-none-eabi -march=armv7m ...
 clang --config=llvmlibc.cfg --target=arm-none-eabi -march=armv7m ...
 ```
 
-To build with only a non-default library, disable picolibc explicitly:
+To build with only a non-default library, disable llvmlibc explicitly:
 
 ```
-cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=OFF -DLLVM_TOOLCHAIN_ENABLE_NEWLIB=ON
+cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=OFF -DLLVM_TOOLCHAIN_ENABLE_NEWLIB=ON
 ```
 
 When only a single library is enabled, its runtimes are installed directly under
@@ -139,7 +139,7 @@ cmake .. -GNinja -DFETCHCONTENT_QUIET=OFF
 ninja llvm-toolchain
 ```
 
-To make it easy to get started, the above command checks out and patches the picolibc Git repo automatically.
+If picolibc is enabled, the picolibc Git repo will be checked out and patched automatically.
 If you prefer you can check out and patch the repos manually and use those, see commands below.
 
 Note, the patching of the llvm-project fork is not done automatically. See [Divergences from upstream](#Divergences-from-upstream)
@@ -155,7 +155,7 @@ git -C repos/picolibc am -k "$PWD"/patches/picolibc/*.patch
 git -C ../.. am -k "$PWD"/patches/llvm-project/*.patch
 mkdir build
 cd build
-cmake .. -GNinja -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=../repos/picolibc
+cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=ON -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=../repos/picolibc
 ninja llvm-toolchain
 ```
 
@@ -288,7 +288,7 @@ using the results of a full build of this toolchain itself in another
 directory, then you should set `LLVM_BINARY_DIR` to point at the `llvm`
 subdirectory of the previous build tree, not the `llvm/bin` subdirectory.)
 
-For example, to build the `armv7a_soft_nofp` variant using `picolibc`, using
+For example, to build the `armv7a_soft_nofp` variant using `llvmlibc`, using
 an existing LLVM build and source checkouts:
 
 ```
@@ -297,15 +297,14 @@ mkdir build-lib
 cd build-lib
 cmake ../arm-runtimes -G Ninja \
   -DVARIANT_JSON=../arm-multilib/json/variants/armv7a_soft_nofp.json \
-  -DC_LIBRARY=picolibc \
-  -DLLVM_BINARY_DIR=/path/to/llvm \
-  -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=/path/to/picolibc
+  -DC_LIBRARY=llvmlibc \
+  -DLLVM_BINARY_DIR=/path/to/llvm
 ninja
 ```
 
 If enabled and the required test executor available, tests can be run with
 using specific test targets:
-`ninja check-picolibc`
+`ninja check-llvmlibc`
 `ninja check-compiler-rt`
 `ninja check-cxx`
 `ninja check-cxxabi`
@@ -323,7 +322,7 @@ sub-project builds and collects multiple libraries, and generates a
 The `arm-multilib/multilib.json` file defines which variants are built and
 their order in the mapping. This can be used to configure the project directly
 
-For example, building the picolibc variants using an existing LLVM build and
+For example, building the LLVM libc variants using an existing LLVM build and
 source checkouts:
 ```
 cd arm-software/embedded
@@ -331,9 +330,8 @@ mkdir build-multilib
 cd build-multilib
 cmake ../arm-multilib -G Ninja \
   -DMULTILIB_JSON=../arm-multilib/json/multilib.json \
-  -DC_LIBRARY=picolibc \
-  -DLLVM_BINARY_DIR=/path/to/llvm \
-  -DFETCHCONTENT_SOURCE_DIR_PICOLIBC=/path/to/picolibc
+  -DC_LIBRARY=llvmlibc \
+  -DLLVM_BINARY_DIR=/path/to/llvm
 ninja
 ```
 To only build a subset of the variants defined in the JSON file,
@@ -344,7 +342,7 @@ variants of `aarch64a` and `armv7a_soft_nofp`.
 If enabled and the required test executor available, tests can be run with
 using specific test targets:
 
-`ninja check-picolibc`
+`ninja check-llvmlibc`
 `ninja check-compiler-rt`
 `ninja check-cxx`
 `ninja check-cxxabi`

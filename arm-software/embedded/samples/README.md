@@ -85,4 +85,4 @@ for example:
 ```
 $ LIBC=llvmlibc make build
 ```
-The default is ``picolibc``.
+The default is ``llvmlibc``.

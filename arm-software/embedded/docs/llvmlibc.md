@@ -1,37 +1,15 @@
 # LLVM libc support
 
-Arm Toolchain for Embedded (ATfE) uses
-[`picolibc`](https://github.com/picolibc/picolibc) as the standard C
-library. This will change in a future version to use the [LLVM project's own
-C library](https://libc.llvm.org/) that is now provided with ATfE to facilitate
-the migration.
+Arm Toolchain for Embedded (ATfE) uses the [LLVM project's own
+C library](https://libc.llvm.org/) as the standard C
+library. Previous versions of ATfE used [`picolibc`](https://github.com/picolibc/picolibc) as the standard C
+library.
 
 ## Building the toolchain with LLVM libc
 
 Enable LLVM libc with `-DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON`.
 
-By default, ATfE builds with `picolibc` enabled. To build both `picolibc`
-and LLVM libc, use:
-
-```
-cmake .. -GNinja -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON
-```
-
-To build only LLVM libc, disable `picolibc` explicitly:
-
-```
-cmake .. -GNinja \
-  -DLLVM_TOOLCHAIN_ENABLE_PICOLIBC=OFF \
-  -DLLVM_TOOLCHAIN_ENABLE_LLVMLIBC=ON
-```
-
-> [!NOTE]
-> The legacy option `-DLLVM_TOOLCHAIN_C_LIBRARY=llvmlibc` is still accepted
-> for backwards compatibility, but it is deprecated.
-
-If you also add `-DLLVM_TOOLCHAIN_LIBRARY_OVERLAY_INSTALL=ON`, then the
-`package-llvm-toolchain` CMake target generates an LLVM libc overlay package.
-Overlay builds require LLVM libc to be the only enabled C library.
+By default, ATfE builds with LLVM libc enabled.
 
 ## Using LLVM libc
 
@@ -39,10 +17,9 @@ To compile a program with this LLVM libc, you must provide the
 following command line options, in addition to `--target`, `-march` or
 `-mcpu`, and the input and output files:
 
-* `--config=llvmlibc.cfg` if LLVM libc is installed as a secondary C library in
-  the standard ATfE package where `picolibc` remains the primary library, or
-  when using an LLVM libc overlay package. You do not need this option if you
-  built the toolchain with only LLVM libc enabled.
+* `--config=llvmlibc.cfg` if multiple libc options are enabled, and LLVM libc
+  was not installed to the clang-runtimes root. You do not need this option if
+  you built the toolchain with only LLVM libc enabled.
 
 * `-nostartfiles` to not include the currently non-existent `crt0.o`
 
