@@ -731,6 +731,16 @@ def main():
             description="The __config_site definition of _LIBCPP_VERBOSE_ABORT provided through CMake does not allow customization.",
         ),
         XFail(
+            name="llvmlibc tm visibility in Clang modules",
+            testnames=[
+                "extensions/clang/clang_modules_include.gen.py/",
+            ],
+            result=NewResult.EXCLUDE,
+            project="libcxx",
+            libc="llvmlibc",
+            description="Clang cannot build module std because iomanip uses tm without importing its declaration from std.cwchar.",
+        ),
+        XFail(
             name="llvmlibc missing signal.h",
             testnames=[
                 "extensions/libcxx/depr/depr.c.headers/extern_c.pass.cpp",
